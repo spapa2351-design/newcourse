@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>온라인 코스 등록</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Pretendard"', '"Roboto"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Helvetica', 'Arial', 'sans-serif'] },
+          colors: {
+            indigo: { 50:'#EEF0FF',100:'#E0E4FF',200:'#C7CDFF',300:'#9BA8FF',400:'#7B8AFF',500:'#5569FF',600:'#4454CC',700:'#3340A6',800:'#2A3587',900:'#000C57',950:'#000940' }
+          },
+          boxShadow: { card:'0px 9px 16px rgba(159,162,191,.18), 0px 2px 2px rgba(159,162,191,0.32)', 'card-sm':'0px 2px 3px rgba(159,162,191,.18), 0px 1px 1px rgba(159,162,191,0.32)' },
+          fontSize: { xs:['13px',{lineHeight:'1.5'}], sm:['15px',{lineHeight:'1.5'}] }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+    .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideDown { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(16px)} }
+    .toast-in { animation: slideUp 0.25s ease-out forwards; }
+    .toast-out { animation: slideDown 0.2s ease-in forwards; }
+    .custom-scrollbar::-webkit-scrollbar { width:6px; height:6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator,
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor:pointer; opacity:0.6; }
+    .drag-ghost { opacity:0.35; }
+    .drag-over-slot { border-color:#5569FF !important; background:#EEF0FF !important; }
+  </style>
+</head>
+<body class="bg-[#f2f5f9] text-slate-800 font-sans antialiased overflow-y-auto custom-scrollbar">
+  <div id="root"></div>
+  <script type="text/babel" data-type="module">
+    import React, { useState, useRef, useEffect, useCallback } from 'https://esm.sh/react@18.2.0';
+    import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+    import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
+
+    const {
+      Plus, Trash2, Copy, X, Check, ChevronDown, ChevronUp, GripVertical,
+      Save, Send, Eye, Video, FileText, ClipboardList, BookOpen,
+      AlertTriangle, Clock, Award, Users, MousePointerClick, Settings,
+      Play, ChevronRight, BarChart2, Layers, Upload, Library, Search, FolderOpen
+    } = Lucide;
+
+    /* ─── Toggle 공통 컴포넌트 (admin1.html 동일) ─── */
+    const Toggle = ({ active, onClick }) => (
+      <div onClick={onClick} className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors ${active ? 'bg-indigo-600' : 'bg-slate-300'}`}>
+        <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm ${active ? 'left-5' : 'left-1'}`}></div>
+      </div>
+    );
+
+    /* ─── 슬롯 유형 설정 ─── */
+    const SLOT_TYPES = {
+      video:   { label:'영상',   icon: Video,       color:'bg-blue-100 text-blue-600',   border:'border-blue-200',   defaultCond:{ watchRate:90 } },
+      exam:    { label:'시험',   icon: ClipboardList,color:'bg-violet-100 text-violet-600',border:'border-violet-200', defaultCond:{ passScore:60, totalQ:20 } },
+      survey:  { label:'설문',   icon: BarChart2,    color:'bg-pink-100 text-pink-600',   border:'border-pink-200',   defaultCond:{} },
+      article: { label:'아티클', icon: BookOpen,     color:'bg-amber-100 text-amber-700', border:'border-amber-200',  defaultCond:{} },
+    };
+
+    /* ─── 슬롯 이수 조건 설명 텍스트 ─── */
+    const condText = (slot) => {
+      if (slot.type === 'video')   return `시청률 ${slot.cond.watchRate ?? 90}% 이상`;
+      if (slot.type === 'exam')    return `${slot.cond.passScore ?? 60}점 이상 / ${slot.cond.totalQ ?? 20}문항`;
+      if (slot.type === 'survey')  return '전 문항 응답 후 제출';
+      if (slot.type === 'article') return '전체 열람 완료';
+      return '';
+    };
+
+    /* ─── 콘텐츠 라이브러리 목업 데이터 ─── */
+    const LIBRARY_ITEMS = [
+      { id:'l1', type:'video',   title:'2025 기업문화 특강',        sub:'45:20 · 2026.01.15', time:'45:20' },
+      { id:'l2', type:'video',   title:'직장 내 성희롱 예방 교육',   sub:'60:00 · 2025.10.05', time:'60:00' },
+      { id:'l3', type:'survey',  title:'임직원 만족도 설문 (상반기)', sub:'설문 · 2025.09.12',   time:'-' },
+      { id:'l4', type:'exam',    title:'개인정보보호 이해도 평가',    sub:'20문항 · 2025.08.01', time:'-' },
+      { id:'l5', type:'video',   title:'신입사원 온보딩 영상 1',     sub:'30:00 · 2026.03.01', time:'30:00' },
+      { id:'l6', type:'article', title:'핵심 개념 읽기 자료',        sub:'아티클 · 2026.02.10', time:'-' },
+      { id:'l7', type:'video',   title:'리더십 역량 강의 1강',       sub:'52:10 · 2026.01.20', time:'52:10' },
+      { id:'l8', type:'exam',    title:'직무 역량 중간 평가',         sub:'30문항 · 2025.11.05', time:'-' },
+    ];
+
+    /* ─── 항목 추가 모달 (업로드 vs 라이브러리) ─── */
+    const AddItemModal = ({ onAdd, onClose }) => {
+      const [step, setStep]       = useState('type');   // 'type' | 'source' | 'library' | 'upload'
+      const [selType, setSelType] = useState(null);
+      const [query, setQuery]     = useState('');
+      const [selLib, setSelLib]   = useState(null);
+      const [draggingFile, setDraggingFile] = useState(false);
+
+      const filteredLib = LIBRARY_ITEMS.filter(i =>
+        (!selType || i.type === selType) &&
+        (!query || i.title.toLowerCase().includes(query.toLowerCase()))
+      );
+
+      const handleAdd = (source, libItem) => {
+        const title = source === 'library' && libItem ? libItem.title : `새 ${SLOT_TYPES[selType].label}`;
+        onAdd(selType, title, source === 'library' ? libItem : null);
+        onClose();
+      };
+
+      return (
+        <div className="fixed inset-0 bg-slate-900/60 z-[200] flex items-center justify-center animate-fadeIn" onClick={onClose}>
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden w-[540px]" onClick={e => e.stopPropagation()}>
+
+            {/* 모달 헤더 */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+              <div className="flex items-center gap-2">
+                {step !== 'type' && (
+                  <button onClick={() => setStep(step === 'source' ? 'type' : 'source')}
+                    className="text-slate-400 hover:text-slate-600 mr-1">
+                    <ChevronRight size={16} className="rotate-180"/>
+                  </button>
+                )}
+                <h3 className="text-[15px] font-bold text-slate-800">
+                  {step === 'type'    && '유형 선택'}
+                  {step === 'source'  && '추가 방식'}
+                  {step === 'library' && '라이브러리에서 가져오기'}
+                  {step === 'upload'  && '파일 업로드'}
+                </h3>
+                {step !== 'type' && selType && (
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${SLOT_TYPES[selType].color}`}>
+                    {SLOT_TYPES[selType].label}
+                  </span>
+                )}
+              </div>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={18}/></button>
+            </div>
+
+            {/* STEP 1: 유형 선택 */}
+            {step === 'type' && (
+              <div className="p-6 grid grid-cols-2 gap-3">
+                {Object.entries(SLOT_TYPES).map(([type, cfg]) => {
+                  const Icon = cfg.icon;
+                  return (
+                    <button key={type} onClick={() => { setSelType(type); setStep('source'); }}
+                      className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all hover:shadow-sm ${cfg.border} hover:bg-slate-50`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${cfg.color}`}>
+                        <Icon size={20}/>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-[14px] font-bold text-slate-800">{cfg.label}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">{condText({ type, cond: cfg.defaultCond })}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* STEP 2: 추가 방식 */}
+            {step === 'source' && (
+              <div className="p-6 grid grid-cols-2 gap-4">
+                <button onClick={() => setStep('library')}
+                  className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 transition-all group">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                    <Library size={22} className="text-indigo-600"/>
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-bold text-slate-800">라이브러리에서</p>
+                    <p className="text-[11px] text-slate-400 mt-1 text-center">등록된 콘텐츠를<br/>검색해서 가져옵니다</p>
+                  </div>
+                </button>
+                <button onClick={() => setStep('upload')}
+                  className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 transition-all group">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                    <Upload size={22} className="text-emerald-600"/>
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-bold text-slate-800">직접 업로드</p>
+                    <p className="text-[11px] text-slate-400 mt-1 text-center">새 파일을 업로드해서<br/>추가합니다</p>
+                  </div>
+                </button>
+                <button onClick={() => handleAdd('empty', null)}
+                  className="col-span-2 py-2.5 border border-dashed border-slate-300 rounded-xl text-[12px] text-slate-400 hover:border-slate-400 hover:text-slate-500 transition-colors">
+                  빈 항목으로 추가 (나중에 에셋 연결)
+                </button>
+              </div>
+            )}
+
+            {/* STEP 3a: 라이브러리 */}
+            {step === 'library' && (
+              <div className="flex flex-col" style={{height:'380px'}}>
+                <div className="px-5 py-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+                    <Search size={14} className="text-slate-400 shrink-0"/>
+                    <input autoFocus type="text" value={query} onChange={e => setQuery(e.target.value)}
+                      placeholder="콘텐츠 검색..."
+                      className="flex-1 bg-transparent outline-none text-[13px] text-slate-700"/>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 space-y-1">
+                  {filteredLib.length === 0 ? (
+                    <div className="text-center py-12 text-slate-400 text-[12px]">검색 결과가 없습니다</div>
+                  ) : filteredLib.map(item => {
+                    const T = SLOT_TYPES[item.type];
+                    const Icon = T.icon;
+                    const isSelected = selLib?.id === item.id;
+                    return (
+                      <button key={item.id} onClick={() => setSelLib(isSelected ? null : item)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left
+                          ${isSelected ? 'bg-indigo-50 border border-indigo-300' : 'border border-transparent hover:bg-slate-50 hover:border-slate-200'}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${T.color}`}>
+                          <Icon size={14}/>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13px] font-semibold text-slate-800 truncate">{item.title}</div>
+                          <div className="text-[11px] text-slate-400">{item.sub}</div>
+                        </div>
+                        {isSelected && <Check size={14} className="text-indigo-600 shrink-0"/>}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="px-5 py-3 border-t border-slate-100 flex gap-2">
+                  <button onClick={onClose} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-[13px] font-semibold hover:bg-slate-50">취소</button>
+                  <button onClick={() => handleAdd('library', selLib)} disabled={!selLib}
+                    className={`flex-1 py-2.5 rounded-xl text-[13px] font-bold transition-colors
+                      ${selLib ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                    가져오기
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3b: 업로드 */}
+            {step === 'upload' && (
+              <div className="p-6 flex flex-col gap-4">
+                <div
+                  onDragOver={e => { e.preventDefault(); setDraggingFile(true); }}
+                  onDragLeave={() => setDraggingFile(false)}
+                  onDrop={e => { e.preventDefault(); setDraggingFile(false); handleAdd('upload', null); }}
+                  className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all cursor-pointer
+                    ${draggingFile ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}
+                  onClick={() => handleAdd('upload', null)}>
+                  <Upload size={32} className={`mx-auto mb-3 ${draggingFile ? 'text-indigo-500' : 'text-slate-300'}`}/>
+                  <p className="text-[14px] font-bold text-slate-700">파일을 드래그하거나 클릭해서 업로드</p>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    {selType === 'video'   && 'MP4, MOV, AVI · 최대 5GB'}
+                    {selType === 'article' && 'PDF, DOCX · 최대 100MB'}
+                    {selType === 'exam'    && '문항 파일 (JSON, XLSX)'}
+                    {selType === 'survey'  && '설문 양식 파일 (JSON)'}
+                  </p>
+                </div>
+                <p className="text-[11px] text-center text-slate-400">
+                  업로드 후 자동으로 콘텐츠 라이브러리에 등록됩니다
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    /* ─── 슬롯 설정 모달 ─── */
+    const SlotSettingModal = ({ slot, onSave, onClose }) => {
+      const [local, setLocal] = useState({ ...slot.cond });
+      const upd = (k, v) => setLocal(p => ({ ...p, [k]: v }));
+      return (
+        <div className="fixed inset-0 bg-slate-900/60 z-[200] flex items-center justify-center animate-fadeIn" onClick={onClose}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-[340px]" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[15px] font-bold text-slate-800">이수 조건 설정</h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={18}/></button>
+            </div>
+            {slot.type === 'video' && (
+              <div className="space-y-3">
+                <label className="text-[12px] font-bold text-slate-500">최소 시청률</label>
+                <div className="flex items-center gap-3">
+                  <input type="range" min={50} max={100} step={5} value={local.watchRate ?? 90}
+                    onChange={e => upd('watchRate', parseInt(e.target.value))}
+                    className="flex-1 accent-indigo-500"/>
+                  <span className="text-[16px] font-black text-indigo-600 w-14 text-right">{local.watchRate ?? 90}%</span>
+                </div>
+                <p className="text-[11px] text-slate-400">기본값 90% · 대정책 Phase 1 기준</p>
+              </div>
+            )}
+            {slot.type === 'exam' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[12px] font-bold text-slate-500 block mb-2">합격 점수</label>
+                  <div className="flex items-center gap-2">
+                    <input type="number" min={0} max={100} value={local.passScore ?? 60}
+                      onChange={e => upd('passScore', parseInt(e.target.value))}
+                      className="w-20 border border-slate-300 rounded-lg px-3 py-2 text-[14px] font-bold text-center focus:border-indigo-500 outline-none"/>
+                    <span className="text-[13px] text-slate-600">점 이상</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[12px] font-bold text-slate-500 block mb-2">총 문항 수</label>
+                  <div className="flex items-center gap-2">
+                    <input type="number" min={1} max={200} value={local.totalQ ?? 20}
+                      onChange={e => upd('totalQ', parseInt(e.target.value))}
+                      className="w-20 border border-slate-300 rounded-lg px-3 py-2 text-[14px] font-bold text-center focus:border-indigo-500 outline-none"/>
+                    <span className="text-[13px] text-slate-600">문항</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            {(slot.type === 'survey' || slot.type === 'article') && (
+              <p className="text-[13px] text-slate-500 py-4 text-center">
+                {slot.type === 'survey' ? '전 문항 응답 후 제출 완료' : '전체 페이지 열람 완료'}<br/>
+                <span className="text-[11px] text-slate-400">조건이 고정됩니다.</span>
+              </p>
+            )}
+            <div className="flex gap-2 mt-5">
+              <button onClick={onClose} className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-[13px] font-semibold hover:bg-slate-50">취소</button>
+              <button onClick={() => { onSave(local); onClose(); }} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-[13px] font-bold hover:bg-indigo-700">저장</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    /* ─── 메인 앱 ─── */
+    const App = () => {
+      /* 기본 정보 */
+      const [courseInfo, setCourseInfo] = useState({
+        title: '', category: '', instructor: '', instructorDesc: '',
+        intro: '', level: 'beginner', estimatedHours: '', certificate: false,
+        noInstructor: false,
+      });
+      const updInfo = (k, v) => setCourseInfo(p => ({ ...p, [k]: v }));
+
+      /* 수강 신청 설정 */
+      const [regPeriod, setRegPeriod]     = useState({ start: '', end: '' });
+      const [isSelfEnroll, setIsSelfEnroll] = useState(true);
+      const [selRule, setSelRule]           = useState('single');
+      const [maxSelect, setMaxSelect]       = useState(3);
+      const [cancelPolicy, setCancelPolicy] = useState({ enabled: false, mode: 'allowed', relativeValue: 3, relativeUnit: 'day' });
+      const [changePolicy, setChangePolicy] = useState({ enabled: false, relativeValue: 5, relativeUnit: 'day' });
+
+      /* 수강 기간 (온라인 특화) */
+      const [studyPeriod, setStudyPeriod] = useState({ type: 'fixed', fixedStart: '', fixedEnd: '', days: 30 });
+      const updPeriod = (k, v) => setStudyPeriod(p => ({ ...p, [k]: v }));
+
+      /* 커리큘럼 — 챕터 → 항목 2계층 */
+      const [chapters, setChapters] = useState([
+        { id: 1, title: '오리엔테이션', items: [
+          { id: 11, type: 'video',   title: '코스 소개 영상',    isRequired: true,  cond: { watchRate: 90 } },
+          { id: 12, type: 'article', title: '사전 읽기 자료',    isRequired: false, cond: {} },
+        ]},
+        { id: 2, title: '핵심 개념 이해', items: [
+          { id: 21, type: 'video',   title: '1강. 핵심 개념',    isRequired: true,  cond: { watchRate: 90 } },
+          { id: 22, type: 'exam',    title: '중간 점검 퀴즈',    isRequired: true,  cond: { passScore: 60, totalQ: 10 } },
+        ]},
+        { id: 3, title: '마무리', items: [
+          { id: 31, type: 'survey',  title: '만족도 설문',       isRequired: true,  cond: {} },
+        ]},
+      ]);
+
+      const allItems = chapters.flatMap(ch => ch.items);
+      const totalSlots = allItems.length;
+      const reqSlots   = allItems.filter(s => s.isRequired);
+
+      const addChapter = () => {
+        setChapters(p => [...p, { id: Date.now(), title: `새 챕터`, items: [] }]);
+      };
+      const removeChapter = (chId) => setChapters(p => p.filter(ch => ch.id !== chId));
+      const updateChapterTitle = (chId, title) => setChapters(p => p.map(ch => ch.id === chId ? { ...ch, title } : ch));
+
+      const addItem = (chId, type, title, libItem) => {
+        const item = {
+          id: Date.now(), type,
+          title: title || `새 ${SLOT_TYPES[type].label}`,
+          isRequired: true,
+          cond: { ...SLOT_TYPES[type].defaultCond },
+          source: libItem ? 'library' : 'upload',
+          libRef: libItem?.id || null,
+        };
+        setChapters(p => p.map(ch => ch.id === chId ? { ...ch, items: [...ch.items, item] } : ch));
+      };
+      const removeItem = (chId, itemId) => setChapters(p => p.map(ch => ch.id === chId ? { ...ch, items: ch.items.filter(s => s.id !== itemId) } : ch));
+      const updateItem = (chId, itemId, changes) => setChapters(p => p.map(ch => ch.id === chId ? { ...ch, items: ch.items.map(s => s.id === itemId ? { ...s, ...changes } : s) } : ch));
+      const updateItemCond = (chId, itemId, cond) => setChapters(p => p.map(ch => ch.id === chId ? { ...ch, items: ch.items.map(s => s.id === itemId ? { ...s, cond } : s) } : ch));
+
+      /* 챕터 내 아이템 드래그앤드롭 */
+      const dragRef = useRef({ chId: null, itemId: null, overChId: null, overItemId: null });
+      const [dragging, setDragging] = useState(null);
+      const [dragOver, setDragOver] = useState(null);
+      const onItemDragStart = (e, chId, itemId) => {
+        dragRef.current = { ...dragRef.current, chId, itemId };
+        setDragging({ chId, itemId }); e.dataTransfer.effectAllowed = 'move';
+      };
+      const onItemDragOver = (e, chId, itemId) => {
+        e.preventDefault(); dragRef.current.overChId = chId; dragRef.current.overItemId = itemId;
+        setDragOver({ chId, itemId });
+      };
+      const onItemDrop = (e) => {
+        e.preventDefault();
+        const { chId: fCh, itemId: fId, overChId: tCh, overItemId: tId } = dragRef.current;
+        if (!fId || !tId || (fCh === tCh && fId === tId)) { setDragging(null); setDragOver(null); return; }
+        setChapters(prev => {
+          const chs = prev.map(ch => ({ ...ch, items: [...ch.items] }));
+          const srcCh = chs.find(ch => ch.id === fCh);
+          const dstCh = chs.find(ch => ch.id === tCh);
+          const fi = srcCh.items.findIndex(s => s.id === fId);
+          const [item] = srcCh.items.splice(fi, 1);
+          const ti = dstCh.items.findIndex(s => s.id === tId);
+          dstCh.items.splice(ti, 0, item);
+          return chs;
+        });
+        dragRef.current = { chId: null, itemId: null, overChId: null, overItemId: null };
+        setDragging(null); setDragOver(null);
+      };
+      const onItemDragEnd = () => { setDragging(null); setDragOver(null); };
+
+      /* 챕터별 항목 추가 모달 */
+      const [addItemModal, setAddItemModal] = useState(null); // chId | null
+
+      /* 이수조건 설정 모달 */
+      const [settingSlot, setSettingSlot] = useState(null); // { chId, item }
+
+      /* 수료 조건 */
+      const [completionRules, setCompletionRules] = useState([
+        { id: 'required-all', label: '필수 콘텐츠 전체 이수', fixed: true, condition: { type: 'all_required' } }
+      ]);
+      const [hasOptionalThreshold, setHasOptionalThreshold] = useState(false);
+      const [optionalMinCount, setOptionalMinCount] = useState(1);
+
+      /* 코스 상태 */
+      const [courseStatus, setCourseStatus] = useState('draft');
+      const [lastSavedAt, setLastSavedAt]   = useState(null);
+      const [showPublishModal, setShowPublishModal] = useState(false);
+      const [toast, setToast] = useState(null);
+      const toastTimer = useRef(null);
+      const statusLabel = { draft:'초안', saved:'임시저장', published:'퍼블리싱됨' };
+      const statusColor  = { draft:'bg-slate-100 text-slate-500 border-slate-200', saved:'bg-amber-50 text-amber-700 border-amber-200', published:'bg-emerald-50 text-emerald-700 border-emerald-200' };
+
+      const dismissToast = () => { setToast(p => p ? { ...p, dismissing: true } : null); setTimeout(() => setToast(null), 200); };
+      const handleSaveDraft = () => {
+        const isFirst = courseStatus === 'draft';
+        setCourseStatus('saved'); setLastSavedAt(new Date());
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+        setToast({ type: isFirst ? 'first' : 'repeat', dismissing: false });
+        if (!isFirst) toastTimer.current = setTimeout(dismissToast, 3000);
+      };
+
+      /* 퍼블리싱 검증 */
+      const validation = [
+        { label: '코스명 입력',         ok: !!courseInfo.title.trim() },
+        { label: '담당 강사 지정',       ok: courseInfo.noInstructor || !!courseInfo.instructor.trim() },
+        { label: '신청 기간 설정',       ok: !!regPeriod.start && !!regPeriod.end },
+        { label: '수강 기간 설정',       ok: studyPeriod.type === 'unlimited' || (studyPeriod.type === 'days' && studyPeriod.days > 0) || (!!studyPeriod.fixedStart && !!studyPeriod.fixedEnd) },
+        { label: '커리큘럼 최소 1개',   ok: totalSlots > 0 },
+        { label: '필수 콘텐츠 최소 1개',ok: reqSlots.length > 0 },
+      ];
+      const canPublish = validation.every(v => v.ok);
+
+      const handlePublish = () => { if (!canPublish) return; setCourseStatus('published'); setShowPublishModal(false); setLastSavedAt(new Date()); };
+
+      /* ─── 렌더 ─── */
+      return (
+        <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
+
+          {/* ── 헤더 ── */}
+          <header className="h-14 bg-white border-b border-slate-200 flex items-center px-5 gap-3 shrink-0 shadow-sm z-10">
+            <button className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+              <ChevronRight size={16} className="rotate-180"/>
+            </button>
+            <div className="w-px h-5 bg-slate-200"/>
+            <div className="flex items-center gap-2 text-[13px]">
+              <span className="text-slate-400">코스 등록</span>
+              <ChevronRight size={12} className="text-slate-300"/>
+              <span className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-600 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                🎬 온라인
+              </span>
+            </div>
+            <div className={`ml-3 text-[11px] font-semibold px-2.5 py-1 rounded-full border ${statusColor[courseStatus]}`}>
+              {statusLabel[courseStatus]}
+              {lastSavedAt && <span className="ml-1.5 opacity-60">{lastSavedAt.toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' })} 저장</span>}
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <button onClick={handleSaveDraft} className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 text-slate-600 rounded-xl text-[13px] font-semibold hover:bg-slate-50 transition-colors">
+                <Save size={14}/> 임시저장
+              </button>
+              <button className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 text-slate-600 rounded-xl text-[13px] font-semibold hover:bg-slate-50 transition-colors">
+                <Eye size={14}/> 미리보기
+              </button>
+              <button onClick={() => setShowPublishModal(true)} className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-colors ${canPublish ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                <Send size={14}/> 퍼블리싱
+              </button>
+            </div>
+          </header>
+
+          {/* ── 바디 ── */}
+          <div className="flex-1 flex overflow-hidden">
+
+            {/* ── 좌측 메인 ── */}
+            <main className="flex-1 overflow-y-auto custom-scrollbar py-10 space-y-8 animate-fadeIn pb-32">
+
+              {/* 퀵 스탯 바 */}
+              <div className="w-[800px] mx-auto grid grid-cols-4 gap-3">
+                {[
+                  { label:'코스 유형',  value:'온라인',      icon:'🎬' },
+                  { label:'전체 항목',  value:`${totalSlots}개`, icon:'📚' },
+                  { label:'필수 콘텐츠',value:`${reqSlots.length}개`, icon:'✅' },
+                  { label:'완성도',     value:`${Math.round((validation.filter(v=>v.ok).length/validation.length)*100)}%`, icon:'📊' },
+                ].map(s => (
+                  <div key={s.label} className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm flex items-center gap-3">
+                    <span className="text-xl">{s.icon}</span>
+                    <div>
+                      <div className="text-[16px] font-black text-slate-900">{s.value}</div>
+                      <div className="text-[11px] text-slate-400 font-medium">{s.label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── 섹션 1: 기본 정보 ── */}
+              <section className="w-[800px] mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center gap-2">
+                  <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-800">코스 기본 정보</h2>
+                    <p className="text-[12px] text-slate-400 font-medium mt-0.5">수강생에게 노출되는 코스 정보를 입력합니다.</p>
+                  </div>
+                </div>
+                <div className="p-6 space-y-5">
+                  {/* 코스명 */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-500 mb-1.5">코스명 <span className="text-red-400">*</span></label>
+                    <input type="text" value={courseInfo.title} onChange={e => updInfo('title', e.target.value)}
+                      placeholder="예: 2026년 신입사원 온보딩 과정"
+                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-medium focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-colors"/>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* 카테고리 */}
+                    <div>
+                      <label className="block text-[12px] font-bold text-slate-500 mb-1.5">카테고리</label>
+                      <select value={courseInfo.category} onChange={e => updInfo('category', e.target.value)}
+                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] focus:border-indigo-400 outline-none bg-white">
+                        <option value="">카테고리 선택</option>
+                        {['직무 역량','리더십','영업','법정의무','온보딩','IT·DX'].map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    {/* 난이도 (온라인 특화) */}
+                    <div>
+                      <label className="block text-[12px] font-bold text-slate-500 mb-1.5">난이도</label>
+                      <div className="flex gap-2">
+                        {[['beginner','입문'],['intermediate','중급'],['advanced','고급']].map(([val, lbl]) => (
+                          <button key={val} onClick={() => updInfo('level', val)}
+                            className={`flex-1 py-2.5 rounded-xl text-[12px] font-bold border transition-colors
+                              ${courseInfo.level === val ? 'bg-indigo-50 border-indigo-400 text-indigo-700' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}>
+                            {lbl}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* 강사 */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[12px] font-bold text-slate-500">
+                          담당 강사 {!courseInfo.noInstructor && <span className="text-red-400">*</span>}
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                          <input type="checkbox" checked={courseInfo.noInstructor}
+                            onChange={e => updInfo('noInstructor', e.target.checked)}
+                            className="w-3.5 h-3.5 accent-slate-500 rounded"/>
+                          <span className="text-[11px] text-slate-400 font-medium">강사 없음</span>
+                        </label>
+                      </div>
+                      <input type="text" value={courseInfo.noInstructor ? '' : courseInfo.instructor}
+                        onChange={e => updInfo('instructor', e.target.value)}
+                        disabled={courseInfo.noInstructor}
+                        placeholder={courseInfo.noInstructor ? '강사 없음' : '강사명'}
+                        className={`w-full border rounded-xl px-4 py-2.5 text-[14px] outline-none transition-colors
+                          ${courseInfo.noInstructor
+                            ? 'border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed'
+                            : 'border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100'}`}/>
+                    </div>
+                    {/* 예상 학습 시간 */}
+                    <div>
+                      <label className="block text-[12px] font-bold text-slate-500 mb-1.5">예상 학습 시간</label>
+                      <div className="flex items-center gap-2">
+                        <input type="number" min={1} value={courseInfo.estimatedHours} onChange={e => updInfo('estimatedHours', e.target.value)}
+                          placeholder="0"
+                          className="w-24 border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] focus:border-indigo-400 outline-none text-center"/>
+                        <span className="text-[13px] text-slate-500">시간</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 강사 소개 (강사 없음 체크 시 숨김) */}
+                  {!courseInfo.noInstructor && (
+                    <div className="animate-fadeIn">
+                      <label className="block text-[12px] font-bold text-slate-500 mb-1.5">강사 소개</label>
+                      <input type="text" value={courseInfo.instructorDesc} onChange={e => updInfo('instructorDesc', e.target.value)}
+                        placeholder="예: 프로젝트 관리 전문가 · PMP 자격"
+                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] focus:border-indigo-400 outline-none transition-colors"/>
+                    </div>
+                  )}
+
+                  {/* 코스 소개 */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-500 mb-1.5">코스 소개</label>
+                    <textarea value={courseInfo.intro} onChange={e => updInfo('intro', e.target.value)}
+                      placeholder="이 코스에서 배울 내용을 간략히 소개해 주세요."
+                      rows={3}
+                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-colors resize-none"/>
+                  </div>
+
+                  {/* 수료증 발급 (온라인 특화) */}
+                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <div>
+                      <p className="text-[13px] font-bold text-slate-700">수료증 발급</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">수료 시 수강생에게 수료증을 자동 발급합니다.</p>
+                    </div>
+                    <Toggle active={courseInfo.certificate} onClick={() => updInfo('certificate', !courseInfo.certificate)}/>
+                  </div>
+                </div>
+              </section>
+
+              {/* ── 섹션 2: 수강 신청 설정 ── */}
+              <section className="w-[800px] mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center gap-2">
+                  <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-800">수강 신청 설정</h2>
+                    <p className="text-[12px] text-slate-400 font-medium mt-0.5">신청 기간과 등록 방식을 설정합니다.</p>
+                  </div>
+                </div>
+                <div className="p-6 space-y-5">
+                  {/* 신청 기간 */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-500 mb-2">수강 신청 기간 <span className="text-red-400">*</span></label>
+                    <div className="flex items-center gap-3">
+                      <input type="datetime-local" value={regPeriod.start} onChange={e => setRegPeriod(p => ({ ...p, start: e.target.value }))}
+                        className="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] focus:border-indigo-400 outline-none"/>
+                      <span className="text-slate-400 text-sm">~</span>
+                      <input type="datetime-local" value={regPeriod.end} onChange={e => setRegPeriod(p => ({ ...p, end: e.target.value }))}
+                        className="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] focus:border-indigo-400 outline-none"/>
+                    </div>
+                  </div>
+
+                  {/* 등록 방식 */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-500 mb-2">수강 등록 방식</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[[true,'자율 수강','수강생이 직접 신청합니다.'],[false,'관리자 강제 할당','관리자가 대상자를 직접 지정합니다.']].map(([val, title, desc]) => (
+                        <button key={String(val)} onClick={() => setIsSelfEnroll(val)}
+                          className={`text-left p-4 rounded-xl border-2 transition-all ${isSelfEnroll === val ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelfEnroll === val ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300'}`}>
+                              {isSelfEnroll === val && <div className="w-2 h-2 bg-white rounded-full"/>}
+                            </div>
+                            <span className="text-[13px] font-bold text-slate-800">{title}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 pl-6">{desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 취소 정책 (자율 수강 전용) */}
+                  {isSelfEnroll && (
+                    <div className="space-y-3 pt-2 border-t border-slate-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[13px] font-bold text-slate-700">수강 취소 정책</p>
+                          <p className="text-[11px] text-slate-400">OFF 시 신청 마감 전까지 언제든 취소 가능</p>
+                        </div>
+                        <Toggle active={cancelPolicy.enabled} onClick={() => setCancelPolicy(p => ({ ...p, enabled: !p.enabled }))}/>
+                      </div>
+                      {cancelPolicy.enabled && (
+                        <div className="ml-4 space-y-2 animate-fadeIn">
+                          {[['allowed','기한부 취소 허용'],['blocked','취소 불가']].map(([val, lbl]) => (
+                            <label key={val} className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" checked={cancelPolicy.mode === val} onChange={() => setCancelPolicy(p => ({ ...p, mode: val }))} className="accent-indigo-500"/>
+                              <span className="text-[13px] text-slate-700">{lbl}</span>
+                              {val === 'allowed' && cancelPolicy.mode === 'allowed' && (
+                                <div className="flex items-center gap-2 ml-2">
+                                  <span className="text-[12px] text-slate-500">교육 시작</span>
+                                  <input type="number" min={1} value={cancelPolicy.relativeValue} onChange={e => setCancelPolicy(p => ({ ...p, relativeValue: parseInt(e.target.value) }))}
+                                    className="w-14 border border-slate-300 rounded-lg px-2 py-1 text-[13px] text-center focus:border-indigo-400 outline-none"/>
+                                  <select value={cancelPolicy.relativeUnit} onChange={e => setCancelPolicy(p => ({ ...p, relativeUnit: e.target.value }))}
+                                    className="border border-slate-200 rounded-lg px-2 py-1 text-[12px] focus:border-indigo-400 outline-none bg-white">
+                                    <option value="day">일 전까지</option>
+                                    <option value="hour">시간 전까지</option>
+                                  </select>
+                                </div>
+                              )}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* ── 섹션 3: 수강 기간 (온라인 특화) ── */}
+              <section className="w-[800px] mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center gap-2">
+                  <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold">3</div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-800">수강 기간 설정</h2>
+                    <p className="text-[12px] text-slate-400 font-medium mt-0.5">수강생이 콘텐츠에 접근 가능한 기간을 설정합니다.</p>
+                  </div>
+                </div>
+                <div className="p-6 space-y-4">
+                  {/* 기간 유형 선택 */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      ['fixed',      '고정 기간',       '지정한 날짜 범위 동안만 수강 가능'],
+                      ['days',       '신청 후 N일',     '수강 신청일로부터 N일간 접근 가능'],
+                      ['unlimited',  '무제한',          '기간 제한 없이 언제든 수강 가능'],
+                    ].map(([val, title, desc]) => (
+                      <button key={val} onClick={() => updPeriod('type', val)}
+                        className={`text-left p-4 rounded-xl border-2 transition-all ${studyPeriod.type === val ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${studyPeriod.type === val ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300'}`}>
+                            {studyPeriod.type === val && <div className="w-2 h-2 bg-white rounded-full"/>}
+                          </div>
+                          <span className="text-[13px] font-bold text-slate-800">{title}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">{desc}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* 고정 기간 날짜 */}
+                  {studyPeriod.type === 'fixed' && (
+                    <div className="flex items-center gap-3 animate-fadeIn">
+                      <input type="date" value={studyPeriod.fixedStart} onChange={e => updPeriod('fixedStart', e.target.value)}
+                        className="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] focus:border-indigo-400 outline-none"/>
+                      <span className="text-slate-400">~</span>
+                      <input type="date" value={studyPeriod.fixedEnd} onChange={e => updPeriod('fixedEnd', e.target.value)}
+                        className="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] focus:border-indigo-400 outline-none"/>
+                    </div>
+                  )}
+
+                  {/* 신청 후 N일 */}
+                  {studyPeriod.type === 'days' && (
+                    <div className="flex items-center gap-3 animate-fadeIn">
+                      <span className="text-[13px] text-slate-600">수강 신청일로부터</span>
+                      <input type="number" min={1} max={365} value={studyPeriod.days}
+                        onChange={e => updPeriod('days', parseInt(e.target.value) || 1)}
+                        className="w-20 border border-slate-300 rounded-xl px-4 py-2.5 text-[14px] font-bold text-center focus:border-indigo-400 outline-none"/>
+                      <span className="text-[13px] text-slate-600">일간</span>
+                    </div>
+                  )}
+
+                  {/* 무제한 안내 */}
+                  {studyPeriod.type === 'unlimited' && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[12px] text-amber-700 animate-fadeIn">
+                      ⚠️ 무제한으로 설정하면 수강 취소 후에도 콘텐츠 접근이 유지될 수 있습니다. 운영 정책에 따라 결정하세요.
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* ── 섹션 4: 수료 조건 (공통 패턴, 온라인 항목) ── */}
+              <section className="w-[800px] mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="bg-slate-50 border-b border-slate-100 px-6 py-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold">4</div>
+                    <h2 className="text-base font-bold text-slate-800">수료 조건 설정</h2>
+                  </div>
+                  <p className="text-[12px] text-slate-400 font-medium ml-8">아래 조건을 <strong className="text-slate-600">모두 충족</strong>해야 수료 처리됩니다.</p>
+                </div>
+                <div className="p-6 space-y-3">
+                  {/* 필수 콘텐츠 전체 이수 (고정) */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 w-5 h-5 rounded bg-emerald-500 flex items-center justify-center shrink-0">
+                        <Check size={12} className="text-white"/>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[14px] font-bold text-slate-800">필수 콘텐츠 전체 이수</span>
+                          <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">필수</span>
+                        </div>
+                        <p className="text-[12px] text-slate-400">커리큘럼에서 <strong>필수</strong>로 지정된 콘텐츠를 각 유형의 이수 조건에 맞게 모두 완료해야 합니다.</p>
+                        {/* 현재 필수 슬롯 미리보기 */}
+                        {reqSlots.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {reqSlots.map(s => {
+                              const T = SLOT_TYPES[s.type];
+                              return (
+                                <span key={s.id} className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold border ${T.color} ${T.border}`}>
+                                  {s.title.length > 14 ? s.title.slice(0, 14) + '…' : s.title}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {reqSlots.length === 0 && (
+                          <p className="mt-2 text-[11px] text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                            ⚠️ 필수 콘텐츠가 없습니다. 우측 커리큘럼에서 최소 1개를 필수로 지정하세요.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 선택 콘텐츠 이수 기준 (추가 가능) */}
+                  <div className="border border-dashed border-slate-300 rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[13px] font-bold text-slate-700">선택 콘텐츠 이수 기준 추가</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">선택 콘텐츠 중 N개 이상 이수한 경우도 조건에 포함할 수 있습니다.</p>
+                      </div>
+                      <Toggle active={hasOptionalThreshold} onClick={() => setHasOptionalThreshold(p => !p)}/>
+                    </div>
+                    {hasOptionalThreshold && (
+                      <div className="mt-3 flex items-center gap-3 animate-fadeIn">
+                        <span className="text-[13px] text-slate-700 font-medium">선택 콘텐츠 중 최소</span>
+                        <input type="number" min={1} max={99} value={optionalMinCount}
+                          onChange={e => setOptionalMinCount(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-14 text-center text-[13px] font-bold border border-emerald-400 bg-white text-slate-800 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-emerald-200"/>
+                        <span className="text-[13px] text-slate-700 font-medium">개 이상 이수</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+            </main>
+
+            {/* ── 우측 사이드바: 커리큘럼 관리 ── */}
+            <aside className="w-[500px] bg-white border-l border-slate-200 flex flex-col z-20 shadow-[-10px_0_20px_-10px_rgba(0,0,0,0.05)] shrink-0">
+
+              {/* 헤더 */}
+              <div className="px-6 py-5 border-b border-slate-200 shrink-0 bg-slate-900 text-white">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-[16px] flex items-center gap-2">
+                    <Layers size={18} className="text-indigo-400"/> 커리큘럼 관리
+                  </h3>
+                  <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                    <span>챕터 {chapters.length}</span>
+                    <span className="text-slate-600">·</span>
+                    <span>항목 {totalSlots}</span>
+                    <span className="text-slate-600">·</span>
+                    <span className="text-indigo-300">필수 {reqSlots.length}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── 챕터 목록 ── */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f4f7fc] px-4 py-5 space-y-4">
+
+                {chapters.map((ch, chIdx) => {
+                  return (
+                    <div key={ch.id} className="animate-fadeIn">
+                      {/* 챕터 헤더 */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-7 h-7 bg-slate-800 text-white rounded-lg flex items-center justify-center text-[11px] font-black shrink-0">
+                          {String(chIdx + 1).padStart(2, '0')}
+                        </div>
+                        <input
+                          type="text"
+                          value={ch.title}
+                          onChange={e => updateChapterTitle(ch.id, e.target.value)}
+                          className="flex-1 min-w-0 text-[13px] font-black text-slate-800 bg-transparent outline-none border-b border-transparent focus:border-indigo-400 py-0.5"
+                        />
+                        {ch.items.length > 0 && (
+                          <span className="text-[10px] font-bold bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full shrink-0">
+                            {ch.items.length}
+                          </span>
+                        )}
+                        {/* + 항목 추가 */}
+                        <button
+                          onClick={() => setAddItemModal(ch.id)}
+                          className="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 hover:bg-indigo-200 flex items-center justify-center transition-colors shrink-0">
+                          <Plus size={13}/>
+                        </button>
+                        <button onClick={() => removeChapter(ch.id)}
+                          className="text-slate-200 hover:text-red-400 transition-colors shrink-0">
+                          <Trash2 size={13}/>
+                        </button>
+                      </div>
+
+                      {/* 챕터 항목 리스트 */}
+                      <div className="ml-3.5 pl-5 border-l-2 border-slate-200 space-y-1.5">
+                        {ch.items.length === 0 ? (
+                          <div className="text-[11px] text-slate-400 py-3 text-center border border-dashed border-slate-300 rounded-xl bg-white/60">
+                            + 버튼으로 항목을 추가하세요
+                          </div>
+                        ) : ch.items.map((item) => {
+                          const T = SLOT_TYPES[item.type];
+                          const Icon = T.icon;
+                          const isDraggingItem = dragging?.chId === ch.id && dragging?.itemId === item.id;
+                          const isOverItem = dragOver?.chId === ch.id && dragOver?.itemId === item.id;
+                          return (
+                            <div key={item.id}
+                              draggable
+                              onDragStart={e => onItemDragStart(e, ch.id, item.id)}
+                              onDragOver={e => onItemDragOver(e, ch.id, item.id)}
+                              onDrop={onItemDrop}
+                              onDragEnd={onItemDragEnd}
+                              className={`relative bg-white border rounded-xl transition-all select-none group
+                                ${isDraggingItem ? 'opacity-30' : ''}
+                                ${isOverItem ? 'border-indigo-400 shadow-[0_0_0_2px_rgba(99,102,241,0.15)]' : 'border-slate-200 hover:border-slate-300'}`}>
+
+                              {/* 좌측 도트 */}
+                              <div className="absolute -left-[21px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white border-2 border-slate-300 group-hover:border-indigo-400 transition-colors"/>
+
+                              <div className="flex items-center gap-2.5 px-3 py-2.5">
+                                {/* 드래그 핸들 */}
+                                <div className="cursor-grab text-slate-200 group-hover:text-slate-400 shrink-0 transition-colors">
+                                  <GripVertical size={13}/>
+                                </div>
+                                {/* 유형 아이콘 */}
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${T.color}`}>
+                                  <Icon size={13}/>
+                                </div>
+                                {/* 제목 */}
+                                <input
+                                  type="text"
+                                  value={item.title}
+                                  onChange={e => updateItem(ch.id, item.id, { title: e.target.value })}
+                                  className="flex-1 min-w-0 text-[12px] font-semibold text-slate-800 bg-transparent outline-none border-b border-transparent focus:border-indigo-300"
+                                />
+                                {/* 필수/선택 배지 */}
+                                <button
+                                  onClick={() => updateItem(ch.id, item.id, { isRequired: !item.isRequired })}
+                                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md border shrink-0 transition-colors
+                                    ${item.isRequired ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 'bg-slate-100 text-slate-400 border-slate-200 hover:border-slate-300'}`}>
+                                  {item.isRequired ? '필수' : '선택'}
+                                </button>
+                                {/* 이수조건 설정 */}
+                                <button onClick={() => setSettingSlot({ chId: ch.id, item })}
+                                  className="p-1 text-slate-200 hover:text-indigo-500 rounded transition-colors shrink-0" title="이수 조건">
+                                  <Settings size={12}/>
+                                </button>
+                                {/* 삭제 */}
+                                <button onClick={() => removeItem(ch.id, item.id)}
+                                  className="p-1 text-slate-200 hover:text-red-400 rounded transition-colors shrink-0">
+                                  <Trash2 size={12}/>
+                                </button>
+                              </div>
+
+                              {/* 이수 조건 행 (필수 항목만) */}
+                              {item.isRequired && condText(item) && (
+                                <div className="mx-3 mb-2.5 flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
+                                  <span className="text-[10px] font-bold text-indigo-500">이수 조건</span>
+                                  <span className="text-[10px] text-slate-500">{condText(item)}</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* 챕터 추가 버튼 */}
+                <button onClick={addChapter}
+                  className="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-xl text-[12px] font-bold text-slate-400 hover:border-indigo-400 hover:text-indigo-500 hover:bg-white/60 transition-all flex items-center justify-center gap-1.5">
+                  <Plus size={13}/> 챕터 추가
+                </button>
+              </div>
+
+              {/* 하단: 체크리스트 + 퍼블리싱 */}
+              <div className="px-5 py-4 border-t border-slate-200 bg-slate-50 shrink-0">
+                <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-1.5 mb-3">
+                  {validation.map(v => (
+                    <div key={v.label} className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${v.ok ? 'bg-emerald-500' : 'bg-slate-200'}`}>
+                        {v.ok ? <Check size={10} className="text-white"/> : <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"/>}
+                      </div>
+                      <span className={`text-[11px] font-medium ${v.ok ? 'text-slate-600' : 'text-slate-400'}`}>{v.label}</span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => setShowPublishModal(true)}
+                  className={`w-full py-3 rounded-xl text-[14px] font-bold transition-colors flex items-center justify-center gap-2
+                    ${canPublish ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                  <Send size={16}/> 코스 퍼블리싱
+                </button>
+              </div>
+            </aside>
+          </div>
+
+          {/* ── 토스트 ── */}
+          {toast && (
+            <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] ${toast.dismissing ? 'toast-out' : 'toast-in'}`}>
+              {toast.type === 'first' ? (
+                <div className="bg-slate-900 text-white rounded-2xl px-5 py-4 shadow-xl max-w-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shrink-0 mt-0.5"><Check size={16} className="text-white"/></div>
+                    <div>
+                      <p className="font-bold text-[14px]">초안이 저장되었습니다</p>
+                      <p className="text-[12px] text-slate-400 mt-0.5">언제든지 이어서 편집할 수 있습니다.</p>
+                    </div>
+                    <button onClick={dismissToast} className="text-slate-500 hover:text-white ml-2"><X size={16}/></button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-slate-800 text-white rounded-xl px-4 py-2.5 shadow-lg flex items-center gap-2 text-[13px]">
+                  <Check size={14} className="text-emerald-400"/> 저장됨
+                  <button onClick={dismissToast} className="text-slate-500 hover:text-white ml-1"><X size={12}/></button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── 퍼블리싱 확인 모달 ── */}
+          {showPublishModal && (
+            <div className="fixed inset-0 bg-slate-900/70 z-[200] flex items-center justify-center animate-fadeIn" onClick={() => setShowPublishModal(false)}>
+              <div className="bg-white rounded-2xl shadow-2xl p-7 w-[420px]" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <Send size={20} className="text-indigo-600"/>
+                  </div>
+                  <div>
+                    <h3 className="text-[16px] font-bold text-slate-900">코스 퍼블리싱</h3>
+                    <p className="text-[12px] text-slate-400">수강생에게 공개됩니다.</p>
+                  </div>
+                </div>
+                {!canPublish ? (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-5 space-y-1.5">
+                    <p className="text-[12px] font-bold text-red-600 mb-2">아래 항목을 먼저 완료하세요</p>
+                    {validation.filter(v => !v.ok).map(v => (
+                      <div key={v.label} className="flex items-center gap-2 text-[12px] text-red-600">
+                        <AlertTriangle size={12}/> {v.label}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-5">
+                    <p className="text-[13px] font-bold text-emerald-700 flex items-center gap-2"><Check size={14}/> 모든 항목이 준비되었습니다.</p>
+                    <p className="text-[11px] text-emerald-600 mt-1">퍼블리싱 후 수강생 신청이 가능해집니다.</p>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button onClick={() => setShowPublishModal(false)} className="flex-1 py-3 border border-slate-200 text-slate-600 rounded-xl text-[13px] font-semibold hover:bg-slate-50">취소</button>
+                  <button onClick={handlePublish} disabled={!canPublish}
+                    className={`flex-1 py-3 rounded-xl text-[13px] font-bold transition-colors flex items-center justify-center gap-2
+                      ${canPublish ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                    <Send size={14}/> 퍼블리싱 확정
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── 항목 추가 모달 ── */}
+          {addItemModal && (
+            <AddItemModal
+              onAdd={(type, title, libItem) => addItem(addItemModal, type, title, libItem)}
+              onClose={() => setAddItemModal(null)}
+            />
+          )}
+
+          {/* ── 이수조건 설정 모달 ── */}
+          {settingSlot && (
+            <SlotSettingModal
+              slot={settingSlot.item}
+              onSave={(cond) => updateItemCond(settingSlot.chId, settingSlot.item.id, cond)}
+              onClose={() => setSettingSlot(null)}
+            />
+          )}
+        </div>
+      );
+    };
+
+    createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
