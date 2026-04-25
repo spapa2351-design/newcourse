@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>오프라인 코스 — 프로토타입</title>
+  <title>LMS 프로토타입 — 네비게이션</title>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -11,111 +11,377 @@
     :root {
       --primary: #5569ff;
       --black: #223354;
-      --body-bg: #f2f5f9;
+      --body-bg: #e8ecf4;
       --white: #ffffff;
       --border: rgba(34,51,84,.10);
       --r-lg: 16px;
     }
-    html, body { height: 100%; }
     body {
       font-family: 'Pretendard','Inter',sans-serif;
       font-size: 14px; color: var(--black);
-      background: #e8ecf4;
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 32px 16px;
+      background: var(--body-bg);
+      min-height: 100vh; padding: 40px 16px;
     }
 
-    .selector {
-      width: 390px; background: var(--white);
-      border-radius: var(--r-lg);
-      box-shadow: 0 20px 60px rgba(34,51,84,.18);
-      overflow: hidden; text-align: center;
-      padding: 48px 32px;
-    }
+    .container { max-width: 860px; margin: 0 auto; }
 
+    /* Header */
+    .header {
+      text-align: center; margin-bottom: 36px;
+    }
     .logo {
       width: 56px; height: 56px; border-radius: 14px;
       background: linear-gradient(135deg, #5569ff, #7B8BFF);
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px; font-size: 24px; color: #fff;
+      margin: 0 auto 16px; font-size: 24px; color: #fff;
     }
+    .header h1 { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .header p { font-size: 13px; color: #6E759F; font-weight: 500; }
 
-    h1 { font-size: 22px; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.5px; }
-    .sub { font-size: 13px; color: #6E759F; margin-bottom: 36px; font-weight: 500; }
+    /* Section */
+    .section { margin-bottom: 24px; }
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .section-icon {
+      width: 32px; height: 32px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .section-title { font-size: 13px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
 
-    .buttons { display: flex; flex-direction: column; gap: 12px; }
+    /* Grid */
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
 
-    .btn-mode {
-      display: flex; align-items: center; gap: 14px;
-      padding: 18px 20px; border-radius: 14px;
+    /* Button */
+    .btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 18px; border-radius: 12px;
       border: 1.5px solid var(--border);
       background: var(--white); cursor: pointer;
-      transition: all .2s; text-align: left;
-      font-family: inherit;
+      transition: all .18s; text-align: left;
+      font-family: inherit; text-decoration: none;
+      color: var(--black);
     }
-    .btn-mode:hover {
+    .btn:hover {
       border-color: var(--primary);
       box-shadow: 0 4px 16px rgba(85,105,255,.12);
       transform: translateY(-2px);
     }
-    .btn-mode:active { transform: scale(0.98); }
+    .btn:active { transform: scale(0.98); }
 
     .btn-icon {
-      width: 44px; height: 44px; border-radius: 12px;
+      width: 38px; height: 38px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
+      font-size: 15px; flex-shrink: 0;
     }
-    .btn-icon.admin { background: #FFF3E0; color: #E65100; }
-    .btn-icon.user { background: #E8F5E9; color: #1A7A4A; }
-    .btn-icon.cases { background: #EEF2FF; color: #4338CA; }
-
-    .btn-text { flex: 1; }
-    .btn-title { font-size: 15px; font-weight: 800; color: var(--black); margin-bottom: 2px; }
+    .btn-text { flex: 1; min-width: 0; }
+    .btn-title { font-size: 13px; font-weight: 800; color: var(--black); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .btn-desc { font-size: 11px; color: #6E759F; font-weight: 500; }
-    .btn-arrow { font-size: 14px; color: #CBD5E1; }
+    .btn-arrow { font-size: 11px; color: #CBD5E1; flex-shrink: 0; }
+
+    /* Colors */
+    .c-admin   { background: #FFF3E0; color: #E65100; }
+    .c-user    { background: #E8F5E9; color: #1A7A4A; }
+    .c-ref     { background: #EEF2FF; color: #4338CA; }
+    .c-doc     { background: #F3E8FF; color: #7C3AED; }
+    .c-online  { background: #E0F2FE; color: #0369A1; }
+
+    .s-admin   { background: #FFF3E0; color: #E65100; }
+    .s-user    { background: #E8F5E9; color: #1A7A4A; }
+    .s-ref     { background: #EEF2FF; color: #4338CA; }
+    .s-doc     { background: #F3E8FF; color: #7C3AED; }
+    .s-online  { background: #E0F2FE; color: #0369A1; }
 
     .version {
-      margin-top: 32px; font-size: 11px; color: #A0AEC0; font-weight: 500;
+      text-align: center; margin-top: 32px;
+      font-size: 11px; color: #A0AEC0; font-weight: 500;
+    }
+
+    @media (max-width: 600px) {
+      .grid, .grid-3 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<div class="selector">
-  <div class="logo"><i class="fa-solid fa-graduation-cap"></i></div>
-  <h1>오프라인 코스</h1>
-  <div class="sub">프로토타입 모드를 선택하세요</div>
+<div class="container">
 
-  <div class="buttons">
-    <button class="btn-mode" onclick="location.href='admin-index.html'">
-      <div class="btn-icon admin"><i class="fa-solid fa-shield-halved"></i></div>
-      <div class="btn-text">
-        <div class="btn-title">관리자 모드</div>
-        <div class="btn-desc">코스 등록 · 수강생 관리 · 출석 현황</div>
-      </div>
-      <i class="fa-solid fa-chevron-right btn-arrow"></i>
-    </button>
-
-    <button class="btn-mode" onclick="location.href='home.html'">
-      <div class="btn-icon user"><i class="fa-solid fa-user"></i></div>
-      <div class="btn-text">
-        <div class="btn-title">사용자 모드</div>
-        <div class="btn-desc">홈 · 카테고리 · 코스 상세 · MY</div>
-      </div>
-      <i class="fa-solid fa-chevron-right btn-arrow"></i>
-    </button>
-    <button class="btn-mode" onclick="location.href='cases.html'">
-      <div class="btn-icon cases"><i class="fa-solid fa-list-check"></i></div>
-      <div class="btn-text">
-        <div class="btn-title">운영 케이스</div>
-        <div class="btn-desc">오프라인 코스 운영 시나리오 6종 · 실사례 스토리</div>
-      </div>
-      <i class="fa-solid fa-chevron-right btn-arrow"></i>
-    </button>
+  <!-- Header -->
+  <div class="header">
+    <div class="logo"><i class="fa-solid fa-graduation-cap"></i></div>
+    <h1>LMS 프로토타입</h1>
+    <p>페이지를 선택하세요 — LMS Vision 2026 Phase 1</p>
   </div>
 
-  <div class="version">Offline Course Prototype v1.0</div>
-</div>
+  <!-- 관리자 페이지 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon s-admin"><i class="fa-solid fa-shield-halved"></i></div>
+      <span class="section-title" style="color:#E65100">관리자</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid">
+      <a class="btn" href="admin/index.html">
+        <div class="btn-icon c-admin"><i class="fa-solid fa-list"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">코스 목록</div>
+          <div class="btn-desc">전체 코스 관리 · 필터 · 검색</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="admin/offline-builder.html">
+        <div class="btn-icon c-admin"><i class="fa-solid fa-hammer"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">오프라인 코스 빌더</div>
+          <div class="btn-desc">코스 개설 · 차수 · 회차 설정</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="admin/offline-attendance.html">
+        <div class="btn-icon c-admin"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">수강관리</div>
+          <div class="btn-desc">출석 · 수강생 · QR 체크인</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="admin/online-builder.html">
+        <div class="btn-icon c-online"><i class="fa-solid fa-tv"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">온라인 코스 빌더</div>
+          <div class="btn-desc">영상 · 시험 · 설문 커리큘럼</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="admin/dashboard.html">
+        <div class="btn-icon c-admin"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">대시보드</div>
+          <div class="btn-desc">통계 · 현황 요약</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+    </div>
+  </div>
 
+  <!-- 사용자 페이지 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon s-user"><i class="fa-solid fa-user"></i></div>
+      <span class="section-title" style="color:#1A7A4A">사용자</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid">
+      <a class="btn" href="user/home.html">
+        <div class="btn-icon c-user"><i class="fa-solid fa-house"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">홈</div>
+          <div class="btn-desc">최근 수강 · 오프라인 영역</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="user/category.html">
+        <div class="btn-icon c-user"><i class="fa-solid fa-tags"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">카테고리</div>
+          <div class="btn-desc">온라인 · 오프라인 · 전체</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="user/course-list.html">
+        <div class="btn-icon c-user"><i class="fa-solid fa-th-large"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">코스 목록</div>
+          <div class="btn-desc">3열 그리드 · 상태 배지</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="user/my.html">
+        <div class="btn-icon c-user"><i class="fa-solid fa-bookmark"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">MY 페이지</div>
+          <div class="btn-desc">수강 내역 · 필터</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="user/course-detail.html">
+        <div class="btn-icon c-user"><i class="fa-solid fa-circle-info"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">코스 상세 (미신청)</div>
+          <div class="btn-desc">신청 전 상태</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="user/course-enrolled.html">
+        <div class="btn-icon c-user"><i class="fa-solid fa-play-circle"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">코스 상세 (수강 중)</div>
+          <div class="btn-desc">출석 현황 · 진도</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="user/course-completed.html">
+        <div class="btn-icon c-user"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">코스 상세 (완료)</div>
+          <div class="btn-desc">수료 · 결과 확인</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="user/learner-flow.html">
+        <div class="btn-icon c-user"><i class="fa-solid fa-route"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">학습자 플로우</div>
+          <div class="btn-desc">전체 흐름 다이어그램</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- 기획/참고 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon s-ref"><i class="fa-solid fa-map"></i></div>
+      <span class="section-title" style="color:#4338CA">기획 · 참고</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid grid-3">
+      <a class="btn" href="reference/cases.html">
+        <div class="btn-icon c-ref"><i class="fa-solid fa-list-check"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">운영 케이스 6종</div>
+          <div class="btn-desc">실사례 시나리오</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="reference/ia-map.html">
+        <div class="btn-icon c-ref"><i class="fa-solid fa-sitemap"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">IA 맵</div>
+          <div class="btn-desc">정보 아키텍처</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="reference/plan.html">
+        <div class="btn-icon c-ref"><i class="fa-solid fa-file-lines"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">대정책</div>
+          <div class="btn-desc">정책 문서</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="reference/lms-policy.html">
+        <div class="btn-icon c-ref"><i class="fa-solid fa-shield"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">LMS 정책 포털</div>
+          <div class="btn-desc">정책 관리</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="reference/lms-policy-v2.html">
+        <div class="btn-icon c-ref"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">LMS 정책 v2</div>
+          <div class="btn-desc">정책 포털 개선</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn" href="reference/demo.html">
+        <div class="btn-icon c-ref"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">데모</div>
+          <div class="btn-desc">데모 페이지</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- 설계 문서 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon s-doc"><i class="fa-solid fa-book"></i></div>
+      <span class="section-title" style="color:#7C3AED">설계 문서</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid">
+      <a class="btn" href="docs/vision-2026.md" target="_blank">
+        <div class="btn-icon c-doc"><i class="fa-solid fa-rocket"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">LMS Vision 2026</div>
+          <div class="btn-desc">아키텍처 로드맵 Phase 1~3</div>
+        </div>
+        <i class="fa-solid fa-arrow-up-right-from-square btn-arrow"></i>
+      </a>
+      <a class="btn" href="docs/offline-course-builder.md" target="_blank">
+        <div class="btn-icon c-doc"><i class="fa-solid fa-drafting-compass"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">오프라인 코스 설계</div>
+          <div class="btn-desc">전체 시스템 설계 문서</div>
+        </div>
+        <i class="fa-solid fa-arrow-up-right-from-square btn-arrow"></i>
+      </a>
+      <a class="btn" href="docs/system-analysis.md" target="_blank">
+        <div class="btn-icon c-doc"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">시스템 구조 분석서</div>
+          <div class="btn-desc">상세 구조 분석 (47KB)</div>
+        </div>
+        <i class="fa-solid fa-arrow-up-right-from-square btn-arrow"></i>
+      </a>
+      <a class="btn" href="docs/gap-report.md" target="_blank">
+        <div class="btn-icon c-doc"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="btn-text">
+          <div class="btn-title">갭 리포트</div>
+          <div class="btn-desc">기획 갭 12개 · Critical 3개</div>
+        </div>
+        <i class="fa-solid fa-arrow-up-right-from-square btn-arrow"></i>
+      </a>
+    </div>
+
+    <!-- 세션 기록 -->
+    <div style="margin-top:10px;">
+      <div style="font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:8px;padding-left:2px;">세션 기록</div>
+      <div class="grid grid-3">
+        <a class="btn" href="docs/sessions/2026-04-09-user-pages.md" target="_blank">
+          <div class="btn-icon c-doc" style="width:32px;height:32px;font-size:12px;border-radius:8px;"><i class="fa-solid fa-scroll"></i></div>
+          <div class="btn-text">
+            <div class="btn-title" style="font-size:12px;">04-09 사용자 화면</div>
+            <div class="btn-desc">홈·카테고리·목록</div>
+          </div>
+        </a>
+        <a class="btn" href="docs/sessions/2026-04-12-blended-cases.md" target="_blank">
+          <div class="btn-icon c-doc" style="width:32px;height:32px;font-size:12px;border-radius:8px;"><i class="fa-solid fa-scroll"></i></div>
+          <div class="btn-text">
+            <div class="btn-title" style="font-size:12px;">04-12 블렌디드 케이스</div>
+            <div class="btn-desc">A/B사 사례 분석</div>
+          </div>
+        </a>
+        <a class="btn" href="docs/sessions/2026-04-23-online-builder.md" target="_blank">
+          <div class="btn-icon c-doc" style="width:32px;height:32px;font-size:12px;border-radius:8px;"><i class="fa-solid fa-scroll"></i></div>
+          <div class="btn-text">
+            <div class="btn-title" style="font-size:12px;">04-23 온라인 빌더</div>
+            <div class="btn-desc">프로토타입 구축</div>
+          </div>
+        </a>
+        <a class="btn" href="docs/sessions/2026-04-24-online-builder.md" target="_blank">
+          <div class="btn-icon c-doc" style="width:32px;height:32px;font-size:12px;border-radius:8px;"><i class="fa-solid fa-scroll"></i></div>
+          <div class="btn-text">
+            <div class="btn-title" style="font-size:12px;">04-24 온라인 빌더 개선</div>
+            <div class="btn-desc">커서·컴포넌트 수정</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="version">LMS Prototype — Vision 2026 Phase 1 &nbsp;·&nbsp; newcourse v1.0</div>
+
+</div>
 </body>
 </html>
