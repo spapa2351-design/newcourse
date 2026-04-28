@@ -47,7 +47,9 @@
       Plus, Trash2, Copy, X, Check, ChevronDown, ChevronUp, GripVertical,
       Save, Send, Eye, Video, FileText, ClipboardList, BookOpen,
       AlertTriangle, Clock, Award, Users, MousePointerClick, Settings,
-      Play, ChevronRight, BarChart2, Layers, Upload, Library, Search, FolderOpen
+      Play, ChevronRight, BarChart2, Layers, Upload, Library, Search, FolderOpen,
+      MapPin, Monitor, Star, List, Archive, AlertCircle, Grid3X3, CheckCircle, Filter,
+      MessageSquare, ArrowLeft, ChevronLeft
     } = Lucide;
 
     /* ─── Toggle 공통 컴포넌트 (admin1.html 동일) ─── */
@@ -318,8 +320,34 @@
       );
     };
 
+    const SIDEBAR_MENUS = [
+      { id: 'member', label: '회원', icon: Users, hasChildren: true },
+      { id: 'course', label: '코스', icon: BookOpen, hasChildren: true, children: [
+        { id: 'course-main', label: '코스', active: true },
+        { id: 'course-plus', label: 'PLUS 코스' },
+      ]},
+      { id: 'offline-course', label: '오프라인 코스', icon: MapPin },
+      { id: 'content', label: '콘텐츠', icon: Copy, hasChildren: true },
+      { id: 'ttube', label: 'T튜브', icon: Monitor, hasChildren: true },
+      { id: 'ai-quiz', label: 'AI 퀴메이커', icon: Star, badge: 'N' },
+      { id: 'translation', label: 'Translation', icon: List, hasChildren: true },
+      { id: 'question-bank', label: '문제 은행', icon: Archive },
+      { id: 'opinion', label: '의견', icon: AlertCircle },
+      { id: 'gamification', label: '게이미피케이션', icon: Grid3X3, hasChildren: true },
+      { id: 'live', label: '라이브 스트리밍', icon: Eye, hasChildren: true },
+      { id: 'touch', label: '터치투게더', icon: Users },
+      { id: 'attendance', label: '출석 체크', icon: CheckCircle },
+      { id: 'ai-chat', label: 'AI 챗봇', icon: Monitor, badge: 'N' },
+      { id: 'stats', label: '통계', icon: Filter },
+      { id: 'notice', label: '공지사항', icon: Archive },
+      { id: 'popup', label: '팝업', icon: Layers },
+    ];
+
     /* ─── 메인 앱 ─── */
     const App = () => {
+      const [sideExpanded, setSideExpanded] = useState(new Set(['course']));
+      const toggleSideMenu = (id) => setSideExpanded(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+
       /* 기본 정보 */
       const [courseInfo, setCourseInfo] = useState({
         title: '', category: '', instructor: '', instructorDesc: '',
@@ -457,13 +485,75 @@
 
       /* ─── 렌더 ─── */
       return (
-        <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
+        <div className="min-h-screen flex">
+          {/* ══ 글로벌 좌측 사이드바 ══ */}
+          <aside className="w-[200px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0 overflow-y-auto custom-scrollbar">
+            <div className="px-4 py-4 flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4"><path d="M7 2L2 5v7h4V9h2v3h4V5L7 2z" fill="white"/></svg>
+              </div>
+              <span className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">TOUCH<br/>CLASS</span>
+            </div>
+            <div className="h-px bg-slate-100 mx-3 mb-2"/>
+            <nav className="flex-1 px-3 pb-6 space-y-0.5">
+              {SIDEBAR_MENUS.map(menu => (
+                <div key={menu.id}>
+                  <button onClick={() => menu.hasChildren && toggleSideMenu(menu.id)} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors ${menu.active ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}>
+                    {React.createElement(menu.icon, { size: 16, className: menu.active ? 'text-indigo-600' : 'text-slate-400' })}
+                    <span className="flex-1 text-left">{menu.label}</span>
+                    {menu.badge && <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{menu.badge}</span>}
+                    {menu.hasChildren && <span className="text-slate-400">{sideExpanded.has(menu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}</span>}
+                  </button>
+                  {menu.children && sideExpanded.has(menu.id) && (
+                    <div className="ml-7 mt-0.5 space-y-0.5">
+                      {menu.children.map(sub => (
+                        <a key={sub.id} href="#" className={`block px-3 py-1.5 rounded-md text-[13px] transition-colors ${sub.active ? 'text-indigo-700 font-bold' : 'text-slate-500 hover:bg-slate-50 font-medium'}`}>{sub.label}</a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
+          </aside>
+          <div className="flex-1 flex flex-col min-h-screen bg-[#f2f5f9]">
 
-          {/* ── 헤더 ── */}
-          <header className="h-14 bg-white border-b border-slate-200 flex items-center px-5 gap-3 shrink-0 shadow-sm z-10">
-            <button className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+          {/* ── 글로벌 탑 네비게이션 ── */}
+          <div className="h-[52px] bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0 sticky top-0 z-40">
+            <div className="flex items-center gap-3">
+              <button className="flex items-center gap-1.5 text-slate-600 text-[13px] font-semibold hover:text-slate-800 transition-colors">
+                <Star size={14} className="text-amber-400 fill-amber-400"/> 즐겨찾기 <ChevronDown size={13} className="text-slate-400"/>
+              </button>
+              <div className="w-px h-4 bg-slate-200"/>
+              <button className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-[12px] font-bold hover:bg-indigo-100 transition-colors">
+                <Users size={12}/> 관리자 가이드
+              </button>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors">
+                <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5"><circle cx="10" cy="10" r="8" stroke="#7c3aed" strokeWidth="1.5"/><circle cx="10" cy="10" r="3.5" fill="#7c3aed"/></svg>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><MessageSquare size={16}/></button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Play size={15} className="ml-0.5"/></button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><BarChart2 size={16}/></button>
+              <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <Filter size={15}/>
+                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none px-0.5">0</span>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Settings size={16}/></button>
+              <div className="w-px h-5 bg-slate-200 mx-1.5"/>
+              <button className="flex items-center gap-1.5 hover:bg-slate-50 pl-0.5 pr-2 py-1 rounded-lg transition-colors">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">조</div>
+                <span className="text-[13px] font-semibold text-slate-700">조찬현</span>
+                <ChevronDown size={13} className="text-slate-400"/>
+              </button>
+            </div>
+          </div>
+
+          {/* ── 페이지 서브 헤더 ── */}
+          <header className="h-14 bg-white border-b border-slate-200 flex items-center px-5 gap-3 shrink-0 z-10">
+            <a href="index.html" className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
               <ChevronRight size={16} className="rotate-180"/>
-            </button>
+            </a>
             <div className="w-px h-5 bg-slate-200"/>
             <div className="flex items-center gap-2 text-[13px]">
               <span className="text-slate-400">코스 등록</span>
@@ -662,38 +752,103 @@
                     </div>
                   </div>
 
-                  {/* 취소 정책 (자율 수강 전용) */}
+                  {/* 자율 수강 전용: 선택 규칙 + 취소/변경 정책 */}
                   {isSelfEnroll && (
-                    <div className="space-y-3 pt-2 border-t border-slate-100">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[13px] font-bold text-slate-700">수강 취소 정책</p>
-                          <p className="text-[11px] text-slate-400">OFF 시 신청 마감 전까지 언제든 취소 가능</p>
-                        </div>
-                        <Toggle active={cancelPolicy.enabled} onClick={() => setCancelPolicy(p => ({ ...p, enabled: !p.enabled }))}/>
-                      </div>
-                      {cancelPolicy.enabled && (
-                        <div className="ml-4 space-y-2 animate-fadeIn">
-                          {[['allowed','기한부 취소 허용'],['blocked','취소 불가']].map(([val, lbl]) => (
-                            <label key={val} className="flex items-center gap-2 cursor-pointer">
-                              <input type="radio" checked={cancelPolicy.mode === val} onChange={() => setCancelPolicy(p => ({ ...p, mode: val }))} className="accent-indigo-500"/>
-                              <span className="text-[13px] text-slate-700">{lbl}</span>
-                              {val === 'allowed' && cancelPolicy.mode === 'allowed' && (
-                                <div className="flex items-center gap-2 ml-2">
-                                  <span className="text-[12px] text-slate-500">교육 시작</span>
-                                  <input type="number" min={1} value={cancelPolicy.relativeValue} onChange={e => setCancelPolicy(p => ({ ...p, relativeValue: parseInt(e.target.value) }))}
-                                    className="w-14 border border-slate-300 rounded-lg px-2 py-1 text-[13px] text-center focus:border-indigo-400 outline-none"/>
-                                  <select value={cancelPolicy.relativeUnit} onChange={e => setCancelPolicy(p => ({ ...p, relativeUnit: e.target.value }))}
-                                    className="border border-slate-200 rounded-lg px-2 py-1 text-[12px] focus:border-indigo-400 outline-none bg-white">
-                                    <option value="day">일 전까지</option>
-                                    <option value="hour">시간 전까지</option>
-                                  </select>
+                    <div className="space-y-4 pt-2 border-t border-slate-100">
+                      {/* GAP-O1: 단일/다중 선택 규칙 */}
+                      <div>
+                        <label className="block text-[12px] font-bold text-slate-500 mb-2">코스 선택 규칙</label>
+                        <div className="flex gap-3">
+                          {[['single','단일 선택','코스를 1개만 선택할 수 있습니다.'],['multi','다중 선택','여러 코스를 동시에 선택할 수 있습니다.']].map(([val, title, desc]) => (
+                            <button key={val} onClick={() => setSelRule(val)}
+                              className={`flex-1 text-left p-3.5 rounded-xl border-2 transition-all ${selRule === val ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${selRule === val ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300'}`}>
+                                  {selRule === val && <div className="w-1.5 h-1.5 bg-white rounded-full"/>}
                                 </div>
-                              )}
-                            </label>
+                                <span className="text-[13px] font-bold text-slate-800">{title}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-400 pl-5">{desc}</p>
+                            </button>
                           ))}
                         </div>
-                      )}
+                        {selRule === 'multi' && (
+                          <div className="flex items-center gap-3 mt-2 ml-1 animate-fadeIn">
+                            <span className="text-[12px] text-slate-500">최대</span>
+                            <input type="number" min={2} max={20} value={maxSelect}
+                              onChange={e => setMaxSelect(Math.max(2, parseInt(e.target.value) || 2))}
+                              className="w-16 border border-slate-300 rounded-lg px-2 py-1.5 text-[13px] font-bold text-center focus:border-indigo-400 outline-none"/>
+                            <span className="text-[12px] text-slate-500">개까지 선택 가능</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 취소 정책 */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-[13px] font-bold text-slate-700">수강 취소 정책</p>
+                            <p className="text-[11px] text-slate-400">OFF 시 신청 마감 전까지 언제든 취소 가능</p>
+                          </div>
+                          <Toggle active={cancelPolicy.enabled} onClick={() => setCancelPolicy(p => ({ ...p, enabled: !p.enabled }))}/>
+                        </div>
+                        {cancelPolicy.enabled && (
+                          <div className="ml-4 mt-2 space-y-2 animate-fadeIn">
+                            {[['allowed','기한부 취소 허용'],['blocked','취소 불가']].map(([val, lbl]) => (
+                              <label key={val} className="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" checked={cancelPolicy.mode === val} onChange={() => setCancelPolicy(p => ({ ...p, mode: val }))} className="accent-indigo-500"/>
+                                <span className="text-[13px] text-slate-700">{lbl}</span>
+                                {val === 'allowed' && cancelPolicy.mode === 'allowed' && (
+                                  <div className="flex items-center gap-2 ml-2">
+                                    <span className="text-[12px] text-slate-500">교육 시작</span>
+                                    <input type="number" min={1} value={cancelPolicy.relativeValue} onChange={e => setCancelPolicy(p => ({ ...p, relativeValue: parseInt(e.target.value) }))}
+                                      className="w-14 border border-slate-300 rounded-lg px-2 py-1 text-[13px] text-center focus:border-indigo-400 outline-none"/>
+                                    <select value={cancelPolicy.relativeUnit} onChange={e => setCancelPolicy(p => ({ ...p, relativeUnit: e.target.value }))}
+                                      className="border border-slate-200 rounded-lg px-2 py-1 text-[12px] focus:border-indigo-400 outline-none bg-white">
+                                      <option value="day">일 전까지</option>
+                                      <option value="hour">시간 전까지</option>
+                                    </select>
+                                  </div>
+                                )}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* GAP-O2: 수강 변경 정책 */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-[13px] font-bold text-slate-700">수강 변경 정책</p>
+                            <p className="text-[11px] text-slate-400">OFF 시 신청 후 코스 변경 불가</p>
+                          </div>
+                          <Toggle active={changePolicy.enabled} onClick={() => setChangePolicy(p => ({ ...p, enabled: !p.enabled }))}/>
+                        </div>
+                        {changePolicy.enabled && (
+                          <div className="flex items-center gap-2 ml-4 mt-2 animate-fadeIn">
+                            <span className="text-[12px] text-slate-500">교육 시작</span>
+                            <input type="number" min={1} value={changePolicy.relativeValue} onChange={e => setChangePolicy(p => ({ ...p, relativeValue: parseInt(e.target.value) }))}
+                              className="w-14 border border-slate-300 rounded-lg px-2 py-1 text-[13px] text-center focus:border-indigo-400 outline-none"/>
+                            <select value={changePolicy.relativeUnit} onChange={e => setChangePolicy(p => ({ ...p, relativeUnit: e.target.value }))}
+                              className="border border-slate-200 rounded-lg px-2 py-1 text-[12px] focus:border-indigo-400 outline-none bg-white">
+                              <option value="day">일 전까지</option>
+                              <option value="hour">시간 전까지</option>
+                            </select>
+                            <span className="text-[12px] text-slate-500">변경 가능</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* GAP-O3: 강제 할당 안내 */}
+                  {!isSelfEnroll && (
+                    <div className="pt-2 border-t border-slate-100 animate-fadeIn">
+                      <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700">
+                        <p className="font-bold mb-0.5">관리자 강제 할당 모드</p>
+                        <p className="text-blue-600">수강생이 직접 신청하지 않습니다. 관리자가 대상자를 지정하면 자동으로 수강 등록됩니다. 수강 취소/변경 정책은 적용되지 않습니다.</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1063,6 +1218,7 @@
               onClose={() => setSettingSlot(null)}
             />
           )}
+          </div>{/* flex-1 wrapper 끝 */}
         </div>
       );
     };

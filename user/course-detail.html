@@ -108,9 +108,12 @@
     /* 선택 아이콘 (모달 전용) */
     .selector-icon { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(34,51,84,.25); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; background: #fff; }
     .selector-icon.check { border-radius: 6px; }
-    .list-item.selected .selector-icon { border-color: var(--primary); background: var(--primary); }
-    .list-item.selected .selector-icon::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
-    .list-item.selected .selector-icon.check::after { content: '\2713'; background: none; color: #fff; font-size: 13px; font-weight: 800; }
+    .list-item.selected .selector-icon,
+    .modal-opt-card.selected .selector-icon { border-color: var(--primary); background: var(--primary); }
+    .list-item.selected .selector-icon::after,
+    .modal-opt-card.selected .selector-icon::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+    .list-item.selected .selector-icon.check::after,
+    .modal-opt-card.selected .selector-icon.check::after { content: '\2713'; background: none; color: #fff; font-size: 13px; font-weight: 800; }
 
     .item-content { flex: 1; min-width: 0; }
     .item-title { font-size: 15px; font-weight: 700; color: var(--black); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
@@ -184,6 +187,24 @@
     .modal-opt-card.selected { border-color: var(--primary); background: #F8FAFF; box-shadow: 0 4px 12px rgba(85,105,255,0.1); }
     .modal-opt-card.disabled { opacity: 0.6; pointer-events: none; background: #F8FAFC; box-shadow: none; border-color: var(--border); }
 
+    /* ── 날짜선택형 회차 피커 ── */
+    .sess-picker { margin-top: 12px; border-top: 1px solid var(--primary-lighter); padding-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .sess-picker-label { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 2px; }
+    .sess-pick-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border: 1.5px solid #E2E5FF; border-radius: 10px; cursor: pointer; background: #fff;
+      transition: border-color .15s, background .15s;
+    }
+    .sess-pick-item:hover { border-color: var(--primary); background: #F8FAFF; }
+    .sess-pick-item.active { border-color: var(--primary); background: var(--primary-lighter); }
+    .sess-pick-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #C0C8FF; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .sess-pick-item.active .sess-pick-radio { border-color: var(--primary); background: var(--primary); }
+    .sess-pick-item.active .sess-pick-radio::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+    .sess-pick-date { font-size: 12px; font-weight: 800; color: var(--primary); min-width: 42px; }
+    .sess-pick-info { flex: 1; min-width: 0; }
+    .sess-pick-title { font-size: 13px; font-weight: 700; color: var(--black); }
+    .sess-pick-sub { font-size: 11px; color: var(--secondary); margin-top: 1px; }
+
     .modal-date-box {
       width: 48px; height: 52px; border-radius: 10px; background: var(--primary-lighter); color: var(--primary);
       display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;
@@ -200,6 +221,12 @@
 
     /* ── 결과 화면 공통 ── */
     .result-card, .my-course-card { margin: 20px 16px; padding: 24px; border-radius: var(--r-lg); background: #fff; border: 1px solid var(--border); box-shadow: var(--card-shadow); }
+
+    /* ── 신청 확인 · 다중 선택 항목별 요약 ── */
+    .conf-detail-wrap { margin: 0 16px 20px; }
+    .conf-detail-item { background: #F8FAFF; border: 1px solid #E2E5FF; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
+    .conf-detail-item-name { font-weight: 700; font-size: 14px; color: var(--black); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .conf-detail-item-sub { font-size: 12px; color: var(--secondary); }
     .result-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed rgba(0,0,0,0.08); }
     .result-row:last-child { border-bottom: none; }
     .result-label { color: var(--secondary); font-size: 13px; font-weight: 600; }
@@ -291,7 +318,7 @@
       </div>
 
       <!-- 수강중 배너 -->
-      <div id="enrolled-banner" style="display:none; margin:16px 20px 0; padding:16px; background:#E6F4EA; border:1.5px solid #A5D6A7; border-radius:12px; cursor:pointer;" onclick="location.href='user1-enrolled.html'">
+      <div id="enrolled-banner" style="display:none; margin:16px 20px 0; padding:16px; background:#E6F4EA; border:1.5px solid #A5D6A7; border-radius:12px; cursor:pointer;" onclick="location.href='course-enrolled.html'">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
           <div style="font-weight:800; color:var(--success); font-size:14px; display:flex; align-items:center; gap:6px;">
             <span style="width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;"></span> 이 코스를 수강 중입니다
@@ -403,6 +430,7 @@
         <div class="result-row"><span class="result-label">교육 일시</span><span class="result-val" id="conf-date"></span></div>
         <div class="result-row"><span class="result-label">기본 장소</span><span class="result-val" id="conf-loc"></span></div>
       </div>
+      <div id="conf-detail-items" class="conf-detail-wrap" style="display:none;"></div>
     </div>
     <div class="bottom-cta">
       <button class="btn-primary" onclick="openSuccessModal()"><i class="fa-solid fa-check"></i> 최종 수강 신청</button>
@@ -553,6 +581,15 @@ const mockData = {
         { title: '1회차', date: '2026-06-07', dayStr: '(토)', time: '09:00–18:00', loc: '방배 실습실' },
         { title: '2회차', date: '2026-06-14', dayStr: '(토)', time: '09:00–18:00', loc: '방배 실습실' }
       ]
+    },
+    {
+      id: 's5', name: '법정의무교육 (날짜 선택형)', remnant: 30, sessionSelect: true,
+      sessions: [
+        { id: 'ss1', title: '5월 1차', date: '2026-05-07', dayStr: '(수)', time: '10:00–12:00', loc: '본사 교육장 A' },
+        { id: 'ss2', title: '5월 2차', date: '2026-05-14', dayStr: '(수)', time: '14:00–16:00', loc: '본사 교육장 B' },
+        { id: 'ss3', title: '5월 3차', date: '2026-05-21', dayStr: '(수)', time: '10:00–12:00', loc: '본사 교육장 A' },
+        { id: 'ss4', title: '6월 1차', date: '2026-06-04', dayStr: '(수)', time: '14:00–16:00', loc: '원격 화상회의' }
+      ]
     }
   ],
   multi: [
@@ -576,6 +613,7 @@ const mockData = {
 let currentMode = 'single';
 const multiLimit = 2;
 let selectedIds = [];
+let selectedSessionMap = {}; // { optId: sessionId } — 날짜선택형 회차 선택
 let activeDetailId = null;
 let timeSim = 'before_all';
 let enrollSim = 'enrolling';
@@ -600,7 +638,7 @@ function setMyStatus(status) {
       btn.disabled = false;
       btn.style.background = 'var(--success,#1A7A4A)';
       btn.style.boxShadow = '0 4px 15px rgba(26,122,74,0.3)';
-      btn.onclick = function() { location.href = 'user1-enrolled.html'; };
+      btn.onclick = function() { location.href = 'course-enrolled.html'; };
     }
   } else if (status === 'completed') {
     completedBanner.style.display = '';
@@ -831,30 +869,60 @@ function renderModalOptions() {
     const isFull = opt.remnant === 0;
     const isSelected = selectedIds.includes(opt.id);
     const isFew = !isFull && opt.remnant < 5;
+    const isDateSelect = !!opt.sessionSelect;
 
     const selectorIcon = `<div class="selector-icon ${currentMode === 'multi' ? 'check' : ''}"></div>`;
     const firstSess = opt.sessions[0];
     const [, m, d] = firstSess.date.split('-');
 
     let badge = opt.req ? '<span class="chip chip-orange" style="font-size:10px; padding:2px 6px;">필수</span>' : '';
-    let subText = opt.sessions.length > 1
-      ? `<div style="font-weight:600; color:var(--black); margin-bottom:2px;">총 ${opt.sessions.length}회 일정</div><div style="font-size:12px;"><span>📍</span> ${firstSess.loc} 외</div>`
-      : `<span style="font-weight:600;">${firstSess.date.replace(/-/g, '.')} ${firstSess.dayStr} ${firstSess.time}</span> <div style="font-size:12px; margin-top:4px;"><span>📍</span> ${firstSess.loc}</div>`;
+    let typeTag = isDateSelect ? '<span style="font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-lighter);padding:2px 7px;border-radius:20px;">날짜선택형</span>' : '';
+
+    let subText;
+    if (isDateSelect) {
+      subText = `<div style="font-weight:600; color:var(--black); margin-bottom:2px;">${opt.sessions.length}개 날짜 중 선택</div><div style="font-size:12px;color:var(--secondary);">${opt.sessions[0].date.replace(/-/g,'.')} ~ ${opt.sessions[opt.sessions.length-1].date.replace(/-/g,'.')}</div>`;
+    } else if (opt.sessions.length > 1) {
+      subText = `<div style="font-weight:600; color:var(--black); margin-bottom:2px;">총 ${opt.sessions.length}회 일정</div><div style="font-size:12px;"><span>📍</span> ${firstSess.loc} 외</div>`;
+    } else {
+      subText = `<span style="font-weight:600;">${firstSess.date.replace(/-/g, '.')} ${firstSess.dayStr} ${firstSess.time}</span> <div style="font-size:12px; margin-top:4px;"><span>📍</span> ${firstSess.loc}</div>`;
+    }
+
+    // 날짜선택형 인라인 피커 HTML
+    let sessPicker = '';
+    if (isDateSelect && isSelected) {
+      const items = opt.sessions.map(s => {
+        const [,sm,sd] = s.date.split('-');
+        const isActive = selectedSessionMap[opt.id] === s.id;
+        return `
+          <div class="sess-pick-item ${isActive ? 'active' : ''}" onclick="event.stopPropagation(); selectSession('${opt.id}','${s.id}')">
+            <div class="sess-pick-radio"></div>
+            <div class="sess-pick-date">${parseInt(sm)}/${parseInt(sd)}<span style="font-size:10px;font-weight:600;"> ${s.dayStr}</span></div>
+            <div class="sess-pick-info">
+              <div class="sess-pick-title">${s.title}</div>
+              <div class="sess-pick-sub">${s.time} &nbsp;📍 ${s.loc}</div>
+            </div>
+          </div>`;
+      }).join('');
+      sessPicker = `<div class="sess-picker"><div class="sess-picker-label">📅 수강할 날짜를 선택하세요</div>${items}</div>`;
+    }
 
     container.innerHTML += `
-      <div class="modal-opt-card ${isFull ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" onclick="if(!${isFull}) handleModalSelect('${opt.id}')">
-        ${selectorIcon}
-        <div class="modal-date-box ${opt.req ? 'req' : ''}">
-          <span class="month">${parseInt(m)}월</span>
-          <span class="day">${parseInt(d)}</span>
+      <div class="modal-opt-card ${isFull ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" style="flex-direction:column; align-items:stretch;" onclick="if(!${isFull}) handleModalSelect('${opt.id}')">
+        <div style="display:flex; align-items:center; gap:12px;">
+          ${selectorIcon}
+          <div class="modal-date-box ${opt.req ? 'req' : ''}">
+            <span class="month">${parseInt(m)}월</span>
+            <span class="day">${parseInt(d)}</span>
+          </div>
+          <div class="modal-opt-info">
+            <div class="modal-opt-title">${badge}${typeTag} ${opt.name}</div>
+            <div class="modal-opt-sub">${subText}</div>
+          </div>
+          <div class="modal-opt-status ${isFull ? 'status-full' : (isFew ? 'status-few' : 'status-remnant')}">
+            ${isFull ? '마감' : '잔여 ' + opt.remnant + '석'}
+          </div>
         </div>
-        <div class="modal-opt-info">
-          <div class="modal-opt-title">${badge} ${opt.name}</div>
-          <div class="modal-opt-sub">${subText}</div>
-        </div>
-        <div class="modal-opt-status ${isFull ? 'status-full' : (isFew ? 'status-few' : 'status-remnant')}">
-          ${isFull ? '마감' : '잔여 ' + opt.remnant + '석'}
-        </div>
+        ${sessPicker}
       </div>
     `;
   });
@@ -863,10 +931,13 @@ function renderModalOptions() {
 
 function handleModalSelect(idStr) {
   if (currentMode === 'single') {
+    // 이전 선택이 날짜선택형이면 session 초기화
+    if (selectedIds[0] && selectedIds[0] !== idStr) delete selectedSessionMap[selectedIds[0]];
     selectedIds = [idStr];
   } else if (currentMode === 'multi') {
     if (selectedIds.includes(idStr)) {
       selectedIds = selectedIds.filter(x => x !== idStr);
+      delete selectedSessionMap[idStr];
     } else {
       if (selectedIds.length < multiLimit) selectedIds.push(idStr);
       else alert(`최대 ${multiLimit}개까지만 선택할 수 있습니다.`);
@@ -876,12 +947,25 @@ function handleModalSelect(idStr) {
   renderUserCalendar();
 }
 
+function selectSession(optId, sessId) {
+  selectedSessionMap[optId] = sessId;
+  renderModalOptions();
+  renderUserCalendar();
+}
+
 function updateNextButton() {
   const btn = document.getElementById('btn-next');
   if (currentMode === 'single') {
     if (selectedIds.length > 0) {
-      btn.disabled = false;
-      btn.innerHTML = '선택 완료 (1개) <i class="fa-solid fa-arrow-right" style="margin-left:4px;"></i>';
+      const opt = mockData.single.find(o => o.id === selectedIds[0]);
+      const needsSessSelect = opt?.sessionSelect && !selectedSessionMap[selectedIds[0]];
+      if (needsSessSelect) {
+        btn.disabled = true;
+        btn.innerHTML = '날짜를 선택하세요 ↑';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '선택 완료 (1개) <i class="fa-solid fa-arrow-right" style="margin-left:4px;"></i>';
+      }
     } else {
       btn.disabled = true;
       btn.innerHTML = '수강할 일정을 선택하세요';
@@ -975,6 +1059,8 @@ function bindData(type) {
       safeSetText('conf-name', displayTitle);
       safeSetText('conf-date', displayDate);
       safeSetText('conf-loc', displayLoc);
+      const dw = document.getElementById('conf-detail-items');
+      if (dw) dw.style.display = 'none';
     }
     if (type === 'done') {
       safeSetText('my-status-sub', '· ' + displayTitle);
@@ -988,14 +1074,51 @@ function bindData(type) {
   if (!firstOpt) return;
 
   const displayTitle = currentMode === 'multi' ? `${selectedIds.length}개 항목 조합 선택` : firstOpt.name;
-  const displayDate = firstOpt.sessions[0].date.replace(/-/g, '.') +
-    (firstOpt.sessions.length > 1 ? ` 외 ${firstOpt.sessions.length - 1}개 일정` : '');
-  const displayLoc = firstOpt.sessions[0].loc + (firstOpt.sessions.length > 1 ? ' 외' : '');
+
+  // sessionSelect: 학습자가 선택한 특정 회차 날짜/장소로 교체
+  let displayDate, displayLoc;
+  if (currentMode === 'single' && firstOpt.sessionSelect && selectedSessionMap[firstOpt.id]) {
+    const sess = firstOpt.sessions.find(s => s.id === selectedSessionMap[firstOpt.id]);
+    if (sess) {
+      displayDate = sess.date.replace(/-/g, '.') + ' ' + sess.dayStr + ' ' + sess.time;
+      displayLoc = sess.loc;
+    } else {
+      displayDate = firstOpt.sessions[0].date.replace(/-/g, '.');
+      displayLoc = firstOpt.sessions[0].loc;
+    }
+  } else if (currentMode === 'multi') {
+    displayDate = firstOpt.sessions[0].date.replace(/-/g, '.') +
+      (selectedIds.length > 1 ? ` 외 ${selectedIds.length - 1}개 일정` : '');
+    displayLoc = firstOpt.sessions[0].loc + (selectedIds.length > 1 ? ' 외' : '');
+  } else {
+    displayDate = firstOpt.sessions[0].date.replace(/-/g, '.') +
+      (firstOpt.sessions.length > 1 ? ` 외 ${firstOpt.sessions.length - 1}개 일정` : '');
+    displayLoc = firstOpt.sessions[0].loc + (firstOpt.sessions.length > 1 ? ' 외' : '');
+  }
 
   if (type === 'conf') {
     safeSetText('conf-name', displayTitle);
     safeSetText('conf-date', displayDate);
     safeSetText('conf-loc', displayLoc);
+
+    const detailWrap = document.getElementById('conf-detail-items');
+    if (detailWrap) {
+      if (currentMode === 'multi') {
+        detailWrap.style.display = '';
+        detailWrap.innerHTML = '<div style="font-size:12px; font-weight:700; color:var(--secondary); margin-bottom:8px;">선택한 특강 상세</div>' +
+          selectedIds.map(id => {
+            const opt = mockData.multi.find(x => x.id === id);
+            if (!opt) return '';
+            const s = opt.sessions[0];
+            const reqBadge = opt.req
+              ? '<span style="font-size:10px;font-weight:700;color:#A84300;background:#FFF0E6;padding:1px 6px;border-radius:20px;">필수</span>'
+              : '';
+            return `<div class="conf-detail-item"><div class="conf-detail-item-name">${reqBadge}${opt.name}</div><div class="conf-detail-item-sub">📅 ${s.date.replace(/-/g,'.')} ${s.dayStr} ${s.time} &nbsp;📍 ${s.loc}</div></div>`;
+          }).join('');
+      } else {
+        detailWrap.style.display = 'none';
+      }
+    }
   }
   if (type === 'done') {
     safeSetText('my-status-sub', '· ' + displayTitle);

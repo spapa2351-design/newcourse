@@ -1,0 +1,26 @@
+{
+  "name": "newcourse",
+  "version": "1.0.0",
+  "description": "LMS Vision 2026 Phase 1: 오프라인 코스 시스템 설계 및 프로토타입",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spapa2351-design/newcourse.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/spapa2351-design/newcourse/issues"
+  },
+  "homepage": "https://github.com/spapa2351-design/newcourse#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.6.0"
+  }
+}

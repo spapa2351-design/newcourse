@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>코스 운영 현황</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Pretendard"','"Roboto"','"Inter"','-apple-system','sans-serif'] },
+          colors: {
+            indigo: { 50:'#EEF0FF',100:'#E0E4FF',200:'#C7CDFF',300:'#9BA8FF',400:'#7B8AFF',500:'#5569FF',600:'#4454CC',700:'#3340A6',800:'#2A3587',900:'#000C57' }
+          },
+          boxShadow: { card:'0px 9px 16px rgba(159,162,191,.18),0px 2px 2px rgba(159,162,191,0.32)' }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideRight { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes modalFade { from{opacity:0;scale:.97} to{opacity:1;scale:1} }
+    .animate-fadeIn { animation:fadeIn .2s ease-out forwards; }
+    .animate-slideRight { animation:slideRight .25s ease-out forwards; }
+    .animate-slideUp { animation:slideUp .35s ease-out forwards; }
+    .animate-modalFade { animation:modalFade .25s ease-out; }
+    .custom-scrollbar::-webkit-scrollbar { width:5px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background:#e2e8f0;border-radius:4px; }
+  </style>
+</head>
+<body class="bg-[#f2f5f9] text-slate-800 antialiased">
+<div id="root"></div>
+<script type="text/babel" data-type="module">
+  import React, { useState, useMemo, useRef, useEffect } from 'https://esm.sh/react@18.2.0';
+  import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+  import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
+
+  const {
+    ArrowLeft, Edit3, Download, QrCode, Users, Calendar, MapPin,
+    CheckCircle, Clock, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
+    Search, BarChart2, TrendingUp, Award, RefreshCw,
+    CheckSquare, UserCheck, Zap, Minimize2, Power, Plus, Pencil,
+    BookOpen, Copy, Monitor, Star, List, Archive, AlertCircle, Grid3X3, Eye, Filter, FileText, Layers,
+    MessageSquare, Play, Settings, ImageIcon
+  } = Lucide;
+
+  /* ── 코스별 더미 데이터 ── */
+  const ALL_COURSE_DATA = {
+
+    // ── 케이스 A: 운영중 + A반 완료 / B반 예정 ──
+    1: {
+      course: {
+        id:1, title:'2026 직무교육 — 프로젝트 관리 심화',
+        status:'active', instructor:'김민준', category:'직무 역량', enrollMethod:'self',
+        packages:[
+          { id:'pa1', name:'A반 (4/14)', startDate:'2026-04-14', endDate:'2026-04-14',
+            place:'한샘 HQ B동 3층', capacity:30, enrolled:28,
+            sessions:[
+              {id:'s1',name:'1회차',date:'2026-04-14',start:'09:00',end:'12:30',att:26,late:2,abs:0,pending:0},
+              {id:'s2',name:'2회차',date:'2026-04-14',start:'13:30',end:'18:00',att:24,late:1,abs:3,pending:0},
+            ]},
+          { id:'pa2', name:'B반 (5/12)', startDate:'2026-05-12', endDate:'2026-05-12',
+            place:'한샘 HQ B동 3층', capacity:30, enrolled:27,
+            sessions:[
+              {id:'s3',name:'1회차',date:'2026-05-12',start:'09:00',end:'12:30',att:0,late:0,abs:0,pending:27},
+              {id:'s4',name:'2회차',date:'2026-05-12',start:'13:30',end:'18:00',att:0,late:0,abs:0,pending:0},
+            ]},
+        ]
+      },
+      learners: [
+        {id:1,name:'박지현',dept:'전략기획팀',pkgId:'pa1'},{id:2,name:'이재호',dept:'PM팀',pkgId:'pa1'},
+        {id:3,name:'김수연',dept:'개발1팀',pkgId:'pa1'},{id:4,name:'정민서',dept:'전략기획팀',pkgId:'pa1'},
+        {id:5,name:'최도훈',dept:'PM팀',pkgId:'pa1'},{id:6,name:'윤아름',dept:'경영기획팀',pkgId:'pa1'},
+        {id:7,name:'오세준',dept:'개발2팀',pkgId:'pa1'},{id:8,name:'임지우',dept:'기획팀',pkgId:'pa1'},
+        {id:9,name:'황민아',dept:'PM팀',pkgId:'pa1'},{id:10,name:'서진혁',dept:'전략기획팀',pkgId:'pa1'},
+        {id:11,name:'안소영',dept:'개발1팀',pkgId:'pa1'},{id:12,name:'강우진',dept:'기획팀',pkgId:'pa1'},
+        {id:13,name:'신동혁',dept:'PM팀',pkgId:'pa2'},{id:14,name:'장수현',dept:'경영기획팀',pkgId:'pa2'},
+        {id:15,name:'유정민',dept:'개발2팀',pkgId:'pa2'},{id:16,name:'홍기현',dept:'전략기획팀',pkgId:'pa2'},
+        {id:17,name:'권도윤',dept:'PM팀',pkgId:'pa2'},{id:18,name:'민지아',dept:'기획팀',pkgId:'pa2'},
+        {id:19,name:'이현준',dept:'개발1팀',pkgId:'pa2'},{id:20,name:'박소율',dept:'전략기획팀',pkgId:'pa2'},
+      ],
+      completion: {
+        1:'completed',2:'completed',3:'completed',4:'completed',5:'completed',6:'completed',
+        7:'completed',8:'completed',9:'completed',10:'completed',11:'in_progress',12:'in_progress',
+        13:'not_started',14:'not_started',15:'not_started',16:'not_started',
+        17:'not_started',18:'not_started',19:'not_started',20:'not_started',
+      }
+    },
+
+    // ── 케이스 D: 임시저장 — 수강생 없음 ──
+    3: {
+      course: {
+        id:3, title:'AI 활용 업무 자동화 워크숍',
+        status:'draft', instructor:'박지훈', category:'직무 역량', enrollMethod:'self',
+        packages:[
+          { id:'pb1', name:'A반 (초급)', startDate:'2026-05-12', endDate:'2026-05-12',
+            place:'판교 연수원', capacity:40, enrolled:0,
+            sessions:[
+              {id:'s1',name:'1회차',date:'2026-05-12',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:0},
+              {id:'s2',name:'2회차',date:'2026-05-12',start:'13:00',end:'17:00',att:0,late:0,abs:0,pending:0},
+              {id:'s3',name:'3회차',date:'2026-05-12',start:'17:30',end:'19:00',att:0,late:0,abs:0,pending:0},
+            ]},
+          { id:'pb2', name:'B반 (중급)', startDate:'2026-05-13', endDate:'2026-05-13',
+            place:'판교 연수원', capacity:40, enrolled:0,
+            sessions:[
+              {id:'s4',name:'1회차',date:'2026-05-13',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:0},
+              {id:'s5',name:'2회차',date:'2026-05-13',start:'13:00',end:'17:00',att:0,late:0,abs:0,pending:0},
+              {id:'s6',name:'3회차',date:'2026-05-13',start:'17:30',end:'19:00',att:0,late:0,abs:0,pending:0},
+            ]},
+          { id:'pb3', name:'C반 (심화)', startDate:'2026-05-14', endDate:'2026-05-14',
+            place:'강남 교육장', capacity:40, enrolled:0,
+            sessions:[
+              {id:'s7',name:'1회차',date:'2026-05-14',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:0},
+              {id:'s8',name:'2회차',date:'2026-05-14',start:'13:00',end:'17:00',att:0,late:0,abs:0,pending:0},
+            ]},
+        ]
+      },
+      learners: [],
+      completion: {}
+    },
+
+    // ── 케이스 C: 종료 코스 — 수료 완료 ──
+    6: {
+      course: {
+        id:6, title:'고객 응대 서비스 매너',
+        status:'closed', instructor:'한소희', category:'직무 역량', enrollMethod:'assign',
+        packages:[
+          { id:'pc1', name:'3월 15일 교육', startDate:'2026-03-15', endDate:'2026-03-15',
+            place:'한샘 HQ 대교육장', capacity:30, enrolled:30,
+            sessions:[
+              {id:'s1',name:'1회차',date:'2026-03-15',start:'09:00',end:'12:00',att:28,late:1,abs:1,pending:0},
+              {id:'s2',name:'2회차',date:'2026-03-15',start:'13:00',end:'17:00',att:24,late:2,abs:4,pending:0},
+            ]},
+        ]
+      },
+      learners: [
+        {id:1,name:'이수진',dept:'고객서비스팀',pkgId:'pc1'},{id:2,name:'김혜린',dept:'고객서비스팀',pkgId:'pc1'},
+        {id:3,name:'박현우',dept:'영업2팀',pkgId:'pc1'},{id:4,name:'최지선',dept:'고객서비스팀',pkgId:'pc1'},
+        {id:5,name:'정성민',dept:'영업1팀',pkgId:'pc1'},{id:6,name:'한예지',dept:'고객서비스팀',pkgId:'pc1'},
+        {id:7,name:'윤재원',dept:'영업2팀',pkgId:'pc1'},{id:8,name:'오지아',dept:'고객서비스팀',pkgId:'pc1'},
+        {id:9,name:'서민준',dept:'영업1팀',pkgId:'pc1'},{id:10,name:'임나영',dept:'고객서비스팀',pkgId:'pc1'},
+        {id:11,name:'강동훈',dept:'영업3팀',pkgId:'pc1'},{id:12,name:'신지원',dept:'고객서비스팀',pkgId:'pc1'},
+        {id:13,name:'류승현',dept:'영업1팀',pkgId:'pc1'},{id:14,name:'김미래',dept:'고객서비스팀',pkgId:'pc1'},
+        {id:15,name:'조태민',dept:'영업3팀',pkgId:'pc1'},
+      ],
+      completion: {
+        1:'completed',2:'completed',3:'completed',4:'completed',5:'completed',
+        6:'completed',7:'completed',8:'completed',9:'completed',10:'completed',
+        11:'completed',12:'completed',13:'not_started',14:'completed',15:'not_started',
+      }
+    },
+
+    // ── 케이스 B: 운영중 + 다기수 혼재 (기존 유지) ──
+    10: {
+      course: {
+        id:10, title:'안전보건 법정의무교육 (4월)',
+        status:'active', instructor:'강태훈', category:'공통/온보딩', enrollMethod:'assign',
+        packages:[
+          { id:'p1', name:'1기 (4/7~4/11)', startDate:'2026-04-07', endDate:'2026-04-11',
+            place:'한샘 HQ 대교육장', capacity:15, enrolled:10,
+            sessions:[
+              {id:'s1',name:'1회차',date:'2026-04-07',start:'09:00',end:'12:00',att:9,late:1,abs:0,pending:0},
+              {id:'s2',name:'2회차',date:'2026-04-08',start:'09:00',end:'12:00',att:8,late:1,abs:1,pending:0},
+              {id:'s3',name:'3회차',date:'2026-04-09',start:'13:00',end:'17:00',att:7,late:2,abs:1,pending:0},
+              {id:'s4',name:'4회차',date:'2026-04-10',start:'13:00',end:'17:00',att:7,late:1,abs:2,pending:0},
+              {id:'s5',name:'5회차',date:'2026-04-11',start:'09:00',end:'12:00',att:6,late:2,abs:2,pending:0},
+            ]},
+          { id:'p2', name:'2기 (4/14~4/18)', startDate:'2026-04-14', endDate:'2026-04-18',
+            place:'한샘 HQ 대교육장', capacity:15, enrolled:10,
+            sessions:[
+              {id:'s6',name:'1회차',date:'2026-04-14',start:'09:00',end:'12:00',att:10,late:0,abs:0,pending:0},
+              {id:'s7',name:'2회차',date:'2026-04-15',start:'09:00',end:'12:00',att:9,late:1,abs:0,pending:0},
+              {id:'s8',name:'3회차',date:'2026-04-16',start:'13:00',end:'17:00',att:8,late:0,abs:2,pending:0},
+              {id:'s9',name:'4회차',date:'2026-04-17',start:'13:00',end:'17:00',att:8,late:1,abs:1,pending:0},
+              {id:'s10',name:'5회차',date:'2026-04-18',start:'09:00',end:'12:00',att:7,late:2,abs:1,pending:0},
+            ]},
+          { id:'p3', name:'3기 (4/21~4/25)', startDate:'2026-04-21', endDate:'2026-04-25',
+            place:'판교 연수원', capacity:15, enrolled:10,
+            sessions:[
+              {id:'s11',name:'1회차',date:'2026-04-21',start:'09:00',end:'12:00',att:10,late:0,abs:0,pending:0},
+              {id:'s12',name:'2회차',date:'2026-04-22',start:'09:00',end:'12:00',att:9,late:0,abs:1,pending:0},
+              {id:'s13',name:'3회차',date:'2026-04-23',start:'13:00',end:'17:00',att:7,late:2,abs:1,pending:0},
+              {id:'s14',name:'4회차',date:'2026-04-24',start:'13:00',end:'17:00',att:7,late:1,abs:2,pending:0},
+              {id:'s15',name:'5회차',date:'2026-04-25',start:'09:00',end:'12:00',att:6,late:2,abs:2,pending:0},
+            ]},
+          { id:'p4', name:'4기 (4/28~4/30)', startDate:'2026-04-28', endDate:'2026-04-30',
+            place:'판교 연수원', capacity:15, enrolled:10,
+            sessions:[
+              {id:'s16',name:'1회차',date:'2026-04-28',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:10},
+              {id:'s17',name:'2회차',date:'2026-04-29',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:0},
+              {id:'s18',name:'3회차',date:'2026-04-30',start:'13:00',end:'17:00',att:0,late:0,abs:0,pending:0},
+            ]},
+          { id:'p5', name:'5기 (5/7~5/9)', startDate:'2026-05-07', endDate:'2026-05-09',
+            place:'강남 교육장', capacity:15, enrolled:5,
+            sessions:[
+              {id:'s19',name:'1회차',date:'2026-05-07',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:0},
+              {id:'s20',name:'2회차',date:'2026-05-08',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:0},
+              {id:'s21',name:'3회차',date:'2026-05-09',start:'13:00',end:'17:00',att:0,late:0,abs:0,pending:0},
+            ]},
+        ]
+      },
+      learners: [
+        {id:1,name:'김민준',dept:'개발팀',pkgId:'p1'},{id:2,name:'이지은',dept:'마케팅팀',pkgId:'p1'},
+        {id:3,name:'박서준',dept:'영업팀',pkgId:'p1'},{id:4,name:'최수아',dept:'인사팀',pkgId:'p1'},
+        {id:5,name:'정우성',dept:'개발팀',pkgId:'p1'},{id:6,name:'한지민',dept:'디자인팀',pkgId:'p1'},
+        {id:21,name:'서지훈',dept:'기획팀',pkgId:'p1'},{id:22,name:'임다은',dept:'재무팀',pkgId:'p1'},
+        {id:23,name:'조현우',dept:'운영팀',pkgId:'p1'},{id:24,name:'허민지',dept:'영업팀',pkgId:'p1'},
+        {id:7,name:'강다니엘',dept:'마케팅팀',pkgId:'p2'},{id:8,name:'신혜선',dept:'영업팀',pkgId:'p2'},
+        {id:9,name:'오지호',dept:'개발팀',pkgId:'p2'},{id:10,name:'이나은',dept:'인사팀',pkgId:'p2'},
+        {id:11,name:'차은우',dept:'영업팀',pkgId:'p2'},{id:12,name:'전지현',dept:'마케팅팀',pkgId:'p2'},
+        {id:25,name:'배성민',dept:'개발팀',pkgId:'p2'},{id:26,name:'안지연',dept:'기획팀',pkgId:'p2'},
+        {id:27,name:'윤서준',dept:'인사팀',pkgId:'p2'},{id:28,name:'류소희',dept:'디자인팀',pkgId:'p2'},
+        {id:13,name:'남주혁',dept:'개발팀',pkgId:'p3'},{id:14,name:'박민영',dept:'디자인팀',pkgId:'p3'},
+        {id:15,name:'이준기',dept:'인사팀',pkgId:'p3'},{id:16,name:'공효진',dept:'영업팀',pkgId:'p3'},
+        {id:29,name:'김도현',dept:'개발팀',pkgId:'p3'},{id:30,name:'이수빈',dept:'마케팅팀',pkgId:'p3'},
+        {id:31,name:'박준영',dept:'영업팀',pkgId:'p3'},{id:32,name:'최예린',dept:'인사팀',pkgId:'p3'},
+        {id:33,name:'정민호',dept:'기획팀',pkgId:'p3'},{id:34,name:'한태양',dept:'디자인팀',pkgId:'p3'},
+        {id:17,name:'현빈',dept:'개발팀',pkgId:'p4'},{id:18,name:'손예진',dept:'마케팅팀',pkgId:'p4'},
+        {id:19,name:'정해인',dept:'영업팀',pkgId:'p4'},{id:20,name:'김태리',dept:'인사팀',pkgId:'p4'},
+        {id:35,name:'강지우',dept:'개발팀',pkgId:'p4'},{id:36,name:'신동욱',dept:'마케팅팀',pkgId:'p4'},
+        {id:37,name:'오지선',dept:'영업팀',pkgId:'p4'},{id:38,name:'이정훈',dept:'인사팀',pkgId:'p4'},
+        {id:39,name:'차주혁',dept:'기획팀',pkgId:'p4'},{id:40,name:'전미래',dept:'디자인팀',pkgId:'p4'},
+        {id:41,name:'배준호',dept:'개발팀',pkgId:'p5'},{id:42,name:'안소영',dept:'마케팅팀',pkgId:'p5'},
+        {id:43,name:'윤희준',dept:'영업팀',pkgId:'p5'},{id:44,name:'류재원',dept:'인사팀',pkgId:'p5'},
+        {id:45,name:'조은별',dept:'기획팀',pkgId:'p5'},
+      ],
+      completion: {
+        1:'completed',2:'completed',3:'completed',4:'completed',5:'completed',6:'in_progress',
+        21:'completed',22:'completed',23:'completed',24:'completed',
+        7:'completed',8:'completed',9:'completed',10:'in_progress',11:'in_progress',12:'completed',
+        25:'completed',26:'in_progress',27:'completed',28:'in_progress',
+        13:'in_progress',14:'in_progress',15:'in_progress',16:'in_progress',
+        29:'in_progress',30:'in_progress',31:'in_progress',32:'in_progress',33:'in_progress',34:'in_progress',
+        17:'not_started',18:'not_started',19:'not_started',20:'not_started',
+        35:'not_started',36:'not_started',37:'not_started',38:'not_started',39:'not_started',40:'not_started',
+        41:'not_started',42:'not_started',43:'not_started',44:'not_started',45:'not_started',
+      }
+    },
+
+    // ── 케이스 A2: 운영중 + 교육일 미래 (전 회차 대기) ──
+    11: {
+      course: {
+        id:11, title:'신임 팀장 리더십 캠프',
+        status:'active', instructor:'최예진', category:'리더십', enrollMethod:'self',
+        packages:[
+          { id:'pp1', name:'1차 워크숍 (5/20)', startDate:'2026-05-20', endDate:'2026-05-20',
+            place:'한샘 HQ 세미나룸', capacity:25, enrolled:20,
+            sessions:[
+              {id:'s1',name:'오전 세션',date:'2026-05-20',start:'09:00',end:'12:30',att:0,late:0,abs:0,pending:20},
+              {id:'s2',name:'오후 세션',date:'2026-05-20',start:'13:30',end:'18:00',att:0,late:0,abs:0,pending:0},
+            ]},
+          { id:'pp2', name:'2차 워크숍 (6/10)', startDate:'2026-06-10', endDate:'2026-06-10',
+            place:'한샘 HQ 세미나룸', capacity:25, enrolled:18,
+            sessions:[
+              {id:'s3',name:'오전 세션',date:'2026-06-10',start:'09:00',end:'12:30',att:0,late:0,abs:0,pending:0},
+              {id:'s4',name:'오후 세션',date:'2026-06-10',start:'13:30',end:'18:00',att:0,late:0,abs:0,pending:0},
+            ]},
+        ]
+      },
+      learners: [
+        {id:1,name:'김상훈',dept:'마케팅본부 팀장',pkgId:'pp1'},{id:2,name:'이지수',dept:'개발실 팀장',pkgId:'pp1'},
+        {id:3,name:'박태양',dept:'영업1본부 팀장',pkgId:'pp1'},{id:4,name:'최민아',dept:'인사팀 팀장',pkgId:'pp1'},
+        {id:5,name:'정재원',dept:'기획실 팀장',pkgId:'pp1'},{id:6,name:'한동욱',dept:'고객서비스 팀장',pkgId:'pp1'},
+        {id:7,name:'윤소희',dept:'재무팀 팀장',pkgId:'pp1'},{id:8,name:'오준혁',dept:'개발실 팀장',pkgId:'pp1'},
+        {id:9,name:'서예나',dept:'마케팅본부 팀장',pkgId:'pp2'},{id:10,name:'임기현',dept:'영업2본부 팀장',pkgId:'pp2'},
+        {id:11,name:'강민준',dept:'IT팀 팀장',pkgId:'pp2'},{id:12,name:'신주원',dept:'경영기획 팀장',pkgId:'pp2'},
+        {id:13,name:'류다은',dept:'브랜드팀 팀장',pkgId:'pp2'},{id:14,name:'문혁준',dept:'개발2팀 팀장',pkgId:'pp2'},
+      ],
+      completion: {
+        1:'not_started',2:'not_started',3:'not_started',4:'not_started',5:'not_started',6:'not_started',
+        7:'not_started',8:'not_started',9:'not_started',10:'not_started',11:'not_started',12:'not_started',
+        13:'not_started',14:'not_started',
+      }
+    },
+
+    // ── 케이스 D: 임시저장 — 수강생 없음 ──
+    12: {
+      course: {
+        id:12, title:'영업 전략 부트캠프 (5기)',
+        status:'draft', instructor:'김도윤', category:'영업', enrollMethod:'self',
+        packages:[
+          { id:'pq1', name:'집합교육 1주차', startDate:'2026-06-02', endDate:'2026-06-06',
+            place:'판교 연수원', capacity:25, enrolled:0,
+            sessions:[
+              {id:'s1',name:'1회차',date:'2026-06-02',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s2',name:'2회차',date:'2026-06-03',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s3',name:'3회차',date:'2026-06-04',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s4',name:'4회차',date:'2026-06-05',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s5',name:'5회차',date:'2026-06-06',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+            ]},
+          { id:'pq2', name:'집합교육 2주차', startDate:'2026-06-15', endDate:'2026-06-19',
+            place:'판교 연수원', capacity:25, enrolled:0,
+            sessions:[
+              {id:'s6',name:'1회차',date:'2026-06-15',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s7',name:'2회차',date:'2026-06-16',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s8',name:'3회차',date:'2026-06-17',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s9',name:'4회차',date:'2026-06-18',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s10',name:'5회차',date:'2026-06-19',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+            ]},
+          { id:'pq3', name:'집합교육 3주차', startDate:'2026-07-01', endDate:'2026-07-03',
+            place:'강남 교육장', capacity:25, enrolled:0,
+            sessions:[
+              {id:'s11',name:'1회차',date:'2026-07-01',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s12',name:'2회차',date:'2026-07-02',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s13',name:'3회차',date:'2026-07-03',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+            ]},
+          { id:'pq4', name:'최종 발표', startDate:'2026-07-31', endDate:'2026-07-31',
+            place:'한샘 HQ 대교육장', capacity:100, enrolled:0,
+            sessions:[
+              {id:'s14',name:'최종 발표',date:'2026-07-31',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+            ]},
+        ]
+      },
+      learners: [],
+      completion: {}
+    },
+
+    // ── 케이스 D: 공개예약 — 수강생 없음 ──
+    14: {
+      course: {
+        id:14, title:'하반기 신입사원 온보딩 (7월)',
+        status:'scheduled', instructor:'박지훈', category:'공통/온보딩', enrollMethod:'assign',
+        packages:[
+          { id:'pr1', name:'1기 (7/1~7/3)', startDate:'2026-07-01', endDate:'2026-07-03',
+            place:'판교 연수원', capacity:40, enrolled:0,
+            sessions:[
+              {id:'s1',name:'1회차',date:'2026-07-01',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s2',name:'2회차',date:'2026-07-02',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s3',name:'3회차',date:'2026-07-03',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:0},
+            ]},
+          { id:'pr2', name:'2기 (7/7~7/9)', startDate:'2026-07-07', endDate:'2026-07-09',
+            place:'판교 연수원', capacity:40, enrolled:0,
+            sessions:[
+              {id:'s4',name:'1회차',date:'2026-07-07',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s5',name:'2회차',date:'2026-07-08',start:'09:00',end:'18:00',att:0,late:0,abs:0,pending:0},
+              {id:'s6',name:'3회차',date:'2026-07-09',start:'09:00',end:'12:00',att:0,late:0,abs:0,pending:0},
+            ]},
+        ]
+      },
+      learners: [],
+      completion: {}
+    },
+  };
+
+  /* ── URL 파라미터로 코스 선택 ── */
+  const _cid = parseInt(new URLSearchParams(window.location.search).get('id') || '10');
+  const _cdata = ALL_COURSE_DATA[_cid] || ALL_COURSE_DATA[10];
+  const COURSE = _cdata.course;
+  const LEARNERS_RAW = _cdata.learners;
+  const COMPLETION = _cdata.completion;
+
+  /* ── 수강생 등록 모달용 풀 ── */
+  const STUDENT_POOL = [
+    {id:'u1',name:'이승주',group:'비서실'},{id:'u2',name:'김하은',group:'개발팀'},
+    {id:'u3',name:'박준서',group:'디자인팀'},{id:'u4',name:'정유진',group:'마케팅팀'},
+    {id:'u5',name:'최민호',group:'영업팀'},{id:'u6',name:'강소연',group:'인사팀'},
+    {id:'u7',name:'윤도현',group:'재무팀'},{id:'u8',name:'한지우',group:'기획팀'},
+    {id:'u9',name:'오세린',group:'개발팀'},{id:'u10',name:'임태양',group:'영업팀'},
+  ];
+
+  /* ── 차수 색상 ── */
+  const PKG_COLORS = [
+    {dot:'bg-indigo-500',light:'bg-indigo-50',text:'text-indigo-600',border:'border-indigo-200'},
+    {dot:'bg-emerald-500',light:'bg-emerald-50',text:'text-emerald-600',border:'border-emerald-200'},
+    {dot:'bg-violet-500',light:'bg-violet-50',text:'text-violet-600',border:'border-violet-200'},
+    {dot:'bg-amber-500',light:'bg-amber-50',text:'text-amber-600',border:'border-amber-200'},
+    {dot:'bg-rose-500',light:'bg-rose-50',text:'text-rose-600',border:'border-rose-200'},
+  ];
+
+  function calDays(y, m) {
+    const first = new Date(y, m-1, 1).getDay();
+    const offset = first === 0 ? 6 : first - 1;
+    const last = new Date(y, m, 0).getDate();
+    const days = [...Array(offset).fill(null), ...Array.from({length:last},(_,i)=>i+1)];
+    while (days.length % 7) days.push(null);
+    return days;
+  }
+
+  const TODAY = '2026-04-28';
+  const fmtDate = d => d ? d.replace(/-/g,'.').slice(2) : '-';
+  const fmtShort = d => d ? d.slice(5).replace('-','/') : '-';
+  const fmtRange = (s,e) => e&&e!==s ? `${fmtDate(s)} ~ ${fmtDate(e)}` : fmtDate(s);
+  const attRate = s => s.att+s.late+s.abs > 0 ? Math.round((s.att+s.late)/(s.att+s.late+s.abs)*100) : null;
+  const pkgAttRate = pkg => {
+    const done = pkg.sessions.filter(s => s.att+s.late+s.abs > 0);
+    if(!done.length) return null;
+    const total = done.reduce((a,s)=>a+s.att+s.late+s.abs,0);
+    const present = done.reduce((a,s)=>a+s.att+s.late,0);
+    return Math.round(present/total*100);
+  };
+
+  const COMPL_CFG = {
+    completed:{label:'수료',bg:'bg-emerald-50',text:'text-emerald-700',dot:'bg-emerald-500'},
+    in_progress:{label:'진행중',bg:'bg-indigo-50',text:'text-indigo-600',dot:'bg-indigo-400'},
+    not_started:{label:'미시작',bg:'bg-slate-100',text:'text-slate-500',dot:'bg-slate-300'},
+  };
+
+  // C-4: 출석 상태 5종 config
+  const ATT_CFG = {
+    attended:    {label:'출석',  color:'text-emerald-600', bg:'bg-emerald-50',  border:'border-emerald-200'},
+    late:        {label:'지각',  color:'text-amber-600',   bg:'bg-amber-50',    border:'border-amber-200'},
+    early_leave: {label:'조퇴',  color:'text-orange-600',  bg:'bg-orange-50',   border:'border-orange-200'},
+    absent:      {label:'결석',  color:'text-red-600',     bg:'bg-red-50',      border:'border-red-200'},
+    pending:     {label:'미확인',color:'text-slate-400',   bg:'bg-slate-50',    border:'border-slate-200'},
+  };
+
+  /* ══ 글로벌 사이드바 메뉴 ══ */
+  const SIDEBAR_MENUS = [
+    { id: 'member', label: '회원', icon: Users, hasChildren: true },
+    { id: 'course', label: '코스', icon: BookOpen, hasChildren: true, children: [
+      { id: 'course-main', label: '코스' },
+      { id: 'course-plus', label: 'PLUS 코스' },
+    ]},
+    { id: 'offline-course', label: '오프라인 코스', icon: MapPin, active: true },
+    { id: 'content', label: '콘텐츠', icon: Copy, hasChildren: true },
+    { id: 'ttube', label: 'T튜브', icon: Monitor, hasChildren: true },
+    { id: 'ai-quiz', label: 'AI 퀴메이커', icon: Star, badge: 'N' },
+    { id: 'translation', label: 'Translation', icon: List, hasChildren: true },
+    { id: 'question-bank', label: '문제 은행', icon: Archive },
+    { id: 'opinion', label: '의견', icon: AlertCircle },
+    { id: 'gamification', label: '게이미피케이션', icon: Grid3X3, hasChildren: true },
+    { id: 'live', label: '라이브 스트리밍', icon: Eye, hasChildren: true },
+    { id: 'touch', label: '터치투게더', icon: Users },
+    { id: 'attendance-check', label: '출석 체크', icon: CheckCircle },
+    { id: 'ai-chat', label: 'AI 챗봇', icon: Monitor, badge: 'N' },
+    { id: 'stats-global', label: '통계', icon: Filter },
+    { id: 'notice', label: '공지사항', icon: Archive },
+    { id: 'popup', label: '팝업', icon: Layers },
+  ];
+
+  /* ══ App ══ */
+  const App = () => {
+    /* 기존 상태 */
+    const [tab, setTab] = useState('dashboard');
+    const [pkgFilter, setPkgFilter] = useState('all');
+    const [search, setSearch] = useState('');
+    const [openPkgs, setOpenPkgs] = useState(new Set(COURSE.packages.map(p=>p.id)));
+    const togglePkg = id => setOpenPkgs(p => { const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n; });
+
+    /* 신규 상태 */
+    const [liveMode, setLiveMode] = useState(false);
+    const [calOpen, setCalOpen] = useState(true);
+    const [calMonth, setCalMonth] = useState(4);
+    const [calPopover, setCalPopover] = useState(null);
+    const [showEnrollModal, setShowEnrollModal] = useState(false);
+    const [enrollSearch, setEnrollSearch] = useState('');
+    const [enrollPkg, setEnrollPkg] = useState(COURSE.packages[COURSE.packages.length-1]?.id || 'p1');
+    const [enrollTab, setEnrollTab] = useState('member');
+    const [enrollType, setEnrollType] = useState('selected');
+    const [selectedMembers, setSelectedMembers] = useState(new Set());
+    const [showMemberPicker, setShowMemberPicker] = useState(false);
+    const [operationConfirm, setOperationConfirm] = useState(false);
+    const [qrCountdown, setQrCountdown] = useState(30);
+    const qrTimerRef = useRef(null);
+    const bcRef = useRef(null);
+
+    const [coverImage, setCoverImage] = useState(() => {
+      try { const s = localStorage.getItem('lms_cover_' + COURSE.id); return s ? JSON.parse(s) : null; } catch(e) { return null; }
+    });
+
+    // C-3/C-4: per-learner attendance map — key: `${learnerId}_${sessionId}`
+    const [attendanceMap, setAttendanceMap] = useState(() => {
+      const map = {};
+      COURSE.packages.forEach(pkg => {
+        const pkgL = LEARNERS_RAW.filter(l => l.pkgId === pkg.id);
+        pkg.sessions.forEach(s => {
+          const sts = [
+            ...Array(s.att).fill('attended'),
+            ...Array(s.late).fill('late'),
+            ...Array(s.abs).fill('absent'),
+            ...Array(s.pending).fill('pending'),
+          ];
+          pkgL.forEach((l, i) => { map[`${l.id}_${s.id}`] = i < sts.length ? sts[i] : 'pending'; });
+        });
+      });
+      return map;
+    });
+    // C-2: mutable completion map
+    const [completionMap, setCompletionMap] = useState(() => ({...COMPLETION}));
+    // C-1: set of explicitly closed session IDs
+    const [closedSessions, setClosedSessions] = useState(() => {
+      const cs = new Set();
+      COURSE.packages.forEach(pkg => pkg.sessions.forEach(s => {
+        if ((s.att + s.late + s.abs > 0) && s.pending === 0) cs.add(s.id);
+      }));
+      return cs;
+    });
+    // C-3: currently expanded session key (`${pkgId}_${sessId}`)
+    const [expandedSession, setExpandedSession] = useState(null);
+    // 관리자 수동 인정 시간 맵 — key: `${learnerId}_${sessId}`
+    const [tsMap, setTsMap] = useState({});
+    // QR 스캔 시간 맵 — 학습자가 실제 QR 찍은 시간 (모의 데이터: 기존 att/late 학습자에 시뮬 시간 부여)
+    const [scanTimeMap, setScanTimeMap] = useState(() => {
+      const map = {};
+      COURSE.packages.forEach(pkg => {
+        const pkgL = LEARNERS_RAW.filter(l => l.pkgId === pkg.id);
+        pkg.sessions.forEach(s => {
+          const sts = [
+            ...Array(s.att).fill('attended'),
+            ...Array(s.late).fill('late'),
+            ...Array(s.abs).fill('absent'),
+            ...Array(s.pending).fill('pending'),
+          ];
+          const [sh, sm] = s.start.split(':').map(Number);
+          pkgL.forEach((l, i) => {
+            const st = i < sts.length ? sts[i] : 'pending';
+            if (st === 'attended' || st === 'late') {
+              const offset = st === 'late' ? 12 + (i % 8) * 2 : (i % 5);
+              const totalMin = sm + offset;
+              const h = sh + Math.floor(totalMin / 60);
+              const m = totalMin % 60;
+              const sec = (i * 17) % 60;
+              const d = s.date.replace(/-/g, '/');
+              map[`${l.id}_${s.id}`] = `${d} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+            }
+          });
+        });
+      });
+      return map;
+    });
+    // 현재 열린 상태 드롭다운 키 + fixed 포지션
+    const [openDropdown, setOpenDropdown] = useState(null);
+    const [dropdownPos, setDropdownPos] = useState({x:0,y:0});
+    // 출석 명단 모달 — { pkg, session, pkgL }
+    const [attModal, setAttModal] = useState(null);
+    const [modalFilter, setModalFilter] = useState('all');
+    const [modalSearch, setModalSearch] = useState('');
+    const toggleDD = (key, e) => {
+      e.stopPropagation();
+      if (openDropdown === key) { setOpenDropdown(null); return; }
+      const rect = e.currentTarget.getBoundingClientRect();
+      const ddW = 130;
+      const x = Math.max(0, Math.min(rect.right - ddW, window.innerWidth - ddW - 8));
+      setDropdownPos({ x, y: rect.bottom + 4 });
+      setOpenDropdown(key);
+    };
+
+    const [sideExpanded, setSideExpanded] = useState(new Set(['course']));
+    const toggleSideMenu = id => setSideExpanded(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+    // C-5: BroadcastChannel setup
+    useEffect(() => {
+      bcRef.current = new BroadcastChannel('offline_attendance');
+      return () => bcRef.current?.close();
+    }, []);
+
+    useEffect(() => {
+      if (!openDropdown) return;
+      const close = () => setOpenDropdown(null);
+      document.addEventListener('click', close);
+      return () => document.removeEventListener('click', close);
+    }, [openDropdown]);
+
+    useEffect(() => {
+      if (liveMode) {
+        setQrCountdown(30);
+        bcRef.current?.postMessage({type:'LIVE_MODE_START',courseId:COURSE.id,ts:Date.now()});
+        qrTimerRef.current = setInterval(() => setQrCountdown(p => {
+          if (p <= 1) {
+            bcRef.current?.postMessage({type:'QR_REFRESH',courseId:COURSE.id,ts:Date.now()});
+            return 30;
+          }
+          return p - 1;
+        }), 1000);
+      }
+      return () => clearInterval(qrTimerRef.current);
+    }, [liveMode]);
+
+    /* 계산값 */
+    const learners = useMemo(() => LEARNERS_RAW.map(l => ({
+      ...l, completion: completionMap[l.id] || 'not_started',
+      pkg: COURSE.packages.find(p => p.id === l.pkgId),
+    })), [completionMap]);
+
+    const filtered = useMemo(() => {
+      let list = learners;
+      if(pkgFilter !== 'all') list = list.filter(l => l.pkgId === pkgFilter);
+      if(search.trim()) { const q=search.toLowerCase(); list=list.filter(l=>l.name.includes(q)||l.dept.includes(q)); }
+      return list;
+    }, [learners, pkgFilter, search]);
+
+    const totalEnrolled = COURSE.packages.reduce((s,p)=>s+p.enrolled,0);
+    const totalCapacity = COURSE.packages.reduce((s,p)=>s+p.capacity,0);
+    const completedCount = learners.filter(l=>l.completion==='completed').length;
+    const totalSessions = COURSE.packages.reduce((s,p)=>s+p.sessions.length,0);
+
+    const todayPkg = COURSE.packages.find(p => p.startDate <= TODAY && p.endDate >= TODAY);
+    const todaySess = todayPkg?.sessions.find(s => s.date === TODAY);
+
+    const overallRate = useMemo(() => {
+      let present=0, total=0;
+      COURSE.packages.forEach(p=>p.sessions.forEach(s=>{if(s.att+s.late+s.abs>0){present+=s.att+s.late;total+=s.att+s.late+s.abs;}}));
+      return total>0?Math.round(present/total*100):0;
+    },[]);
+
+    const downloadStudentExcel = () => {
+      const bom = '﻿';
+      const headers = ['이름', '소속', '차수', '수료상태', '출석횟수'];
+      const rows = learners.map(l => {
+        const pkg = COURSE.packages.find(p => p.id === l.pkgId);
+        const doneSess = pkg?.sessions.filter(s=>s.att+s.late+s.abs>0).length || 0;
+        return [l.name, l.dept, pkg?.name||'', COMPL_CFG[l.completion]?.label||'', doneSess];
+      });
+      const csv = [headers, ...rows].map(r=>r.join(',')).join('\n');
+      const blob = new Blob([bom+csv], {type:'text/csv;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${COURSE.title}_수강생목록.csv`; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const downloadSampleExcel = () => {
+      const bom = '﻿';
+      const headers = ['아이디(이메일)', '이름', '소속(부서)'];
+      const rows = [
+        ['hong@company.com','홍길동','개발팀'],
+        ['kim@company.com','김철수','마케팅팀'],
+        ['lee@company.com','이영희','영업팀'],
+      ];
+      const csv = [headers, ...rows].map(r=>r.join(',')).join('\n');
+      const blob = new Blob([bom+csv], {type:'text/csv;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = '수강생_대량등록_양식.csv'; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // C-3/C-4: compute live session counts from attendanceMap
+    const getSessionCounts = (sessId, pkgId) => {
+      const pkgL = LEARNERS_RAW.filter(l => l.pkgId === pkgId);
+      let att = 0, late = 0, el = 0, abs = 0, pending = 0;
+      pkgL.forEach(l => {
+        switch (attendanceMap[`${l.id}_${sessId}`] || 'pending') {
+          case 'attended':    att++;     break;
+          case 'late':        late++;    break;
+          case 'early_leave': el++;      break;
+          case 'absent':      abs++;     break;
+          default:            pending++; break;
+        }
+      });
+      return { att, late, el, abs, pending };
+    };
+
+    // C-1: close session — convert pending → absent
+    const closeSession = (sessId, pkgId) => {
+      const pkgL = LEARNERS_RAW.filter(l => l.pkgId === pkgId);
+      setAttendanceMap(prev => {
+        const next = {...prev};
+        pkgL.forEach(l => {
+          const k = `${l.id}_${sessId}`;
+          if (!next[k] || next[k] === 'pending') next[k] = 'absent';
+        });
+        return next;
+      });
+      setClosedSessions(prev => new Set([...prev, sessId]));
+    };
+
+    // C-3: change individual learner attendance status
+    const changeAttendance = (learnerId, sessId, status) => {
+      setAttendanceMap(prev => ({...prev, [`${learnerId}_${sessId}`]: status}));
+    };
+
+    // 타임스탬프 포맷: 2026/04/28 19:50:47
+    const fmtTs = () => {
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+
+    // 출석인정 + 타임스탬프 기록
+    // isQrScan=true → scanTimeMap(학습자 스캔 시간), false → tsMap(관리자 인정 시간)
+    const recordAttendance = (learnerId, sessId, status, pkgId, learnerName, isQrScan = false) => {
+      changeAttendance(learnerId, sessId, status);
+      const key = `${learnerId}_${sessId}`;
+      if (status === 'attended' || status === 'late' || status === 'early_leave') {
+        if (isQrScan) {
+          setScanTimeMap(prev => ({...prev, [key]: prev[key] || fmtTs()}));
+        } else {
+          setTsMap(prev => ({...prev, [key]: prev[key] || fmtTs()}));
+        }
+      } else {
+        setTsMap(prev => { const n = {...prev}; delete n[key]; return n; });
+        setScanTimeMap(prev => { const n = {...prev}; delete n[key]; return n; });
+      }
+      bcRef.current?.postMessage({type:'ATTENDANCE_CHANGE',learnerId,name:learnerName,sessionId:sessId,pkgId,status,ts:Date.now()});
+    };
+
+    // C-2: process package completion — mark qualifying learners as completed
+    const processPkgCompletion = pkgId => {
+      const pkgL = LEARNERS_RAW.filter(l => l.pkgId === pkgId);
+      setCompletionMap(prev => {
+        const next = {...prev};
+        pkgL.forEach(l => { next[l.id] = 'completed'; });
+        return next;
+      });
+    };
+
+    const calDaysData = useMemo(() => calDays(2026, calMonth), [calMonth]);
+    const sessByDate = useMemo(() => {
+      const m={};
+      COURSE.packages.forEach(p=>p.sessions.forEach(s=>{
+        if(!m[s.date]) m[s.date]=[];
+        m[s.date].push({...s,pkgId:p.id,pkgName:p.name});
+      }));
+      return m;
+    },[]);
+
+    /* ══ 라이브 QR 모드 ══ */
+    if (liveMode) {
+      const liveTotal = todayPkg?.enrolled || 20;
+      const livePresent = 7; // 시뮬레이션
+      const recentScans = LEARNERS_RAW.filter(l=>l.pkgId==='p4').slice(0,3);
+      return (
+        <div className="h-screen bg-slate-900 flex overflow-hidden">
+          <div className="flex-[7] flex flex-col items-center justify-center relative">
+            <button onClick={()=>setLiveMode(false)}
+              className="absolute top-6 left-6 text-white/50 hover:text-white flex items-center gap-2 text-[14px] font-bold transition-colors">
+              <Minimize2 size={16}/> 라이브 모드 종료
+            </button>
+            <div className="text-center mb-10">
+              <div className="text-[22px] font-black text-white mb-2 leading-tight">{COURSE.title}</div>
+              <div className="text-[18px] font-bold text-indigo-400 mb-1">{todayPkg?.name}</div>
+              <div className="text-[32px] font-black text-white">{todaySess?.name}</div>
+              <div className="text-[18px] text-slate-400 mt-2">{fmtShort(todaySess?.date)} · {todaySess?.start}~{todaySess?.end} · {todayPkg?.place}</div>
+            </div>
+            <div className="bg-white rounded-3xl p-8 shadow-2xl relative">
+              <div className="w-[340px] h-[340px] bg-slate-50 rounded-2xl flex items-center justify-center border-4 border-slate-100">
+                <QrCode size={220} className="text-slate-800"/>
+              </div>
+              <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 px-5 py-2 rounded-full flex items-center gap-2">
+                <RefreshCw size={14} className={`text-indigo-400 ${qrCountdown<=5?'animate-spin':''}`}/>
+                <span className={`text-[16px] font-bold ${qrCountdown<=5?'text-amber-400':'text-slate-300'}`}>{qrCountdown}초 후 갱신</span>
+              </div>
+            </div>
+            <p className="text-slate-400 text-[28px] font-bold mt-12">학습자 앱에서 QR을 스캔하세요</p>
+          </div>
+          <div className="flex-[3] bg-slate-800 border-l border-slate-700 flex flex-col">
+            <div className="p-6 border-b border-slate-700">
+              <div className="text-[16px] font-bold text-slate-500 mb-1">실시간 출석 현황</div>
+              <div className="flex items-end gap-2">
+                <span className="text-[64px] font-black text-white leading-none">{livePresent}</span>
+                <span className="text-[28px] text-slate-500 font-bold mb-2">/ {liveTotal}</span>
+              </div>
+              <div className="mt-4 w-full h-4 bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{width:`${Math.round(livePresent/liveTotal*100)}%`}}/>
+              </div>
+              <div className="text-[18px] font-bold text-emerald-400 mt-2">{Math.round(livePresent/liveTotal*100)}% 출석</div>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-3">
+              {[{label:'출석',val:livePresent,color:'text-emerald-400'},{label:'지각',val:0,color:'text-amber-400'},{label:'미확인',val:liveTotal-livePresent,color:'text-slate-400'},{label:'결석',val:0,color:'text-rose-400'}].map(s=>(
+                <div key={s.label} className="bg-slate-700/50 rounded-xl p-4">
+                  <div className={`text-[14px] font-bold ${s.color} mb-1`}>{s.label}</div>
+                  <div className="text-[32px] font-black text-white">{s.val}</div>
+                </div>
+              ))}
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 pt-2">
+              <div className="text-[15px] font-bold text-slate-500 mb-3">최근 출석</div>
+              <div className="space-y-2">
+                {recentScans.map(st=>(
+                  <div key={st.id} className="flex items-center gap-2 bg-slate-700/30 rounded-lg px-3 py-2 animate-fadeIn">
+                    <div className="w-7 h-7 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center"><CheckCircle size={13}/></div>
+                    <div>
+                      <div className="text-[17px] font-bold text-white">{st.name}</div>
+                      <div className="text-[14px] text-slate-500">{st.dept}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ══ 일반 모드 ══ */
+    return (
+      <div className="min-h-screen flex">
+
+        {/* ══ 글로벌 좌측 사이드바 ══ */}
+        <aside className="w-[200px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0 overflow-y-auto custom-scrollbar">
+          <div className="px-4 py-4 flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4"><path d="M7 2L2 5v7h4V9h2v3h4V5L7 2z" fill="white"/></svg>
+            </div>
+            <span className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">TOUCH<br/>CLASS</span>
+          </div>
+          <div className="h-px bg-slate-100 mx-3 mb-2"/>
+          <nav className="flex-1 px-3 pb-6 space-y-0.5">
+            {SIDEBAR_MENUS.map(menu => (
+              <div key={menu.id}>
+                <button
+                  onClick={() => menu.hasChildren && toggleSideMenu(menu.id)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors ${menu.active ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}>
+                  {React.createElement(menu.icon, { size: 16, className: menu.active ? 'text-indigo-600' : 'text-slate-400' })}
+                  <span className="flex-1 text-left">{menu.label}</span>
+                  {menu.badge && <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{menu.badge}</span>}
+                  {menu.hasChildren && <span className="text-slate-400">{sideExpanded.has(menu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}</span>}
+                </button>
+                {menu.children && sideExpanded.has(menu.id) && (
+                  <div className="ml-7 mt-0.5 space-y-0.5">
+                    {menu.children.map(sub => (
+                      <a key={sub.id} href="#"
+                        className={`block px-3 py-1.5 rounded-md text-[13px] transition-colors ${sub.active ? 'text-indigo-700 font-bold' : 'text-slate-500 hover:bg-slate-50 font-medium'}`}>
+                        {sub.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
+        </aside>
+
+        {/* ══ 메인 영역 ══ */}
+        <div className="flex-1 flex flex-col min-h-screen bg-[#f2f5f9]">
+
+        {/* ── 글로벌 탑 네비게이션 ── */}
+        <div className="h-[52px] bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0 sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-1.5 text-slate-600 text-[13px] font-semibold hover:text-slate-800 transition-colors">
+              <Star size={14} className="text-amber-400 fill-amber-400"/> 즐겨찾기 <ChevronDown size={13} className="text-slate-400"/>
+            </button>
+            <div className="w-px h-4 bg-slate-200"/>
+            <button className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-[12px] font-bold hover:bg-indigo-100 transition-colors">
+              <Users size={12}/> 관리자 가이드
+            </button>
+          </div>
+          <div className="flex items-center gap-0.5">
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors">
+              <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5"><circle cx="10" cy="10" r="8" stroke="#7c3aed" strokeWidth="1.5"/><circle cx="10" cy="10" r="3.5" fill="#7c3aed"/></svg>
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><MessageSquare size={16}/></button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Play size={15} className="ml-0.5"/></button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><BarChart2 size={16}/></button>
+            <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+              <Filter size={15}/>
+              <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none px-0.5">0</span>
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Settings size={16}/></button>
+            <div className="w-px h-5 bg-slate-200 mx-1.5"/>
+            <button className="flex items-center gap-1.5 hover:bg-slate-50 pl-0.5 pr-2 py-1 rounded-lg transition-colors">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">조</div>
+              <span className="text-[13px] font-semibold text-slate-700">조찬현</span>
+              <ChevronDown size={13} className="text-slate-400"/>
+            </button>
+          </div>
+        </div>
+
+        {/* 페이지 서브 헤더 */}
+        <header className="shrink-0 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <a href="index.html" className="flex items-center gap-1.5 text-slate-400 hover:text-slate-700 transition-colors text-[13px] font-semibold">
+              <ArrowLeft size={15}/> 목록으로
+            </a>
+            <div className="w-px h-5 bg-slate-200"/>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-[16px] font-black text-slate-900">{COURSE.title}</h1>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-200">운영중</span>
+              </div>
+              <div className="flex items-center gap-3 mt-0.5 text-[11px] text-slate-400 font-medium">
+                <span className="flex items-center gap-1"><Users size={10}/>{COURSE.instructor}</span>
+                <span className="flex items-center gap-1"><MapPin size={10}/>한샘 HQ 대교육장 외 2곳</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={()=>setCalOpen(o=>!o)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold border transition-colors
+                ${calOpen?'bg-indigo-50 border-indigo-300 text-indigo-600':'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+              <Calendar size={14}/> 일정
+            </button>
+            <button onClick={downloadStudentExcel} className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-[13px] font-bold hover:bg-slate-50 transition-colors">
+              <Download size={14}/> 엑셀
+            </button>
+            <a href="offline-builder.html" className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-[13px] font-bold hover:bg-slate-50 transition-colors">
+              <Edit3 size={14}/> 코스 편집
+            </a>
+          </div>
+        </header>
+
+        <div className="flex flex-1 overflow-hidden gap-3 px-4 pb-4 pt-0 items-start">
+
+          {/* ══ 왼쪽 사이드바 ══ */}
+          <aside className="w-[230px] bg-white rounded-xl shadow-card shrink-0 flex flex-col overflow-hidden">
+            {/* 커버 영역 */}
+            <div className="bg-white px-3 pt-3 pb-2 shrink-0 border-b border-slate-100 flex flex-col items-center gap-2">
+              {/* 배지 블록 */}
+              <div className="w-full flex gap-1">
+                <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">{COURSE.category}</span>
+                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">운영중</span>
+              </div>
+              {/* 커버 이미지 블록 9:16 */}
+              {coverImage ? (
+                <div className="w-[100px] rounded-md overflow-hidden shadow-sm border border-slate-200" style={{aspectRatio:'9/16'}}>
+                  <img src={coverImage.dataUrl} alt="커버" className="w-full h-full object-cover"/>
+                </div>
+              ) : (
+                <div className="w-[100px] rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center" style={{aspectRatio:'9/16'}}>
+                  <ImageIcon size={28} className="text-slate-300"/>
+                </div>
+              )}
+              {/* 타이틀 블록 */}
+              <div className="w-full text-[12px] font-black text-slate-900 leading-snug">{COURSE.title}</div>
+            </div>
+
+            {/* 코스 정보 */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-0">
+              <div className="space-y-2 pb-4 border-b border-slate-100">
+                {[
+                  {label:'강사', value: COURSE.instructor},
+                  {label:'차수', value:`${COURSE.packages.length}개 차수`},
+                  {label:'총 회차', value:`${totalSessions}회차`},
+                  {label:'기간', value:`${fmtShort(COURSE.packages[0].startDate)} ~ ${fmtShort(COURSE.packages[COURSE.packages.length-1].endDate)}`},
+                  {label:'장소', value:'한샘 HQ 외 2곳'},
+                ].map(({label,value}) => (
+                  <div key={label} className="flex items-start justify-between gap-2 text-[12px]">
+                    <span className="text-slate-400 font-bold w-12 shrink-0">{label}</span>
+                    <span className="text-slate-700 font-semibold text-right leading-snug">{value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 수강 현황 */}
+              <div className="py-4 border-b border-slate-100">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">수강 현황</div>
+                <div className="flex items-baseline gap-1 mb-1.5">
+                  <span className="text-[22px] font-black text-slate-900 leading-none">{totalEnrolled}</span>
+                  <span className="text-[13px] font-bold text-slate-400">/ {totalCapacity}명</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-400 rounded-full" style={{width:`${totalCapacity>0?totalEnrolled/totalCapacity*100:0}%`}}/>
+                </div>
+                <div className="text-[10px] text-slate-400 font-medium mt-1">정원 대비 {Math.round(totalEnrolled/totalCapacity*100)}%</div>
+              </div>
+
+              {/* 수료 현황 */}
+              <div className="py-4 border-b border-slate-100">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">수료 현황</div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[22px] font-black text-emerald-600 leading-none">{completedCount}</span>
+                  <span className="text-[13px] font-bold text-slate-400">/ {totalEnrolled}명</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mt-1.5">
+                  <div className="h-full bg-emerald-400 rounded-full" style={{width:`${Math.round(completedCount/totalEnrolled*100)}%`}}/>
+                </div>
+                <div className="text-[10px] text-emerald-600 font-semibold mt-1">수료율 {Math.round(completedCount/totalEnrolled*100)}%</div>
+              </div>
+
+              {/* 출석률 */}
+              <div className="py-4 border-b border-slate-100">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">평균 출석률</div>
+                <div className="text-[22px] font-black text-amber-500 leading-none">{overallRate}%</div>
+                <div className="text-[10px] text-slate-400 font-medium mt-0.5">완료 회차 기준</div>
+              </div>
+
+              {/* 운영 방식 배지 */}
+              <div className="py-3">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 text-[11px] font-bold text-amber-700 flex items-center gap-1.5">
+                  <Users size={11}/> 관리자 강제 할당
+                </div>
+              </div>
+            </div>
+
+            {/* 액션 버튼 */}
+            <div className="p-4 border-t border-slate-100 space-y-2 shrink-0">
+              <button onClick={()=>setShowEnrollModal(true)}
+                className="w-full flex items-center justify-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[13px] py-2 rounded-xl transition-colors border border-indigo-200">
+                <UserCheck size={13}/> 수강생 등록
+              </button>
+              {todaySess && (
+                <button onClick={()=>setLiveMode(true)}
+                  className="w-full flex items-center justify-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-[13px] py-2 rounded-xl transition-colors shadow-sm">
+                  <QrCode size={13}/> 라이브 출석
+                </button>
+              )}
+              <button onClick={()=>setOperationConfirm(true)}
+                className="w-full flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[12px] py-2 rounded-xl transition-colors">
+                <Power size={12}/> 운영 종료
+              </button>
+            </div>
+          </aside>
+
+          {/* ══ 메인 콘텐츠 ══ */}
+          <main className="flex-1 overflow-y-auto custom-scrollbar bg-white rounded-xl shadow-card overflow-hidden p-5 space-y-4">
+
+            {/* 오늘 회차 배너 */}
+            {todaySess && (
+              <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl px-5 py-4 flex items-center gap-4 shadow-card animate-fadeIn">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+                  <Zap size={20} className="text-white"/>
+                </div>
+                <div className="flex-1">
+                  <div className="text-[11px] font-bold text-indigo-200 mb-0.5">오늘 수업</div>
+                  <div className="text-[14px] font-black">{todayPkg.name} · {todaySess.name} &nbsp;|&nbsp; {todaySess.start}~{todaySess.end} &nbsp;|&nbsp; {todayPkg.place}</div>
+                  <div className="text-[12px] text-indigo-200 mt-0.5">예정 인원 {todayPkg.enrolled}명</div>
+                </div>
+                <button onClick={()=>setLiveMode(true)}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 rounded-xl text-[13px] font-black hover:bg-indigo-50 transition-colors shadow-sm shrink-0">
+                  <QrCode size={16}/> QR 출석 시작
+                </button>
+              </div>
+            )}
+
+            {/* 요약 통계 카드 */}
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                {label:'총 신청자', value:`${totalEnrolled}/${totalCapacity}명`, sub:`정원 대비 ${Math.round(totalEnrolled/totalCapacity*100)}%`, color:'text-indigo-600', bg:'bg-indigo-50', icon:Users},
+                {label:'수료 완료', value:`${completedCount}명`, sub:`전체의 ${Math.round(completedCount/totalEnrolled*100)}%`, color:'text-emerald-600', bg:'bg-emerald-50', icon:Award},
+                {label:'차수', value:`${COURSE.packages.length}개`, sub:`총 ${totalSessions}회차`, color:'text-violet-600', bg:'bg-violet-50', icon:Calendar},
+                {label:'평균 출석률', value:`${overallRate}%`, sub:'완료 회차 기준', color:'text-amber-600', bg:'bg-amber-50', icon:TrendingUp},
+              ].map((s,i)=>(
+                <div key={i} className="bg-white rounded-xl px-4 py-3.5 shadow-sm flex items-center gap-3">
+                  <div className={`w-9 h-9 ${s.bg} rounded-xl flex items-center justify-center shrink-0`}>
+                    <s.icon size={17} className={s.color}/>
+                  </div>
+                  <div>
+                    <div className={`text-[18px] font-black ${s.color} leading-none`}>{s.value}</div>
+                    <div className="text-[11px] text-slate-400 font-medium mt-0.5">{s.label} · {s.sub}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 탭 카드 */}
+            <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+              <div className="flex border-b border-slate-100">
+                {[
+                  {key:'dashboard',label:'대시보드',icon:Grid3X3,tip:'차수 현황·출석률·조치 필요 항목을 한눈에 확인'},
+                  {key:'attendance',label:'출석 관리',icon:CheckSquare,tip:'교육 당일 회차별 출석·지각·결석 처리 및 회차 마감'},
+                  {key:'roster',label:'수강생 현황',icon:Users,tip:'수강생 전체 출결 이력 확인 및 수료 처리'},
+                  {key:'stats',label:'통계',icon:BarChart2,tip:'차수·부서별 출석률·수료율 집계'},
+                ].map(t=>(
+                  <div key={t.key} className="relative group">
+                    <button onClick={()=>setTab(t.key)}
+                      className={`flex items-center gap-2 px-6 py-4 text-[14px] font-bold border-b-2 transition-colors
+                        ${tab===t.key?'border-indigo-500 text-indigo-600':'border-transparent text-slate-400 hover:text-slate-700'}`}>
+                      <t.icon size={15}/>{t.label}
+                    </button>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2.5 py-1.5 bg-slate-800 text-white text-[11px] rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                      {t.tip}
+                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"/>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ─── 대시보드 탭 ─── */}
+              {tab==='dashboard' && (
+                <div className="p-5 space-y-4 animate-fadeIn">
+
+                  {/* 차수 진행 타임라인 */}
+                  <div>
+                    <div className="text-[12px] font-bold text-slate-400 uppercase tracking-wide mb-3">차수 진행 현황</div>
+                    <div className="grid grid-cols-5 gap-2">
+                      {COURSE.packages.map((pkg,pi)=>{
+                        const isCompleted = pkg.endDate < TODAY;
+                        const isActive = pkg.startDate <= TODAY && pkg.endDate >= TODAY;
+                        const rate = pkgAttRate(pkg);
+                        const pct = Math.round(pkg.enrolled/pkg.capacity*100);
+                        const c = PKG_COLORS[pi%PKG_COLORS.length];
+                        const handlePkgClick = () => {
+                          const target = isActive ? 'attendance' : 'roster';
+                          setTab(target);
+                          setOpenPkgs(prev => new Set([...prev, pkg.id]));
+                          setPkgFilter(pkg.id);
+                        };
+                        return (
+                          <div key={pkg.id} onClick={handlePkgClick}
+                            className={`rounded-xl p-3.5 border cursor-pointer transition-shadow hover:shadow-md ${isActive?'border-indigo-300 bg-indigo-50 ring-1 ring-indigo-200':isCompleted?'border-slate-200 bg-slate-50 hover:border-slate-300':'border-dashed border-slate-200 bg-white hover:border-slate-300'}`}>
+                            <div className="flex items-start justify-between mb-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <div className={`w-2 h-2 rounded-full ${c.dot} shrink-0 mt-0.5`}/>
+                                <span className="text-[11px] font-black text-slate-700 leading-tight">{pkg.name.split(' ')[0]}</span>
+                              </div>
+                              {isActive && <span className="text-[9px] font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded-full shrink-0">진행중</span>}
+                              {isCompleted && <span className="text-[9px] font-bold bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full shrink-0">완료</span>}
+                              {!isActive && !isCompleted && <span className="text-[9px] font-bold bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-full shrink-0">예정</span>}
+                            </div>
+                            <div className="text-[10px] text-slate-400 mb-2.5">{fmtShort(pkg.startDate)} ~ {fmtShort(pkg.endDate)}</div>
+                            <div className="space-y-2">
+                              <div>
+                                <div className="flex justify-between mb-0.5">
+                                  <span className="text-[10px] text-slate-400">신청</span>
+                                  <span className="text-[10px] font-bold text-slate-600">{pkg.enrolled}/{pkg.capacity}</span>
+                                </div>
+                                <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                  <div className={`h-full rounded-full ${c.dot.replace('bg-','bg-')}`} style={{width:`${pct}%`,background: pct>=100?'#10b981':undefined}}/>
+                                </div>
+                              </div>
+                              {rate!==null && (
+                                <div>
+                                  <div className="flex justify-between mb-0.5">
+                                    <span className="text-[10px] text-slate-400">출석</span>
+                                    <span className={`text-[10px] font-bold ${rate>=90?'text-emerald-600':rate>=70?'text-amber-500':'text-red-500'}`}>{rate}%</span>
+                                  </div>
+                                  <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full ${rate>=90?'bg-emerald-400':rate>=70?'bg-amber-400':'bg-red-400'}`} style={{width:`${rate}%`}}/>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 2열 그리드 */}
+                  <div className="grid grid-cols-2 gap-4">
+
+                    {/* 조치 필요 */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <AlertCircle size={13} className="text-amber-500"/>
+                        <span className="text-[13px] font-bold text-slate-700">조치 필요</span>
+                      </div>
+                      <div className="space-y-2">
+                        {[
+                          {badge:'출석', text:'4기 오늘 출석 미시작 · 20명 대기중', sev:'amber'},
+                          {badge:'정원', text:'4기 잔여 10석 — 등록 가능', sev:'indigo'},
+                          {badge:'출석', text:'3기 4회차 결석 3명 최종 처리 필요', sev:'rose'},
+                        ].map((item,i)=>{
+                          const colors = {
+                            amber:'text-amber-600 bg-amber-50 border-amber-200',
+                            rose:'text-rose-600 bg-rose-50 border-rose-200',
+                            indigo:'text-indigo-600 bg-indigo-50 border-indigo-200',
+                          };
+                          return (
+                            <div key={i} className="flex items-center gap-2.5 bg-slate-50 rounded-lg px-3 py-2.5 border border-slate-100">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${colors[item.sev]}`}>{item.badge}</span>
+                              <span className="text-[12px] font-semibold text-slate-700 leading-tight">{item.text}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 소속별 수강 현황 */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                      <div className="text-[13px] font-bold text-slate-700 mb-3">소속별 수료 현황</div>
+                      <div className="space-y-3">
+                        {[
+                          {dept:'개발팀',   count:5, completed:3},
+                          {dept:'영업팀',   count:5, completed:2},
+                          {dept:'인사팀',   count:4, completed:1},
+                          {dept:'마케팅팀', count:4, completed:3},
+                          {dept:'디자인팀', count:2, completed:0},
+                        ].map((d,i)=>{
+                          const rate = Math.round(d.completed/d.count*100);
+                          return (
+                            <div key={i}>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-[12px] font-semibold text-slate-600">{d.dept}</span>
+                                <div className="flex items-center gap-2.5 text-[11px]">
+                                  <span className="text-slate-400">{d.count}명 수강</span>
+                                  <span className={`font-bold ${rate===0?'text-slate-400':'text-emerald-600'}`}>수료 {d.completed}명</span>
+                                </div>
+                              </div>
+                              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full transition-all ${rate>=60?'bg-emerald-400':rate>0?'bg-amber-400':'bg-slate-200'}`} style={{width:`${rate}%`}}/>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── 출석 관리 탭 (회차 중심) ─── */}
+              {tab==='attendance' && (
+                <div className="animate-fadeIn">
+                  {/* 툴바 */}
+                  <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50">
+                    <select value={pkgFilter} onChange={e=>setPkgFilter(e.target.value)}
+                      className="px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-indigo-400 bg-white">
+                      <option value="all">전체 차수</option>
+                      {COURSE.packages.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                    <span className="text-[12px] text-slate-400 font-medium ml-auto">
+                      <QrCode size={11} className="inline mr-1 text-indigo-400"/>QR 스캔 시간
+                      <Pencil size={10} className="inline mx-1 ml-3 text-slate-400"/>관리자 인정 시간
+                    </span>
+                  </div>
+
+                  {/* 차수 아코디언 */}
+                  <div className="p-5 space-y-3">
+                    {COURSE.packages.filter(pkg=>pkgFilter==='all'||pkg.id===pkgFilter).map(pkg=>{
+                      const isOpen=openPkgs.has(pkg.id);
+                      const pkgL=LEARNERS_RAW.filter(l=>l.pkgId===pkg.id);
+                      const sessData=pkg.sessions.map(s=>{
+                        const c=getSessionCounts(s.id,pkg.id);
+                        const doneTotal=c.att+c.late+c.el+c.abs;
+                        const rate=doneTotal>0?Math.round((c.att+c.late)/doneTotal*100):null;
+                        return {...s,...c,rate};
+                      });
+                      const livePkgRate=(()=>{
+                        const done=sessData.filter(s=>s.rate!==null);
+                        if(!done.length) return null;
+                        const present=done.reduce((a,s)=>a+s.att+s.late,0);
+                        const total=done.reduce((a,s)=>a+s.att+s.late+s.el+s.abs,0);
+                        return total>0?Math.round(present/total*100):null;
+                      })();
+                      const allClosed=pkg.sessions.length>0&&pkg.sessions.every(s=>closedSessions.has(s.id));
+                      const hasToday=pkg.sessions.some(s=>s.date===TODAY);
+                      const isPkgCompleted=allClosed&&pkgL.length>0&&pkgL.every(l=>completionMap[l.id]==='completed');
+                      return (
+                        <div key={pkg.id} className={`border rounded-xl overflow-hidden transition-all ${hasToday?'border-indigo-300 ring-1 ring-indigo-200':'border-slate-200'}`}>
+                          {/* 차수 헤더 */}
+                          <div className={`flex items-center gap-3 px-5 py-3.5 cursor-pointer ${hasToday?'bg-indigo-50':'bg-slate-50'} hover:bg-slate-100 transition-colors`}
+                            onClick={()=>togglePkg(pkg.id)}>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-[14px] text-slate-800">{pkg.name}</span>
+                                {hasToday && <span className="text-[10px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full">오늘</span>}
+                                {allClosed && !isPkgCompleted && <span className="text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 px-2 py-0.5 rounded-full">마감완료</span>}
+                                {isPkgCompleted && <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-full">수료완료</span>}
+                              </div>
+                              <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2">
+                                <span>{fmtRange(pkg.startDate,pkg.endDate)}</span>
+                                <span>·</span><span>{pkg.place}</span>
+                                <span>·</span><span>신청 {pkg.enrolled}/{pkg.capacity}명</span>
+                                {livePkgRate!==null && <><span>·</span><span className="font-bold text-indigo-600">출석률 {livePkgRate}%</span></>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {hasToday && (
+                                <button onClick={e=>{e.stopPropagation();setLiveMode(true);}}
+                                  className="flex items-center gap-1 text-[11px] font-bold text-white bg-indigo-500 hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition-colors">
+                                  <QrCode size={12}/> QR 출석
+                                </button>
+                              )}
+                              {isOpen?<ChevronUp size={15} className="text-slate-400"/>:<ChevronDown size={15} className="text-slate-400"/>}
+                            </div>
+                          </div>
+
+                          {/* 회차 테이블 */}
+                          {isOpen && (
+                            <div className="border-t border-slate-100">
+                              <table className="w-full text-[12px]">
+                                <thead>
+                                  <tr className="bg-white text-slate-400 text-[11px]">
+                                    <th className="px-5 py-2.5 text-left font-bold">회차</th>
+                                    <th className="px-4 py-2.5 text-left font-bold">날짜</th>
+                                    <th className="px-4 py-2.5 text-left font-bold">시간</th>
+                                    <th className="px-4 py-2.5 text-center font-bold text-emerald-600">출석</th>
+                                    <th className="px-4 py-2.5 text-center font-bold text-amber-500">지각</th>
+                                    <th className="px-4 py-2.5 text-center font-bold text-orange-500">조퇴</th>
+                                    <th className="px-4 py-2.5 text-center font-bold text-red-500">결석</th>
+                                    <th className="px-4 py-2.5 text-center font-bold text-slate-400">미확인</th>
+                                    <th className="px-4 py-2.5 text-center font-bold">출석률</th>
+                                    <th className="px-3 py-2.5 text-right font-bold">액션</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {sessData.map((s,i)=>{
+                                    const isToday=s.date===TODAY;
+                                    const isClosed=closedSessions.has(s.id);
+                                    return (
+                                      <React.Fragment key={s.id}>
+                                        <tr className={`border-t border-slate-100 ${isToday?'bg-indigo-50/40':i%2===0?'bg-white':'bg-slate-50/30'}`}>
+                                          <td className="px-5 py-2.5 font-bold text-slate-700">{s.name}{isToday&&<span className="text-[9px] bg-indigo-500 text-white px-1.5 py-0.5 rounded-full ml-1">오늘</span>}</td>
+                                          <td className="px-4 py-2.5 text-slate-500">{fmtDate(s.date)}</td>
+                                          <td className="px-4 py-2.5 text-slate-500">{s.start}~{s.end}</td>
+                                          <td className="px-4 py-2.5 text-center font-bold text-emerald-600">{s.att}</td>
+                                          <td className="px-4 py-2.5 text-center font-bold text-amber-500">{s.late}</td>
+                                          <td className="px-4 py-2.5 text-center font-bold text-orange-500">{s.el}</td>
+                                          <td className="px-4 py-2.5 text-center font-bold text-red-500">{s.abs}</td>
+                                          <td className="px-4 py-2.5 text-center font-bold text-slate-400">{s.pending}</td>
+                                          <td className="px-4 py-2.5 text-center">
+                                            {s.rate!==null
+                                              ?<span className={`font-black text-[12px] ${s.rate>=90?'text-emerald-600':s.rate>=70?'text-amber-500':'text-red-500'}`}>{s.rate}%</span>
+                                              :<span className="text-slate-300 text-[11px]">—</span>}
+                                          </td>
+                                          <td className="px-3 py-2.5">
+                                            <div className="flex items-center justify-end gap-1">
+                                              {pkgL.length>0 && (
+                                                <button onClick={()=>{setAttModal({pkg,session:s,pkgL});setModalFilter('all');setModalSearch('');}}
+                                                  className="text-[10px] font-bold px-2 py-1 rounded-lg border bg-white text-slate-500 border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-colors">
+                                                  명단
+                                                </button>
+                                              )}
+                                              {!isClosed && s.pending>0 && (
+                                                <button onClick={()=>{closeSession(s.id,pkg.id);bcRef.current?.postMessage({type:'SESSION_CLOSED',sessionId:s.id,pkgId:pkg.id,ts:Date.now()});}}
+                                                  className="text-[10px] font-bold px-2 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors">
+                                                  마감
+                                                </button>
+                                              )}
+                                              {isClosed && <span className="text-[10px] text-slate-300 font-bold px-1">마감됨</span>}
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      </React.Fragment>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ─── 수강생 현황 탭 (학습자 중심) ─── */}
+              {tab==='roster' && (
+                <div className="animate-fadeIn">
+                  {/* 툴바 */}
+                  <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50">
+                    <div className="relative">
+                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="이름·소속 검색"
+                        className="pl-8 pr-4 py-1.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-indigo-400 bg-white w-48"/>
+                    </div>
+                    <select value={pkgFilter} onChange={e=>setPkgFilter(e.target.value)}
+                      className="px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-indigo-400 bg-white">
+                      <option value="all">전체 차수</option>
+                      {COURSE.packages.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                    <span className="text-[12px] text-slate-400 font-medium ml-auto">{filtered.length}명</span>
+                    <button onClick={()=>setShowEnrollModal(true)}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-[12px] font-bold hover:bg-indigo-600 transition-colors shadow-sm">
+                      <Plus size={12}/> 등록
+                    </button>
+                    <button onClick={downloadStudentExcel} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                      <Download size={12}/> 엑셀
+                    </button>
+                  </div>
+                  {/* 차수별 그룹 */}
+                  <div className="p-5 space-y-3">
+                    {COURSE.packages.filter(pkg=>pkgFilter==='all'||pkg.id===pkgFilter).map(pkg=>{
+                      const isOpen=openPkgs.has(pkg.id);
+                      const pkgL=LEARNERS_RAW.filter(l=>l.pkgId===pkg.id);
+                      const filteredPkgL=pkgL.filter(l=>{
+                        if(!search.trim()) return true;
+                        const q=search.toLowerCase();
+                        return l.name.includes(q)||l.dept.includes(q);
+                      });
+                      const allClosed=pkg.sessions.length>0&&pkg.sessions.every(s=>closedSessions.has(s.id));
+                      const isPkgCompleted=allClosed&&pkgL.length>0&&pkgL.every(l=>completionMap[l.id]==='completed');
+                      const hasToday=pkg.sessions.some(s=>s.date===TODAY);
+                      return (
+                        <div key={pkg.id} className={`border rounded-xl overflow-hidden ${hasToday?'border-indigo-300 ring-1 ring-indigo-200':'border-slate-200'}`}>
+                          <div className={`flex items-center gap-3 px-5 py-3.5 cursor-pointer ${hasToday?'bg-indigo-50':'bg-slate-50'} hover:bg-slate-100 transition-colors`}
+                            onClick={()=>togglePkg(pkg.id)}>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-[14px] text-slate-800">{pkg.name}</span>
+                                <span className="text-[11px] text-slate-400">· {filteredPkgL.length}명</span>
+                                {isPkgCompleted && <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-full">수료완료</span>}
+                              </div>
+                              <div className="text-[11px] text-slate-400 mt-0.5">{fmtRange(pkg.startDate,pkg.endDate)} · {pkg.place}</div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {isOpen?<ChevronUp size={15} className="text-slate-400"/>:<ChevronDown size={15} className="text-slate-400"/>}
+                            </div>
+                          </div>
+                          {isOpen && (
+                            <div className="border-t border-slate-100 overflow-x-auto">
+                              <table className="w-full text-[12px]">
+                                <thead>
+                                  <tr className="bg-slate-50 text-slate-400 text-[11px] font-bold">
+                                    <th className="px-5 py-2.5 text-left sticky left-0 bg-slate-50 z-10 min-w-[100px]">이름</th>
+                                    <th className="px-3 py-2.5 text-left min-w-[72px]">소속</th>
+                                    <th className="px-3 py-2.5 text-left min-w-[64px]">수료 상태</th>
+                                    {pkg.sessions.map((s,si)=>(
+                                      <th key={s.id} className="px-2 py-2.5 text-center min-w-[56px]">
+                                        <span className="block text-[10px]">{si+1}회차</span>
+                                        <span className="block text-[9px] font-normal text-slate-300">{fmtShort(s.date)}</span>
+                                      </th>
+                                    ))}
+                                    <th className="px-3 py-2.5 text-right min-w-[64px]">수료</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {filteredPkgL.map((l,li)=>{
+                                    const compl=completionMap[l.id]||'not_started';
+                                    const cfg=COMPL_CFG[compl];
+                                    return (
+                                      <tr key={l.id} className={`border-t border-slate-100 hover:bg-slate-50 transition-colors ${li%2===0?'bg-white':'bg-slate-50/30'}`}>
+                                        <td className="px-5 py-2.5 sticky left-0 bg-inherit z-10">
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-black text-indigo-600 shrink-0">{l.name[0]}</div>
+                                            <span className="font-bold text-slate-800 whitespace-nowrap">{l.name}</span>
+                                          </div>
+                                        </td>
+                                        <td className="px-3 py-2.5 text-slate-400 text-[11px] whitespace-nowrap">{l.dept}</td>
+                                        <td className="px-3 py-2.5">
+                                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}/>{cfg.label}
+                                          </span>
+                                        </td>
+                                        {pkg.sessions.map(s=>{
+                                          const st=attendanceMap[`${l.id}_${s.id}`]||'pending';
+                                          const scanTs=scanTimeMap[`${l.id}_${s.id}`];
+                                          const manualTs=tsMap[`${l.id}_${s.id}`];
+                                          const timeStr=scanTs?scanTs.slice(11,16):manualTs?manualTs.slice(11,16):null;
+                                          const isQr=!!scanTs;
+                                          const ddKey=`${l.id}_${s.id}`;
+                                          const isDDOpen=openDropdown===ddKey;
+                                          return (
+                                            <td key={s.id} className="px-2 py-2.5 text-center">
+                                              <div className="inline-block relative">
+                                                <button onClick={e=>toggleDD(ddKey,e)}
+                                                  title={scanTs||manualTs||ATT_CFG[st].label}
+                                                  className={`text-[10px] font-bold w-12 py-1 rounded-lg border transition-colors ${ATT_CFG[st].bg} ${ATT_CFG[st].color} ${ATT_CFG[st].border} hover:opacity-75`}>
+                                                  {ATT_CFG[st].label}
+                                                </button>
+                                                {timeStr && (
+                                                  <div className="flex items-center justify-center gap-0.5 mt-0.5 text-[11px] text-slate-500 font-mono">
+                                                    {isQr?<QrCode size={8} className="text-indigo-400"/>:<Pencil size={8}/>}{timeStr}
+                                                  </div>
+                                                )}
+                                                {isDDOpen && (
+                                                  <div className="absolute left-0 top-full mt-1 z-[200] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden w-[120px] animate-fadeIn"
+                                                    onClick={e=>e.stopPropagation()}>
+                                                    {['attended','late','early_leave','absent'].map(opt=>(
+                                                      <button key={opt}
+                                                        onClick={()=>{recordAttendance(l.id,s.id,opt,pkg.id,l.name);setOpenDropdown(null);}}
+                                                        className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] font-bold text-left transition-colors ${st===opt?`${ATT_CFG[opt].bg} ${ATT_CFG[opt].color}`:'text-slate-600 hover:bg-slate-50'}`}>
+                                                        {st===opt?<CheckCircle size={11} className="shrink-0"/>:<span className="w-[11px] shrink-0 inline-block"/>}
+                                                        {ATT_CFG[opt].label}
+                                                      </button>
+                                                    ))}
+                                                    <div className="my-1 border-t border-slate-100"/>
+                                                    <button onClick={()=>{recordAttendance(l.id,s.id,'pending',pkg.id,l.name);setOpenDropdown(null);}}
+                                                      className="w-full flex items-center gap-2 px-3 py-2 text-[11px] text-slate-400 hover:bg-slate-50 text-left transition-colors">
+                                                      <span className="w-[11px] shrink-0 inline-block"/>미확인으로
+                                                    </button>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </td>
+                                          );
+                                        })}
+                                        <td className="px-3 py-2.5 text-right">
+                                          {compl==='completed' && (
+                                            <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 justify-end">
+                                              <CheckCircle size={11}/> 완료
+                                            </span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                  {filteredPkgL.length===0 && (
+                                    <tr><td colSpan={4+pkg.sessions.length} className="text-center py-8 text-slate-400 text-[13px]">검색 결과가 없습니다</td></tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ─── 통계 탭 ─── */}
+              {tab==='stats' && (
+                <div className="p-6 space-y-6 animate-fadeIn">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-[14px] font-bold text-slate-700 mb-4">차수별 출석률</h4>
+                      <div className="space-y-3">
+                        {COURSE.packages.map(pkg=>{
+                          const r=pkgAttRate(pkg);
+                          return (
+                            <div key={pkg.id}>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-[12px] font-semibold text-slate-600">{pkg.name}</span>
+                                <span className={`text-[12px] font-black ${r===null?'text-slate-300':r>=90?'text-emerald-600':r>=70?'text-amber-500':'text-red-500'}`}>{r!==null?`${r}%`:'미시작'}</span>
+                              </div>
+                              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div style={{width:`${r||0}%`}} className={`h-full rounded-full transition-all ${r===null?'':'bg-gradient-to-r from-indigo-400 to-indigo-600'}`}/>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-[14px] font-bold text-slate-700 mb-4">수료 현황</h4>
+                      <div className="space-y-3">
+                        {[
+                          {label:'수료 완료',count:completedCount,color:'bg-emerald-500',textColor:'text-emerald-600'},
+                          {label:'진행중',count:learners.filter(l=>l.completion==='in_progress').length,color:'bg-indigo-400',textColor:'text-indigo-600'},
+                          {label:'미시작',count:learners.filter(l=>l.completion==='not_started').length,color:'bg-slate-300',textColor:'text-slate-500'},
+                        ].map((s,i)=>(
+                          <div key={i}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[12px] font-semibold text-slate-600">{s.label}</span>
+                              <span className={`text-[12px] font-black ${s.textColor}`}>{s.count}명</span>
+                            </div>
+                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                              <div style={{width:`${Math.round(s.count/totalEnrolled*100)}%`}} className={`h-full rounded-full ${s.color}`}/>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-5 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                        <div className="text-[24px] font-black text-emerald-600">{Math.round(completedCount/totalEnrolled*100)}%</div>
+                        <div className="text-[12px] text-emerald-700 font-semibold">전체 수료율 · {completedCount}/{totalEnrolled}명 완료</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-slate-700 mb-4">차수별 신청 현황</h4>
+                    <div className="grid grid-cols-5 gap-3">
+                      {COURSE.packages.map(pkg=>{
+                        const pct=Math.round(pkg.enrolled/pkg.capacity*100);
+                        return (
+                          <div key={pkg.id} className="bg-slate-50 rounded-xl p-4 text-center">
+                            <div className="text-[11px] font-bold text-slate-500 mb-2">{pkg.name.split(' ')[0]}</div>
+                            <div className="relative w-12 h-12 mx-auto mb-2">
+                              <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e2e8f0" strokeWidth="3"/>
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke={pct>=90?'#10b981':'#6366f1'} strokeWidth="3"
+                                  strokeDasharray={`${pct} ${100-pct}`} strokeLinecap="round"/>
+                              </svg>
+                              <div className="absolute inset-0 flex items-center justify-center text-[11px] font-black text-slate-700">{pct}%</div>
+                            </div>
+                            <div className="text-[11px] text-slate-500">{pkg.enrolled}/{pkg.capacity}명</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </main>
+
+          {/* ══ 캘린더 슬라이드 패널 ══ */}
+          {calOpen && (
+            <aside className="w-[340px] shrink-0 border-l border-slate-200 bg-white flex flex-col overflow-hidden animate-slideRight">
+              {/* 헤더 */}
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-1">
+                  <button onClick={()=>setCalMonth(m=>m>1?m-1:12)}
+                    className="w-6 h-6 rounded-md bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors"><ChevronLeft size={12}/></button>
+                  <span className="text-[13px] font-black text-slate-700 w-[90px] text-center">2026년 {calMonth}월</span>
+                  <button onClick={()=>setCalMonth(m=>m<12?m+1:1)}
+                    className="w-6 h-6 rounded-md bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors"><ChevronRight size={12}/></button>
+                </div>
+                <button onClick={()=>setCalOpen(false)}
+                  className="w-6 h-6 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors"><X size={12}/></button>
+              </div>
+              {/* 차수 범례 */}
+              <div className="px-3 py-2 border-b border-slate-100 flex flex-wrap gap-1.5 shrink-0">
+                {COURSE.packages.map((p,pi)=>{
+                  const c=PKG_COLORS[pi%PKG_COLORS.length];
+                  return (
+                    <div key={p.id} className={`flex items-center gap-1 text-[10px] font-bold ${c.text} ${c.light} border ${c.border} px-2 py-0.5 rounded-md`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${c.dot}`}/>{p.name.split(' ')[0]}
+                    </div>
+                  );
+                })}
+              </div>
+              {/* 캘린더 그리드 */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
+                <div className="grid grid-cols-7 mb-1">
+                  {['월','화','수','목','금','토','일'].map(d=>(
+                    <div key={d} className={`text-center text-[10px] font-bold py-1 ${d==='일'?'text-rose-400':d==='토'?'text-blue-400':'text-slate-400'}`}>{d}</div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 gap-0.5">
+                  {calDaysData.map((day,i)=>{
+                    if(!day) return <div key={i}/>;
+                    const dateStr=`2026-${String(calMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                    const sessions=sessByDate[dateStr]||[];
+                    const isToday=dateStr===TODAY;
+                    const isPast=dateStr<TODAY;
+                    return (
+                      <div key={i} className={`relative rounded-lg p-1 min-h-[44px] cursor-pointer hover:bg-slate-50 transition-colors ${isToday?'bg-indigo-50 ring-1 ring-indigo-300':''}`}>
+                        <div className={`text-[11px] font-bold text-center mb-0.5 ${isToday?'text-indigo-600':isPast?'text-slate-300':'text-slate-700'}`}>{day}</div>
+                        <div className="flex flex-wrap gap-0.5 justify-center">
+                          {sessions.map((s,si)=>{
+                            const pkgIdx=COURSE.packages.findIndex(p=>p.id===s.pkgId);
+                            const c=PKG_COLORS[pkgIdx%PKG_COLORS.length];
+                            return <div key={si} className={`w-2 h-2 rounded-full ${c.dot}`}/>;
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* 해당 월 세션 목록 */}
+                <div className="mt-4 space-y-1.5">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">{calMonth}월 일정</div>
+                  {COURSE.packages.flatMap(p=>p.sessions.map(s=>({...s,pkgId:p.id,pkgName:p.name,place:p.place})))
+                    .filter(s=>s.date.startsWith(`2026-${String(calMonth).padStart(2,'0')}`))
+                    .sort((a,b)=>a.date.localeCompare(b.date))
+                    .map((s,i)=>{
+                      const pkgIdx=COURSE.packages.findIndex(p=>p.id===s.pkgId);
+                      const c=PKG_COLORS[pkgIdx%PKG_COLORS.length];
+                      const isToday=s.date===TODAY;
+                      return (
+                        <div key={i} onClick={()=>setCalPopover(s)} className={`flex items-start gap-2 rounded-lg p-2.5 cursor-pointer hover:opacity-75 transition-opacity ${isToday?'bg-indigo-50 border border-indigo-200':'bg-slate-50'}`}>
+                          <div className={`w-2 h-2 rounded-full ${c.dot} mt-1 shrink-0`}/>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[11px] font-bold text-slate-700 truncate">{s.pkgName} · {s.name}</div>
+                            <div className="text-[10px] text-slate-400">{fmtShort(s.date)} {s.start}~{s.end}</div>
+                          </div>
+                          {isToday && <span className="text-[9px] font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded-full shrink-0">오늘</span>}
+                        </div>
+                      );
+                    })}
+                  {COURSE.packages.flatMap(p=>p.sessions).filter(s=>s.date.startsWith(`2026-${String(calMonth).padStart(2,'0')}`)).length===0 && (
+                    <div className="text-[12px] text-slate-400 text-center py-4">이 달에 일정이 없습니다</div>
+                  )}
+                </div>
+              </div>
+            </aside>
+          )}
+        </div>
+
+        {/* ══ 수강생 등록 모달 ══ */}
+        {showEnrollModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-xl w-[500px] flex flex-col animate-slideUp">
+              {/* 헤더 */}
+              <div className="flex items-center justify-between px-6 pt-5 pb-4">
+                <div className="text-[17px] font-black text-slate-900">수강생 등록</div>
+                <button onClick={()=>{setShowEnrollModal(false);setEnrollSearch('');setSelectedMembers(new Set());setShowMemberPicker(false);setEnrollTab('member');setEnrollType('selected');}}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-colors"><X size={16}/></button>
+              </div>
+              {/* 탭 */}
+              <div className="px-6 pb-4 flex gap-1 border-b border-slate-200">
+                {[{key:'member',label:'회원'},{key:'group',label:'그룹'},{key:'bulk',label:'대량 등록'},{key:'id',label:'아이디 입력'}].map(t=>(
+                  <button key={t.key} onClick={()=>setEnrollTab(t.key)}
+                    className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-colors ${enrollTab===t.key?'bg-indigo-600 text-white':'text-slate-500 hover:bg-slate-100'}`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              {/* 본문 */}
+              <div className="px-6">
+                {/* 코스 */}
+                <div className="flex items-center gap-6 py-4 border-b border-slate-100">
+                  <span className="text-[13px] font-bold text-slate-500 w-10 shrink-0">코스</span>
+                  <span className="text-[14px] font-bold text-slate-800">{COURSE.title}</span>
+                </div>
+                {/* 회원 탭 */}
+                {enrollTab==='member' && (
+                  <div className="flex items-start gap-6 py-5 border-b border-slate-100">
+                    <span className="text-[13px] font-bold text-slate-500 w-10 shrink-0 mt-0.5">회원</span>
+                    <div className="flex-1 space-y-3">
+                      <label className="flex items-center gap-2.5 cursor-pointer">
+                        <input type="radio" name="enrollType" checked={enrollType==='all'} onChange={()=>setEnrollType('all')} className="w-4 h-4 accent-indigo-600"/>
+                        <span className="text-[14px] font-semibold text-slate-700">전체 회원</span>
+                      </label>
+                      <div>
+                        <label className="flex items-center gap-2.5 cursor-pointer mb-3">
+                          <input type="radio" name="enrollType" checked={enrollType==='selected'} onChange={()=>setEnrollType('selected')} className="w-4 h-4 accent-indigo-600"/>
+                          <span className="text-[14px] font-semibold text-slate-700">선택한 회원</span>
+                        </label>
+                        {enrollType==='selected' && (
+                          <div className="ml-6">
+                            {selectedMembers.size>0 && (
+                              <div className="flex flex-wrap gap-1.5 mb-3">
+                                {STUDENT_POOL.filter(s=>selectedMembers.has(s.id)).map(s=>(
+                                  <span key={s.id} className="flex items-center gap-1 text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-1 rounded-full">
+                                    {s.name}
+                                    <button onClick={()=>setSelectedMembers(prev=>{const n=new Set(prev);n.delete(s.id);return n;})} className="text-indigo-400 hover:text-indigo-700 ml-0.5"><X size={10}/></button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            <button onClick={()=>setShowMemberPicker(p=>!p)}
+                              className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white rounded-full text-[13px] font-bold hover:bg-indigo-700 transition-colors">
+                              <Plus size={13}/> 회원 선택
+                            </button>
+                            {showMemberPicker && (
+                              <div className="mt-3 border border-slate-200 rounded-xl overflow-hidden">
+                                <div className="relative px-3 py-2 border-b border-slate-100 bg-slate-50">
+                                  <Search size={12} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"/>
+                                  <input value={enrollSearch} onChange={e=>setEnrollSearch(e.target.value)} placeholder="이름 검색..."
+                                    className="w-full pl-7 pr-3 py-1 text-[12px] outline-none bg-transparent"/>
+                                </div>
+                                <div className="max-h-[160px] overflow-y-auto custom-scrollbar">
+                                  {STUDENT_POOL.filter(s=>!enrollSearch||s.name.includes(enrollSearch)).map(s=>(
+                                    <div key={s.id} onClick={()=>setSelectedMembers(prev=>{const n=new Set(prev);n.has(s.id)?n.delete(s.id):n.add(s.id);return n;})}
+                                      className={`flex items-center gap-2.5 px-4 py-2.5 cursor-pointer transition-colors ${selectedMembers.has(s.id)?'bg-indigo-50':'hover:bg-slate-50'}`}>
+                                      <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-black text-indigo-600 shrink-0">{s.name[0]}</div>
+                                      <div className="flex-1">
+                                        <div className="text-[12px] font-bold text-slate-800">{s.name}</div>
+                                        <div className="text-[11px] text-slate-400">{s.group}</div>
+                                      </div>
+                                      {selectedMembers.has(s.id) && <CheckCircle size={14} className="text-indigo-500 shrink-0"/>}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {enrollTab==='group' && (
+                  <div className="flex items-center justify-center py-12 text-[13px] text-slate-400">그룹 선택 기능은 준비 중입니다</div>
+                )}
+                {enrollTab==='bulk' && (
+                  <div className="flex flex-col items-center gap-3 py-8">
+                    <p className="text-[13px] text-slate-500">엑셀 파일로 수강생을 대량 등록합니다</p>
+                    <button onClick={downloadSampleExcel}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-[13px] font-bold hover:bg-emerald-100 transition-colors">
+                      <Download size={13}/> 양식 다운로드
+                    </button>
+                    <div className="w-full mt-1 border-2 border-dashed border-slate-200 rounded-xl px-10 py-8 text-center text-[12px] text-slate-400 cursor-pointer hover:border-indigo-300 hover:text-indigo-400 transition-colors">
+                      파일을 여기에 끌어다 놓거나 클릭하여 업로드하세요<br/>
+                      <span className="text-[11px] text-slate-300 mt-1 block">.csv, .xlsx 지원</span>
+                    </div>
+                  </div>
+                )}
+                {enrollTab==='id' && (
+                  <div className="flex items-start gap-6 py-5 border-b border-slate-100">
+                    <span className="text-[13px] font-bold text-slate-500 w-10 shrink-0 mt-2">아이디</span>
+                    <textarea placeholder="아이디(이메일)를 줄바꿈으로 구분하여 입력하세요"
+                      className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-indigo-400 h-28 resize-none"/>
+                  </div>
+                )}
+              </div>
+              {/* 하단 버튼 */}
+              <div className="flex justify-end px-6 py-4 border-t border-slate-100 mt-2">
+                <button
+                  disabled={enrollTab==='member' && enrollType==='selected' && selectedMembers.size===0}
+                  className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-colors
+                    ${enrollTab!=='member' || enrollType==='all' || selectedMembers.size>0
+                      ?'bg-indigo-600 text-white hover:bg-indigo-700'
+                      :'bg-slate-100 text-slate-400 cursor-not-allowed'}`}>
+                  <CheckCircle size={14}/> 등록
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ 운영 종료 확인 ══ */}
+        {operationConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-xl w-[420px] animate-slideUp p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center shrink-0">
+                  <Power size={18} className="text-rose-500"/>
+                </div>
+                <div>
+                  <div className="text-[16px] font-black text-slate-900">운영 종료</div>
+                  <div className="text-[12px] text-slate-400 mt-0.5">이 작업은 되돌릴 수 없습니다</div>
+                </div>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 space-y-1.5">
+                <div className="flex items-center gap-2 text-[12px] font-semibold text-amber-700">
+                  <AlertCircle size={13}/> 종료 전 확인 사항
+                </div>
+                <div className="text-[12px] text-amber-600 space-y-1 pl-5">
+                  <div>• 종료 후 신규 수강 등록 및 QR 출석이 불가합니다</div>
+                  <div>• 출석·수료 데이터 조회 및 수정은 가능합니다</div>
+                </div>
+              </div>
+              <div className="text-[13px] text-slate-600 mb-5">정말 코스 운영을 종료하시겠습니까?</div>
+              <div className="flex gap-2 justify-end">
+                <button onClick={()=>setOperationConfirm(false)}
+                  className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                  취소
+                </button>
+                <button onClick={()=>setOperationConfirm(false)}
+                  className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white bg-rose-500 hover:bg-rose-600 transition-colors flex items-center gap-1.5">
+                  <Power size={13}/> 운영 종료
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ 회차 상세 팝오버 ══ */}
+        {calPopover && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={()=>setCalPopover(null)}>
+            <div className="bg-white rounded-2xl shadow-xl w-[360px] animate-slideUp" onClick={e=>e.stopPropagation()}>
+              <div className="flex items-start justify-between px-5 py-4 border-b border-slate-100">
+                <div>
+                  <div className="text-[15px] font-black text-slate-900">{calPopover.pkgName}</div>
+                  <div className="text-[13px] font-bold text-indigo-600 mt-0.5">{calPopover.name}</div>
+                  <div className="flex items-center gap-2 mt-1.5 text-[11px] text-slate-400">
+                    <span className="flex items-center gap-1"><Calendar size={10}/>{fmtDate(calPopover.date)}</span>
+                    <span>·</span>
+                    <span>{calPopover.start}~{calPopover.end}</span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1"><MapPin size={10}/>{calPopover.place}</span>
+                  </div>
+                </div>
+                <button onClick={()=>setCalPopover(null)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-colors shrink-0">
+                  <X size={14}/>
+                </button>
+              </div>
+              <div className="p-5">
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {[
+                    {label:'출석', val:calPopover.att,     color:'text-emerald-600', bg:'bg-emerald-50'},
+                    {label:'지각', val:calPopover.late,    color:'text-amber-500',   bg:'bg-amber-50'},
+                    {label:'결석', val:calPopover.abs,     color:'text-red-500',     bg:'bg-rose-50'},
+                    {label:'미확인', val:calPopover.pending, color:'text-slate-400', bg:'bg-slate-50'},
+                  ].map(s=>(
+                    <div key={s.label} className={`${s.bg} rounded-xl p-3 text-center`}>
+                      <div className={`text-[22px] font-black ${s.color} leading-none`}>{s.val}</div>
+                      <div className={`text-[10px] font-bold ${s.color} mt-1`}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  {calPopover.date === TODAY && (
+                    <button onClick={()=>{setLiveMode(true);setCalPopover(null);}}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-indigo-500 text-white rounded-xl text-[13px] font-bold hover:bg-indigo-600 transition-colors shadow-sm">
+                      <QrCode size={14}/> QR 출석
+                    </button>
+                  )}
+                  <button onClick={()=>{setTab('attendance');setOpenPkgs(prev=>new Set([...prev,calPopover.pkgId]));setCalPopover(null);}}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-[13px] font-bold hover:bg-slate-200 transition-colors">
+                    <CheckSquare size={14}/> 출석탭에서 보기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* ── 출석 명단 모달 ── */}
+        {attModal && (()=>{
+          const {pkg:mp,session:ms,pkgL:mL}=attModal;
+          const FILTERS=[
+            {key:'all',label:'전체'},
+            {key:'att',label:'출석·지각'},
+            {key:'absent',label:'결석'},
+            {key:'pending',label:'미확인'},
+          ];
+          const filtered=mL.filter(l=>{
+            const st=attendanceMap[`${l.id}_${ms.id}`]||'pending';
+            const matchFilter=
+              modalFilter==='all'||
+              (modalFilter==='att'&&['attended','late','early_leave'].includes(st))||
+              (modalFilter==='absent'&&st==='absent')||
+              (modalFilter==='pending'&&st==='pending');
+            const matchSearch=!modalSearch||l.name.includes(modalSearch);
+            return matchFilter&&matchSearch;
+          });
+          return (
+            <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 animate-fadeIn"
+              onClick={()=>setAttModal(null)}>
+              <div className="bg-white rounded-2xl shadow-2xl w-[600px] max-h-[80vh] flex flex-col animate-modalFade"
+                onClick={e=>e.stopPropagation()}>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                  <div>
+                    <div className="text-[15px] font-bold text-slate-800">
+                      {ms.label||`${ms.date.slice(5).replace('-','/')} 회차`} 출석 명단
+                    </div>
+                    <div className="text-[12px] text-slate-400 mt-0.5">{mp.name} · 총 {mL.length}명 · {ms.start}~{ms.end}</div>
+                  </div>
+                  <button onClick={()=>setAttModal(null)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors">
+                    <X size={15}/>
+                  </button>
+                </div>
+                <div className="px-5 pt-3 pb-2 flex items-center gap-3 border-b border-slate-100">
+                  <div className="flex gap-1">
+                    {FILTERS.map(f=>{
+                      const cnt=f.key==='all'?mL.length:mL.filter(l=>{
+                        const st=attendanceMap[`${l.id}_${ms.id}`]||'pending';
+                        return (f.key==='att'&&['attended','late','early_leave'].includes(st))||(f.key==='absent'&&st==='absent')||(f.key==='pending'&&st==='pending');
+                      }).length;
+                      return (
+                        <button key={f.key} onClick={()=>setModalFilter(f.key)}
+                          className={`px-3 py-1 rounded-lg text-[12px] font-bold transition-colors ${modalFilter===f.key?'bg-indigo-600 text-white':'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                          {f.label} <span className="opacity-70">{cnt}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex-1">
+                    <input value={modalSearch} onChange={e=>setModalSearch(e.target.value)}
+                      placeholder="이름 검색..."
+                      className="w-full px-3 py-1.5 text-[12px] border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-400 bg-slate-50"/>
+                  </div>
+                </div>
+                <div className="overflow-y-auto flex-1">
+                  {filtered.length===0
+                    ? <div className="py-10 text-center text-[13px] text-slate-300">해당 조건의 수강생이 없습니다</div>
+                    : <table className="w-full text-[12px]">
+                        <thead className="bg-slate-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2.5 text-left font-bold text-slate-500 text-[11px]">이름</th>
+                            <th className="px-4 py-2.5 text-center font-bold text-slate-500 text-[11px]">상태</th>
+                            <th className="px-4 py-2.5 text-center font-bold text-slate-500 text-[11px]">QR 스캔</th>
+                            <th className="px-4 py-2.5 text-center font-bold text-slate-500 text-[11px]">관리자 인정</th>
+                            <th className="px-4 py-2.5 text-center font-bold text-slate-500 text-[11px]">변경</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map((l,li)=>{
+                            const key=`${l.id}_${ms.id}`;
+                            const st=attendanceMap[key]||'pending';
+                            const cfg=ATT_CFG[st];
+                            const scanTs=scanTimeMap[key];
+                            const manTs=tsMap[key];
+                            const isDDOpen=openDropdown===`modal_${key}`;
+                            return (
+                              <tr key={l.id} className={`border-t border-slate-100 hover:bg-slate-50 transition-colors ${li%2===0?'bg-white':'bg-slate-50/30'}`}>
+                                <td className="px-4 py-2.5 font-bold text-slate-700">{l.name}</td>
+                                <td className="px-4 py-2.5 text-center">
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold ${cfg.bg} ${cfg.color} ${cfg.border} border`}>
+                                    {cfg.label}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-2.5 text-center text-[11px] font-mono text-slate-500">
+                                  {scanTs?<span className="flex items-center justify-center gap-1"><QrCode size={9} className="text-indigo-400"/>{scanTs.slice(11,16)}</span>:<span className="text-slate-200">—</span>}
+                                </td>
+                                <td className="px-4 py-2.5 text-center text-[11px] font-mono text-slate-500">
+                                  {manTs?<span className="flex items-center justify-center gap-1"><Pencil size={9}/>{manTs.slice(11,16)}</span>:<span className="text-slate-200">—</span>}
+                                </td>
+                                <td className="px-4 py-2.5 text-center">
+                                  <div className="inline-block">
+                                    <button onClick={e=>toggleDD(`modal_${key}`,e)}
+                                      className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-colors ${cfg.bg} ${cfg.color} ${cfg.border} hover:opacity-75`}>
+                                      변경 <ChevronDown size={9} className="inline"/>
+                                    </button>
+                                    {isDDOpen && (
+                                      <div className="fixed z-[400] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden w-[130px] animate-fadeIn"
+                                        onClick={e=>e.stopPropagation()}
+                                        style={{left:dropdownPos.x,top:dropdownPos.y}}>
+                                        {['attended','late','early_leave','absent'].map(opt=>(
+                                          <button key={opt}
+                                            onClick={()=>{recordAttendance(l.id,ms.id,opt,mp.id,l.name);setOpenDropdown(null);}}
+                                            className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] font-bold text-left transition-colors ${st===opt?`${ATT_CFG[opt].bg} ${ATT_CFG[opt].color}`:'text-slate-600 hover:bg-slate-50'}`}>
+                                            {st===opt?<CheckCircle size={11} className="shrink-0"/>:<span className="w-[11px] shrink-0 inline-block"/>}
+                                            {ATT_CFG[opt].label}
+                                          </button>
+                                        ))}
+                                        <div className="my-1 border-t border-slate-100"/>
+                                        <button onClick={()=>{recordAttendance(l.id,ms.id,'pending',mp.id,l.name);setOpenDropdown(null);}}
+                                          className="w-full flex items-center gap-2 px-3 py-2 text-[11px] text-slate-400 hover:bg-slate-50 text-left transition-colors">
+                                          <span className="w-[11px] shrink-0 inline-block"/>미확인으로
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                  }
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+        </div>
+      </div>
+    );
+  };
+
+  createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

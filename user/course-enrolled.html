@@ -244,13 +244,42 @@
     .pkg-status.full { background: #F1F5F9; color: #94A3B8; }
     .pkg-status.mine { background: var(--body-bg); color: var(--secondary); }
 
-    /* 취소 사유 */
-    .cancel-textarea {
-      width: 100%; height: 80px; border: 1px solid var(--border); border-radius: 8px;
-      padding: 12px; font-size: 13px; font-family: inherit; resize: none;
-      margin-top: 12px;
+    /* ── 출석률 바 (75% 기준선) ── */
+    .enroll-bar-wrap {
+      margin-top: 16px; padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,.15);
     }
-    .cancel-textarea:focus { outline: none; border-color: var(--primary); }
+    .enroll-bar-label {
+      display: flex; justify-content: space-between;
+      font-size: 11px; font-weight: 600; opacity: .8; margin-bottom: 8px;
+    }
+    .enroll-bar-track {
+      height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,.2); position: relative;
+    }
+    .enroll-bar-fill {
+      height: 100%; border-radius: 3px;
+      background: rgba(255,255,255,.85); transition: width .4s ease;
+    }
+    .graduation-line {
+      position: absolute; top: -6px; bottom: -6px; width: 2px;
+      background: rgba(255,220,80,.9); left: 75%;
+    }
+    .graduation-label {
+      position: absolute; top: -20px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px; font-weight: 800; white-space: nowrap;
+      color: rgba(255,220,80,1); letter-spacing: .2px;
+    }
+
+    /* ── 버튼별 힌트 문구 ── */
+    .btn-hint {
+      font-size: 11px; font-weight: 600; margin-top: 5px;
+      text-align: center; display: none;
+    }
+    .btn-hint.warn { color: var(--error); }
+    .btn-hint.amber { color: var(--warning); }
+
 
     /* 결과 화면 */
     .result-center {
@@ -281,6 +310,7 @@
   <div class="proto-chips">
     <button class="proto-chip active" onclick="setPolicy('open')">기한 내 (변경·취소 가능)</button>
     <button class="proto-chip" onclick="setPolicy('change-expired')">변경 기한 경과</button>
+    <button class="proto-chip" onclick="setPolicy('all-expired')">모든 기한 경과</button>
   </div>
 </div>
 
@@ -316,6 +346,20 @@
         <div class="enroll-item">
           <div class="enroll-item-label">장소</div>
           <div class="enroll-item-val">본사 대교육장</div>
+        </div>
+      </div>
+
+      <!-- 출석률 바 + 75% 수료 기준선 -->
+      <div class="enroll-bar-wrap">
+        <div class="enroll-bar-label">
+          <span>출석률</span>
+          <span>수료 기준 75%</span>
+        </div>
+        <div class="enroll-bar-track">
+          <div class="enroll-bar-fill" style="width:100%"></div>
+          <div class="graduation-line">
+            <span class="graduation-label">75%</span>
+          </div>
         </div>
       </div>
     </div>
@@ -401,12 +445,18 @@
     <!-- ══ 일정 변경 / 수강 취소 ══ -->
     <div class="action-section">
       <div class="action-btns">
-        <button class="action-btn change" id="btn-change" onclick="openChangeSheet()">
-          <i class="fa-solid fa-arrow-right-arrow-left" style="font-size:13px;"></i> 일정 변경
-        </button>
-        <button class="action-btn cancel" id="btn-cancel" onclick="openCancelModal()">
-          <i class="fa-solid fa-xmark" style="font-size:14px;"></i> 수강 취소
-        </button>
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <button class="action-btn change" id="btn-change" onclick="openChangeSheet()">
+            <i class="fa-solid fa-arrow-right-arrow-left" style="font-size:13px;"></i> 일정 변경
+          </button>
+          <div class="btn-hint amber" id="hint-change">일정 변경 기한이 지났어요</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <button class="action-btn cancel" id="btn-cancel" onclick="openCancelModal()">
+            <i class="fa-solid fa-xmark" style="font-size:14px;"></i> 수강 취소
+          </button>
+          <div class="btn-hint warn" id="hint-cancel">취소 기한이 지났어요</div>
+        </div>
       </div>
       <div class="action-notice info" id="action-notice">
         교육 시작 <strong>5일 전</strong>까지 변경, <strong>3일 전</strong>까지 취소 가능합니다.
@@ -426,7 +476,7 @@
 <!-- ══ 취소 확인 ══ -->
 <div class="app" id="app-cancelled" style="display:none;">
   <div class="nav">
-    <button class="nav-back" onclick="location.href='user-my.html'">✕</button>
+    <button class="nav-back" onclick="location.href='my.html'">✕</button>
     <span class="nav-title">취소 완료</span>
   </div>
   <div class="scroll-area" style="display:flex; flex-direction:column; justify-content:center;">
@@ -437,7 +487,7 @@
     </div>
   </div>
   <div class="bottom-cta">
-    <button class="btn-primary qr" style="background:var(--black);" onclick="location.href='user-my.html'">MY로 돌아가기</button>
+    <button class="btn-primary qr" style="background:var(--black);" onclick="location.href='my.html'">MY로 돌아가기</button>
   </div>
 </div>
 
@@ -499,7 +549,6 @@
     <div style="font-size:13px;color:var(--secondary);text-align:center;line-height:1.5;margin-bottom:12px;">
       취소 후 재신청은 잔여석이 있는 경우에만 가능합니다.
     </div>
-    <textarea class="cancel-textarea" placeholder="취소 사유를 입력해 주세요 (선택)"></textarea>
     <div class="modal-btn-row">
       <button class="modal-btn outline" onclick="closeCancelModal()">돌아가기</button>
       <button class="modal-btn danger" onclick="confirmCancel()">취소 확정</button>
@@ -532,16 +581,29 @@ function setPolicy(policy) {
   const btnCancel = document.getElementById('btn-cancel');
   const notice = document.getElementById('action-notice');
 
+  const hintChange = document.getElementById('hint-change');
+  const hintCancel = document.getElementById('hint-cancel');
+
+  btnChange.disabled = false;
+  btnCancel.disabled = false;
+  hintChange.style.display = 'none';
+  hintCancel.style.display = 'none';
+
   if (policy === 'open') {
-    btnChange.disabled = false;
-    btnCancel.disabled = false;
     notice.className = 'action-notice info';
     notice.innerHTML = '교육 시작 <strong>5일 전</strong>까지 변경, <strong>3일 전</strong>까지 취소 가능합니다.';
   } else if (policy === 'change-expired') {
     btnChange.disabled = true;
-    btnCancel.disabled = false;
+    hintChange.style.display = 'block';
     notice.className = 'action-notice amber';
-    notice.innerHTML = '⚠️ 일정 변경 기한이 경과했습니다. <strong>취소만 가능</strong>합니다.';
+    notice.innerHTML = '취소는 기한 내 가능합니다.';
+  } else if (policy === 'all-expired') {
+    btnChange.disabled = true;
+    btnCancel.disabled = true;
+    hintChange.style.display = 'block';
+    hintCancel.style.display = 'block';
+    notice.className = 'action-notice warn';
+    notice.innerHTML = '변경 및 취소 기한이 모두 경과했습니다.';
   }
 }
 
