@@ -227,7 +227,12 @@
       color: var(--error); background: #FEF2F2;
     }
 
-    /* ── QR 결과 모달 ── */
+    /* ── QR 자동 닫힘 카운터 ── */
+.qr-auto-dismiss {
+  font-size: 12px; color: var(--secondary); margin-top: 8px; font-weight: 600;
+}
+
+/* ── QR 결과 모달 ── */
     .qr-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,.55); z-index: 600;
@@ -606,7 +611,7 @@
         </div>
 
         <!-- 카드 1: 진행중 코스 -->
-        <div class="course-card" onclick="location.href='user1-enrolled.html'">
+        <div class="course-card" onclick="location.href='course-enrolled.html'">
           <div class="card-top">
             <div class="card-thumb" style="background: linear-gradient(135deg, #5569ff, #7B8BFF); color: #fff;">📋</div>
             <div class="card-info">
@@ -632,7 +637,7 @@
         </div>
 
         <!-- 카드 2: 예정 코스 -->
-        <div class="course-card" onclick="location.href='user1-enrolled.html'">
+        <div class="course-card" onclick="location.href='course-enrolled.html'">
           <div class="card-top">
             <div class="card-thumb" style="background: linear-gradient(135deg, #10B981, #34D399); color: #fff;">🎯</div>
             <div class="card-info">
@@ -664,7 +669,7 @@
           <h3>완료된 코스 <span class="count">1</span></h3>
         </div>
 
-        <div class="done-card" onclick="location.href='user1-completed.html'">
+        <div class="done-card" onclick="location.href='course-completed.html'">
           <div class="done-thumb">🏆</div>
           <div class="done-info">
             <div class="done-name">2025 하반기 리더십 심화</div>
@@ -684,7 +689,7 @@
         <div class="icon">📭</div>
         <div class="msg">수강중인 오프라인 코스가 없습니다</div>
         <div class="sub">오프라인 코스를 탐색하고 교육에 신청해 보세요.</div>
-        <button class="btn-explore"><i class="fa-solid fa-compass"></i> 코스 탐색하기</button>
+        <button class="btn-explore" onclick="location.href='category.html'"><i class="fa-solid fa-compass"></i> 코스 탐색하기</button>
       </div>
     </div>
 
@@ -707,10 +712,10 @@
 <div class="qr-overlay" id="qr-success" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon success"><i class="fa-solid fa-check"></i></div>
-    <div class="qr-modal-title">출석 완료</div>
+    <div class="qr-modal-title">출석 완료!</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-name">홍길동 님</div>
-    <div class="qr-modal-desc">출석이 완료되었습니다.</div>
+    <div class="qr-modal-desc">오늘도 화이팅이에요</div>
     <div class="qr-modal-time">2026.04.12 08:57</div>
     <button class="qr-modal-btn primary" onclick="closeQr()">확인</button>
   </div>
@@ -720,46 +725,45 @@
 <div class="qr-overlay" id="qr-late" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon late-icon"><i class="fa-solid fa-clock"></i></div>
-    <div class="qr-modal-title">지각 처리</div>
+    <div class="qr-modal-title">지각 처리됐어요</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-name">홍길동 님</div>
-    <div class="qr-modal-desc">출석 시간이 지나 지각으로 처리되었습니다.</div>
+    <div class="qr-modal-desc">다음엔 일찍 와요!</div>
     <div class="qr-modal-time" style="color:#E65100;">2026.04.12 09:23</div>
     <button class="qr-modal-btn primary" style="background:#E65100;" onclick="closeQr()">확인</button>
   </div>
 </div>
 
-<!-- 출석 기간 종료 -->
+<!-- 체크인 시간 종료 -->
 <div class="qr-overlay" id="qr-expired" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon fail"><i class="fa-solid fa-xmark"></i></div>
-    <div class="qr-modal-title">출석 기간 종료</div>
-    <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
-    <div class="qr-modal-desc">출석 체크 기간이 종료되었습니다.<br>관리자에게 문의해 주세요.</div>
-    <div style="height:8px"></div>
-    <button class="qr-modal-btn gray" onclick="closeQr()">홈으로</button>
+    <div class="qr-modal-title">체크인 시간이 지났어요</div>
+    <div class="qr-modal-desc" style="margin-top:8px;">강사에게 문의해주세요</div>
+    <div style="height:12px"></div>
+    <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
   </div>
 </div>
 
-<!-- 출석 대상 아님 -->
+<!-- 수강 대상 아님 -->
 <div class="qr-overlay" id="qr-notarget" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon fail"><i class="fa-solid fa-user-xmark"></i></div>
-    <div class="qr-modal-title">출석 대상이 아닙니다</div>
-    <div class="qr-modal-desc" style="margin-top:8px;">해당 코스의 수강 대상이 아닙니다.<br>관리자에게 문의해 주세요.</div>
-    <div style="height:8px"></div>
-    <button class="qr-modal-btn gray" onclick="closeQr()">홈으로</button>
+    <div class="qr-modal-title">수강 대상이 아니에요</div>
+    <div class="qr-modal-desc" style="margin-top:8px;">현재 회차 수강생이 아닙니다</div>
+    <div style="height:12px"></div>
+    <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
   </div>
 </div>
 
-<!-- 출석 체크 시작 전 -->
+<!-- 수업 시작 전 -->
 <div class="qr-overlay" id="qr-notyet" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon wait"><i class="fa-regular fa-clock"></i></div>
-    <div class="qr-modal-title">아직 출석 시간이 아닙니다</div>
+    <div class="qr-modal-title">아직 시작 전이에요</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
-    <div class="qr-modal-desc" style="margin-top:8px;">출석 체크는 교육 시작 시간부터<br>가능합니다. 잠시 후 다시 시도해 주세요.</div>
-    <div style="height:8px"></div>
+    <div class="qr-modal-desc" style="margin-top:8px;">수업 시작 후 다시 스캔해주세요</div>
+    <div style="height:12px"></div>
     <button class="qr-modal-btn primary" onclick="closeQr()">확인</button>
   </div>
 </div>
@@ -830,10 +834,16 @@ function setView(view) {
 }
 
 /* ── QR result modals ── */
+let qrDismissTimer = null;
 function showQr(id) {
+  closeQr();
   document.getElementById(id).classList.add('open');
+  if (id === 'qr-success' || id === 'qr-late') {
+    qrDismissTimer = setTimeout(closeQr, 3000);
+  }
 }
 function closeQr() {
+  if (qrDismissTimer) { clearTimeout(qrDismissTimer); qrDismissTimer = null; }
   document.querySelectorAll('.qr-overlay').forEach(o => o.classList.remove('open'));
 }
 

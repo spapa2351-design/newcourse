@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>운영팀 정책 가이드</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; font-size: 14px; }
+
+  /* ── 사이드바 ── */
+  #sidebar { width: 240px; min-width: 240px; }
+  .nav-group-title { font-size: 10.5px; font-weight: 700; color: #94a3b8; letter-spacing: .08em; text-transform: uppercase; padding: 14px 14px 5px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 7px; font-size: 13px; color: #475569; cursor: pointer; transition: all .12s; user-select: none; }
+  .nav-item:hover { background: #f1f5f9; color: #1e293b; }
+  .nav-item.active { background: #fff7ed; color: #c2410c; font-weight: 600; }
+  .nav-item.active .nav-dot { background: #ea580c; }
+  .nav-dot { width: 7px; height: 7px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; transition: background .12s; }
+  .nav-sub { padding: 4px 14px 4px 33px; font-size: 12px; color: #64748b; cursor: pointer; border-radius: 7px; transition: all .12s; }
+  .nav-sub:hover { background: #f8fafc; color: #334155; }
+  .nav-sub.active { color: #ea580c; font-weight: 600; background: #fff7ed; }
+  .nav-arrow { margin-left: auto; font-size: 10px; color: #94a3b8; transition: transform .15s; }
+  .nav-arrow.open { transform: rotate(90deg); }
+  .nav-children { overflow: hidden; max-height: 0; transition: max-height .25s ease; }
+  .nav-children.open { max-height: 600px; }
+  .nav-divider { border-top: 1px solid #f1f5f9; margin: 6px 10px; }
+
+  /* ── 페이지 ── */
+  #content { flex: 1; min-width: 0; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-tag { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+  .page-title { font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+  .page-desc { font-size: 13.5px; color: #64748b; line-height: 1.7; max-width: 700px; margin-bottom: 28px; }
+
+  /* ── 섹션 ── */
+  .guide-section { margin-bottom: 40px; }
+  .section-title { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 8px; padding-bottom: 7px; border-bottom: 2px solid #fed7aa; display: flex; align-items: center; gap-6px; }
+  .section-tag { font-size: 10px; font-weight: 700; background: #ffedd5; color: #c2410c; padding: 2px 7px; border-radius: 4px; margin-left: 8px; }
+
+  /* ── 엑셀 스타일 테이블 ── */
+  .xl-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .xl-table th { background: #f1f5f9; color: #374151; font-weight: 700; text-align: left; padding: 7px 10px; border: 1px solid #d1d5db; white-space: nowrap; font-size: 12px; }
+  .xl-table td { padding: 6px 10px; border: 1px solid #e5e7eb; color: #374151; vertical-align: top; line-height: 1.5; }
+  .xl-table tr:hover td { background: #f8fafc; }
+  .xl-table tr:nth-child(even) td { background: #fafafa; }
+  .xl-table tr:nth-child(even):hover td { background: #f1f5f9; }
+
+  /* ── 배지 ── */
+  .b { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .b-green { background: #d1fae5; color: #065f46; }
+  .b-orange { background: #ffedd5; color: #9a3412; }
+  .b-yellow { background: #fef9c3; color: #854d0e; }
+  .b-red { background: #fee2e2; color: #b91c1c; }
+  .b-slate { background: #f1f5f9; color: #475569; }
+  .b-blue { background: #dbeafe; color: #1d4ed8; }
+  .b-violet { background: #ede9fe; color: #6d28d9; }
+  .b-indigo { background: #e0e7ff; color: #3730a3; }
+
+  /* ── callout ── */
+  .callout { border-left: 3px solid; padding: 10px 14px; border-radius: 0 7px 7px 0; margin: 14px 0; font-size: 13px; line-height: 1.6; }
+  .callout-red { border-color: #ef4444; background: #fef2f2; color: #7f1d1d; }
+  .callout-blue { border-color: #3b82f6; background: #eff6ff; color: #1e3a8a; }
+  .callout-amber { border-color: #f59e0b; background: #fffbeb; color: #78350f; }
+  .callout-green { border-color: #10b981; background: #ecfdf5; color: #065f46; }
+
+  /* ── step ── */
+  .step-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+  .step-row:last-child { border-bottom: none; }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; background: #ea580c; color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-body { flex: 1; }
+  .step-action { font-weight: 600; font-size: 13.5px; color: #1e293b; }
+  .step-note { font-size: 12px; color: #64748b; margin-top: 3px; }
+
+  /* ── QA 빠른 색인 ── */
+  .q-index { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .q-chip { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #475569; cursor: pointer; transition: all .12s; }
+  .q-chip:hover { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+
+  /* ── 상태 카드 ── */
+  .status-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 16px; }
+  .status-card { border-radius: 10px; padding: 10px 8px; text-align: center; border: 1px solid; }
+
+  /* ── 검색 ── */
+  #search-wrap { position: relative; }
+  #search-input { width: 220px; padding: 5px 10px 5px 32px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #334155; background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center; outline: none; transition: border-color .15s, width .2s; }
+  #search-input:focus { border-color: #fb923c; background-color: #fff; width: 280px; }
+  #search-input::placeholder { color: #94a3b8; }
+  #search-drop { position: absolute; top: calc(100% + 6px); right: 0; width: 320px; background: white; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.1); z-index: 200; display: none; max-height: 340px; overflow-y: auto; }
+  #search-drop.show { display: block; }
+  .sr-group { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; padding: 8px 12px 3px; letter-spacing: .06em; }
+  .sr-item { display: flex; align-items: center; gap-8px; padding: 7px 12px; cursor: pointer; transition: background .1s; font-size: 13px; color: #334155; }
+  .sr-item:hover { background: #fff7ed; color: #c2410c; }
+  .sr-item .sr-cat { font-size: 10px; color: #94a3b8; margin-left: auto; white-space: nowrap; }
+  .sr-empty { padding: 16px 12px; text-align: center; color: #94a3b8; font-size: 13px; }
+
+  @media (max-width: 900px) { #sidebar { display: none; } }
+</style>
+</head>
+<body class="bg-slate-50">
+
+<!-- Top bar -->
+<header class="sticky top-0 z-50 bg-white border-b border-slate-200 flex items-center px-6 h-13 gap-3" style="height:52px">
+  <div class="flex items-center gap-2">
+    <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center">
+      <span class="text-white text-xs font-bold">OPS</span>
+    </div>
+    <span class="font-bold text-slate-800">운영팀 정책 가이드</span>
+  </div>
+  <div class="flex-1"></div>
+  <div id="search-wrap">
+    <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
+    <div id="search-drop"></div>
+  </div>
+  <span class="text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · 2026-04-28</span>
+</header>
+
+<div class="flex" style="min-height:calc(100vh - 52px)">
+
+<!-- Sidebar -->
+<aside id="sidebar" class="border-r border-slate-200 bg-white overflow-y-auto sticky top-13 self-start" style="top:52px;height:calc(100vh - 52px)">
+  <div class="py-3">
+
+    <div class="nav-group-title">개요</div>
+    <div class="nav-item active" onclick="showPage('overview',this)"><span class="nav-dot"></span>가이드 개요</div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">운영 케이스 Phase 1</div>
+    <div class="nav-item" onclick="showPage('case-overview',this)"><span class="nav-dot"></span>케이스 전체 목록</div>
+    <div class="nav-item" onclick="toggleNav('nav-cases',this)">
+      <span class="nav-dot"></span>흐름별 상세
+      <span class="nav-arrow" id="arr-cases">▶</span>
+    </div>
+    <div class="nav-children" id="nav-cases">
+      <div class="nav-sub" onclick="showPage('case-publish',this)">퍼블리싱 체크리스트</div>
+      <div class="nav-sub" onclick="showPage('case-open',this)">FLOW-01 코스 개설</div>
+      <div class="nav-sub" onclick="showPage('case-enroll-self',this)">FLOW-02 자율 수강신청</div>
+      <div class="nav-sub" onclick="showPage('case-enroll-assign',this)">FLOW-03 강제 할당</div>
+      <div class="nav-sub" onclick="showPage('case-attendance',this)">FLOW-04 현장 QR 출석</div>
+      <div class="nav-sub" onclick="showPage('case-browse',this)">FLOW-06 코스 목록 탐색</div>
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">1. 출석 처리</div>
+    <div class="nav-item" onclick="showPage('att-status',this)"><span class="nav-dot"></span>출석 상태 5종</div>
+    <div class="nav-item" onclick="showPage('att-late',this)"><span class="nav-dot"></span>지각 기준</div>
+    <div class="nav-item" onclick="showPage('att-change',this)"><span class="nav-dot"></span>상태 변경 규칙</div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">2. 회차 마감</div>
+    <div class="nav-item" onclick="showPage('close-flow',this)"><span class="nav-dot"></span>마감 절차</div>
+    <div class="nav-item" onclick="showPage('close-rules',this)"><span class="nav-dot"></span>마감 전후 규칙</div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">3. 수료 처리</div>
+    <div class="nav-item" onclick="showPage('cert-cond',this)"><span class="nav-dot"></span>수료 기준</div>
+    <div class="nav-item" onclick="showPage('cert-cases',this)"><span class="nav-dot"></span>케이스별 판정</div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">4. 수강신청 관리</div>
+    <div class="nav-item" onclick="showPage('enroll-types',this)"><span class="nav-dot"></span>신청 방식 2종</div>
+    <div class="nav-item" onclick="showPage('enroll-cases',this)"><span class="nav-dot"></span>상황별 처리</div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">5. 데이터 정정</div>
+    <div class="nav-item" onclick="showPage('data-perm',this)"><span class="nav-dot"></span>수정 가능 범위</div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">6. QR 현장 운영</div>
+    <div class="nav-item" onclick="showPage('qr-flow',this)"><span class="nav-dot"></span>QR 운영 절차</div>
+    <div class="nav-item" onclick="showPage('qr-trouble',this)"><span class="nav-dot"></span>스캔 오류 대응</div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">7. CS 응대</div>
+    <div class="nav-item" onclick="showPage('cs-guide',this)"><span class="nav-dot"></span>문의 유형별 처리</div>
+    <div class="nav-item" onclick="showPage('cs-escalate',this)"><span class="nav-dot"></span>에스컬레이션 기준</div>
+
+  </div>
+</aside>
+
+<!-- Content -->
+<main id="content" class="px-10 py-9 max-w-4xl">
+
+
+<!-- ══════════════════════════════════════════
+     운영 케이스 — 전체 목록
+══════════════════════════════════════════ -->
+<div id="page-case-overview" class="page">
+  <div class="page-tag">운영 케이스 Phase 1</div>
+  <div class="page-title">케이스 전체 목록</div>
+  <div class="page-desc">Phase 1에서 실제 운영 중 발생하는 주요 흐름입니다. 기획팀은 정책 기준으로, 운영팀은 실무 절차로 활용하세요.</div>
+
+  <div class="guide-section">
+    <div class="section-title">Phase 1 운영 케이스 <span class="section-tag">전체</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:100px">케이스 ID</th>
+            <th style="width:200px">케이스명</th>
+            <th style="width:120px">주요 담당자</th>
+            <th style="width:100px">관련 화면</th>
+            <th>핵심 정책 근거</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="b b-slate">FLOW-01</span></td>
+            <td><strong>코스 개설</strong> — 기본정보 입력부터 퍼블리싱까지</td>
+            <td>고객사 담당자</td>
+            <td>offline-builder</td>
+            <td>4.7 퍼블리싱 8항목 체크</td>
+          </tr>
+          <tr>
+            <td><span class="b b-violet">FLOW-02</span></td>
+            <td><strong>자율 수강신청</strong> — 학습자가 직접 차수 신청</td>
+            <td>학습자</td>
+            <td>학습자 앱</td>
+            <td>4.5 수강신청 (자율)</td>
+          </tr>
+          <tr>
+            <td><span class="b b-violet">FLOW-03</span></td>
+            <td><strong>강제 할당</strong> — HRD가 부서·직급 단위 배정</td>
+            <td>고객사 담당자</td>
+            <td>offline-builder</td>
+            <td>4.5 수강신청 (강제)</td>
+          </tr>
+          <tr>
+            <td><span class="b b-green">FLOW-04</span></td>
+            <td><strong>현장 QR 출석</strong> — 수업 당일 라이브 모드 운영</td>
+            <td>강사 / 고객사 담당자</td>
+            <td>offline-course-view</td>
+            <td>4.1~4.3 출석 상태·지각·마감</td>
+          </tr>
+          <tr>
+            <td><span class="b b-blue">FLOW-06</span></td>
+            <td><strong>코스 목록 탐색</strong> — 관리자 목록 화면 필터 탐색</td>
+            <td>고객사 담당자 / 운영팀</td>
+            <td>index.html</td>
+            <td>6.1 코스 목록 기능</td>
+          </tr>
+          <tr>
+            <td><span class="b b-orange">—</span></td>
+            <td><strong>퍼블리싱 체크리스트</strong> — 공개 전 8항목 확인</td>
+            <td>고객사 담당자 / 운영팀</td>
+            <td>offline-builder</td>
+            <td>4.7 퍼블리싱</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>FLOW-05 (수료 처리)</strong>는 Phase 2 예정입니다. 수료 처리 버튼은 현재 없으며, 출석률 통계는 대시보드에서 확인할 수 있습니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">담당자별 주요 케이스</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:140px">담당자</th>
+            <th>주요 케이스</th>
+            <th>참조 가이드</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="b b-blue">고객사 담당자</span></td>
+            <td>코스 개설(FLOW-01) · 강제 할당(FLOW-03) · 퍼블리싱 체크리스트 · 회차 마감 · 수강신청 취소 처리</td>
+            <td>운영 케이스 + 2장 회차 마감 + 4장 수강신청</td>
+          </tr>
+          <tr>
+            <td><span class="b b-green">강사</span></td>
+            <td>현장 QR 출석 운영(FLOW-04) · 스캔 오류 대응</td>
+            <td>운영 케이스 FLOW-04 + 6장 QR 운영</td>
+          </tr>
+          <tr>
+            <td><span class="b b-orange">운영팀</span></td>
+            <td>출석 상태 정정 · CS 응대 · 에스컬레이션 판단 · 코스 목록 탐색</td>
+            <td>1장 출석 처리 + 5장 데이터 정정 + 7장 CS 응대</td>
+          </tr>
+          <tr>
+            <td><span class="b b-violet">기획팀</span></td>
+            <td>정책 기준 관리 · 갭·이슈 기록 · Phase 2 우선순위 결정</td>
+            <td>전체 가이드 (정책 근거 확인용)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     운영 케이스 — 퍼블리싱 체크리스트
+══════════════════════════════════════════ -->
+<div id="page-case-publish" class="page">
+  <div class="page-tag">운영 케이스 Phase 1</div>
+  <div class="page-title">퍼블리싱 체크리스트</div>
+  <div class="page-desc">코스를 학습자에게 공개하려면 아래 8가지 항목이 모두 충족돼야 퍼블리싱 버튼이 활성화됩니다. 하나라도 빠지면 버튼이 눌리지 않습니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">퍼블리싱 필수 8항목 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:50px">순번</th>
+            <th style="width:160px">항목</th>
+            <th>확인 방법</th>
+            <th style="width:160px">미완료 시 증상</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="text-center font-bold">①</td><td><strong>코스명</strong></td><td>기본정보 섹션 1 — 코스명 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">②</td><td><strong>담당 강사</strong></td><td>기본정보 섹션 1 — 강사 선택 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">③</td><td><strong>교육 장소</strong></td><td>기본정보 섹션 1 — 장소명 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">④</td><td><strong>신청 기간</strong></td><td>수강 신청 설정 — 신청 오픈/마감 일시 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">⑤</td><td><strong>차수 1개 이상</strong></td><td>커리큘럼 사이드바 — 차수 생성 여부</td><td>"최소 1개 차수 필요" 안내</td></tr>
+          <tr><td class="text-center font-bold">⑥</td><td><strong>모든 차수에 회차</strong></td><td>커리큘럼 사이드바 — 각 차수에 회차가 1개 이상 있는지</td><td>경고 표시</td></tr>
+          <tr><td class="text-center font-bold">⑦</td><td><strong>회차 날짜·시간</strong></td><td>각 회차에 날짜·시작·종료 시간 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">⑧</td><td><strong>수료 조건 1개</strong></td><td>수료 조건 섹션 — 출석률 기준 설정 여부 (기본 75%)</td><td>퍼블리싱 버튼 비활성</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-green mt-2">
+      8항목 모두 충족 시 퍼블리싱 버튼이 활성화되며, 클릭 즉시 학습자 앱에 코스가 노출됩니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">퍼블리싱 후 수정 가능 범위</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:100px">수정 시점</th>
+            <th style="width:100px">가능 여부</th>
+            <th>수정 가능 항목</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>퍼블리싱 후</td>
+            <td><span class="b b-green">✅ 가능</span></td>
+            <td>코스명, 강사소개, 코스소개 등 기본정보</td>
+          </tr>
+          <tr>
+            <td>수강생 배정 전</td>
+            <td><span class="b b-yellow">⚠️ 조건부</span></td>
+            <td>차수 삭제, 정원 축소 — 수강생이 배정되기 전까지만 가능</td>
+          </tr>
+          <tr>
+            <td>수강생 배정 후</td>
+            <td><span class="b b-red">❌ 제한</span></td>
+            <td>차수 삭제 불가. 정원 축소 불가 (기배정 인원 초과 시)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     운영 케이스 — FLOW-01 코스 개설
+══════════════════════════════════════════ -->
+<div id="page-case-open" class="page">
+  <div class="page-tag">운영 케이스 FLOW-01</div>
+  <div class="page-title">코스 개설</div>
+  <div class="page-desc">고객사 담당자가 신규 오프라인 코스를 등록하고 공개하는 전체 흐름입니다. 총 소요 시간: 약 10~15분.</div>
+
+  <div class="guide-section">
+    <div class="section-title">코스 개설 단계별 흐름 <span class="section-tag">FLOW-01</span></div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-action">관리자 화면 → "새 코스 등록" 클릭</div>
+          <div class="step-note">코스 등록 빌더(offline-builder.html) 진입</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-action">섹션 1: 기본정보 입력 (약 3분)</div>
+          <div class="step-note">코스명 · 카테고리 · 강사 · 교육 장소(장소명/주소/교통안내) · 코스 표지 이미지</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-action">섹션 2: 수강 신청 설정 (약 2분)</div>
+          <div class="step-note">수강 방식(자율/강제) · 신청 오픈·마감 일시 · 취소 정책 · 재수강 허용 여부 · 지각 기준(기본 10분)</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-action">차수 생성 (약 3분)</div>
+          <div class="step-note">차수명 · 정원 · 담당 강사 · 그룹 배정(강제 할당 시). 우측 사이드바에서 편집</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-action">회차 생성 (약 2~5분)</div>
+          <div class="step-note">수동 입력 또는 일괄 생성(🪄 버튼 → 요일·시간 선택 → 자동 생성). 각 회차에 날짜·시작·종료 시간 필요</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="step-action">섹션 4: 수료 조건 확인 (기본 출석률 75%)</div>
+          <div class="step-note">Phase 1에서는 출석률 기준만 설정. 기본값 75% 그대로 사용해도 무방</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <div class="step-action">퍼블리싱 8항목 확인 → "퍼블리싱" 클릭</div>
+          <div class="step-note">버튼이 활성화되면 8항목 모두 충족된 상태. 클릭 즉시 학습자 앱에 노출</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">주요 의사결정 포인트</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:180px">의사결정 항목</th>
+            <th>선택지</th>
+            <th>선택 기준</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>수강 방식</strong></td>
+            <td>자율 수강 / 강제 할당</td>
+            <td>학습자가 직접 고르는 교육 → 자율. 법정의무교육·전사 필수교육 → 강제 할당</td>
+          </tr>
+          <tr>
+            <td><strong>재수강 허용</strong></td>
+            <td>ON / OFF (기본 OFF)</td>
+            <td>매년 재이수 필요한 교육(법정의무 등) → 반드시 ON</td>
+          </tr>
+          <tr>
+            <td><strong>지각 기준</strong></td>
+            <td>0분 / 10분(기본) / N분</td>
+            <td>지각 구분 불필요 → 0분. 일반 교육 → 10분</td>
+          </tr>
+          <tr>
+            <td><strong>수강 유형 (차수별)</strong></td>
+            <td>전체수강 / 날짜선택형</td>
+            <td>모든 회차 참석 → 전체수강. 날짜 중 1개만 선택 → 날짜선택형</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     운영 케이스 — FLOW-02 자율 수강신청
+══════════════════════════════════════════ -->
+<div id="page-case-enroll-self" class="page">
+  <div class="page-tag">운영 케이스 FLOW-02</div>
+  <div class="page-title">자율 수강신청</div>
+  <div class="page-desc">학습자가 교육 목록에서 직접 원하는 차수를 선택해 신청하는 흐름입니다. 관리자 개입 없이 학습자가 전체 처리합니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">학습자 신청 흐름 <span class="section-tag">FLOW-02</span></div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num" style="background:#7c3aed">1</div>
+        <div class="step-body">
+          <div class="step-action">학습자 앱 → 교육 목록에서 코스 선택</div>
+          <div class="step-note">코스 상세 화면 진입. 차수 목록과 잔여석 확인 가능</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#7c3aed">2</div>
+        <div class="step-body">
+          <div class="step-action">차수 목록 확인 (날짜, 시간, 잔여석)</div>
+          <div class="step-note">잔여석이 있는 차수만 신청 가능. 마감된 차수는 "마감" 배지로 표시</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#7c3aed">3</div>
+        <div class="step-body">
+          <div class="step-action">"신청" 클릭 → 확인 팝업</div>
+          <div class="step-note">신청 완료 시 잔여석 -1 자동 반영</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">예외 케이스 처리 기준 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:190px">상황</th>
+            <th style="width:150px">시스템 동작</th>
+            <th>운영팀 대응</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>정원 마감 (잔여석 0)</td>
+            <td><span class="b b-red">마감 배지</span> 표시, 신청 불가</td>
+            <td>다른 차수 안내. 대기 기능 없음</td>
+          </tr>
+          <tr>
+            <td>신청 기간 외</td>
+            <td>신청 버튼 비활성. 신청 기간 표시</td>
+            <td>신청 기간을 안내. 기간 연장 필요 시 고객사 담당자에게 전달</td>
+          </tr>
+          <tr>
+            <td>동일 차수 중복 신청</td>
+            <td>"이미 신청됨" 안내</td>
+            <td>중복 신청은 시스템에서 자동 차단. 추가 대응 불필요</td>
+          </tr>
+          <tr>
+            <td>재수강 허용 OFF + 기수료</td>
+            <td>"이미 수료한 교육" 안내</td>
+            <td>재수강이 필요하면 고객사 담당자에게 재수강 허용 토글 요청</td>
+          </tr>
+          <tr>
+            <td>재수강 허용 ON + 기수료</td>
+            <td>다른 차수 신청 가능</td>
+            <td>정상 신청 가능. 별도 대응 불필요</td>
+          </tr>
+          <tr>
+            <td>취소 기한 내 취소 요청</td>
+            <td>학습자 직접 취소 가능</td>
+            <td>잔여석 +1 자동 반영. 별도 대응 불필요</td>
+          </tr>
+          <tr>
+            <td>취소 기한 초과 후 취소 요청</td>
+            <td>학습자 직접 취소 불가</td>
+            <td>운영팀이 수강생 관리 화면에서 직접 취소 처리</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     운영 케이스 — FLOW-03 강제 할당
+══════════════════════════════════════════ -->
+<div id="page-case-enroll-assign" class="page">
+  <div class="page-tag">운영 케이스 FLOW-03</div>
+  <div class="page-title">강제 할당</div>
+  <div class="page-desc">고객사 담당자가 부서·직급 단위로 수강생을 직접 배정하는 흐름입니다. 법정의무교육, 전사 필수교육에 주로 사용합니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">강제 할당 흐름 <span class="section-tag">FLOW-03</span></div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-action">코스 등록 빌더 → 섹션 2 수강 신청 설정 → "관리자가 강제 할당" 선택</div>
+          <div class="step-note">이 선택을 해야 차수 편집 사이드바에서 그룹 배정 UI가 활성화됨</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-action">차수 편집 사이드바 → "배정 그룹" 섹션에서 대상 그룹 선택</div>
+          <div class="step-note">부서 / 직급 단위 그룹 선택. 그룹별 할당 한도 입력 가능</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-action">정원 자동 계산 확인</div>
+          <div class="step-note">선택한 그룹 인원 합계가 정원으로 자동 계산됨. 미배정석도 표시됨</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-action">퍼블리싱 → 대상 그룹 전원 학습자 앱에 자동 배정</div>
+          <div class="step-note">학습자는 선택권 없이 배정됨. 배정 취소는 고객사 담당자만 가능</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">강제 할당 주요 규칙</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:180px">항목</th>
+            <th>규칙</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>학습자 신청 여부</td><td>학습자가 직접 신청하지 않음. 고객사 담당자가 그룹 단위로 일괄 배정</td></tr>
+          <tr><td>취소 권한</td><td>학습자 직접 취소 불가. 고객사 담당자만 수강생 관리 화면에서 제거 가능</td></tr>
+          <tr><td>정원 계산</td><td>그룹 인원 합산으로 정원 자동 계산. 별도 정원 입력 불필요</td></tr>
+          <tr><td>법정의무교육</td><td>재수강 허용 토글을 반드시 ON으로 설정 (매년 재이수 필요)</td></tr>
+          <tr><td>앱 노출 시점</td><td>퍼블리싱 즉시 학습자 앱에 노출 (Phase 3에서 시점 조정 가능 예정)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     운영 케이스 — FLOW-04 현장 QR 출석
+══════════════════════════════════════════ -->
+<div id="page-case-attendance" class="page">
+  <div class="page-tag">운영 케이스 FLOW-04</div>
+  <div class="page-title">현장 QR 출석 운영</div>
+  <div class="page-desc">수업 당일 강사 또는 고객사 담당자가 라이브 모드로 QR 출석을 운영하고 회차를 마감하는 전체 흐름입니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">수업 당일 출석 운영 흐름 <span class="section-tag">FLOW-04</span></div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num" style="background:#16a34a">1</div>
+        <div class="step-body">
+          <div class="step-action">수강관리 화면(offline-course-view) → 출석 탭 → 해당 회차 선택</div>
+          <div class="step-note">수업 당일 수업 시작 전에 미리 화면을 열어둡니다</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#16a34a">2</div>
+        <div class="step-body">
+          <div class="step-action">"라이브 모드" 버튼 클릭 → QR 코드 대형 표시</div>
+          <div class="step-note">빔프로젝터 또는 대형 모니터에 화면 띄우기. QR은 30초마다 자동 갱신됨</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#16a34a">3</div>
+        <div class="step-body">
+          <div class="step-action">수강생이 스마트폰으로 QR 코드 스캔</div>
+          <div class="step-note">지각 기준 이내 → 출석. 초과 → 지각. 우측 실시간 명단에 즉시 표시</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#16a34a">4</div>
+        <div class="step-body">
+          <div class="step-action">수업 종료 후 미확인 인원 확인 및 수동 처리</div>
+          <div class="step-note">QR을 못 찍은 수강생 → 실제 출석 여부 확인 후 상태 드롭다운으로 수동 변경</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#16a34a">5</div>
+        <div class="step-body">
+          <div class="step-action">"회차 마감" 클릭 → 확인 팝업 → 마감 완료</div>
+          <div class="step-note">남은 미확인 인원 전원 결석으로 일괄 전환. 마감 취소 불가</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">출석 상태 결정 기준 요약</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:200px">상황</th>
+            <th style="width:120px">결과 상태</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>지각 기준 이내 QR 스캔</td><td><span class="b b-green">출석</span></td><td>기본값 10분 이내</td></tr>
+          <tr><td>지각 기준 초과 QR 스캔</td><td><span class="b b-orange">지각</span></td><td>수료 계산에서 출석으로 인정</td></tr>
+          <tr><td>QR 없이 수동 처리 (실제 출석)</td><td><span class="b b-green">출석</span> 또는 <span class="b b-orange">지각</span></td><td>관리자가 드롭다운에서 직접 선택</td></tr>
+          <tr><td>수업 중 퇴장</td><td><span class="b b-yellow">조퇴</span></td><td>관리자 수동 처리만 가능. QR로 처리 안 됨</td></tr>
+          <tr><td>미확인 상태로 회차 마감</td><td><span class="b b-red">결석</span></td><td>마감 시 미확인 → 전원 결석 자동 전환</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-red mt-2">
+      <strong>마감 전 반드시 확인</strong>: 미확인 인원이 남아 있으면 마감 전에 처리하세요. 마감 후 개별 수정은 가능하지만 번거롭습니다.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     운영 케이스 — FLOW-06 코스 목록 탐색
+══════════════════════════════════════════ -->
+<div id="page-case-browse" class="page">
+  <div class="page-tag">운영 케이스 FLOW-06</div>
+  <div class="page-title">코스 목록 탐색</div>
+  <div class="page-desc">관리자 메인 화면에서 코스를 필터링하고, 차수 현황을 확인하고, 수강관리 화면으로 이동하는 흐름입니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">코스 목록 탐색 흐름 <span class="section-tag">FLOW-06</span></div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num" style="background:#2563eb">1</div>
+        <div class="step-body">
+          <div class="step-action">관리자 메인 (index.html) 접속</div>
+          <div class="step-note">상단 상태 탭(전체/준비중/모집중/진행중/완료) + 좌측 카테고리 트리 표시</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#2563eb">2</div>
+        <div class="step-body">
+          <div class="step-action">상태 탭 또는 카테고리 선택으로 필터링</div>
+          <div class="step-note">복합 필터 적용 가능. 탭 클릭 시 카운트 배지도 업데이트</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#2563eb">3</div>
+        <div class="step-body">
+          <div class="step-action">코스 행 클릭 → 차수 인라인 확장</div>
+          <div class="step-note">잔여석·일정·모집 상태 등 차수 상세가 행 아래로 펼쳐짐</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num" style="background:#2563eb">4</div>
+        <div class="step-body">
+          <div class="step-action">"수강관리" 버튼 클릭</div>
+          <div class="step-note">offline-course-view.html로 이동. 수강생·출석·통계 관리 화면</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">코스 상태별 의미 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:100px">상태</th>
+            <th>의미</th>
+            <th style="width:200px">운영팀이 해야 할 것</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="b b-slate">준비중</span></td><td>아직 퍼블리싱 전. 학습자 앱에 안 보임</td><td>퍼블리싱 8항목 확인 → 공개 처리</td></tr>
+          <tr><td><span class="b b-blue">모집중</span></td><td>신청 기간 내. 학습자가 신청 가능한 상태</td><td>잔여석 모니터링. 정원 초과 문의 대응</td></tr>
+          <tr><td><span class="b b-orange">진행중</span></td><td>수업이 진행 중인 상태 (신청 기간 종료 후)</td><td>회차별 출석 관리. QR 운영 준비</td></tr>
+          <tr><td><span class="b b-green">완료</span></td><td>모든 회차 마감 완료</td><td>수료율 통계 확인. Phase 2 수료 처리 대기</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">코스 목록 주요 기능</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:160px">기능</th><th>사용 방법</th><th style="width:180px">활용 케이스</th></tr></thead>
+        <tbody>
+          <tr><td>상태 탭 필터</td><td>상단 탭 클릭 (전체/준비중/모집중/진행중/완료)</td><td>현재 진행 중인 코스만 보고 싶을 때</td></tr>
+          <tr><td>카테고리 필터</td><td>좌측 카테고리 트리에서 클릭</td><td>특정 분류 코스만 볼 때</td></tr>
+          <tr><td>검색</td><td>검색창에 코스명 입력</td><td>특정 코스를 빠르게 찾을 때</td></tr>
+          <tr><td>차수 인라인 확장</td><td>코스 행 클릭</td><td>차수별 잔여석·날짜를 빠르게 확인</td></tr>
+          <tr><td>코스 삭제</td><td>행 우측 삭제 버튼 또는 체크박스 다중 선택 후 삭제</td><td>잘못 등록된 코스 제거</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     개요
+══════════════════════════════════════════ -->
+<div id="page-overview" class="page active">
+  <div class="page-tag">운영팀 전용</div>
+  <div class="page-title">운영 정책 가이드</div>
+  <div class="page-desc">이 가이드는 오프라인 코스 운영 담당자가 일상 업무에서 "이 케이스 어떻게 처리하지?" 싶을 때 바로 꺼내 쓸 수 있도록 만들어졌습니다. 출석 처리부터 CS 응대까지 케이스별 기준이 표로 정리되어 있습니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">이 가이드로 해결할 수 있는 것들</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:180px">상황</th>
+            <th style="width:130px">관련 챕터</th>
+            <th>바로 확인할 것</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>수강생이 QR을 늦게 찍었는데 출석으로 바꿔달라고 함</td><td><span class="b b-orange">1장 출석 처리</span></td><td>지각 기준 시간 확인 → 관리자 수동 변경</td></tr>
+          <tr><td>회차 마감을 눌렀는데 결석이 너무 많음</td><td><span class="b b-orange">2장 회차 마감</span></td><td>마감 후에도 개별 상태 수정 가능 → 한명씩 수정</td></tr>
+          <tr><td>수강생이 수료가 안 됐는데 이의 제기</td><td><span class="b b-orange">3장 수료 처리</span></td><td>출석률 계산 방법 확인 → 지각·조퇴 출석 인정 여부</td></tr>
+          <tr><td>정원이 찼는데 신청 추가 요청이 들어옴</td><td><span class="b b-orange">4장 수강신청</span></td><td>정원 초과 처리 기준 확인</td></tr>
+          <tr><td>출석 상태가 잘못 입력됨</td><td><span class="b b-orange">5장 데이터 정정</span></td><td>수정 가능 범위 확인</td></tr>
+          <tr><td>현장에서 QR이 안 읽힘</td><td><span class="b b-orange">6장 QR 운영</span></td><td>스캔 오류 대응 체크리스트</td></tr>
+          <tr><td>수강생이 "왜 저는 수료가 안 되나요?" 라고 연락</td><td><span class="b b-orange">7장 CS 응대</span></td><td>수료 미달 응대 스크립트</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">기본 용어</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th>용어</th><th>뜻</th><th>예시</th></tr></thead>
+        <tbody>
+          <tr><td><strong>코스</strong></td><td>교육 프로그램 단위. 제목·강사·장소가 담긴 최상위 단위</td><td>직장 내 성희롱 예방 교육 2026</td></tr>
+          <tr><td><strong>차수</strong></td><td>코스의 운영 회기. 같은 코스를 A반/B반처럼 여러 번 운영할 때 각각의 회기</td><td>1차수(A반), 2차수(B반)</td></tr>
+          <tr><td><strong>회차</strong></td><td>차수 내 개별 수업일. 3일짜리 교육이면 회차가 3개</td><td>1회차(4/1), 2회차(4/8), 3회차(4/15)</td></tr>
+          <tr><td><strong>미확인</strong></td><td>회차 생성 시 자동으로 부여되는 임시 상태. 마감 전까지 처리해야 함</td><td>수업 당일 QR 스캔 전 상태</td></tr>
+          <tr><td><strong>마감</strong></td><td>회차 종료 후 미확인 → 결석 일괄 전환. 되돌릴 수 없음</td><td>수업 종료 후 "회차 마감" 버튼 클릭</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     1. 출석 처리 — 상태 5종
+══════════════════════════════════════════ -->
+<div id="page-att-status" class="page">
+  <div class="page-tag">1. 출석 처리</div>
+  <div class="page-title">출석 상태 5종</div>
+  <div class="page-desc">수강생은 회차(수업 1일)마다 아래 5가지 상태 중 하나를 가집니다. 상태는 수료 계산에 직결되므로 회차 마감 전 반드시 확인하세요.</div>
+
+  <div class="guide-section">
+    <div class="section-title">상태 매트릭스 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:90px">상태</th>
+            <th style="width:80px">수료 인정</th>
+            <th>언제 이 상태가 되나</th>
+            <th style="width:160px">누가 변경할 수 있나</th>
+            <th>주의사항</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="b b-slate">⬜ 미확인</span></td>
+            <td><span class="b b-red">❌ 불인정</span></td>
+            <td>회차가 생성되면 자동으로 부여되는 초기값. <strong>임시 상태</strong></td>
+            <td>관리자 수동 변경 가능</td>
+            <td>마감 시 미확인 → 전원 결석. 반드시 마감 전 처리</td>
+          </tr>
+          <tr>
+            <td><span class="b b-green">🟢 출석</span></td>
+            <td><span class="b b-green">✅ 인정</span></td>
+            <td>수업 시작 후 지각 기준 시간 <em>이내</em> QR 스캔, 또는 관리자 수동</td>
+            <td>관리자 수동 변경 가능</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="b b-orange">🟠 지각</span></td>
+            <td><span class="b b-green">✅ 인정</span></td>
+            <td>수업 시작 후 지각 기준 시간 <em>초과</em> QR 스캔, 또는 관리자 수동</td>
+            <td>관리자 수동 변경 가능</td>
+            <td>수료 계산에서 출석과 동일 취급</td>
+          </tr>
+          <tr>
+            <td><span class="b b-yellow">🟡 조퇴</span></td>
+            <td><span class="b b-green">✅ 인정</span></td>
+            <td>수업 중 퇴실. QR로는 변경 불가</td>
+            <td><strong>관리자만</strong> 수동 변경</td>
+            <td>수료 계산에서 출석과 동일. QR 스캔으로는 조퇴 처리 안 됨</td>
+          </tr>
+          <tr>
+            <td><span class="b b-red">🔴 결석</span></td>
+            <td><span class="b b-red">❌ 불인정</span></td>
+            <td>회차 마감 시 미확인 → 자동 전환, 또는 관리자 수동</td>
+            <td>관리자 수동 변경 가능</td>
+            <td>마감 후 결석 → 출석 수정 가능하지만 번거로움</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">수료 계산에서 인정되는 상태</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:100px">상태</th>
+            <th style="width:100px">수료 계산</th>
+            <th>설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="b b-green">출석</span></td><td><span class="b b-green">출석 1회 인정</span></td><td>정상 출석</td></tr>
+          <tr><td><span class="b b-orange">지각</span></td><td><span class="b b-green">출석 1회 인정</span></td><td>늦게 왔지만 출석으로 인정. "지각 N회 = 결석 1회" 환산은 현재 없음</td></tr>
+          <tr><td><span class="b b-yellow">조퇴</span></td><td><span class="b b-green">출석 1회 인정</span></td><td>일찍 퇴장했지만 출석으로 인정</td></tr>
+          <tr><td><span class="b b-red">결석</span></td><td><span class="b b-red">출석 불인정</span></td><td>수료 조건 미달 계산에 포함</td></tr>
+          <tr><td><span class="b b-slate">미확인</span></td><td><span class="b b-red">출석 불인정</span></td><td>임시 상태. 마감 전까지 처리 필수</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-blue mt-2">
+      <strong>핵심 요약</strong>: 출석·지각·조퇴는 모두 수료 계산에서 <strong>출석 1회로 동일하게 인정</strong>됩니다. 결석과 미확인만 불인정입니다.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     1. 출석 처리 — 지각 기준
+══════════════════════════════════════════ -->
+<div id="page-att-late" class="page">
+  <div class="page-tag">1. 출석 처리</div>
+  <div class="page-title">지각 기준</div>
+  <div class="page-desc">수업 시작 후 몇 분까지 QR 스캔을 출석으로 인정할지를 차수마다 설정합니다. 기본값은 10분입니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">지각 기준 설정별 동작 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:130px">지각 기준 설정</th>
+            <th>출석 처리 범위</th>
+            <th>지각 처리 범위</th>
+            <th style="width:180px">주요 사용 케이스</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>0분</strong></td>
+            <td>시작 후 언제 스캔해도 모두 출석</td>
+            <td>지각 없음 (구분 안 함)</td>
+            <td>지각 구분이 불필요한 교육</td>
+          </tr>
+          <tr>
+            <td><strong>10분 (기본값)</strong></td>
+            <td>시작 후 0~10분 이내 스캔</td>
+            <td>시작 후 11분 이후 스캔</td>
+            <td>일반 오프라인 교육</td>
+          </tr>
+          <tr>
+            <td><strong>30분</strong></td>
+            <td>시작 후 0~30분 이내 스캔</td>
+            <td>시작 후 31분 이후 스캔</td>
+            <td>장거리 이동이 있는 교육</td>
+          </tr>
+          <tr>
+            <td><strong>N분 (직접 입력)</strong></td>
+            <td>시작 후 0~N분 이내 스캔</td>
+            <td>시작 후 N+1분 이후 스캔</td>
+            <td>코스 개설 시 커스텀 설정</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-2">
+      지각 기준은 <strong>코스 단위로 설정</strong>하며, 해당 코스의 모든 차수에 동일하게 적용됩니다. 차수별로 다르게 설정하는 것은 현재 지원하지 않습니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">QR 스캔 시간대별 상태 결정</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:200px">스캔 시점</th>
+            <th style="width:130px">지각 기준이 10분일 때</th>
+            <th>설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>수업 시작 전 스캔</td><td><span class="b b-green">출석</span></td><td>시작 전 미리 스캔 — 출석 처리</td></tr>
+          <tr><td>수업 시작 후 0~10분 이내</td><td><span class="b b-green">출석</span></td><td>정상 출석 인정 범위</td></tr>
+          <tr><td>수업 시작 후 11분 이후</td><td><span class="b b-orange">지각</span></td><td>기준 초과 → 지각 처리</td></tr>
+          <tr><td>QR 스캔 없이 회차 마감</td><td><span class="b b-red">결석</span></td><td>미확인 → 마감 시 결석으로 일괄 전환</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     1. 출석 처리 — 상태 변경 규칙
+══════════════════════════════════════════ -->
+<div id="page-att-change" class="page">
+  <div class="page-tag">1. 출석 처리</div>
+  <div class="page-title">상태 변경 규칙</div>
+  <div class="page-desc">관리자는 어떤 상태에서든 제한 없이 수동으로 변경할 수 있습니다. 단, 조퇴는 QR로 변경 불가하고 관리자만 직접 변경합니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">상태 전환 가능 여부 표 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:110px">현재 상태</th>
+            <th class="text-center" style="width:90px">→ 미확인</th>
+            <th class="text-center" style="width:90px">→ 출석</th>
+            <th class="text-center" style="width:90px">→ 지각</th>
+            <th class="text-center" style="width:90px">→ 조퇴</th>
+            <th class="text-center" style="width:90px">→ 결석</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="b b-slate">미확인</span></td>
+            <td class="text-center text-slate-300">—</td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+            <td class="text-center text-slate-300 text-xs">불가</td>
+            <td class="text-center"><span class="text-green-600 font-bold text-xs">✓ 마감 시</span></td>
+          </tr>
+          <tr>
+            <td><span class="b b-green">출석</span></td>
+            <td class="text-center text-slate-300 text-xs">불가</td>
+            <td class="text-center">—</td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+          </tr>
+          <tr>
+            <td><span class="b b-orange">지각</span></td>
+            <td class="text-center text-slate-300 text-xs">불가</td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+            <td class="text-center">—</td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+          </tr>
+          <tr>
+            <td><span class="b b-yellow">조퇴</span></td>
+            <td class="text-center text-slate-300 text-xs">불가</td>
+            <td class="text-center"><span class="text-green-600 font-bold text-xs">✓ 관리자</span></td>
+            <td class="text-center"><span class="text-green-600 font-bold text-xs">✓ 관리자</span></td>
+            <td class="text-center">—</td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+          </tr>
+          <tr>
+            <td><span class="b b-red">결석</span></td>
+            <td class="text-center text-slate-300 text-xs">불가</td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+            <td class="text-center"><span class="text-green-600 font-bold">✓</span></td>
+            <td class="text-center text-slate-300 text-xs">불가</td>
+            <td class="text-center">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-blue mt-2">
+      <strong>관리자 무제한 정정 정책</strong>: 관리자는 언제든 어떤 상태든 수동 변경할 수 있습니다. 회차 마감 후에도 동일합니다. 조퇴 → 출석 소급 수정도 가능합니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">조퇴 처리 방법</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th>상황</th><th>처리 방법</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>수강생이 수업 중 먼저 나감</td><td>관리자가 출석 관리 화면 → 해당 수강생 드롭다운 → <strong>조퇴</strong> 선택</td><td>QR 재스캔으로는 변경 안 됨</td></tr>
+          <tr><td>수업 끝나고 나중에 조퇴 처리 요청</td><td>동일. 마감 전후 모두 관리자 수동 변경 가능</td><td>—</td></tr>
+          <tr><td>조퇴 → 출석으로 다시 바꾸려면</td><td>동일. 관리자 드롭다운 → 출석 선택</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     2. 회차 마감 — 절차
+══════════════════════════════════════════ -->
+<div id="page-close-flow" class="page">
+  <div class="page-tag">2. 회차 마감</div>
+  <div class="page-title">마감 절차</div>
+  <div class="page-desc">회차 마감 시 "미확인" 상태인 수강생 전원이 결석으로 전환됩니다. 마감 자체는 취소할 수 없습니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">마감 전 체크리스트 <span class="section-tag">필독</span></div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-action">출석 관리 화면 → 해당 회차 열기</div>
+          <div class="step-note">수강생 목록과 현재 출석 상태를 확인합니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-action">"미확인" 인원 확인</div>
+          <div class="step-note">미확인 인원이 남아 있다면: QR을 못 찍은 건지, 실제 결석인지 먼저 확인하세요. 마감 후 개별 수정은 가능하지만 번거롭습니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-action">필요한 경우 미확인 → 출석/지각/조퇴로 수동 변경</div>
+          <div class="step-note">실제 참석했지만 QR을 못 찍은 수강생은 수동으로 출석/지각으로 변경합니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-action">"회차 마감" 버튼 클릭 → 확인 팝업에서 최종 확인</div>
+          <div class="step-note">이 시점부터 미확인 인원이 전원 결석으로 전환됩니다. 되돌릴 수 없습니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-red mt-3">
+      <strong>⚠️ 주의</strong>: 마감은 취소할 수 없습니다. 마감 후 "미확인 → 결석" 일괄 전환을 되돌리는 기능은 없습니다. 마감 전 미확인 인원 처리를 반드시 먼저 하세요.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     2. 회차 마감 — 마감 전후 규칙
+══════════════════════════════════════════ -->
+<div id="page-close-rules" class="page">
+  <div class="page-tag">2. 회차 마감</div>
+  <div class="page-title">마감 전후 규칙</div>
+  <div class="page-desc">마감 후에도 개별 상태 수정은 가능합니다. 단, 마감 자체를 취소하는 것은 불가합니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">마감 전후 가능/불가 정리 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:220px">항목</th>
+            <th style="width:120px">마감 전</th>
+            <th style="width:120px">마감 후</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>미확인 상태 수강생 존재 가능</td><td><span class="b b-green">가능</span></td><td><span class="b b-red">불가 (결석 전환)</span></td><td>마감 즉시 미확인 → 결석 일괄 전환</td></tr>
+          <tr><td>개별 출석 상태 수동 변경</td><td><span class="b b-green">가능</span></td><td><span class="b b-green">가능</span></td><td>관리자 무제한 정정 정책 적용</td></tr>
+          <tr><td>마감 자체 취소</td><td>—</td><td><span class="b b-red">불가</span></td><td>취소 기능 없음</td></tr>
+          <tr><td>결석 → 출석 수동 변경</td><td><span class="b b-green">가능</span></td><td><span class="b b-green">가능</span></td><td>마감 후에도 관리자 수동 변경 가능</td></tr>
+          <tr><td>QR 자동 스캔</td><td><span class="b b-green">가능 (라이브모드)</span></td><td><span class="b b-slate">비활성</span></td><td>마감 후 QR 스캔 처리 안 됨</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">마감 후 "결석이 너무 많아요" 상황 처리</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th>상황</th><th>처리 방법</th></tr></thead>
+        <tbody>
+          <tr><td>실제로 출석했지만 QR 미스캔으로 결석 처리됨</td><td>출석 관리 → 해당 수강생 → 드롭다운 → <strong>출석</strong> 또는 <strong>지각</strong>으로 변경</td></tr>
+          <tr><td>여러 명을 한번에 수정해야 함</td><td>현재는 1명씩 수동 변경. 일괄 변경 기능은 Phase 2 예정</td></tr>
+          <tr><td>이미 수료 처리까지 완료된 경우</td><td>Phase 2 이후 대응. Phase 1에서는 수료 처리 버튼 없음</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     3. 수료 처리 — 수료 기준
+══════════════════════════════════════════ -->
+<div id="page-cert-cond" class="page">
+  <div class="page-tag">3. 수료 처리</div>
+  <div class="page-title">수료 기준</div>
+  <div class="page-desc">수료 조건은 출석률 75% 이상입니다. 출석·지각·조퇴는 출석으로 인정됩니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">수료 조건 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:180px">조건</th>
+            <th>기준값</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>출석률</strong></td><td>전체 회차의 <strong>75% 이상</strong> 출석 인정</td><td>출석·지각·조퇴 모두 출석 1회로 인정. 결석·미확인은 불인정</td></tr>
+          <tr><td><strong>버튼 활성 조건</strong></td><td>모든 회차가 마감된 후 (Phase 2 구현)</td><td>미마감 회차가 1개라도 있으면 수료 처리 버튼 비활성</td></tr>
+          <tr><td><strong>Phase 1 수료 처리</strong></td><td>버튼 없음 (Phase 2 예정)</td><td>현재는 통계에서 출석률만 확인 가능</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-2">
+      Phase 1에서는 수료 처리 버튼이 없습니다. 출석률 통계는 대시보드에서 확인할 수 있습니다. 공식적인 수료 확정은 Phase 2에서 구현됩니다.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     3. 수료 처리 — 케이스별 판정
+══════════════════════════════════════════ -->
+<div id="page-cert-cases" class="page">
+  <div class="page-tag">3. 수료 처리</div>
+  <div class="page-title">케이스별 수료 판정</div>
+  <div class="page-desc">4회차 교육을 기준으로 다양한 출석 패턴에 따른 수료 판정 예시입니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">판정 케이스 (4회차 교육 기준 — 수료 기준: 75%) <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:220px">출석 패턴</th>
+            <th style="width:90px">출석률</th>
+            <th style="width:100px">판정</th>
+            <th>설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>4회 모두 출석</td><td class="text-center">100%</td><td><span class="b b-green">✅ 수료</span></td><td>—</td></tr>
+          <tr><td>3회 출석 + 1회 결석</td><td class="text-center">75%</td><td><span class="b b-green">✅ 수료 (경계)</span></td><td>정확히 75% = 수료 인정</td></tr>
+          <tr><td>2회 출석 + 2회 결석</td><td class="text-center">50%</td><td><span class="b b-red">❌ 미수료</span></td><td>75% 미달</td></tr>
+          <tr><td>4회 모두 지각</td><td class="text-center">100%</td><td><span class="b b-green">✅ 수료</span></td><td>지각 = 출석 인정</td></tr>
+          <tr><td>3회 지각 + 1회 결석</td><td class="text-center">75%</td><td><span class="b b-green">✅ 수료</span></td><td>지각 = 출석 인정</td></tr>
+          <tr><td>2회 출석 + 1회 조퇴 + 1회 결석</td><td class="text-center">75%</td><td><span class="b b-green">✅ 수료</span></td><td>조퇴 = 출석 인정</td></tr>
+          <tr><td>4회 모두 미확인 (마감 전)</td><td class="text-center">0%</td><td><span class="b b-red">❌ 미수료</span></td><td>미확인은 출석 불인정</td></tr>
+          <tr><td>1회 출석 + 3회 미확인 (마감 후 → 결석)</td><td class="text-center">25%</td><td><span class="b b-red">❌ 미수료</span></td><td>마감 후 미확인 → 결석 처리</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">"왜 수료가 안 됐어요?" 수강생 문의 체크리스트</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:220px">확인 항목</th><th>확인 방법</th><th style="width:180px">처리</th></tr></thead>
+        <tbody>
+          <tr><td>출석률이 75% 이상인지</td><td>출석 관리 화면 → 해당 수강생의 출석 현황 확인</td><td>75% 미만이면 미수료 정상</td></tr>
+          <tr><td>지각이 결석으로 잘못 기록됐는지</td><td>각 회차별 상태 확인</td><td>오기입이면 수동 수정 후 재계산</td></tr>
+          <tr><td>미확인 상태로 마감됐는지</td><td>결석 처리된 회차의 원래 상태 확인 (마감 전 미확인이었는지)</td><td>실제 출석이었다면 결석 → 출석 수정</td></tr>
+          <tr><td>수료 처리 버튼이 눌렸는지</td><td>Phase 1에서는 버튼 없음 → 해당 없음</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     4. 수강신청 — 신청 방식 2종
+══════════════════════════════════════════ -->
+<div id="page-enroll-types" class="page">
+  <div class="page-tag">4. 수강신청 관리</div>
+  <div class="page-title">신청 방식 2종</div>
+  <div class="page-desc">코스별로 "자율 수강"과 "강제 할당" 중 하나를 선택합니다. 코스 개설 시 고객사 담당자가 결정합니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">자율 수강 vs 강제 할당 비교 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:130px">항목</th>
+            <th>🙋 자율 수강</th>
+            <th>👤 강제 할당</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>신청 주체</strong></td><td>학습자가 직접 신청</td><td>고객사 담당자가 부서·직급 단위로 배정</td></tr>
+          <tr><td><strong>주요 사용 케이스</strong></td><td>일반 선택형 교육, 자기계발 과정</td><td>법정의무교육, 전사 필수 교육</td></tr>
+          <tr><td><strong>신청 기간</strong></td><td>코스에서 설정한 신청 기간 내에만 가능</td><td>기간 관계없이 관리자가 배정</td></tr>
+          <tr><td><strong>정원</strong></td><td>잔여석이 있어야 신청 가능. 마감 시 다른 차수 안내</td><td>그룹 선택 시 정원 자동 계산</td></tr>
+          <tr><td><strong>취소</strong></td><td>취소 기한 이내 학습자 직접 취소 가능. 기한 초과 시 고객사 담당자에게 요청</td><td>학습자 직접 취소 불가. 고객사 담당자만 처리</td></tr>
+          <tr><td><strong>대기 기능</strong></td><td>없음 (Phase 2 예정). 정원 초과 시 다른 차수 안내</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     4. 수강신청 — 상황별 처리
+══════════════════════════════════════════ -->
+<div id="page-enroll-cases" class="page">
+  <div class="page-tag">4. 수강신청 관리</div>
+  <div class="page-title">상황별 처리 기준</div>
+  <div class="page-desc">수강신청 처리 중 자주 발생하는 케이스별 대응 기준입니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">케이스별 처리 기준 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:220px">상황</th>
+            <th>처리 방법</th>
+            <th style="width:140px">권한</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>정원이 꽉 찼는데 추가 신청 요청</td><td>"마감" 배지 안내. 다른 차수 신청 유도. 대기 기능 없음</td><td>고객사 담당자 판단</td></tr>
+          <tr><td>취소 기한이 지났는데 취소 요청</td><td>학습자 직접 취소 불가. 고객사 담당자가 수강생 관리 화면에서 직접 취소 처리</td><td>고객사 담당자</td></tr>
+          <tr><td>차수 변경 요청 (A차수 → B차수)</td><td>현재는 기존 차수 취소 후 새 차수 신청으로 처리. 직접 변경 기능은 Phase 2 예정</td><td>고객사 담당자</td></tr>
+          <tr><td>재수강 신청 (같은 코스 또 듣기)</td><td>코스에 "재수강 허용" 토글이 켜져 있어야 가능. 꺼져 있으면 신청 차단됨</td><td>코스 설정에 따름</td></tr>
+          <tr><td>같은 코스 여러 차수 동시 신청</td><td>같은 코스 내 중복 신청 자동 차단됨</td><td>시스템 자동 처리</td></tr>
+          <tr><td>법정의무교육 매년 재이수</td><td>코스에 "재수강 허용" 토글을 켜야 함. 반드시 확인 필요</td><td>고객사 담당자 설정</td></tr>
+          <tr><td>강제 할당된 수강생이 취소 요청</td><td>학습자 직접 취소 불가. 고객사 담당자가 수강생 관리 화면에서 직접 제거</td><td>고객사 담당자</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-blue mt-2">
+      <strong>대기 기능 없음</strong>: 현재 대기자 등록 기능은 없습니다. 정원 초과 시 "다른 차수를 신청해 주세요"로 안내하세요.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     5. 데이터 정정
+══════════════════════════════════════════ -->
+<div id="page-data-perm" class="page">
+  <div class="page-tag">5. 데이터 정정</div>
+  <div class="page-title">수정 가능 범위</div>
+  <div class="page-desc">출석 상태는 마감 전후 모두 관리자가 수정할 수 있습니다. 모든 수정 이력은 자동으로 기록됩니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">수정 가능 범위 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:240px">수정 항목</th>
+            <th style="width:100px">가능 여부</th>
+            <th>조건 및 비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>회차 마감 <strong>전</strong> 출석 상태 수정</td>
+            <td><span class="b b-green">✅ 가능</span></td>
+            <td>자유롭게 수정 가능. 관리자 무제한 정정 정책</td>
+          </tr>
+          <tr>
+            <td>회차 마감 <strong>후</strong> 출석 상태 수정</td>
+            <td><span class="b b-green">✅ 가능</span></td>
+            <td>마감 후에도 관리자 수동 변경 가능. Phase 2에서 사유 입력 + 감사 로그 추가 예정</td>
+          </tr>
+          <tr>
+            <td>마감 자체 취소</td>
+            <td><span class="b b-red">❌ 불가</span></td>
+            <td>취소 기능 없음. 개별 상태 수정으로만 대응</td>
+          </tr>
+          <tr>
+            <td>수료 확정 후 출석 수정 (Phase 2 이후)</td>
+            <td><span class="b b-yellow">⚠️ 가능하나 주의</span></td>
+            <td>수정은 가능하지만 수료 상태는 <strong>자동으로 바뀌지 않음</strong></td>
+          </tr>
+          <tr>
+            <td>수료 확정 취소 (Phase 2 이후)</td>
+            <td><span class="b b-red">❌ 불가</span></td>
+            <td>수료 취소 기능 없음</td>
+          </tr>
+          <tr>
+            <td>삭제된 수강생 복원</td>
+            <td><span class="b b-red">❌ 불가</span></td>
+            <td>Phase 2 예정</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-green mt-2">
+      <strong>모든 수정 이력 자동 기록</strong>: 누가, 언제, 어떤 상태로 변경했는지 언제든 확인할 수 있습니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">출석 상태 정정 절차</div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-action">출석 관리 화면 → 해당 회차 선택</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-action">수강생 목록에서 해당 수강생 찾기</div>
+          <div class="step-note">검색 또는 스크롤로 찾습니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-action">상태 드롭다운 클릭 → 변경할 상태 선택</div>
+          <div class="step-note">출석 / 지각 / 조퇴 / 결석 / 미확인 중 선택</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-action">즉시 저장됨 — 별도 저장 버튼 없음</div>
+          <div class="step-note">변경 즉시 출석률 통계에 반영됩니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     6. QR 현장 운영 — 절차
+══════════════════════════════════════════ -->
+<div id="page-qr-flow" class="page">
+  <div class="page-tag">6. QR 현장 운영</div>
+  <div class="page-title">QR 운영 절차</div>
+  <div class="page-desc">현장 QR 출석 운영 절차입니다. QR 코드는 30초마다 자동으로 갱신되므로 수강생이 화면을 미리 캡처해도 사용할 수 없습니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">현장 운영 순서 <span class="section-tag">핵심</span></div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-action">출석 관리 화면 접속 → 해당 회차 선택</div>
+          <div class="step-note">수업 당일 수업 시작 전에 미리 열어둡니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-action">"라이브 모드" ON → QR 화면을 대형 스크린에 표시</div>
+          <div class="step-note">강사 또는 운영자의 화면을 빔프로젝터나 모니터에 띄웁니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-action">수강생이 스마트폰으로 QR 코드 스캔</div>
+          <div class="step-note">QR 코드는 30초마다 자동 갱신됩니다. 수강생은 화면에 표시된 최신 QR을 스캔해야 합니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-action">스캔 즉시 출석 상태 자동 처리</div>
+          <div class="step-note">지각 기준 시간 이내 → 출석. 초과 → 지각. 라이브 모드 화면에서 실시간 확인 가능</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-action">수업 종료 후 "라이브 모드" OFF → 회차 마감</div>
+          <div class="step-note">미확인 인원 확인 후 마감 처리</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">QR 특성 요약</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:200px">항목</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td><strong>QR 갱신 주기</strong></td><td>30초마다 자동 갱신 — 화면 캡처 후 나중에 스캔 불가</td></tr>
+          <tr><td><strong>1인 1회 스캔</strong></td><td>동일 수강생이 같은 회차에 여러 번 스캔해도 상태는 한 번만 처리</td></tr>
+          <tr><td><strong>지각 기준 적용 시점</strong></td><td>QR 스캔이 완료된 서버 수신 시각 기준</td></tr>
+          <tr><td><strong>인터넷 필요 여부</strong></td><td>수강생 스마트폰 + 관리자 화면 모두 인터넷 연결 필요</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     6. QR — 스캔 오류 대응
+══════════════════════════════════════════ -->
+<div id="page-qr-trouble" class="page">
+  <div class="page-tag">6. QR 현장 운영</div>
+  <div class="page-title">스캔 오류 대응</div>
+  <div class="page-desc">현장에서 QR이 안 읽히거나 오류가 발생했을 때 대응 방법입니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">오류 유형별 대응 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:220px">증상</th>
+            <th>원인</th>
+            <th>즉시 대응</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>QR 스캔이 안 됨 (카메라가 인식 못 함)</td><td>화면이 너무 작거나 밝기 부족</td><td>화면 밝기 높이기 / 스크린 크게 확대</td></tr>
+          <tr><td>"만료된 QR" 오류 메시지</td><td>30초 갱신 전의 QR을 캡처해서 사용</td><td>화면에 표시된 최신 QR을 다시 스캔하도록 안내</td></tr>
+          <tr><td>스캔했는데 출석 처리 안 됨</td><td>인터넷 연결 불안정</td><td>수강생 Wi-Fi 확인 / 관리자 화면 새로고침 후 상태 확인</td></tr>
+          <tr><td>라이브 모드 화면이 업데이트 안 됨</td><td>관리자 화면 인터넷 불안정</td><td>관리자 화면 새로고침</td></tr>
+          <tr><td>스마트폰이 없는 수강생</td><td>기기 미소지</td><td>수업 후 관리자 수동으로 출석 처리</td></tr>
+          <tr><td>QR 스캔 자체가 불가능한 환경</td><td>인터넷 불가 장소 등</td><td>전원 미확인으로 마감 후 관리자 수동 일괄 처리</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-green mt-2">
+      <strong>QR이 안 될 때 최후 수단</strong>: 수동 출석 처리. 수업 후 출석 명단을 종이로 받은 후 관리자가 1명씩 수동으로 출석 상태를 변경합니다.
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     7. CS 응대 — 문의 유형별
+══════════════════════════════════════════ -->
+<div id="page-cs-guide" class="page">
+  <div class="page-tag">7. CS 응대</div>
+  <div class="page-title">문의 유형별 처리</div>
+  <div class="page-desc">수강생 문의 유형별 처리 방법입니다. 처리 권한이 없는 케이스는 에스컬레이션 기준을 참고하세요.</div>
+
+  <div class="guide-section">
+    <div class="section-title">출석·수료 관련 문의 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:230px">문의 내용</th>
+            <th>확인 방법</th>
+            <th style="width:170px">처리 방법</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>"저 출석했는데 결석으로 되어 있어요"</td><td>해당 회차 출석 상태 확인. 마감 전 미확인이었는지 확인</td><td>실제 출석 확인 후 → 결석 → 출석 수동 변경</td></tr>
+          <tr><td>"지각으로 처리됐는데 출석으로 바꿔주세요"</td><td>지각 기준 시간과 실제 스캔 시각 확인</td><td>기준 초과면 지각 정상. 기준 이내면 수동 출석 변경</td></tr>
+          <tr><td>"수료가 안 됐는데 이상해요"</td><td>출석률 계산 확인. 지각·조퇴도 출석 인정 여부 확인</td><td>75% 미달이면 미수료 정상. 기록 오류이면 정정 후 재계산</td></tr>
+          <tr><td>"수료증은 언제 받나요?"</td><td>Phase 1에서는 수료 처리 버튼 없음</td><td>"수료 확정 기능은 현재 준비 중입니다"로 안내</td></tr>
+          <tr><td>"QR을 못 찍었는데 출석 처리 가능한가요?"</td><td>현장 운영 담당자 또는 강사에게 확인</td><td>실제 출석 확인 후 → 수동 출석 처리</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">수강신청 관련 문의</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:230px">문의 내용</th>
+            <th>확인 방법</th>
+            <th style="width:170px">처리 방법</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>"신청이 안 돼요"</td><td>신청 기간 확인 / 정원 잔여 확인</td><td>기간 외 → 기간 안내. 정원 마감 → 다른 차수 안내</td></tr>
+          <tr><td>"신청을 취소하고 싶어요"</td><td>취소 가능 기한 확인</td><td>기한 내 → 직접 취소 안내. 기한 초과 → 운영팀이 직접 취소 처리</td></tr>
+          <tr><td>"차수를 바꾸고 싶어요 (A → B)"</td><td>두 차수 모두 잔여석 확인</td><td>기존 취소 후 새 차수 신청으로 처리</td></tr>
+          <tr><td>"같은 코스를 또 신청하려는데 안 돼요"</td><td>코스 재수강 허용 설정 확인</td><td>재수강 허용 OFF면 → 고객사 담당자에게 설정 변경 요청 에스컬레이션</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     7. CS 응대 — 에스컬레이션
+══════════════════════════════════════════ -->
+<div id="page-cs-escalate" class="page">
+  <div class="page-tag">7. CS 응대</div>
+  <div class="page-title">에스컬레이션 기준</div>
+  <div class="page-desc">운영팀이 직접 처리하기 어려운 케이스의 에스컬레이션 기준과 담당 연락처입니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">처리 주체별 담당 범위 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:200px">케이스</th>
+            <th style="width:120px">처리 주체</th>
+            <th>처리 방법 / 연락처</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>출석 상태 수동 변경</td><td><span class="b b-orange">운영팀</span></td><td>출석 관리 화면에서 직접 처리</td></tr>
+          <tr><td>수강 신청 직접 취소</td><td><span class="b b-orange">운영팀</span></td><td>수강생 관리 화면에서 직접 처리</td></tr>
+          <tr><td>정원 변경 요청</td><td><span class="b b-violet">고객사 담당자</span></td><td>코스 수정 권한 필요 → 고객사 담당자에게 전달</td></tr>
+          <tr><td>재수강 허용 토글 변경</td><td><span class="b b-violet">고객사 담당자</span></td><td>코스 설정 변경 권한 → 고객사 담당자에게 전달</td></tr>
+          <tr><td>시스템 오류 (버튼 안 눌림, 화면 오류)</td><td><span class="b b-blue">개발팀</span></td><td>오류 화면 캡처 → 기획팀(승우)에게 보고</td></tr>
+          <tr><td>정책 자체에 대한 이의 제기</td><td><span class="b b-blue">기획팀</span></td><td>기획팀(승우)에게 전달</td></tr>
+          <tr><td>수료 이의 제기 (정정 요청)</td><td><span class="b b-orange">운영팀 → 확인 후 처리</span></td><td>출석 기록 확인 후 오기입이면 수정. 정책 문제이면 기획팀 에스컬레이션</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>기억하세요</strong>: 운영팀이 직접 처리할 수 없는 것은 ① 코스 설정 변경 (고객사 담당자), ② 시스템 오류 (개발팀), ③ 정책 변경 (기획팀)입니다.
+    </div>
+  </div>
+</div>
+
+
+</main>
+</div>
+
+<script>
+  const pages = document.querySelectorAll('.page');
+  const navItems = document.querySelectorAll('.nav-item, .nav-sub');
+
+  function showPage(id, clickedEl) {
+    pages.forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + id);
+    if (target) target.classList.add('active');
+
+    navItems.forEach(n => n.classList.remove('active'));
+    if (clickedEl) clickedEl.classList.add('active');
+  }
+
+  function toggleNav(id, el) {
+    const child = document.getElementById(id);
+    const arrow = el ? el.querySelector('.nav-arrow') : null;
+    if (!child) return;
+    const isOpen = child.classList.contains('open');
+    child.classList.toggle('open', !isOpen);
+    if (arrow) arrow.classList.toggle('open', !isOpen);
+  }
+
+  // ── 검색 ──
+  const SEARCH_INDEX = [
+    { id:'overview',           label:'가이드 개요',           cat:'개요' },
+    { id:'case-overview',      label:'케이스 전체 목록',       cat:'운영 케이스' },
+    { id:'case-publish',       label:'퍼블리싱 체크리스트',    cat:'운영 케이스' },
+    { id:'case-open',          label:'FLOW-01 코스 개설',      cat:'운영 케이스' },
+    { id:'case-enroll-self',   label:'FLOW-02 자율 수강신청',  cat:'운영 케이스' },
+    { id:'case-enroll-assign', label:'FLOW-03 강제 할당',      cat:'운영 케이스' },
+    { id:'case-attendance',    label:'FLOW-04 현장 QR 출석',   cat:'운영 케이스' },
+    { id:'case-browse',        label:'FLOW-06 코스 목록 탐색', cat:'운영 케이스' },
+    { id:'att-status',         label:'출석 상태 5종',          cat:'1. 출석 처리' },
+    { id:'att-late',           label:'지각 기준',               cat:'1. 출석 처리' },
+    { id:'att-change',         label:'상태 변경 규칙',          cat:'1. 출석 처리' },
+    { id:'close-flow',         label:'마감 절차',               cat:'2. 회차 마감' },
+    { id:'close-rules',        label:'마감 전후 규칙',          cat:'2. 회차 마감' },
+    { id:'cert-cond',          label:'수료 기준',               cat:'3. 수료 처리' },
+    { id:'cert-cases',         label:'케이스별 판정',           cat:'3. 수료 처리' },
+    { id:'enroll-types',       label:'신청 방식 2종',           cat:'4. 수강신청' },
+    { id:'enroll-cases',       label:'상황별 처리',             cat:'4. 수강신청' },
+    { id:'data-perm',          label:'수정 가능 범위',          cat:'5. 데이터 정정' },
+    { id:'qr-flow',            label:'QR 운영 절차',            cat:'6. QR 현장 운영' },
+    { id:'qr-trouble',         label:'스캔 오류 대응',          cat:'6. QR 현장 운영' },
+    { id:'cs-guide',           label:'문의 유형별 처리',        cat:'7. CS 응대' },
+    { id:'cs-escalate',        label:'에스컬레이션 기준',       cat:'7. CS 응대' },
+  ];
+
+  function onSearch(q) {
+    const drop = document.getElementById('search-drop');
+    q = q.trim();
+    if (!q) { drop.classList.remove('show'); drop.innerHTML = ''; return; }
+
+    const results = SEARCH_INDEX.filter(item =>
+      item.label.includes(q) || item.cat.includes(q)
+    );
+
+    if (!results.length) {
+      drop.innerHTML = '<div class="sr-empty">검색 결과 없음</div>';
+    } else {
+      const groups = {};
+      results.forEach(r => { (groups[r.cat] = groups[r.cat] || []).push(r); });
+      drop.innerHTML = Object.entries(groups).map(([cat, items]) =>
+        `<div class="sr-group">${cat}</div>` +
+        items.map(r =>
+          `<div class="sr-item" onmousedown="goSearch('${r.id}')">
+            ${highlight(r.label, q)}
+            <span class="sr-cat">${r.cat}</span>
+          </div>`
+        ).join('')
+      ).join('');
+    }
+    drop.classList.add('show');
+  }
+
+  function highlight(text, q) {
+    const idx = text.indexOf(q);
+    if (idx < 0) return text;
+    return text.slice(0, idx) + `<mark style="background:#fff3cd;border-radius:2px;padding:0 1px">${text.slice(idx, idx + q.length)}</mark>` + text.slice(idx + q.length);
+  }
+
+  function goSearch(id) {
+    document.getElementById('search-input').value = '';
+    closeDrop();
+    showPage(id, null);
+    // sidebar active sync
+    navItems.forEach(n => {
+      const fn = n.getAttribute('onclick') || '';
+      if (fn.includes("'" + id + "'")) n.classList.add('active');
+    });
+  }
+
+  function closeDrop() {
+    const drop = document.getElementById('search-drop');
+    drop.classList.remove('show');
+  }
+</script>
+</body>
+</html>

@@ -53,7 +53,8 @@
       Plus, Search, ChevronDown, ChevronRight, MapPin, Monitor, Layers,
       Calendar, Users, Trash2, Copy, Edit3, Star, Download, Grid3X3, List,
       Link2, MoreHorizontal, X, CheckCircle, Clock, Archive, AlertCircle,
-      BookOpen, QrCode, Eye, GripVertical, Settings, Filter, ImageIcon
+      BookOpen, QrCode, Eye, GripVertical, Settings, Filter, ImageIcon, FileText,
+      MessageSquare, Play, BarChart2,
     } = Lucide;
 
     /* ══════════════════════════════════════
@@ -63,8 +64,8 @@
       { id: 1, title: '2026 직무교육 — 프로젝트 관리 심화', status: 'active', thumb: '', instructor: '김민준', creator: 'jiyoungkim', category: '직무 역량', registeredAt: '2026/04/08 14:28', enrollMethod: 'self',
         totalEnrolled: 55, totalCapacity: 60,
         packages: [
-          { name: '11월 01일 교육', startDate: '2026-11-01', endDate: '2026-11-01', place: '한샘 HQ B동 3층', capacity: 30, enrolled: 30, sessions: 2 },
-          { name: '11월 02일 교육', startDate: '2026-11-02', endDate: '2026-11-02', place: '한샘 HQ B동 3층', capacity: 30, enrolled: 25, sessions: 2 },
+          { name: 'A반 (4/14)', startDate: '2026-04-14', endDate: '2026-04-14', place: '한샘 HQ B동 3층', capacity: 30, enrolled: 28, sessions: 2 },
+          { name: 'B반 (5/12)', startDate: '2026-05-12', endDate: '2026-05-12', place: '한샘 HQ B동 3층', capacity: 30, enrolled: 27, sessions: 2 },
         ]},
       { id: 3, title: 'AI 활용 업무 자동화 워크숍', status: 'draft', thumb: '', instructor: '박지훈', creator: 'jiyoungkim', category: '직무 역량', registeredAt: '2026/04/07 17:45', enrollMethod: 'self',
         totalEnrolled: 0, totalCapacity: 120,
@@ -96,10 +97,17 @@
       { id: 12, title: '영업 전략 부트캠프 (5기)', status: 'draft', thumb: '', instructor: '김도윤', creator: 'jiyoungkim', category: '영업', registeredAt: '2026/04/06 13:10', enrollMethod: 'self',
         totalEnrolled: 0, totalCapacity: 100,
         packages: [
-          { name: '집합교육 1주차', startDate: '2026-06-01', endDate: '2026-06-05', place: '판교 연수원', capacity: 25, enrolled: 0, sessions: 5 },
+          { name: '집합교육 1주차', startDate: '2026-06-02', endDate: '2026-06-06', place: '판교 연수원', capacity: 25, enrolled: 0, sessions: 5 },
           { name: '집합교육 2주차', startDate: '2026-06-15', endDate: '2026-06-19', place: '판교 연수원', capacity: 25, enrolled: 0, sessions: 5 },
-          { name: '집합교육 3주차', startDate: '2026-07-01', endDate: '2026-07-03', place: '강남 교육장', capacity: 25, enrolled: 0, sessions: 6 },
-          { name: '최종 발표', startDate: '2026-07-31', endDate: '2026-07-31', place: '한샘 HQ 대교육장', capacity: 25, enrolled: 0, sessions: 1 },
+          { name: '집합교육 3주차', startDate: '2026-07-01', endDate: '2026-07-03', place: '강남 교육장', capacity: 25, enrolled: 0, sessions: 3 },
+          { name: '최종 발표', startDate: '2026-07-31', endDate: '2026-07-31', place: '한샘 HQ 대교육장', capacity: 100, enrolled: 0, sessions: 1 },
+        ]},
+      { id: 14, title: '하반기 신입사원 온보딩 (7월)', status: 'scheduled', thumb: '', instructor: '박지훈', creator: 'jiyoungkim', category: '공통/온보딩', registeredAt: '2026/04/28 09:00', enrollMethod: 'assign',
+        scheduledAt: '2026-05-01T09:00',
+        totalEnrolled: 0, totalCapacity: 80,
+        packages: [
+          { name: '1기 (7/1~7/3)', startDate: '2026-07-01', endDate: '2026-07-03', place: '판교 연수원', capacity: 40, enrolled: 0, sessions: 3 },
+          { name: '2기 (7/7~7/9)', startDate: '2026-07-07', endDate: '2026-07-09', place: '판교 연수원', capacity: 40, enrolled: 0, sessions: 3 },
         ]},
     ];
 
@@ -117,12 +125,15 @@
 
     /* ── 설정 맵 ── */
     const STATUS_CFG = {
-      active:    { label: '운영중', bg: 'bg-indigo-50', text: 'text-indigo-600', dot: 'bg-indigo-500' },
-      published: { label: '운영중', bg: 'bg-indigo-50', text: 'text-indigo-600', dot: 'bg-indigo-500' },
-      draft:     { label: '임시저장', bg: 'bg-slate-100', text: 'text-slate-500', dot: 'bg-slate-400' },
-      saved:     { label: '임시저장', bg: 'bg-slate-100', text: 'text-slate-500', dot: 'bg-slate-400' },
-      closed:    { label: '종료', bg: 'bg-slate-50', text: 'text-slate-400', dot: 'bg-slate-300' },
+      active:    { label: '운영중',   bg: 'bg-indigo-50',  text: 'text-indigo-600',  dot: 'bg-indigo-500' },
+      published: { label: '운영중',   bg: 'bg-indigo-50',  text: 'text-indigo-600',  dot: 'bg-indigo-500' },
+      scheduled: { label: '공개예약', bg: 'bg-violet-50',  text: 'text-violet-600',  dot: 'bg-violet-400 animate-pulse' },
+      draft:     { label: '임시저장', bg: 'bg-slate-100',  text: 'text-slate-500',   dot: 'bg-slate-400' },
+      saved:     { label: '임시저장', bg: 'bg-slate-100',  text: 'text-slate-500',   dot: 'bg-slate-400' },
+      closed:    { label: '종료',     bg: 'bg-slate-50',   text: 'text-slate-400',   dot: 'bg-slate-300' },
     };
+
+    const TODAY = '2026-04-28';
 
     const fmtDate = (d) => d ? d.replace(/-/g, '.').slice(5) : '';
     const fmtRange = (s, e) => {
@@ -154,6 +165,26 @@
       const [selectedIds, setSelectedIds] = useState(new Set());
       const [catFilter, setCatFilter] = useState('all');
       const [expandedCats, setExpandedCats] = useState(new Set(['work']));
+      const [activeFilters, setActiveFilters] = useState([]);
+      const [filterPopup, setFilterPopup] = useState(null); // null | 'select' | fieldKey
+      const [filterInput, setFilterInput] = useState('');
+
+      const FILTER_FIELDS = [
+        { key: 'instructor', label: '강사명' },
+        { key: 'place',      label: '장소' },
+        { key: 'enrollMethod', label: '수강 방식', options: [{ val:'self',label:'자율 수강' },{ val:'assign',label:'강제 할당' }] },
+      ];
+
+      const addFilter = (field, value) => {
+        if (!value.trim()) return;
+        setActiveFilters(prev => {
+          const without = prev.filter(f => f.key !== field.key);
+          return [...without, { key: field.key, label: field.label, value }];
+        });
+        setFilterPopup(null);
+        setFilterInput('');
+      };
+      const removeFilter = (key) => setActiveFilters(prev => prev.filter(f => f.key !== key));
 
       const toggleExpand = (id) => setExpandedIds(prev => {
         const next = new Set(prev);
@@ -173,15 +204,17 @@
 
       /* ── 상태별 카운트 ── */
       const statusCounts = useMemo(() => ({
-        all: courses.length,
-        active: courses.filter(c => c.status === 'active' || c.status === 'published').length,
-        draft: courses.filter(c => c.status === 'draft' || c.status === 'saved').length,
-        closed: courses.filter(c => c.status === 'closed').length,
+        all:       courses.length,
+        active:    courses.filter(c => c.status === 'active' || c.status === 'published').length,
+        scheduled: courses.filter(c => c.status === 'scheduled').length,
+        draft:     courses.filter(c => c.status === 'draft' || c.status === 'saved').length,
+        closed:    courses.filter(c => c.status === 'closed').length,
       }), [courses]);
 
       const filtered = useMemo(() => {
         let list = courses;
-        if (statusFilter === 'active') list = list.filter(c => c.status === 'active' || c.status === 'published');
+        if (statusFilter === 'active')    list = list.filter(c => c.status === 'active' || c.status === 'published');
+        else if (statusFilter === 'scheduled') list = list.filter(c => c.status === 'scheduled');
         else if (statusFilter === 'draft') list = list.filter(c => c.status === 'draft' || c.status === 'saved');
         else if (statusFilter === 'closed') list = list.filter(c => c.status === 'closed');
         if (catFilter !== 'all') list = list.filter(c => c.category === catFilter);
@@ -189,8 +222,13 @@
           const q = search.trim().toLowerCase();
           list = list.filter(c => c.title.toLowerCase().includes(q) || c.instructor.toLowerCase().includes(q));
         }
+        activeFilters.forEach(f => {
+          if (f.key === 'instructor') list = list.filter(c => c.instructor.toLowerCase().includes(f.value.toLowerCase()));
+          if (f.key === 'place') list = list.filter(c => c.packages.some(p => p.place?.toLowerCase().includes(f.value.toLowerCase())));
+          if (f.key === 'enrollMethod') list = list.filter(c => c.enrollMethod === f.value);
+        });
         return list;
-      }, [courses, statusFilter, catFilter, search]);
+      }, [courses, statusFilter, catFilter, search, activeFilters]);
 
       const allSelected = filtered.length > 0 && filtered.every(c => selectedIds.has(c.id));
       const toggleAll = () => {
@@ -198,10 +236,33 @@
         else setSelectedIds(new Set(filtered.map(c => c.id)));
       };
 
+      const [deleteModal, setDeleteModal] = useState(null); // null | { type:'single', course } | { type:'bulk', courses:[] }
+      const [deleteInput, setDeleteInput] = useState('');
+
       const handleDelete = (id) => {
-        if (!confirm('정말 삭제하시겠습니까?')) return;
-        setCourses(courses.filter(c => c.id !== id));
-        setSelectedIds(prev => { const n = new Set(prev); n.delete(id); return n; });
+        const course = courses.find(c => c.id === id);
+        setDeleteInput('');
+        setDeleteModal({ type: 'single', course });
+      };
+
+      const handleBulkDelete = () => {
+        if (selectedIds.size === 0) return;
+        const targets = courses.filter(c => selectedIds.has(c.id));
+        setDeleteInput('');
+        setDeleteModal({ type: 'bulk', courses: targets });
+      };
+
+      const executeDelete = () => {
+        if (deleteModal.type === 'single') {
+          setCourses(prev => prev.filter(c => c.id !== deleteModal.course.id));
+          setSelectedIds(prev => { const n = new Set(prev); n.delete(deleteModal.course.id); return n; });
+        } else {
+          const ids = new Set(deleteModal.courses.map(c => c.id));
+          setCourses(prev => prev.filter(c => !ids.has(c.id)));
+          setSelectedIds(new Set());
+        }
+        setDeleteModal(null);
+        setDeleteInput('');
       };
 
       /* ── 코스의 날짜 범위 요약 ── */
@@ -223,6 +284,16 @@
 
       /* ── 총 회차 수 ── */
       const getTotalSessions = (course) => course.packages.reduce((s, p) => s + (p.sessions || 0), 0);
+
+      /* ── D-day ── */
+      const getDday = (course) => {
+        const today = new Date(TODAY);
+        const upcoming = course.packages
+          .map(p => p.startDate).filter(d => d && d >= TODAY).sort();
+        if (upcoming.length === 0) return null;
+        const diff = Math.round((new Date(upcoming[0]) - today) / 86400000);
+        return diff === 0 ? 'D-Day' : `D-${diff}`;
+      };
 
       const SIDEBAR_MENUS = [
         { id: 'member', label: '회원', icon: Users, hasChildren: true },
@@ -256,10 +327,11 @@
 
       /* ── 상태 필터 탭 정의 ── */
       const STATUS_TABS = [
-        { key: 'all', label: '전체' },
-        { key: 'active', label: '운영중' },
-        { key: 'draft', label: '임시저장' },
-        { key: 'closed', label: '종료' },
+        { key: 'all',       label: '전체' },
+        { key: 'active',    label: '운영중' },
+        { key: 'scheduled', label: '공개예약' },
+        { key: 'draft',     label: '임시저장' },
+        { key: 'closed',    label: '종료' },
       ];
 
       return (
@@ -268,9 +340,13 @@
           {/* ══ 글로벌 좌측 사이드바 ══ */}
           <aside className="w-[200px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0 overflow-y-auto custom-scrollbar">
             {/* 로고 */}
-            <div className="px-5 py-5 flex items-center justify-center">
-              <span className="text-[40px]">🔥</span>
+            <div className="px-4 py-4 flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0 shadow-sm">
+                <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4"><path d="M7 2L2 5v7h4V9h2v3h4V5L7 2z" fill="white"/></svg>
+              </div>
+              <span className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">TOUCH<br/>CLASS</span>
             </div>
+            <div className="h-px bg-slate-100 mx-3 mb-2"/>
             {/* 메뉴 */}
             <nav className="flex-1 px-3 pb-6 space-y-0.5">
               {SIDEBAR_MENUS.map(menu => (
@@ -311,36 +387,76 @@
             </nav>
           </aside>
 
-          {/* ══ 메인 영역 (헤더 + 콘텐츠) ══ */}
-          <div className="flex-1 flex flex-col min-h-screen">
+          {/* ══ 메인 영역 (탑 네비 + 헤더 + 콘텐츠) ══ */}
+          <div className="flex-1 flex flex-col min-h-screen bg-[#f2f5f9]">
 
-          {/* ── 헤더 ── */}
-          <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-            <div className="px-8 py-4 flex justify-between items-center">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-violet-50 border border-violet-200 flex items-center justify-center">
-                  <MapPin size={16} className="text-violet-600"/>
-                </div>
-                <h1 className="text-[20px] font-black text-slate-900">오프라인 코스</h1>
+          {/* ── 글로벌 탑 네비게이션 ── */}
+          <div className="h-[52px] bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0 sticky top-0 z-40">
+            <div className="flex items-center gap-3">
+              <button className="flex items-center gap-1.5 text-slate-600 text-[13px] font-semibold hover:text-slate-800 transition-colors">
+                <Star size={14} className="text-amber-400 fill-amber-400"/> 즐겨찾기 <ChevronDown size={13} className="text-slate-400"/>
+              </button>
+              <div className="w-px h-4 bg-slate-200"/>
+              <button className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-[12px] font-bold hover:bg-indigo-100 transition-colors">
+                <Users size={12}/> 관리자 가이드
+              </button>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors">
+                <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5"><circle cx="10" cy="10" r="8" stroke="#7c3aed" strokeWidth="1.5"/><circle cx="10" cy="10" r="3.5" fill="#7c3aed"/></svg>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <MessageSquare size={16}/>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <Play size={15} className="ml-0.5"/>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <BarChart2 size={16}/>
+              </button>
+              <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <Filter size={15}/>
+                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none px-0.5">0</span>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <Settings size={16}/>
+              </button>
+              <div className="w-px h-5 bg-slate-200 mx-1.5"/>
+              <button className="flex items-center gap-1.5 hover:bg-slate-50 pl-0.5 pr-2 py-1 rounded-lg transition-colors">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">조</div>
+                <span className="text-[13px] font-semibold text-slate-700">조찬현</span>
+                <ChevronDown size={13} className="text-slate-400"/>
+              </button>
+            </div>
+          </div>
+
+          {/* ── 페이지 타이틀 (배경 위 텍스트) ── */}
+          <header className="shrink-0">
+            <div className="px-6 py-4 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <h1 className="text-[18px] font-black text-slate-900">오프라인 코스</h1>
+                <button className="text-slate-300 hover:text-amber-400 transition-colors">
+                  <Star size={15}/>
+                </button>
               </div>
-              <div className="flex items-center gap-2.5">
-                <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
+                <button onClick={() => alert('현재 기능과 같음')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
                   <List size={14}/> 코스 순서 관리
                 </button>
-                <a href="admin1-1.html" className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+                <button onClick={() => alert('현재 기능과 같음')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
                   <Plus size={14}/> 수강생 등록
-                </a>
-                <a href="admin1.html" className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-[14px] font-bold hover:bg-indigo-600 transition-colors flex items-center gap-1.5 shadow-sm">
-                  <Plus size={14}/> 코스 등록
+                </button>
+                <a href="offline-builder.html" className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-[14px] font-bold hover:bg-indigo-600 transition-colors flex items-center gap-1.5 shadow-sm">
+                  <Plus size={14}/> 등록
                 </a>
               </div>
             </div>
           </header>
 
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 overflow-hidden gap-3 px-4 pb-4 pt-0 items-start">
 
-            {/* ── 좌측 분류 사이드바 ── */}
-            <aside className="w-[180px] bg-white border-r border-slate-200 overflow-y-auto custom-scrollbar shrink-0 py-4">
+            {/* ── 좌측 분류 사이드바 (카드) ── */}
+            <aside className="w-[180px] bg-white rounded-xl shadow-card overflow-y-auto custom-scrollbar shrink-0 py-4 self-stretch">
               <div className="px-4 mb-3 flex items-center justify-between">
                 <span className="text-[14px] font-bold text-slate-800">분류</span>
                 <div className="flex items-center gap-1">
@@ -388,11 +504,11 @@
               </div>
             </aside>
 
-            {/* ── 메인 콘텐츠 ── */}
-            <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#f5f6fa]">
-              {/* 필터 바 — 상태 탭 (메인 필터) */}
-              <div className="bg-white border-b border-slate-200 px-6 py-3">
-                <div className="flex items-center gap-2">
+            {/* ── 메인 콘텐츠 (카드) ── */}
+            <main className="flex-1 overflow-y-auto custom-scrollbar bg-white rounded-xl shadow-card overflow-hidden">
+              {/* 필터 바 — 상태 탭 + 필터 추가 */}
+              <div className="bg-white border-b border-slate-200 px-6 py-3 relative">
+                <div className="flex items-center gap-2 flex-wrap">
                   {STATUS_TABS.map(tab => (
                     <button
                       key={tab.key}
@@ -406,10 +522,105 @@
                       <span className={`${statusFilter === tab.key ? 'text-indigo-200' : 'text-slate-300'}`}>{statusCounts[tab.key]}</span>
                     </button>
                   ))}
-                  <button className="ml-2 flex items-center gap-1 text-[13px] text-slate-400 font-semibold border border-dashed border-slate-300 rounded-lg px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-500 transition-colors">
-                    <Plus size={12}/> 필터 추가
-                  </button>
+
+                  {/* 적용된 필터 칩 */}
+                  {activeFilters.map(f => (
+                    <div key={f.key} className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 border border-indigo-200 rounded-lg text-[12px] font-bold text-indigo-700 animate-fadeIn">
+                      <span className="text-indigo-400 text-[10px] font-bold">{f.label}</span>
+                      <span>{f.key === 'enrollMethod' ? (f.value === 'self' ? '자율 수강' : '강제 할당') : f.value}</span>
+                      <button onClick={() => removeFilter(f.key)} className="ml-0.5 text-indigo-300 hover:text-indigo-600 transition-colors"><X size={11}/></button>
+                    </div>
+                  ))}
+
+                  {/* + 필터 추가 버튼 */}
+                  <div className="relative z-30">
+                    <button
+                      onClick={() => { setFilterPopup(p => p ? null : 'select'); setFilterInput(''); }}
+                      className={`flex items-center gap-1 text-[13px] font-semibold border rounded-lg px-3 py-1.5 transition-colors
+                        ${filterPopup ? 'border-indigo-400 text-indigo-500 bg-indigo-50' : 'border-dashed border-slate-300 text-slate-400 hover:border-indigo-400 hover:text-indigo-500'}`}
+                    >
+                      <Plus size={12}/> 필터 추가
+                      <ChevronDown size={11} className={`transition-transform ${filterPopup ? 'rotate-180' : ''}`}/>
+                    </button>
+
+                    {/* 필터 선택 팝업 */}
+                    {filterPopup === 'select' && (
+                      <div className="absolute left-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-card w-[200px] z-30 overflow-hidden animate-fadeIn">
+                        <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wide border-b border-slate-100">필터 항목 선택</div>
+                        {FILTER_FIELDS.map(f => (
+                          <button key={f.key}
+                            onClick={() => { setFilterPopup(f.key); setFilterInput(''); }}
+                            className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center justify-between">
+                            {f.label}
+                            <ChevronRight size={12} className="text-slate-300"/>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 값 입력 팝업 */}
+                    {filterPopup && filterPopup !== 'select' && (() => {
+                      const field = FILTER_FIELDS.find(f => f.key === filterPopup);
+                      if (!field) return null;
+                      return (
+                        <div className="absolute left-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-card w-[260px] z-30 animate-fadeIn">
+                          <div className="px-4 pt-4 pb-3">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-[13px] font-bold text-slate-800">{field.label}</span>
+                              <button onClick={() => setFilterPopup(null)} className="text-slate-300 hover:text-slate-600 transition-colors"><X size={13}/></button>
+                            </div>
+                            {field.options ? (
+                              <div className="space-y-1">
+                                {field.options.map(opt => (
+                                  <button key={opt.val}
+                                    onClick={() => addFilter(field, opt.val)}
+                                    className="w-full text-left px-3 py-2 rounded-lg text-[13px] font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-transparent hover:border-indigo-200">
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <>
+                                <div className="border border-slate-200 rounded-lg px-3 py-2 focus-within:border-indigo-400 transition-colors">
+                                  <div className="text-[10px] font-bold text-slate-400 mb-1">{field.label}</div>
+                                  <input
+                                    autoFocus
+                                    value={filterInput}
+                                    onChange={e => setFilterInput(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && addFilter(field, filterInput)}
+                                    placeholder={`${field.label} 입력`}
+                                    className="w-full text-[13px] outline-none text-slate-800 placeholder-slate-300"
+                                  />
+                                </div>
+                                <div className="flex justify-end mt-3">
+                                  <button
+                                    onClick={() => addFilter(field, filterInput)}
+                                    disabled={!filterInput.trim()}
+                                    className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-bold transition-colors
+                                      ${filterInput.trim() ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
+                                  >
+                                    <CheckCircle size={12}/> 적용
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 전체 초기화 */}
+                  {activeFilters.length > 0 && (
+                    <button onClick={() => setActiveFilters([])}
+                      className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors ml-1">
+                      초기화
+                    </button>
+                  )}
                 </div>
+
+                {/* 팝업 외부 클릭 닫기 */}
+                {filterPopup && <div className="fixed inset-0 z-20" style={{zIndex:15}} onClick={() => setFilterPopup(null)}/>}
               </div>
 
               {/* 카운트 + 검색 */}
@@ -427,6 +638,14 @@
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[12px] text-slate-400 font-medium">코스 순서 설정순</span>
+                  {selectedIds.size > 0 && (
+                    <button
+                      onClick={handleBulkDelete}
+                      className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[13px] font-bold hover:bg-rose-600 transition-colors flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Trash2 size={13}/> 선택 삭제 ({selectedIds.size})
+                    </button>
+                  )}
                   <button className="p-1.5 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 bg-white"><Download size={14}/></button>
                   <div className="flex border border-slate-200 rounded-lg overflow-hidden bg-white">
                     <button className="p-1.5 text-slate-400 hover:bg-slate-50"><Grid3X3 size={14}/></button>
@@ -466,6 +685,8 @@
                         const hasPackages = course.packages.length > 0;
                         const totalSessions = getTotalSessions(course);
                         const isFull = course.totalCapacity > 0 && course.totalEnrolled >= course.totalCapacity;
+                        const dday = getDday(course);
+                        const isActive = course.status === 'active' || course.status === 'published';
 
                         return (
                           <React.Fragment key={course.id}>
@@ -506,7 +727,7 @@
                               {/* 코스명 */}
                               <td className="px-3 py-3">
                                 <div className="flex items-center gap-2">
-                                  <a href={`admin1.html?courseId=${course.id}`} className="text-[14px] font-bold text-slate-800 hover:text-indigo-600 transition-colors leading-snug">
+                                  <a href={`offline-builder.html?courseId=${course.id}`} className="text-[14px] font-bold text-slate-800 hover:text-indigo-600 transition-colors leading-snug">
                                     {course.title}
                                   </a>
                                   {hasPackages && (
@@ -521,8 +742,8 @@
                               </td>
                               {/* 수강관리 */}
                               <td className="px-3 py-3 text-center">
-                                {course.status === 'active' || course.status === 'closed' ? (
-                                  <a href={`admin1-1.html?courseId=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-600 border border-indigo-200 px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-100 transition-colors whitespace-nowrap">
+                                {(isActive || course.status === 'closed') ? (
+                                  <a href={`offline-course-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
                                     <Users size={10}/> 수강관리
                                   </a>
                                 ) : (
@@ -544,6 +765,19 @@
                               {/* 교육 기간 */}
                               <td className="px-3 py-3 text-[12px] text-slate-600 font-medium">
                                 {getDateRange(course)}
+                                {dday && (
+                                  <span className={`ml-1.5 text-[10px] font-black px-1.5 py-0.5 rounded
+                                    ${dday === 'D-Day'
+                                      ? 'bg-rose-100 text-rose-600'
+                                      : 'bg-amber-50 text-amber-600'}`}>
+                                    {dday}
+                                  </span>
+                                )}
+                                {course.status === 'scheduled' && course.scheduledAt && (
+                                  <div className="text-[10px] text-violet-500 font-bold mt-0.5 flex items-center gap-0.5">
+                                    <Clock size={9}/> {new Date(course.scheduledAt).toLocaleString('ko-KR', {month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})} 공개
+                                  </div>
+                                )}
                               </td>
                               {/* 수강 인원 */}
                               <td className="px-3 py-3 text-right">
@@ -561,7 +795,7 @@
                               <td className="px-3 py-3">
                                 <div className="flex items-center justify-center gap-0.5">
                                   <button className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"><Link2 size={14}/></button>
-                                  <a href={`admin1.html?courseId=${course.id}`} className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"><Edit3 size={14}/></a>
+                                  <a href={`offline-builder.html?courseId=${course.id}`} className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"><Edit3 size={14}/></a>
                                   <button onClick={() => handleDelete(course.id)} className="p-1 text-slate-400 hover:text-rose-500 transition-colors"><Trash2 size={14}/></button>
                                 </div>
                               </td>
@@ -614,16 +848,16 @@
                                       </tbody>
                                     </table>
                                     <div className="mt-3 flex items-center gap-2">
-                                      <a href={`admin1.html?courseId=${course.id}`} className="text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors flex items-center gap-1">
+                                      <a href={`offline-builder.html?courseId=${course.id}`} className="text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors flex items-center gap-1">
                                         <Edit3 size={10}/> 차수 편집
                                       </a>
-                                      {course.status === 'active' || course.status === 'closed' ? (
-                                        <a href={`admin1-1.html?courseId=${course.id}`} className="text-[11px] font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1">
-                                          <QrCode size={10}/> 수강관리
+                                      {(isActive || course.status === 'closed') ? (
+                                        <a href={`offline-course-view.html?id=${course.id}`} className="text-[11px] font-bold text-white bg-indigo-500 px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-1 shadow-sm">
+                                          <Users size={10}/> 수강관리
                                         </a>
                                       ) : (
                                         <span className="text-[11px] font-bold text-slate-300 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-1 cursor-not-allowed" title="퍼블리싱 후 이용 가능">
-                                          <QrCode size={10}/> 수강관리
+                                          <Users size={10}/> 수강관리
                                         </span>
                                       )}
                                     </div>
@@ -649,6 +883,94 @@
           </div>
 
           </div>{/* 메인 영역 끝 */}
+
+          {/* ══ 삭제 확인 모달 ══ */}
+          {deleteModal && (() => {
+            const isBulk = deleteModal.type === 'bulk';
+            const courseName = isBulk ? null : deleteModal.course.title;
+            const totalEnrolled = isBulk
+              ? deleteModal.courses.reduce((s, c) => s + (c.totalEnrolled || 0), 0)
+              : (deleteModal.course.totalEnrolled || 0);
+            const canConfirm = deleteInput === '삭제';
+            return (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 animate-fadeIn" onClick={e => { if(e.target === e.currentTarget) { setDeleteModal(null); setDeleteInput(''); } }}>
+                <div className="bg-white rounded-2xl shadow-2xl w-[440px] overflow-hidden animate-slideUp">
+                  {/* 상단 아이콘 + 타이틀 */}
+                  <div className="px-8 pt-8 pb-5 text-center">
+                    <div className="w-14 h-14 bg-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7"><path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <h2 className="text-[18px] font-black text-slate-900 mb-1.5">정말 삭제하시겠습니까?</h2>
+                    <p className="text-[13px] text-slate-500 leading-relaxed">
+                      선택한 코스와 관련된 모든 데이터가 삭제되며,<br/>삭제 후에는 복구할 수 없습니다.
+                    </p>
+                  </div>
+
+                  <div className="px-8 pb-6 space-y-4">
+                    {/* 삭제 대상 코스명 */}
+                    <div className="bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 flex items-center gap-2">
+                      <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-rose-400 shrink-0"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                      <span className="text-[13px] text-rose-700 font-medium">
+                        {isBulk ? `삭제할 코스: ${deleteModal.courses.length}개 선택됨` : `삭제할 코스: ${courseName}`}
+                      </span>
+                    </div>
+
+                    {/* 수강생 경고 */}
+                    {totalEnrolled > 0 && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-amber-500 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                        <span className="text-[13px] text-amber-700 font-semibold">{totalEnrolled}명의 수강생 데이터가 함께 삭제됩니다.</span>
+                      </div>
+                    )}
+
+                    {/* 삭제 항목 목록 */}
+                    <ul className="space-y-1.5 pl-1">
+                      {[
+                        '수강생 등록 정보 (수강생 목록, 출석 기록 등)',
+                        '차수·회차 일정 / 정원 / 장소',
+                        '코스 통계',
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[13px] text-slate-600">
+                          <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 shrink-0"/>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* 텍스트 입력 확인 */}
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 text-indigo-500"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><polyline points="22 4 12 14.01 9 11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="text-[13px] font-semibold text-slate-700">계속하려면 <strong className="text-slate-900">삭제</strong>를 입력하세요.</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={deleteInput}
+                        onChange={e => setDeleteInput(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && canConfirm && executeDelete()}
+                        placeholder="삭제"
+                        autoFocus
+                        className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-[14px] outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 placeholder-slate-300"
+                      />
+                    </div>
+
+                    {/* 버튼 */}
+                    <div className="flex gap-3 pt-1">
+                      <button
+                        onClick={() => { setDeleteModal(null); setDeleteInput(''); }}
+                        className="flex-1 py-2.5 border border-slate-200 rounded-xl text-[14px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                      >취소</button>
+                      <button
+                        onClick={executeDelete}
+                        disabled={!canConfirm}
+                        className={`flex-1 py-2.5 rounded-xl text-[14px] font-bold transition-colors ${canConfirm ? 'bg-rose-500 text-white hover:bg-rose-600' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                      >확인</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       );
     };
