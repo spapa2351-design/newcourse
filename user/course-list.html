@@ -213,7 +213,7 @@
   </div>
 
   <!-- ── 서브 카테고리 탭 ── -->
-  <div class="sub-tabs">
+  <div class="sub-tabs" data-feature-id="U2-01">
     <button class="sub-tab active" onclick="setSubTab(this)">전체</button>
     <button class="sub-tab" onclick="setSubTab(this)">프로젝트관리</button>
     <button class="sub-tab" onclick="setSubTab(this)">데이터분석</button>
@@ -222,7 +222,7 @@
   </div>
 
   <!-- ── 검색 ── -->
-  <div class="search-bar">
+  <div class="search-bar" data-feature-id="U2-03">
     <i class="fa-solid fa-magnifying-glass icon"></i>
     <input type="text" placeholder="어떤 코스를 찾으세요?">
   </div>
@@ -250,7 +250,7 @@
     <div class="course-grid">
 
       <!-- 1: 수강 신청 가능 -->
-      <div class="g-card" onclick="location.href='course-detail.html'">
+      <div class="g-card" data-feature-id="U2-04" onclick="location.href='course-detail.html'">
         <div class="g-card-cover">
           <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=400&fit=crop" alt="">
           <div class="g-badges">
@@ -440,5 +440,6 @@ function setSubTab(el) {
 }
 </script>
 
+<script src="../admin/feature-highlight.js"></script>
 </body>
 </html>

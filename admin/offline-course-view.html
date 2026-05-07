@@ -720,7 +720,7 @@
       const livePresent = 7; // 시뮬레이션
       const recentScans = LEARNERS_RAW.filter(l=>l.pkgId==='p4').slice(0,3);
       return (
-        <div className="h-screen bg-slate-900 flex overflow-hidden">
+        <div data-feature-id="A4-02" className="h-screen bg-slate-900 flex overflow-hidden">
           <div className="flex-[7] flex flex-col items-center justify-center relative">
             <button onClick={()=>setLiveMode(false)}
               className="absolute top-6 left-6 text-white/50 hover:text-white flex items-center gap-2 text-[14px] font-bold transition-colors">
@@ -892,7 +892,7 @@
         <div className="flex flex-1 overflow-hidden gap-3 px-4 pb-4 pt-0 items-start">
 
           {/* ══ 왼쪽 사이드바 ══ */}
-          <aside className="w-[230px] bg-white rounded-xl shadow-card shrink-0 flex flex-col overflow-hidden">
+          <aside className="w-[230px] bg-white rounded-xl shadow-card shrink-0 flex flex-col overflow-hidden" data-feature-id="A3-01">
             {/* 커버 영역 */}
             <div className="bg-white px-3 pt-3 pb-2 shrink-0 border-b border-slate-100 flex flex-col items-center gap-2">
               {/* 배지 블록 */}
@@ -974,12 +974,12 @@
 
             {/* 액션 버튼 */}
             <div className="p-4 border-t border-slate-100 space-y-2 shrink-0">
-              <button onClick={()=>setShowEnrollModal(true)}
+              <button data-feature-id="A3-03" onClick={()=>setShowEnrollModal(true)}
                 className="w-full flex items-center justify-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[13px] py-2 rounded-xl transition-colors border border-indigo-200">
                 <UserCheck size={13}/> 수강생 등록
               </button>
               {todaySess && (
-                <button onClick={()=>setLiveMode(true)}
+                <button data-feature-id="A3-04" onClick={()=>setLiveMode(true)}
                   className="w-full flex items-center justify-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-[13px] py-2 rounded-xl transition-colors shadow-sm">
                   <QrCode size={13}/> 라이브 출석
                 </button>
@@ -996,7 +996,7 @@
 
             {/* 오늘 회차 배너 */}
             {todaySess && (
-              <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl px-5 py-4 flex items-center gap-4 shadow-card animate-fadeIn">
+              <div data-feature-id="A3-05" className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl px-5 py-4 flex items-center gap-4 shadow-card animate-fadeIn">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                   <Zap size={20} className="text-white"/>
                 </div>
@@ -1181,7 +1181,7 @@
 
               {/* ─── 출석 관리 탭 (회차 중심) ─── */}
               {tab==='attendance' && (
-                <div className="animate-fadeIn">
+                <div className="animate-fadeIn" data-feature-id="A3-14">
                   {/* 툴바 */}
                   <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50">
                     <select value={pkgFilter} onChange={e=>setPkgFilter(e.target.value)}
@@ -1313,10 +1313,10 @@
 
               {/* ─── 수강생 현황 탭 (학습자 중심) ─── */}
               {tab==='roster' && (
-                <div className="animate-fadeIn">
+                <div className="animate-fadeIn" data-feature-id="A3-09">
                   {/* 툴바 */}
                   <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50">
-                    <div className="relative">
+                    <div className="relative" data-feature-id="A3-10">
                       <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
                       <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="이름·소속 검색"
                         className="pl-8 pr-4 py-1.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-indigo-400 bg-white w-48"/>
@@ -1973,5 +1973,6 @@
 
   createRoot(document.getElementById('root')).render(<App/>);
 </script>
+<script src="feature-highlight.js"></script>
 </body>
 </html>

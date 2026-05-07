@@ -303,7 +303,7 @@
 
     <div class="scroll-area">
       <!-- 커버 영역 -->
-      <div class="cover">
+      <div class="cover" data-feature-id="U3-01">
         <span class="cover-tag">직무교육</span>
         <span class="cover-badge" id="cover-enroll-badge">신청 가능</span>
         <div style="font-size:48px; margin-bottom:12px;">📋</div>
@@ -311,7 +311,7 @@
       </div>
 
       <!-- 관리자 배정 안내 배너 -->
-      <div id="assigned-banner" style="display:none; margin:16px 20px 0; padding:16px; background:#FFF8E1; border:1.5px solid #FFE082; border-radius:12px;">
+      <div id="assigned-banner" data-feature-id="U3-03" style="display:none; margin:16px 20px 0; padding:16px; background:#FFF8E1; border:1.5px solid #FFE082; border-radius:12px;">
         <div style="font-weight:800; color:#E65100; margin-bottom:6px; font-size:14px;">🛡️ 관리자 배정 교육</div>
         <div style="font-size:13px; color:#BF360C; line-height:1.6;">이 코스는 관리자가 직접 배정한 교육입니다.<br>별도의 수강 신청 없이 배정된 일정에 참석해 주세요.</div>
         <div id="assigned-group-chip" style="display:inline-block; margin-top:10px; padding:5px 14px; background:#FFF3E0; border:1px solid #FFCC80; border-radius:20px; font-size:12px; font-weight:700; color:#E65100;"></div>
@@ -383,7 +383,7 @@
             <div class="info-val" style="color: var(--error);">교육 시작 3일 전까지 취소, 5일 전까지 변경 가능</div>
           </div>
         </div>
-        <div class="info-row" id="row-enroll-period">
+        <div class="info-row" id="row-enroll-period" data-feature-id="U3-04">
           <div class="info-icon">📝</div>
           <div>
             <div class="info-label">수강 신청 기간</div>
@@ -393,7 +393,7 @@
       </div>
 
       <!-- 커리큘럼 (읽기 전용 아코디언) -->
-      <div class="section" style="border-bottom:none;">
+      <div class="section" style="border-bottom:none;" data-feature-id="U3-05">
         <div class="section-title" style="margin-bottom: 16px;">커리큘럼 안내</div>
 
         <div style="font-size:13px; color:var(--secondary); background:#FFF8E1; padding:14px; border-radius:8px; margin-bottom:16px; font-weight:600; display: flex; gap: 8px;">
@@ -409,7 +409,7 @@
     </div>
 
     <!-- 하단 버튼 -->
-    <div class="bottom-cta" id="detail-cta">
+    <div class="bottom-cta" id="detail-cta" data-feature-id="U3-02">
       <button class="btn-primary" id="btn-enroll" onclick="openModal()">
         수강 신청하기 <i class="fa-solid fa-arrow-right" style="font-size:14px; margin-left:4px;"></i>
       </button>
@@ -1298,5 +1298,6 @@ goScreen('screen-detail');
   else if (status === 'completed') setMyStatus('completed');
 })();
 </script>
+<script src="../admin/feature-highlight.js"></script>
 </body>
 </html>
