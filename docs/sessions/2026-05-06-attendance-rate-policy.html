@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>출석률 계산 & 차수·회차 변경 정책 — 2026-05-06</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+  .dev-q {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+  }
+  .plan-a {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .q-card {
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    overflow: hidden;
+  }
+  .acc-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 28px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .acc-header:hover { background: #f8fafc; }
+  .acc-chevron {
+    width: 18px;
+    height: 18px;
+    color: #94a3b8;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+  }
+  .acc-chevron.open { transform: rotate(180deg); }
+  .acc-body {
+    display: none;
+    padding: 0 28px 24px;
+  }
+  .acc-body.open { display: block; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 12px 0; }
+  th { background: #f8fafc; color: #475569; font-weight: 600; text-align: left; padding: 9px 14px; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 9px 14px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: top; line-height: 1.5; }
+  tr:last-child td { border-bottom: none; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 12.5px; font-family: 'SF Mono', 'Fira Code', monospace; color: #4f46e5; }
+  pre { background: #1e293b; color: #e2e8f0; border-radius: 10px; padding: 16px 20px; font-size: 13px; line-height: 1.7; overflow-x: auto; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge-ok { background: #d1fae5; color: #065f46; }
+  .badge-warn { background: #fef3c7; color: #92400e; }
+  .badge-no { background: #fee2e2; color: #b91c1c; }
+  .badge-phase { background: #dbeafe; color: #1d4ed8; }
+  nav a { display: block; padding: 6px 12px; border-radius: 6px; font-size: 13px; color: #94a3b8; transition: all 0.15s; cursor: pointer; text-decoration: none; }
+  nav a:hover { background: #1e293b; color: #e2e8f0; }
+  .divider { border: none; border-top: 1px solid #f1f5f9; margin: 0 28px; }
+  .callout-amber { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 0 7px 7px 0; margin: 12px 0; font-size: 13px; color: #78350f; line-height: 1.6; }
+  .callout-green { background: #ecfdf5; border-left: 3px solid #10b981; padding: 10px 14px; border-radius: 0 7px 7px 0; margin: 12px 0; font-size: 13px; color: #065f46; line-height: 1.6; }
+  .callout-blue { background: #eff6ff; border-left: 3px solid #3b82f6; padding: 10px 14px; border-radius: 0 7px 7px 0; margin: 12px 0; font-size: 13px; color: #1e3a8a; line-height: 1.6; }
+</style>
+</head>
+<body class="bg-slate-50">
+
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-screen w-56 bg-slate-900 overflow-y-auto z-20 flex flex-col">
+  <div class="p-5 border-b border-slate-700/50">
+    <div class="text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-1">Session Note</div>
+    <div class="text-white font-bold text-sm leading-tight">출석률 & 차수·회차<br>변경 정책</div>
+    <div class="flex items-center gap-2 mt-2">
+      <span class="bg-blue-500/20 text-blue-400 text-xs px-2 py-0.5 rounded-full">2026-05-06</span>
+    </div>
+  </div>
+  <nav class="flex-1 p-3 space-y-0.5">
+    <div class="text-slate-600 text-xs font-semibold px-3 pt-3 pb-1 tracking-wider">질문 목록</div>
+    <a href="#q1" onclick="openCard('q1')">Q1. 분모 = A vs B</a>
+    <a href="#q2" onclick="openCard('q2')">Q2. 차수·회차 추가 시 수료자</a>
+    <a href="#q3" onclick="openCard('q3')">Q3. 운영 케이스 빈도</a>
+    <div class="text-slate-600 text-xs font-semibold px-3 pt-4 pb-1 tracking-wider">참고</div>
+    <a href="#summary">핵심 요약</a>
+    <a href="#guide-ref">운영팀 가이드 반영</a>
+    <div class="px-3 pt-4">
+      <button onclick="expandAll()" class="w-full text-xs text-slate-500 hover:text-slate-300 py-1 transition-colors">모두 펼치기</button>
+      <button onclick="collapseAll()" class="w-full text-xs text-slate-500 hover:text-slate-300 py-1 transition-colors">모두 접기</button>
+    </div>
+  </nav>
+</aside>
+
+<!-- Main -->
+<main class="ml-56 min-h-screen">
+
+<!-- Header -->
+<div class="bg-gradient-to-br from-slate-700 via-slate-600 to-slate-700 text-white px-10 py-6">
+  <div class="max-w-3xl">
+    <div class="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-2">Session Note · 2026-05-06</div>
+    <h1 class="text-xl font-bold">출석률 계산 & 차수·회차 변경 정책</h1>
+    <p class="text-slate-300 text-sm mt-1">개발자 ↔ 기획자 문답 기록 — 분모 정의 · immutable 차수 · 운영 가이드</p>
+  </div>
+</div>
+
+<div class="max-w-3xl mx-auto px-8 py-8">
+
+<!-- Q1 -->
+<div id="q1" class="q-card">
+  <button class="acc-header" onclick="toggle(this)">
+    <div class="flex items-center gap-2">
+      <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">Q1</span>
+      <span class="font-bold text-slate-800">회차 변경/추가/삭제 시 출석률 재계산 정책 — Option A vs B?</span>
+    </div>
+    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </button>
+  <div class="acc-body">
+    <hr class="divider mb-4" style="margin-left:0;margin-right:0;">
+    <div class="dev-q">
+      <div class="text-xs font-bold text-blue-500 mb-1">👨‍💻 개발자</div>
+      <div class="text-sm text-blue-900">
+        출석 회차를 변경/추가/삭제 하게 될 때 학습자 출석률 재계산 정책이 필요합니다. 분모가 <strong>차수 전체 회차 수(미래 포함)</strong>면 회차 추가 즉시 분모 증가로 ELIGIBLE이 강등될 수 있고, <strong>마감된 회차 수만</strong>이면 미래 회차 추가/삭제는 snapshot 영향이 없어요. Option B가 맞다면 마감된 회차 삭제 예외만 대응하면 됩니다.
+      </div>
+    </div>
+    <div class="plan-a">
+      <div class="text-xs font-bold text-indigo-500 mb-3">🙋 기획자</div>
+      <p class="text-sm text-slate-700 mb-3"><strong>Option B로 갑니다.</strong> 분모는 마감된 회차 수만 카운트.</p>
+      <p class="text-sm font-bold text-slate-800 mt-4 mb-2">왜 B인가</p>
+      <table>
+        <thead><tr><th style="width:160px">근거</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td><strong>학습자 공정성</strong></td><td>안 열린 회차 때문에 rate가 떨어지는 건 부당. 회차 추가는 보통 학습자 책임이 아닌 사유로 일어남</td></tr>
+          <tr><td><strong>운영 가능성</strong></td><td>차수·회차 추가는 일상. 매번 re-fanout 트리거되면 시스템 못 버팀</td></tr>
+          <tr><td><strong>수료 시점 동일</strong></td><td>코스 종료 시점엔 A·B 결과가 같음. 차이는 진행 중 표시에서만</td></tr>
+          <tr><td><strong>법정의무 정의 일치</strong></td><td>75% 법정 기준은 "최종 출석률". 진행 중 표시는 "현재까지의 출석률"이 자연스러움</td></tr>
+        </tbody>
+      </table>
+      <p class="text-sm font-bold text-slate-800 mt-4 mb-2">비유로 보면</p>
+      <div class="callout-blue">
+        <strong>A는 시험 진행 중인데 아직 안 푼 문제까지 0점 처리한 점수</strong>. <strong>B는 지금까지 푼 문제 중에서 몇 점 맞았는지 보여주는 점수.</strong>
+      </div>
+      <p class="text-sm text-slate-600 mt-2">10회차 코스, 3회차 마감, 2회 출석한 학습자:</p>
+      <table>
+        <thead><tr><th></th><th>계산</th><th>표시 출석률</th><th>학습자 인상</th></tr></thead>
+        <tbody>
+          <tr><td><strong>A</strong></td><td>2 ÷ 10</td><td>20%</td><td>"망했네…"</td></tr>
+          <tr><td><strong>B</strong></td><td>2 ÷ 3</td><td>67%</td><td>"남은 회차 챙기면 회복 가능"</td></tr>
+        </tbody>
+      </table>
+      <p class="text-sm font-bold text-slate-800 mt-4 mb-2">보완 정책 5가지</p>
+      <table>
+        <thead><tr><th style="width:30px">#</th><th>정책</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>학습자 앱에 <code>마감된 N회차 중 M회 출석 (X%)</code> 형식으로 분자·분모 모두 노출</td></tr>
+          <tr><td>2</td><td>미래 회차 추가 시 학습자 푸시·메일 알림 ("일정 1개 추가됨")</td></tr>
+          <tr><td>3</td><td>수료/미수료 라벨은 차수 종료 후에만 노출 — 진행 중에는 출석률 숫자만 표시 <span class="badge badge-warn">2026-05-06 수정: UI 부담으로 "현재까지" 별도 라벨 제거. 차수 상태 배지가 finality 시그널 대체</span></td></tr>
+          <tr><td>4</td><td>마감된 회차 삭제는 admin 이중 확인 + audit log + re-fanout 트리거. 영향 학습자 수 dialog에 미리 표시</td></tr>
+          <tr><td>5</td><td>회차 추가·삭제 모두 audit log에 [시점·작업자·영향 인원] 기록</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div id="q2" class="q-card">
+  <button class="acc-header" onclick="toggle(this)">
+    <div class="flex items-center gap-2">
+      <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">Q2</span>
+      <span class="font-bold text-slate-800">차수가 늘고 회차도 늘었는데, 이미 수료한 학습자는?</span>
+    </div>
+    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </button>
+  <div class="acc-body">
+    <hr class="divider mb-4" style="margin-left:0;margin-right:0;">
+    <div class="dev-q">
+      <div class="text-xs font-bold text-blue-500 mb-1">👨‍💻 개발자</div>
+      <div class="text-sm text-blue-900">
+        2차수였던 코스가 1차수가 늘어났고, 회차 10개도 추가됐어요. 학습자는 2차수에 등록해서 다 출석 → 수료 표시까지 떴는데, 이렇게 되면 사용자 결과는 어떻게 됩니까?
+      </div>
+    </div>
+    <div class="plan-a">
+      <div class="text-xs font-bold text-indigo-500 mb-3">🙋 기획자</div>
+      <p class="text-sm font-bold text-slate-800 mb-2">단위 합의: 출석률은 차수(Session) 단위</p>
+      <pre>분모 = 학습자가 등록된 차수의 마감된 회차 수
+분자 = 그중 출석/지각/조퇴 회차 수</pre>
+      <p class="text-sm text-slate-700 mb-3">학습자는 한 차수에만 등록되므로, <strong>다른 차수에 뭐가 일어나든 본인 출석률·수료에 영향 없음.</strong></p>
+      <p class="text-sm font-bold text-slate-800 mt-4 mb-2">시나리오 매트릭스</p>
+      <table>
+        <thead><tr><th style="width:55%">어떤 변화?</th><th>2차수 등록·수료자에게 결과</th></tr></thead>
+        <tbody>
+          <tr><td>새 차수(3차수) 추가</td><td><span class="badge badge-ok">영향 없음</span> 수료 유지</td></tr>
+          <tr><td>새 차수(3차수)에 회차 10개 추가</td><td><span class="badge badge-ok">영향 없음</span> 수료 유지</td></tr>
+          <tr><td>본인 차수(2차수)에 회차 10개 추가 — 이미 종료(마감)</td><td><span class="badge badge-no">시스템에서 차단</span> 수료 유지</td></tr>
+          <tr><td>본인 차수(2차수)에 회차 10개 추가 — 진행 중</td><td><span class="badge badge-warn">분모 증가</span> 임시 수료 풀림 → "진행 중"</td></tr>
+        </tbody>
+      </table>
+      <div class="callout-green">
+        질문 시나리오는 첫 두 케이스에 해당 → <strong>사용자는 영향 없음. 수료 표시 그대로.</strong>
+      </div>
+      <p class="text-sm font-bold text-slate-800 mt-4 mb-2">정책 약속 3개</p>
+      <table>
+        <thead><tr><th style="width:30px">#</th><th>약속</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>차수가 종료(closed)되면 그 차수의 출석률·수료는 <strong>immutable</strong>. 사후 변경 불가</td></tr>
+          <tr><td>2</td><td>종료된 차수에는 회차 추가/삭제가 시스템에서 차단. UI 버튼 비활성화</td></tr>
+          <tr><td>3</td><td>진행 중 차수에 회차 추가 시 학습자 알림 + "회사 사정으로 추가됨" 안내 자동 발송</td></tr>
+        </tbody>
+      </table>
+      <div class="callout-blue mt-3">
+        한 줄 요약 — <strong>"내 차수에서 내 약속(75% 출석)을 지켰으면 끝."</thread>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div id="q3" class="q-card">
+  <button class="acc-header" onclick="toggle(this)">
+    <div class="flex items-center gap-2">
+      <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">Q3</span>
+      <span class="font-bold text-slate-800">코스 오픈 후에도 차수·회차 추가가 자주 일어나나요?</span>
+    </div>
+    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </button>
+  <div class="acc-body">
+    <hr class="divider mb-4" style="margin-left:0;margin-right:0;">
+    <div class="dev-q">
+      <div class="text-xs font-bold text-blue-500 mb-1">👨‍💻 개발자</div>
+      <div class="text-sm text-blue-900">
+        솔직히 코스 오픈하고 나서도 계속 차수·회차를 추가하는 운영 케이스가 있긴 하지 않을까요? 많지는 않겠지만.
+      </div>
+    </div>
+    <div class="plan-a">
+      <div class="text-xs font-bold text-indigo-500 mb-3">🙋 기획자</div>
+      <p class="text-sm text-slate-700 mb-3">솔직히 — <strong>꽤 자주 있습니다.</strong> 운영 일상이에요.</p>
+      <p class="text-sm font-bold text-slate-800 mt-4 mb-2">차수 추가 케이스</p>
+      <table>
+        <thead><tr><th>코스</th><th>패턴</th><th style="width:100px">빈도</th></tr></thead>
+        <tbody>
+          <tr><td>매니저 코칭 스킬 워크숍</td><td>정원 빨리 마감 → 분기마다 차수 추가</td><td>분기 1회</td></tr>
+          <tr><td>데이터 분석 입문</td><td>5분 만에 마감 → 매월 차수 추가</td><td>월 1회</td></tr>
+          <tr><td>김난도 트렌드 특강</td><td>외부 강사 일정 추가 받아 차수 추가</td><td>비정기</td></tr>
+          <tr><td>신입 OT</td><td>추가 입사자 모아 보충 차수 운영</td><td>반기 1~2회</td></tr>
+          <tr><td>조직개편/신규 본부</td><td>그 본부용 차수 추가</td><td>연 1~2회</td></tr>
+          <tr><td>법정의무 미수료자 사이클</td><td>75% 못 채운 사람 모아 추가 차수</td><td>분기 1회</td></tr>
+        </tbody>
+      </table>
+      <p class="text-sm font-bold text-slate-800 mt-4 mb-2">회차 추가 케이스</p>
+      <table>
+        <thead><tr><th>케이스</th><th>발생 조건</th><th style="width:100px">빈도</th></tr></thead>
+        <tbody>
+          <tr><td>보강 회차</td><td>강사 사정·공휴일·재해로 결강</td><td>분기 1~2회</td></tr>
+          <tr><td>연장 운영</td><td>진도 못 빼서 1주 연장</td><td>분기 1회</td></tr>
+          <tr><td>Q&A·심화 세션 추가</td><td>학습자 요청</td><td>비정기</td></tr>
+          <tr><td>법령 개정 시수 증가</td><td>의무교육 시수 늘어남</td><td>연 0~1회</td></tr>
+          <tr><td>강의장 사정으로 분할</td><td>한 회차를 두 회차로 쪼갬</td><td>비정기</td></tr>
+        </tbody>
+      </table>
+      <div class="callout-amber">
+        그래서 Option B가 단지 깔끔해서가 아니라 <strong>운영 가능성을 위해 필수</strong>예요. A로 가면 매번 fanout 폭탄이라 운영이 안 됩니다.
+      </div>
+      <p class="text-sm font-bold text-slate-800 mt-4 mb-2">추가 운영 가이드 3개</p>
+      <p class="text-sm text-slate-700 mb-2"><strong>가이드 1.</strong> "차수 추가 vs 새 코스 개설" 판단 기준</p>
+      <table>
+        <thead><tr><th>상황</th><th class="text-center" style="width:100px">차수 추가</th><th class="text-center" style="width:120px">새 코스 개설</th></tr></thead>
+        <tbody>
+          <tr><td>같은 강사·같은 커리큘럼</td><td class="text-center text-green-600 font-bold">✅</td><td></td></tr>
+          <tr><td>강사·커리큘럼 다름</td><td></td><td class="text-center text-green-600 font-bold">✅</td></tr>
+          <tr><td>시즌(분기·연도) 바뀜</td><td></td><td class="text-center text-green-600 font-bold">✅</td></tr>
+          <tr><td>미수료자 재이수</td><td></td><td class="text-center text-green-600 font-bold">✅ (이력 분리)</td></tr>
+        </tbody>
+      </table>
+      <p class="text-sm text-slate-700 mt-3 mb-2"><strong>가이드 2.</strong> "회차 추가 vs 일정 변경" 판단 기준</p>
+      <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1">
+        <li>기존 회차의 날짜·시간만 바뀜 → <strong>회차 일정 변경</strong> (새 회차 추가 X)</li>
+        <li>새 날짜에 추가 수업 → <strong>회차 추가</strong></li>
+      </ul>
+      <p class="text-sm text-slate-700 mt-3 mb-2"><strong>가이드 3.</strong> 회차 추가 시 학습자 안내 템플릿</p>
+      <pre>[코스명]의 일정이 변경되었습니다.
+[날짜]에 [N회차]가 추가되었어요.
+회사 사정으로 인한 변경이며, 본인의 기존 출석률은 영향받지 않습니다.
+추가된 회차는 별도 마감 시점에 출석률 분모에 반영됩니다.</pre>
+      <p class="text-sm text-slate-600 mt-2">시스템에서 자동 발송 — 운영자가 매번 안내 문구 새로 짜지 않게.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 핵심 요약 -->
+<div id="summary" class="q-card bg-indigo-50 border border-indigo-100">
+  <div class="px-7 py-5">
+    <div class="font-bold text-indigo-800 mb-4">핵심 요약</div>
+    <div class="space-y-2 text-sm text-indigo-800">
+      <div class="flex gap-2"><span class="text-indigo-400 font-bold shrink-0">1.</span><span>출석률 분모 = <strong>마감된 회차 수만</strong> (Option B)</span></div>
+      <div class="flex gap-2"><span class="text-indigo-400 font-bold shrink-0">2.</span><span>계산 단위 = <strong>차수(Session)</strong>. 학습자가 등록된 차수 안에서만 계산</span></div>
+      <div class="flex gap-2"><span class="text-indigo-400 font-bold shrink-0">3.</span><span>차수 종료 시점부터 결과는 <strong>immutable</strong>, 회차 추가·삭제 차단</span></div>
+      <div class="flex gap-2"><span class="text-indigo-400 font-bold shrink-0">4.</span><span>다른 차수 변경은 본인에게 영향 없음</span></div>
+      <div class="flex gap-2"><span class="text-indigo-400 font-bold shrink-0">5.</span><span>차수·회차 추가는 운영 일상이므로 정책이 단순할수록 운영 가능</span></div>
+      <div class="flex gap-2"><span class="text-indigo-400 font-bold shrink-0">6.</span><span>학습자 앱 표시: <code>마감된 N회차 중 M회 출석 (X%)</code> 형식만 사용 (별도 라벨 X). 차수 상태 배지로 진행/완료 구분</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 가이드 반영 -->
+<div id="guide-ref" class="q-card">
+  <div class="px-7 py-5">
+    <div class="font-bold text-slate-800 mb-3">운영팀 가이드 반영</div>
+    <p class="text-sm text-slate-700 mb-2"><code>guide-ops-policy.html</code>에 두 페이지 추가:</p>
+    <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1">
+      <li>1장 출석 처리 → <strong>출석률 계산 정책</strong> (att-rate-policy)</li>
+      <li>2장 회차 마감 → <strong>차수·회차 변경 정책</strong> (close-change)</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- max-w -->
+</main>
+
+<script>
+  function toggle(btn) {
+    const body = btn.nextElementSibling;
+    const chevron = btn.querySelector('.acc-chevron');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    chevron.classList.toggle('open', !isOpen);
+  }
+
+  function openCard(id) {
+    const card = document.getElementById(id);
+    if (!card) return;
+    const body = card.querySelector('.acc-body');
+    const chevron = card.querySelector('.acc-chevron');
+    if (body && !body.classList.contains('open')) {
+      body.classList.add('open');
+      chevron && chevron.classList.add('open');
+    }
+  }
+
+  function expandAll() {
+    document.querySelectorAll('.acc-body').forEach(b => b.classList.add('open'));
+    document.querySelectorAll('.acc-chevron').forEach(c => c.classList.add('open'));
+  }
+
+  function collapseAll() {
+    document.querySelectorAll('.acc-body').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.acc-chevron').forEach(c => c.classList.remove('open'));
+  }
+</script>
+
+</body>
+</html>

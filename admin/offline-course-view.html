@@ -1037,7 +1037,7 @@
               <div className="flex border-b border-slate-100">
                 {[
                   {key:'dashboard',label:'대시보드',icon:Grid3X3,tip:'차수 현황·출석률·조치 필요 항목을 한눈에 확인'},
-                  {key:'attendance',label:'출석 관리',icon:CheckSquare,tip:'교육 당일 회차별 출석·지각·결석 처리 및 회차 마감'},
+                  {key:'attendance',label:'출석 관리',icon:CheckSquare,tip:'회차별 출석·지각·결석 처리 (회차는 수업 종료 시각에 자동으로 종료)'},
                   {key:'roster',label:'수강생 현황',icon:Users,tip:'수강생 전체 출결 이력 확인 및 수료 처리'},
                   {key:'stats',label:'통계',icon:BarChart2,tip:'차수·부서별 출석률·수료율 집계'},
                 ].map(t=>(
@@ -1225,7 +1225,7 @@
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-[14px] text-slate-800">{pkg.name}</span>
                                 {hasToday && <span className="text-[10px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full">오늘</span>}
-                                {allClosed && !isPkgCompleted && <span className="text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 px-2 py-0.5 rounded-full">마감완료</span>}
+                                {allClosed && !isPkgCompleted && <span className="text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full">종료</span>}
                                 {isPkgCompleted && <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-full">수료완료</span>}
                               </div>
                               <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2">
@@ -1292,13 +1292,7 @@
                                                   명단
                                                 </button>
                                               )}
-                                              {!isClosed && s.pending>0 && (
-                                                <button onClick={()=>{closeSession(s.id,pkg.id);bcRef.current?.postMessage({type:'SESSION_CLOSED',sessionId:s.id,pkgId:pkg.id,ts:Date.now()});}}
-                                                  className="text-[10px] font-bold px-2 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors">
-                                                  마감
-                                                </button>
-                                              )}
-                                              {isClosed && <span className="text-[10px] text-slate-300 font-bold px-1">마감됨</span>}
+                                              {isClosed && <span className="text-[10px] text-slate-400 font-medium px-1.5 py-0.5 bg-slate-100 rounded">종료</span>}
                                             </div>
                                           </td>
                                         </tr>
@@ -1607,7 +1601,7 @@
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">{calMonth}월 일정</div>
                   {COURSE.packages.flatMap(p=>p.sessions.map(s=>({...s,pkgId:p.id,pkgName:p.name,place:p.place})))
                     .filter(s=>s.date.startsWith(`2026-${String(calMonth).padStart(2,'0')}`))
-                    .sort((a,b)=>a.date.localeCompare(b.date))
+                    .sort((a,b)=>b.date.localeCompare(a.date))
                     .map((s,i)=>{
                       const pkgIdx=COURSE.packages.findIndex(p=>p.id===s.pkgId);
                       const c=PKG_COLORS[pkgIdx%PKG_COLORS.length];
