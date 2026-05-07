@@ -66,9 +66,16 @@
 <div class="container-wrap">
 
   <div class="mb-8">
-    <h1 class="text-3xl font-black mb-2">📅 Phase 로드맵 — 일정 관리 문서</h1>
+    <div class="flex items-center gap-3 mb-2 flex-wrap">
+      <h1 class="text-3xl font-black">📅 Phase 로드맵 — 일정 관리 문서</h1>
+      <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-black border border-amber-300">📍 일정 SSOT</span>
+    </div>
     <p class="text-slate-600">offline-spec.html에 정의된 모든 정책·기능을 5단계 Phase로 분류한 문서입니다. 일정 산정·우선순위 결정·고객사 커뮤니케이션에 사용하세요.</p>
-    <div class="text-xs text-slate-400 mt-2">2026-05-06 작성 · 기획·운영팀 4인 브레인스토밍 결과 (구교환·고윤정·카리나·태서)</div>
+    <div class="flex items-center gap-2 mt-2">
+      <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">v1.2</span>
+      <span class="text-xs text-slate-500">2026-05-07</span>
+    </div>
+    <div class="text-xs text-slate-500 mt-2">📚 관련 문서: <a href="../offline-spec.html" target="_blank" class="text-indigo-600 underline">정책 SSOT (offline-spec)</a> · <a href="../../admin/feature-spec.html" target="_blank" class="text-indigo-600 underline">기능 라인 SSOT (admin/feature-spec)</a> · <a href="../guide-ops-policy.html" target="_blank" class="text-indigo-600 underline">운영 가이드 SSOT (guide-ops-policy)</a></div>
   </div>
 
   <!-- 한 줄 핵심 -->
@@ -80,13 +87,13 @@
     </div>
   </div>
 
-  <!-- 통계 카드 -->
+  <!-- 통계 카드 (2026-05-07 재산정 — 8명 기준) -->
   <div class="stat-grid">
     <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Phase 단계</div></div>
-    <div class="stat-card"><div class="stat-num">52주</div><div class="stat-label">전체 견적 (1년)</div></div>
-    <div class="stat-card"><div class="stat-num">12주</div><div class="stat-label">Phase 1 (MVP)</div></div>
-    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">개발자 기준</div></div>
-    <div class="stat-card"><div class="stat-num">~58</div><div class="stat-label">총 기능 수</div></div>
+    <div class="stat-card"><div class="stat-num">27주</div><div class="stat-label">전체 견적 (~6개월)</div></div>
+    <div class="stat-card"><div class="stat-num">7주</div><div class="stat-label">Phase 1 (MVP) +베타</div></div>
+    <div class="stat-card"><div class="stat-num">8</div><div class="stat-label">개발자 (백4+프4)</div></div>
+    <div class="stat-card"><div class="stat-num">108</div><div class="stat-label">총 기능 수</div></div>
   </div>
 
   <!-- 전체 일정 한눈 -->
@@ -105,37 +112,37 @@
       <tbody>
         <tr>
           <td><span class="phase-tag tag-p0">🟪 Phase 0</span></td>
-          <td>4주</td>
+          <td><strong>2주</strong> <span class="text-xs text-slate-400">(기존 4주)</span></td>
           <td>개발팀</td>
-          <td>아키텍처 기반 — 데이터 모델·인프라·CI/CD</td>
+          <td>아키텍처 기반 — 백엔드 4명 병렬 (인프라·CI/CD·데이터모델·API) / 프론트 4명 병렬 (디자인시스템·컨벤션)</td>
           <td><span class="priority-pill pri-1">P1 필수</span></td>
         </tr>
         <tr>
           <td><span class="phase-tag tag-p1">🟦 Phase 1</span></td>
-          <td>12주</td>
+          <td><strong>6주 +베타 1주</strong> <span class="text-xs text-slate-400">(기존 12주)</span></td>
           <td>운영자 (HRD)</td>
-          <td>오프라인 기본 1사이클 (MVP)</td>
+          <td>오프라인 기본 1사이클 (MVP). 백엔드 4명 = 빌더 API·신청·QR·출석률 / 프론트 4명 = 빌더 UI·학습자 앱·라이브 모드·수강관리 동시</td>
           <td><span class="priority-pill pri-1">P1 필수</span></td>
         </tr>
         <tr>
           <td><span class="phase-tag tag-p2">🟩 Phase 2</span></td>
-          <td>8주 (4+4)</td>
+          <td><strong>5주 (3+2)</strong> <span class="text-xs text-slate-400">(기존 8주)</span></td>
           <td>운영자 + 학습자</td>
-          <td>운영 사각지대 자동화 · 학습자 알림</td>
+          <td>운영 사각지대 자동화 · 학습자 알림. 작은 단위로 분할 병렬</td>
           <td><span class="priority-pill pri-2">P2 중요</span></td>
         </tr>
         <tr>
           <td><span class="phase-tag tag-p3">🟨 Phase 3</span></td>
-          <td>16주</td>
+          <td><strong>8주</strong> <span class="text-xs text-slate-400">(기존 16주)</span></td>
           <td>학습자</td>
-          <td>도메인 확장 — 온라인 코스 · 모바일 앱</td>
+          <td>도메인 확장 — 모바일 앱은 프론트 2명 별도 트랙. 온라인 코스는 나머지 6명. 휴강 상태 포함</td>
           <td><span class="priority-pill pri-3">P3 가치</span></td>
         </tr>
         <tr>
           <td><span class="phase-tag tag-p4">🟧 Phase 4</span></td>
-          <td>12주</td>
+          <td><strong>6주</strong> <span class="text-xs text-slate-400">(기존 12주)</span></td>
           <td>경영진 · HR전략</td>
-          <td>데이터 분석 · AI 인사이트</td>
+          <td>데이터 분석 · AI 인사이트 (데이터 엔지니어 1명 추가 가정)</td>
           <td><span class="priority-pill pri-4">P4 옵션</span></td>
         </tr>
       </tbody>
@@ -148,7 +155,7 @@
       <span class="phase-tag tag-p0">🟪 Phase 0</span>
       <div>
         <div class="phase-title">아키텍처 기반</div>
-        <div class="phase-meta">기간: 4주 · 목표 사용자: 개발팀 · 우선순위: P1 필수</div>
+        <div class="phase-meta">기간: <strong>2주</strong> (8명 기준 · 기존 4주) · 목표 사용자: 개발팀 · 우선순위: P1 필수</div>
       </div>
     </div>
     <div class="phase-oneliner">
@@ -168,7 +175,7 @@
       <div class="feature-cell"><span class="num">10</span><strong>재해복구·백업</strong> — RTO/RPO 정책 · 일별 백업</div>
     </div>
     <div class="phase-oneliner mt-4" style="border-color: #a855f7; background: #faf5ff;">
-      <strong>마일스톤</strong> — W1: 데이터 모델 확정 / W2: 인프라 구축 / W3: CI/CD + 디자인 시스템 / W4: API 골격 + 보안 검토
+      <strong>마일스톤 (2주)</strong> — W1: 데이터 모델 + 인프라 + 디자인시스템 병렬 / W2: API 골격 + CI/CD + 보안 검토
     </div>
   </div>
 
@@ -178,7 +185,7 @@
       <span class="phase-tag tag-p1">🟦 Phase 1</span>
       <div>
         <div class="phase-title">오프라인 기본 1사이클 (MVP)</div>
-        <div class="phase-meta">기간: 12주 · 목표 사용자: 운영자 · 우선순위: P1 필수</div>
+        <div class="phase-meta">기간: <strong>6주 + 베타 1주</strong> (8명 기준 · 기존 12주) · 목표 사용자: 운영자 · 우선순위: P1 필수</div>
       </div>
     </div>
     <div class="phase-oneliner">
@@ -194,7 +201,7 @@
       <div class="feature-cell highlight"><span class="num">⑤</span><strong>통계 확인</strong> — 출석률·차수별 통계 (Option B 분모 정책)</div>
     </div>
 
-    <div class="text-sm font-bold mb-2 text-slate-700">📦 Phase 1 기능 목록 (24개)</div>
+    <div class="text-sm font-bold mb-2 text-slate-700">📦 Phase 1 기능 그룹 (21개 그룹 — 라인 아이템 70개, <a href="../../admin/feature-spec.html" target="_blank" class="text-indigo-600 underline">feature-spec.html</a> 참고)</div>
     <div class="feature-grid">
       <div class="feature-cell">코스 개설 빌더 (차수·회차·그룹·정원·기간)</div>
       <div class="feature-cell">학습자 앱 — 코스 목록·상세</div>
@@ -220,7 +227,7 @@
     </div>
 
     <div class="phase-oneliner mt-4" style="border-color: #3b82f6; background: #eff6ff;">
-      <strong>마일스톤</strong> — W1~3: 빌더 + 학습자 앱 / W4~6: QR 출석 + 라이브 모드 / W7~9: 회차 종료 자동화 + 통계 / W10~12: 통합 테스트 + 안정화
+      <strong>마일스톤 (6주 + 베타 1주)</strong> — W3~5: 빌더 + 학습자 앱 + QR 라이브 모드 (병렬) / W6~8: 회차 자동 종료 + 출석률 + 통합 테스트 / W9: 베타 운영
     </div>
 
     <div class="text-sm font-bold mb-2 text-slate-700 mt-4">🚫 Phase 1에서 빠지는 것 (운영팀 합의 필요)</div>
@@ -231,11 +238,10 @@
       <tbody>
         <tr><td>수료 처리 버튼</td><td>출석률 통계로 확인</td><td>Phase 2.1</td></tr>
         <tr><td>학습자 결석 통보</td><td>학습자가 앱 직접 확인</td><td>Phase 2.1</td></tr>
-        <tr><td>휴강 상태</td><td>운영자가 미확인 일괄 처리로 우회</td><td>Phase 2.2</td></tr>
+        <tr><td>휴강 상태 + 보강 강제 토글</td><td>운영자가 미확인 일괄 처리로 우회 + 별도 보강 회차 추가</td><td>Phase 3</td></tr>
         <tr><td>HR 시스템 연동</td><td>수동 데이터 추출</td><td>Phase 2.1</td></tr>
         <tr><td>회차선택형(날짜선택형) 회차</td><td>차수 N개 분리 운영</td><td>Phase 2.2</td></tr>
         <tr><td>정정 사유·감사 로그</td><td>—</td><td>Phase 2.1</td></tr>
-        <tr><td>보강 강제 토글</td><td>운영자 룰로 보강 회차 추가</td><td>Phase 2.2</td></tr>
         <tr><td>지각·조퇴 환산 정책</td><td>출석=지각=조퇴로 동등 인정</td><td>Phase 2.2</td></tr>
         <tr><td>공결(사전결석) 신청</td><td>운영자 직접 출석 변경</td><td>Phase 2.2</td></tr>
         <tr><td>차수 변경 (직접)</td><td>취소 후 재신청</td><td>Phase 2.2</td></tr>
@@ -249,7 +255,7 @@
       <span class="phase-tag tag-p2">🟩 Phase 2</span>
       <div>
         <div class="phase-title">운영 자동화·확장</div>
-        <div class="phase-meta">기간: 8주 (2.1: 4주 + 2.2: 4주) · 목표 사용자: 운영자 + 학습자 · 우선순위: P2 중요</div>
+        <div class="phase-meta">기간: <strong>5주 (2.1: 3주 + 2.2: 2주)</strong> (8명 기준 · 기존 8주) · 목표 사용자: 운영자 + 학습자 · 우선순위: P2 중요</div>
       </div>
     </div>
     <div class="phase-oneliner">
@@ -268,7 +274,6 @@
 
     <div class="text-sm font-bold mb-2 text-slate-700 mt-4">🟡 Phase 2.2 — 4주 (운영 확장)</div>
     <div class="feature-grid">
-      <div class="feature-cell"><span class="priority-pill pri-2">P2</span> <strong>휴강 상태</strong> 추가 (4번째 회차 상태) + <strong>보강 강제 토글</strong></div>
       <div class="feature-cell"><span class="priority-pill pri-3">P3</span> <strong>회차선택형(날짜선택형) 회차</strong> — 법정의무교육</div>
       <div class="feature-cell"><span class="priority-pill pri-3">P3</span> 일괄 정정 도구 (출석 일괄 변경)</div>
       <div class="feature-cell"><span class="priority-pill pri-4">P4</span> 공결(사전결석) 신청·승인 워크플로우</div>
@@ -277,8 +282,10 @@
       <div class="feature-cell"><span class="priority-pill pri-5">P5</span> 알림 채널 설정 (이메일 vs 푸시 — 푸시는 Phase 3 의존)</div>
     </div>
 
+    <div class="text-xs text-slate-500 mt-2 italic">※ 휴강 상태 + 보강 강제 토글은 부수 기능 묶음이 큼(보강 강제 / 자동 알림 / 자동 재배정 / audit log) → <strong>Phase 3 이월</strong></div>
+
     <div class="phase-oneliner mt-4" style="border-color: #10b981; background: #ecfdf5;">
-      <strong>마일스톤</strong> — Phase 2.1: W13~16 (수료 + 알림 + HR) / Phase 2.2: W17~20 (휴강 + 회차선택형 + 환산)
+      <strong>마일스톤 (5주)</strong> — Phase 2.1: W10~12 (수료 + 알림 + HR + audit) / Phase 2.2: W13~14 (회차선택형 + 환산 + 일괄 정정)
     </div>
   </div>
 
@@ -288,13 +295,13 @@
       <span class="phase-tag tag-p3">🟨 Phase 3</span>
       <div>
         <div class="phase-title">도메인 확장 — 온라인 코스 + 모바일</div>
-        <div class="phase-meta">기간: 16주 · 목표 사용자: 학습자 · 우선순위: P3 가치</div>
+        <div class="phase-meta">기간: <strong>8주</strong> (8명 기준 · 기존 16주) · 목표 사용자: 학습자 · 우선순위: P3 가치</div>
       </div>
     </div>
     <div class="phase-oneliner">
       <strong>목표</strong> — 오프라인 외 채널·디바이스로 확장. 푸시 알림 인프라가 여기서 도입돼 Phase 2.2 알림 채널과 연결됩니다.
     </div>
-    <div class="text-sm font-bold mb-2 text-slate-700 mt-4">📦 기능 목록 (8개)</div>
+    <div class="text-sm font-bold mb-2 text-slate-700 mt-4">📦 기능 목록 (9개)</div>
     <div class="feature-grid">
       <div class="feature-cell"><strong>온라인 코스</strong> — 영상 강의 / 진도율 / 이수 시간 추적</div>
       <div class="feature-cell"><strong>퀴즈·시험</strong> — 객관식/주관식, 자동 채점, 패스 기준</div>
@@ -304,9 +311,10 @@
       <div class="feature-cell">다국어 지원 (영문 UI · 한·영 콘텐츠)</div>
       <div class="feature-cell">외부 LMS 연동 (SCORM 1.2 · xAPI)</div>
       <div class="feature-cell">콘텐츠 라이브러리 (코스 템플릿 마켓플레이스)</div>
+      <div class="feature-cell"><strong>회차 휴강 상태</strong> — 4번째 회차 상태(휴강) + 보강 강제 토글 + 사유 입력 + audit log + 자동 재배정 (2026-05-07 Phase 2 → Phase 3 이월)</div>
     </div>
     <div class="phase-oneliner mt-4" style="border-color: #f59e0b; background: #fffbeb;">
-      <strong>마일스톤</strong> — W21~24: 온라인 코스 / W25~28: 퀴즈·시험 / W29~32: 모바일 앱 / W33~36: 다국어·LMS 연동
+      <strong>마일스톤 (8주)</strong> — W15~18: 온라인 코스 + 퀴즈·시험 (프론트 6명) / W19~22: 모바일 앱 + 다국어 + 휴강 상태 (프론트 2명 별도 트랙)
     </div>
   </div>
 
@@ -316,7 +324,7 @@
       <span class="phase-tag tag-p4">🟧 Phase 4</span>
       <div>
         <div class="phase-title">데이터·분석·인텔리전스</div>
-        <div class="phase-meta">기간: 12주 · 목표 사용자: 경영진 + HR전략 · 우선순위: P4 옵션</div>
+        <div class="phase-meta">기간: <strong>6주</strong> (8명 + 데이터 엔지니어 1명 · 기존 12주) · 목표 사용자: 경영진 + HR전략 · 우선순위: P4 옵션</div>
       </div>
     </div>
     <div class="phase-oneliner">
@@ -333,7 +341,7 @@
       <div class="feature-cell">법정의무교육 감사 리포트 자동 생성</div>
     </div>
     <div class="phase-oneliner mt-4" style="border-color: #ef4444; background: #fef2f2;">
-      <strong>전제 조건</strong> — Phase 1~2 12개월 운영 데이터 확보 후 시작. 데이터팀 1명 추가 필요.
+      <strong>전제 조건</strong> — Phase 1~2 운영 데이터 확보 후 시작 (이상적으로 12개월). <strong>데이터 엔지니어 1명 추가</strong> 가정. 8명 기준 6주 견적.
     </div>
   </div>
 
@@ -349,16 +357,16 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>W1~4</td><td><span class="phase-tag tag-p0">🟪 P0</span></td><td>아키텍처 기반 (데이터 모델, 인프라, CI/CD, 디자인 시스템)</td></tr>
-        <tr><td>W5~7</td><td><span class="phase-tag tag-p1">🟦 P1</span></td><td>코스 빌더 + 학습자 앱 (코스 목록·상세·신청)</td></tr>
-        <tr><td>W8~10</td><td><span class="phase-tag tag-p1">🟦 P1</span></td><td>QR 출석 + 라이브 모드 (30초 갱신, 5종 상태)</td></tr>
-        <tr><td>W11~13</td><td><span class="phase-tag tag-p1">🟦 P1</span></td><td>회차 자동 종료 + 미확인 자동 처리 + 출석률 통계</td></tr>
-        <tr><td>W14~16</td><td><span class="phase-tag tag-p1">🟦 P1</span></td><td>통합 테스트 + 베타 운영 + 안정화</td></tr>
-        <tr><td>W17~20</td><td><span class="phase-tag tag-p2">🟩 P2.1</span></td><td>수료 처리 + 학습자 알림 + HR 연동 + audit log</td></tr>
-        <tr><td>W21~24</td><td><span class="phase-tag tag-p2">🟩 P2.2</span></td><td>휴강 상태 + 회차선택형 + 일괄 정정</td></tr>
-        <tr><td>W25~32</td><td><span class="phase-tag tag-p3">🟨 P3</span></td><td>온라인 코스 + 퀴즈·시험 (8주)</td></tr>
-        <tr><td>W33~40</td><td><span class="phase-tag tag-p3">🟨 P3</span></td><td>모바일 네이티브 앱 + 다국어 (8주)</td></tr>
-        <tr><td>W41~52</td><td><span class="phase-tag tag-p4">🟧 P4</span></td><td>데이터 분석 대시보드 + AI 추천 엔진 (12주)</td></tr>
+        <tr><td>W1~2</td><td><span class="phase-tag tag-p0">🟪 P0</span></td><td>아키텍처 기반 (백엔드 4명 = 인프라+데이터모델+API / 프론트 4명 = 디자인시스템+컨벤션 병렬) — 2주</td></tr>
+        <tr><td>W3~5</td><td><span class="phase-tag tag-p1">🟦 P1</span></td><td>코스 빌더 + 학습자 앱 + QR 라이브 모드 (백·프 동시 진행) — 3주</td></tr>
+        <tr><td>W6~8</td><td><span class="phase-tag tag-p1">🟦 P1</span></td><td>회차 자동 종료 + 미확인 일괄 처리 + 출석률 통계 + 통합 테스트 — 3주</td></tr>
+        <tr><td>W9</td><td><span class="phase-tag tag-p1">🟦 P1</span></td><td>베타 운영 + 안정화 — 1주</td></tr>
+        <tr><td>W10~12</td><td><span class="phase-tag tag-p2">🟩 P2.1</span></td><td>수료 처리 + 학습자 알림 + HR 연동 + audit log — 3주</td></tr>
+        <tr><td>W13~14</td><td><span class="phase-tag tag-p2">🟩 P2.2</span></td><td>회차선택형 + 일괄 정정 + 환산 정책 — 2주</td></tr>
+        <tr><td>W15~18</td><td><span class="phase-tag tag-p3">🟨 P3</span></td><td>온라인 코스 + 퀴즈·시험 (프론트 6명) — 4주</td></tr>
+        <tr><td>W19~22</td><td><span class="phase-tag tag-p3">🟨 P3</span></td><td>모바일 네이티브 앱 + 다국어 + 휴강 상태 (프론트 2명 모바일 별도 트랙) — 4주</td></tr>
+        <tr><td>W23~27</td><td><span class="phase-tag tag-p4">🟧 P4</span></td><td>데이터 분석 대시보드 + AI 추천 엔진 + ROI (데이터 엔지니어 1명 추가) — 5주</td></tr>
+        <tr><td colspan="3" class="bg-emerald-50 text-emerald-800 font-bold text-center">전체 27주 (~6개월) — 8명 기준 (백엔드 4 + 프론트 4)</td></tr>
       </tbody>
     </table>
   </div>
@@ -390,16 +398,16 @@
     </table>
   </div>
 
-  <!-- 결정 근거 -->
+  <!-- 분류 근거 -->
   <div class="phase-card" style="background: #fffbeb; border-color: #fde68a;">
-    <div class="text-base font-black mb-3 text-amber-900">💬 분류 근거 — 4인 브레인스토밍 합의</div>
+    <div class="text-base font-black mb-3 text-amber-900">💬 Phase 분류 근거</div>
     <ul class="list-disc list-inside space-y-2 text-sm text-slate-700">
-      <li><strong>Phase 0 분리 이유</strong>: 아키텍처를 Phase 1에 묶으면 일정 무너짐 (카리나). 데이터 모델·인프라는 사전 작업.</li>
-      <li><strong>Phase 1 한계 명확화</strong>: "운영팀이 손으로 하던 1사이클 완결"이 기준 (구교환). 자동화·알림은 의도적으로 제외.</li>
-      <li><strong>Phase 2 P1/P2 분리</strong>: 8주 한 번에 못 함. 운영팀 클레임 빈도순으로 4주씩 끊어 진행 (카리나).</li>
-      <li><strong>Phase 3 = 도메인 확장</strong>: 푸시 알림 인프라가 여기서 도입돼 Phase 2.2 알림 채널과 연결 (구교환).</li>
-      <li><strong>Phase 4 = 12개월 후</strong>: 다년간 데이터가 쌓여야 의미 있음 (태서). Phase 1 시작 후 1년 뒤 가능.</li>
-      <li><strong>"마감" 개념 제거</strong>는 Phase 1 시작 전에 적용된 정책 (2026-05-06). Phase 1 spec은 시간 기반 자동 종료를 전제로 작성.</li>
+      <li><strong>Phase 0 분리</strong>: 아키텍처를 Phase 1에 묶으면 일정이 무너짐. 데이터 모델·인프라는 사전 작업으로 분리.</li>
+      <li><strong>Phase 1 한계</strong>: "운영팀이 손으로 하던 1사이클 완결"이 기준. 자동화·알림은 의도적으로 제외.</li>
+      <li><strong>Phase 2 P1/P2 분리</strong>: 8주 한 번에 못 함. 운영팀 클레임 빈도순으로 4주씩 끊어 진행.</li>
+      <li><strong>Phase 3 = 도메인 확장</strong>: 푸시 알림 인프라가 여기서 도입돼 Phase 2.2 알림 채널과 연결.</li>
+      <li><strong>Phase 4 = 12개월 후</strong>: 다년간 데이터가 쌓여야 의미 있음. Phase 1 시작 후 1년 뒤 가능.</li>
+      <li><strong>"마감" 개념 제거</strong>: Phase 1 spec은 시간 기반 자동 종료를 전제로 작성.</li>
     </ul>
   </div>
 
@@ -407,10 +415,10 @@
   <div class="phase-card" style="background: #eff6ff; border-color: #bfdbfe;">
     <div class="text-base font-black mb-3 text-blue-900">📖 이 문서 사용 가이드</div>
     <ul class="list-disc list-inside space-y-2 text-sm text-slate-700">
-      <li><strong>일정 산정</strong>: Phase별 기간 견적은 개발 3명 + 기획 1명 + 디자인 1명 기준. 팀 규모에 비례 조정.</li>
+      <li><strong>일정 산정</strong>: Phase별 기간 견적은 <strong>백엔드 4 + 프론트 4 = 8명</strong> + 기획 1 + 디자인 1 기준. 팀 규모에 비례 조정 (단, 인원 늘어도 커뮤니케이션 비용으로 선형 단축은 안 됨).</li>
       <li><strong>고객사 커뮤니케이션</strong>: "Phase 1 = MVP", "Phase 2 = 운영 자동화", "Phase 3 = 확장"으로 일관 사용.</li>
       <li><strong>스코프 합의</strong>: "Phase 1에서 빠지는 것" 표를 운영팀과 공유해 사전 합의.</li>
-      <li><strong>변경 시</strong>: 정책 변경 시 spec.html 결정 히스토리 + 이 문서 동시 업데이트.</li>
+      <li><strong>변경 시</strong>: 정책 변경 시 spec.html과 이 문서 동시 업데이트.</li>
       <li><strong>참고 문서</strong>: <a href="../offline-spec.html" class="text-blue-600 underline">offline-spec.html</a> · <a href="../guide-ops-policy.html" class="text-blue-600 underline">guide-ops-policy.html</a> · <a href="../guide-offline-lms.html" class="text-blue-600 underline">guide-offline-lms.html</a></li>
     </ul>
   </div>
