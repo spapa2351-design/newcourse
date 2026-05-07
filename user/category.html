@@ -170,19 +170,19 @@
   </div>
 
   <!-- ── 검색 ── -->
-  <div class="search-bar">
+  <div class="search-bar" data-feature-id="U7-01">
     <i class="fa-solid fa-magnifying-glass icon"></i>
     <input type="text" placeholder="어떤 코스를 찾으세요?">
   </div>
 
   <!-- ── 필터 탭 ── -->
-  <div class="filter-tabs" id="filter-tabs">
+  <div class="filter-tabs" id="filter-tabs" data-feature-id="U7-02">
     <button class="filter-tab active" onclick="clickFilter(this,'all')">전체</button>
     <button class="filter-tab" onclick="clickFilter(this,'online')">온라인만</button>
     <button class="filter-tab" onclick="clickFilter(this,'offline')"><i class="fa-solid fa-location-dot tab-icon"></i> 오프라인만</button>
   </div>
 
-  <div class="scroll-area">
+  <div class="scroll-area" data-feature-id="U7-03">
 
     <!-- ===== 전체 뷰 ===== -->
     <div id="view-all">
@@ -278,5 +278,6 @@ function applyFilter(type) {
 }
 </script>
 
+<script src="../admin/feature-highlight.js"></script>
 </body>
 </html>
