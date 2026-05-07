@@ -41,7 +41,7 @@
 <body class="bg-[#f2f5f9] text-slate-800 antialiased">
 <div id="root"></div>
 <script type="text/babel" data-type="module">
-  import React, { useState, useMemo } from 'https://esm.sh/react@18.2.0';
+  import React, { useState, useMemo, useRef, useEffect } from 'https://esm.sh/react@18.2.0';
   import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
   import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
 
@@ -176,8 +176,7 @@
   const USER_ROWS = [
     /* ── U1. 홈 ── */
     { id:'U1-01', screen:'U1', screenName:'홈', group:'배너', feature:'히어로 배너', desc:'메인 추천 코스 또는 공지 배너 슬라이드. CTA 버튼 → 코스 상세', input:'-', output:'배너 렌더', note:'', pri:'P2', phase:1, status:'todo' },
-    { id:'U1-02', screen:'U1', screenName:'홈', group:'추천', feature:'추천 코스 섹션', desc:'카테고리별/최신 코스 카드 리스트. 썸네일, 코스명, 강사, 차수 수, D-day 뱃지', input:'-', output:'코스 카드 렌더', note:'', pri:'P2', phase:1, status:'todo' },
-    { id:'U1-03', screen:'U1', screenName:'홈', group:'진행중', feature:'내 진행중 코스', desc:'로그인 시 현재 수강 중인 코스 빠른 접근. 진행률 프로그레스 바', input:'-', output:'MY 코스 필터', note:'', pri:'P1', phase:1, status:'todo' },
+    { id:'U1-02', screen:'U1', screenName:'홈', group:'오프라인', feature:'오프라인 코스 섹션', desc:'홈 화면에 오프라인 코스 카드 리스트 노출. 썸네일, 코스명, 강사, 차수 수, D-day 뱃지', input:'-', output:'오프라인 코스 카드 렌더', note:'2026-05-07 추천 → 오프라인으로 변경', pri:'P2', phase:1, status:'todo' },
 
     /* ── U2. 코스 목록/검색 ── */
     { id:'U2-01', screen:'U2', screenName:'코스 목록', group:'필터', feature:'카테고리 필터', desc:'상단 탭 또는 사이드 필터로 직무역량/공통/IT 등 카테고리 전환', input:'탭/버튼 클릭', output:'카테고리 필터 적용', note:'', pri:'P1', phase:1, status:'todo' },
@@ -231,13 +230,72 @@
     U5: 'bg-cyan-100 text-cyan-700',
   };
 
-  /* ── 화면 ID → 프로토타입 URL 매핑 (어드민 샘플) ── */
+  /* ── 화면 ID → 프로토타입 URL 매핑 ── */
   const SCREEN_URL_MAP = {
+    /* 관리자단 (admin/) */
     A1: { url: 'index.html',                 label: '코스 목록 (index.html)' },
     A2: { url: 'offline-builder.html',       label: '코스 빌더 (offline-builder.html)' },
     A3: { url: 'offline-course-view.html',   label: '수강관리 (offline-course-view.html)' },
     A4: { url: 'offline-course-view.html',   label: '출석 관리 (offline-course-view.html)' },
-    /* 사용자단 (U2~U5)은 user/ 폴더 매핑 추가 시 활성화 */
+    /* 사용자단 (user/) — 학습자 앱 */
+    U1: { url: '../user/home.html',           label: '홈 (user/home.html)' },
+    U2: { url: '../user/course-list.html',    label: '코스 목록 (user/course-list.html)' },
+    U3: { url: '../user/course-detail.html',  label: '코스 상세 (user/course-detail.html)' },
+    U4: { url: '../user/my.html',             label: 'MY 학습 (user/my.html)' },
+    /* U5 QR 출석은 학습자 앱 내장 (별도 화면 없음) */
+  };
+
+  /* ── 기능 ID → CSS selector 매핑 (data-feature-id 기반) ──
+     admin 페이지에 [data-feature-id="..."] 속성을 박아 사용.
+     매칭 안 되면 조용히 무시. */
+  const FEATURE_SELECTORS = {
+    /* admin/index.html — A1 (코스 목록) */
+    'A1-02':   '[data-feature-id="A1-02"]',    // 코스 상태 탭
+    'A1-02a':  '[data-feature-id="A1-02a"]',   // 추가 필터 빌더
+    'A1-03':   '[data-feature-id="A1-03"]',    // 카테고리 사이드바
+    'A1-04':   '[data-feature-id="A1-04"]',    // 코스 검색
+    'A1-05':   '[data-feature-id="A1-05"]',    // 코스 테이블 행
+    'A1-06':   '[data-feature-id="A1-06"]',    // D-day 배지
+    'A1-07':   '[data-feature-id="A1-07"]',    // 행 확장
+    'A1-08':   '[data-feature-id="A1-08"]',    // 수강관리 버튼
+    'A1-09':   '[data-feature-id="A1-09"]',    // 공개예약 코스 표시
+    'A1-10':   '[data-feature-id="A1-10"]',    // 코스 등록 버튼
+    'A1-11':   '[data-feature-id="A1-11"]',    // 코스 삭제 확인 모달
+    /* admin/offline-builder.html — A2 (코스 빌더) */
+    'A2-01':   '[data-feature-id="A2-01"]',    // 코스 기본정보
+    'A2-02':   '[data-feature-id="A2-02"]',    // 코스 상단 이미지
+    'A2-03':   '[data-feature-id="A2-03"]',    // 장소 설정
+    'A2-04':   '[data-feature-id="A2-04"]',    // 수강신청 기간
+    'A2-05':   '[data-feature-id="A2-05"]',    // 수강 등록 방식
+    'A2-13':   '[data-feature-id="A2-13"]',    // 임시저장
+    'A2-14':   '[data-feature-id="A2-14"]',    // 퍼블리싱
+    'A2-16':   '[data-feature-id="A2-16"]',    // 미리보기
+    /* admin/offline-course-view.html — A3·A4 (수강관리) */
+    'A3-01':   '[data-feature-id="A3-01"]',    // 코스 정보 사이드바
+    'A3-03':   '[data-feature-id="A3-03"]',    // 수강생 등록 버튼
+    'A3-04':   '[data-feature-id="A3-04"]',    // 라이브 출석 버튼
+    'A3-05':   '[data-feature-id="A3-05"]',    // 오늘 회차 배너
+    'A3-09':   '[data-feature-id="A3-09"]',    // 수강 탭
+    'A3-10':   '[data-feature-id="A3-10"]',    // 수강생 검색
+    'A3-14':   '[data-feature-id="A3-14"]',    // 출석 탭
+    'A4-02':   '[data-feature-id="A4-02"]',    // QR 라이브 모드 (회차 자동 종료)
+
+    /* user/home.html — U1 (홈) */
+    'U1-02':   '[data-feature-id="U1-02"]',    // 오프라인 코스 섹션
+    /* user/course-list.html — U2 (코스 목록) */
+    'U2-01':   '[data-feature-id="U2-01"]',    // 카테고리 필터
+    'U2-03':   '[data-feature-id="U2-03"]',    // 코스 검색
+    'U2-04':   '[data-feature-id="U2-04"]',    // 코스 카드
+    /* user/course-detail.html — U3 (코스 상세) */
+    'U3-01':   '[data-feature-id="U3-01"]',    // 코스 헤더 (커버)
+    'U3-02':   '[data-feature-id="U3-02"]',    // 자율 수강 신청 버튼
+    'U3-03':   '[data-feature-id="U3-03"]',    // 관리자 배정 안내
+    'U3-04':   '[data-feature-id="U3-04"]',    // 신청 기간 표시
+    'U3-05':   '[data-feature-id="U3-05"]',    // 커리큘럼 목록
+    /* user/my.html — U4 (MY학습) */
+    'U4-01':   '[data-feature-id="U4-01"]',    // 진행중/완료/신청내역 탭
+    'U4-02':   '[data-feature-id="U4-02"]',    // MY 코스 카드
+    'U4-03':   '[data-feature-id="U4-03"]',    // 출석 내역 확인
   };
 
   /* ══ 사이드바 메뉴 ══ */
@@ -280,8 +338,28 @@
     const [filterScreen, setFilterScreen] = useState('all');
     const [search, setSearch] = useState('');
     /* 우측 슬라이드 패널: 프로토타입 미리보기 */
-    const [previewScreen, setPreviewScreen] = useState(null); // {screen, label, url} or null
+    const [previewScreen, setPreviewScreen] = useState(null); // {screen, label, url, selector?, featureId?, featureName?}
     const [previewFullscreen, setPreviewFullscreen] = useState(false);
+    const iframeRef = useRef(null);
+    const iframeLoadedUrlRef = useRef(null);
+
+    /* previewScreen 변경 시 iframe이 같은 URL이면 즉시 하이라이트 갱신 */
+    useEffect(() => {
+      if (!previewScreen || !iframeRef.current) return;
+      const currentUrl = previewScreen.url;
+      if (iframeLoadedUrlRef.current === currentUrl) {
+        /* 같은 페이지면 즉시 postMessage */
+        try {
+          iframeRef.current.contentWindow.postMessage({
+            type: 'feature-highlight',
+            selector: previewScreen.selector || null,
+            featureId: previewScreen.featureId,
+            featureName: previewScreen.featureName,
+          }, '*');
+        } catch (err) { console.warn('postMessage 실패', err); }
+      }
+      /* 다른 URL이면 onLoad에서 처리됨 */
+    }, [previewScreen]);
 
     const rows = side === 'admin' ? ADMIN_ROWS : USER_ROWS;
 
@@ -335,14 +413,11 @@
               <div className="flex items-center gap-2">
                 <FileSpreadsheet size={18} className="text-indigo-500"/>
                 <h1 className="text-[16px] font-black text-slate-900">기능명세서</h1>
-                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.0</span>
+                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.2</span>
                 <span className="text-[10px] font-black text-violet-700 bg-violet-100 border border-violet-300 px-2 py-0.5 rounded-full ml-1">📍 기능 라인 SSOT</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-04-28</span>
-                <button className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                  <Download size={13}/> 다운로드
-                </button>
+                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-05-07</span>
               </div>
             </header>
           )}
@@ -512,10 +587,11 @@
                           <td
                             className={`sticky-col4 border-r border-slate-200 px-3 py-2.5 font-bold text-slate-800 ${SCREEN_URL_MAP[row.screen] ? 'cursor-pointer hover:text-indigo-600 hover:bg-indigo-50/40' : ''}`}
                             style={{background:isEven?'#fff':'#f8fafc'}}
-                            onClick={() => SCREEN_URL_MAP[row.screen] && setPreviewScreen({ screen: row.screen, ...SCREEN_URL_MAP[row.screen] })}
+                            onClick={() => SCREEN_URL_MAP[row.screen] && setPreviewScreen({ screen: row.screen, ...SCREEN_URL_MAP[row.screen], featureId: row.id, featureName: row.feature, selector: FEATURE_SELECTORS[row.id] || null })}
                             title={SCREEN_URL_MAP[row.screen] ? `${row.screen} 화면 미리보기 — 클릭` : ''}>
                             {row.feature}
                             {SCREEN_URL_MAP[row.screen] && <Monitor size={11} className="inline-block ml-1.5 text-slate-300 group-hover:text-indigo-500" style={{verticalAlign:'middle'}}/>}
+                            {FEATURE_SELECTORS[row.id] && <span className="inline-block ml-1.5 text-[9px] font-bold bg-indigo-500 text-white px-1.5 py-0.5 rounded-full" title="이 기능은 화면에서 위치 하이라이트 가능">📍</span>}
                           </td>
                           <td className="px-3 py-2.5 text-slate-500">
                             <span className="bg-slate-100 px-2 py-0.5 rounded-md text-[10px] font-bold">{row.group}</span>
@@ -539,8 +615,8 @@
                           <td className="px-2 py-2.5 text-center">
                             {SCREEN_URL_MAP[row.screen] ? (
                               <button
-                                onClick={() => setPreviewScreen({ screen: row.screen, ...SCREEN_URL_MAP[row.screen] })}
-                                title={`${row.screen} 화면 미리보기`}
+                                onClick={() => setPreviewScreen({ screen: row.screen, ...SCREEN_URL_MAP[row.screen], featureId: row.id, featureName: row.feature, selector: FEATURE_SELECTORS[row.id] || null })}
+                                title={`${row.screen} 화면 미리보기${FEATURE_SELECTORS[row.id] ? ' (📍 위치 하이라이트)' : ''}`}
                                 className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-indigo-50 hover:bg-indigo-500 hover:text-white text-indigo-600 border border-indigo-200 transition-colors">
                                 <Monitor size={13}/>
                               </button>
@@ -567,7 +643,7 @@
           <>
             {/* 백드롭 — 전체 영역 클릭 시 닫기 (전체화면 모드는 진하게, 일반 모드는 살짝 투명) */}
             <div
-              onClick={() => { setPreviewScreen(null); setPreviewFullscreen(false); }}
+              onClick={() => { setPreviewScreen(null); setPreviewFullscreen(false); iframeLoadedUrlRef.current = null; }}
               className="fixed inset-0 z-40 cursor-pointer"
               style={{
                 background: previewFullscreen ? 'rgba(0,0,0,0.4)' : 'rgba(15,23,42,0.08)',
@@ -578,11 +654,18 @@
             {/* 슬라이드 패널 */}
             <aside
               className="fixed top-0 right-0 h-full bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col transition-[width] duration-300"
-              style={{
-                width: previewFullscreen ? '100vw' : 'calc(100vw - 480px)',
-                minWidth: previewFullscreen ? 'auto' : '600px',
-                animation: 'slideInRight .25s ease-out'
-              }}
+              style={(() => {
+                const isUserScreen = previewScreen.screen && previewScreen.screen.startsWith('U');
+                if (previewFullscreen) {
+                  return { width: '100vw', minWidth: 'auto', animation: 'slideInRight .25s ease-out' };
+                }
+                if (isUserScreen) {
+                  /* 사용자단 — 모바일 프레임(390px) + 좌우 여백 */
+                  return { width: 'min(35vw, 520px)', minWidth: '440px', animation: 'slideInRight .25s ease-out' };
+                }
+                /* 관리자단 — 데스크탑 풀폭 */
+                return { width: 'calc(100vw - 480px)', minWidth: '600px', animation: 'slideInRight .25s ease-out' };
+              })()}
             >
               {/* 패널 헤더 */}
               <div className="shrink-0 px-5 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
@@ -607,19 +690,39 @@
                     <Eye size={15}/>
                   </a>
                   <button
-                    onClick={() => { setPreviewScreen(null); setPreviewFullscreen(false); }}
+                    onClick={() => { setPreviewScreen(null); setPreviewFullscreen(false); iframeLoadedUrlRef.current = null; }}
                     title="닫기 (Esc)"
                     className="w-8 h-8 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-rose-600 transition-colors text-[18px] font-bold border border-slate-200">
                     ×
                   </button>
                 </div>
               </div>
-              {/* iframe */}
+              {/* iframe — 로드 후 postMessage로 selector 하이라이트 요청 */}
               <iframe
+                ref={iframeRef}
                 src={previewScreen.url}
                 title={previewScreen.label}
                 className="flex-1 w-full border-0 bg-white"
+                onLoad={(e) => {
+                  iframeLoadedUrlRef.current = previewScreen.url;
+                  if (previewScreen.selector) {
+                    try {
+                      e.target.contentWindow.postMessage({
+                        type: 'feature-highlight',
+                        selector: previewScreen.selector,
+                        featureId: previewScreen.featureId,
+                        featureName: previewScreen.featureName,
+                      }, '*');
+                    } catch (err) { console.warn('postMessage 실패', err); }
+                  }
+                }}
               />
+              {previewScreen.selector && (
+                <div className="shrink-0 px-4 py-1.5 bg-indigo-50 border-t border-indigo-200 text-[11px] text-indigo-700 flex items-center gap-2">
+                  <span className="font-bold">📍 위치 하이라이트</span>
+                  <span className="text-indigo-500">— 화면에서 [{previewScreen.featureName}] 위치 찾으면 툴팁 표시. 5초 후 자동 사라짐 / 클릭·Esc로 닫기</span>
+                </div>
+              )}
               {/* 패널 푸터 */}
               <div className="shrink-0 px-4 py-2 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-500 flex items-center justify-between">
                 <span>📍 admin/<strong>{previewScreen.url}</strong> {previewFullscreen && <span className="ml-2 text-indigo-600 font-bold">· 전체화면 모드</span>}</span>
