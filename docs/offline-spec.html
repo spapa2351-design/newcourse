@@ -236,7 +236,7 @@
 <div id="cover" data-tab="admin" class="bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 text-white px-12 py-6">
   <div class="max-w-4xl flex items-center gap-4">
     <h1 class="text-2xl font-bold leading-tight">오프라인 코스 기획설계서</h1>
-    <span class="bg-white/15 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0">Phase 1 완료</span>
+    <span class="bg-white/15 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0">Phase 1</span>
     <span class="bg-emerald-400/30 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 border border-emerald-300/40">📍 정책 SSOT</span>
   </div>
   <div class="mt-2 text-xs text-white/70">이 문서는 <strong>운영 정책의 단일 진실 원천(SSOT)</strong> · 기능 라인 아이템은 <a href="../admin/feature-spec.html" target="_blank" class="underline">admin/feature-spec.html</a> · 일정은 <a href="00-standard/phase-roadmap.html" target="_blank" class="underline">phase-roadmap.html</a> · 운영 가이드는 <a href="guide-ops-policy.html" target="_blank" class="underline">guide-ops-policy.html</a></div>
@@ -1152,13 +1152,13 @@
 <!-- S8: Phase 로드맵 -->
 <section id="s8" data-tab="admin" class="section-card">
   <div class="section-title">8. Phase 로드맵</div>
-  <p class="section-desc">현재 어디까지 왔고, 다음에 무엇을 할 것인가.</p>
+  <p class="section-desc">Phase별 범위와 우선순위.</p>
 
   <!-- 탭 버튼 -->
   <div class="flex gap-1 mb-5 bg-slate-100 p-1 rounded-xl">
     <button onclick="showPhaseTab('p1')" id="ptab-p1"
-      class="phase-tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all bg-white text-green-700 shadow-sm">
-      ✅ Phase 1 <span class="text-xs font-normal text-green-500">완료</span>
+      class="phase-tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all bg-white text-indigo-700 shadow-sm">
+      📦 Phase 1 <span class="text-xs font-normal text-indigo-500">범위</span>
     </button>
     <button onclick="showPhaseTab('p2')" id="ptab-p2"
       class="phase-tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all text-slate-500 hover:text-blue-600">
@@ -1173,13 +1173,13 @@
   <!-- Phase 1 콘텐츠 -->
   <div id="ptab-content-p1">
     <div class="flex items-center gap-3 mb-4">
-      <span class="badge badge-done">✅ Phase 1 완료</span>
-      <span class="ml-auto text-xs text-green-600 font-semibold bg-green-100 px-2.5 py-1 rounded-full">18개 기능 100% · 수료 처리 Phase 2 이월</span>
+      <span class="badge badge-plan2">📦 Phase 1 범위</span>
+      <span class="ml-auto text-xs text-slate-600 font-semibold bg-slate-100 px-2.5 py-1 rounded-full">기능 18개 · 수료 처리 Phase 2 이월</span>
     </div>
     <div class="grid grid-cols-2 gap-4">
-      <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-        <div class="text-xs font-bold text-green-600 mb-2 uppercase tracking-wide">코스 · 빌더</div>
-        <div class="space-y-1.5 text-sm text-green-800">
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+        <div class="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-wide">코스 · 빌더</div>
+        <div class="space-y-1.5 text-sm text-indigo-900">
           <div>• 코스 목록 (필터, 차수 확장, 상태 탭)</div>
           <div>• 코스 개설 빌더 섹션 1~4 — 우측 패널 통합 편집</div>
           <div>• 차수/회차 관리 + 동일 날짜 시간대 추가</div>
@@ -1189,9 +1189,9 @@
           <div>• 글로벌 사이드바 (4개 파일 통일)</div>
         </div>
       </div>
-      <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-        <div class="text-xs font-bold text-green-600 mb-2 uppercase tracking-wide">출석 · 수료 · 수강</div>
-        <div class="space-y-1.5 text-sm text-green-800">
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+        <div class="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-wide">출석 · 수료 · 수강</div>
+        <div class="space-y-1.5 text-sm text-indigo-900">
           <div>• QR 라이브 출석 (30초 갱신)</div>
           <div>• 출석 상태 5종 (미확인/출석/지각/조퇴/결석)</div>
           <div>• 개인별 체크인 시간 다양화</div>
@@ -1521,7 +1521,7 @@
         <tr><td>기획 보완 문서</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/00-standard/offline-course-planning-supplement.md</code></td><td>운영 정책 원본, 사용자 흐름, 테스트 매트릭스, 용어 사전</td></tr>
         <tr><td>전체 설계 문서</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/offline-course-builder.md</code></td><td>아키텍처 결정, 데이터 모델, 운영 케이스 6종</td></tr>
         <tr><td>기획 갭 리포트</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/gap-report.md</code></td><td>12개 기획 구멍 상세</td></tr>
-        <tr><td>Phase 1 완결 리포트</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/04-report/phase1-completion.md</code></td><td>5파일 결과, 갭 처리 현황, Phase 2 이월 목록</td></tr>
+        <tr><td>Phase 1 범위 리포트</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/04-report/phase1-completion.md</code></td><td>5파일 결과, 갭 처리 현황, Phase 2 이월 목록</td></tr>
         <tr><td>통합 README</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/README.md</code></td><td>마크다운 버전 통합 문서</td></tr>
       </tbody>
     </table>
@@ -1535,7 +1535,7 @@
 <!-- s13 -->
 <section id="s13" data-tab="learner" class="section-card">
   <div class="section-title">13. 학습자 앱 개요</div>
-  <p class="section-desc">관리자단 Phase 1 완성 후, 학습자가 코스를 신청·출석·수료까지 완결하는 7개 HTML 화면의 공식 기획·설계 명세. CDN 직접 실행 환경(빌드 도구 없음)에서 기존 프로토타입의 갭을 정의·수정한다.</p>
+  <p class="section-desc">관리자단 Phase 1과 함께 진행되는 학습자 앱 7개 HTML 화면의 공식 기획·설계 명세. 학습자가 코스를 신청·출석·수료까지 진행하는 흐름을 정의. CDN 직접 실행 환경(빌드 도구 없음)에서 기존 프로토타입의 갭을 정의·수정한다.</p>
 
   <div class="subsection">
     <div class="subsection-title">13.1 Context Anchor</div>
@@ -1632,7 +1632,7 @@
       </tbody>
     </table>
     <div class="callout callout-amber mt-4">
-      <strong>GAP-U05 적용:</strong> home.html · category.html · course-list.html · my.html의 오프라인 코스 카드 onclick에 위 규칙을 반영한 href가 설정되어야 함. <span class="badge badge-done">Phase 1 완료</span>
+      <strong>GAP-U05 적용:</strong> home.html · category.html · course-list.html · my.html의 오프라인 코스 카드 onclick에 위 규칙을 반영한 href가 설정되어야 함.
     </div>
   </div>
 </section>
