@@ -205,6 +205,11 @@
     { id:'U5-01', screen:'U5', screenName:'QR출석', group:'QR', feature:'학습자 앱 QR 스캔', desc:'라이브 QR 화면의 QR을 학습자 앱 카메라로 스캔 → 출석 처리', input:'QR 스캔', output:'출석(attended) or 지각(late) 상태 변경', note:'타임스탬프+회차ID 포함', pri:'P1', phase:1, status:'todo' },
     { id:'U5-02', screen:'U5', screenName:'QR출석', group:'QR', feature:'QR 스캔 결과 피드백', desc:'스캔 성공: 출석/지각 안내 토스트. 이미 스캔: 중복 처리 안내. 오류: 재시도 안내', input:'스캔 결과', output:'토스트 UI', note:'', pri:'P1', phase:1, status:'todo' },
 
+    /* ── U7. 카테고리 (category.html) — 2026-05-07 추가 ── */
+    { id:'U7-01', screen:'U7', screenName:'카테고리', group:'헤더', feature:'카테고리 검색', desc:'카테고리 화면 상단 검색 바. 카테고리명·코스명 키워드로 즉시 필터', input:'검색어 입력', output:'검색 결과 필터', note:'', pri:'P1', phase:1, status:'todo' },
+    { id:'U7-02', screen:'U7', screenName:'카테고리', group:'필터', feature:'코스 유형 필터', desc:'전체 / 온라인만 / 오프라인만 3종 칩 필터. 선택 시 카테고리 그리드의 노출 코스 종류 토글', input:'칩 클릭', output:'filter state (all/online/offline) → 카테고리 섹션 노출 분기', note:'2026-05-07 추가 — 카테고리 화면 핵심 동선', pri:'P1', phase:1, status:'todo' },
+    { id:'U7-03', screen:'U7', screenName:'카테고리', group:'그리드', feature:'카테고리 그리드 3섹션', desc:'코스 / PLUS 코스 / 오프라인 코스 3개 섹션. 각 섹션 내 카테고리 칩 그리드 (라이브·성과관리·특별강의·직무교육·리더십·법정의무교육 등). 칩 클릭 → 코스 목록(course-list.html) 이동', input:'카테고리 칩 클릭', output:'course-list.html?cat=... 이동', note:'필터 선택에 따라 섹션 노출 분기', pri:'P1', phase:1, status:'todo' },
+
     /* ── U4 Phase 2: MY학습 추가 기능 ── */
     { id:'U4-07', screen:'U4', screenName:'MY학습', group:'공결', feature:'공결(사전결석) 신청', desc:'학습자가 교육일 전에 사전 결석 신청 제출. 신청 사유 입력 + 첨부파일. 담당자 승인 대기 표시', input:'공결 신청 버튼', output:'공결 신청 데이터 생성', note:'담당자 승인 플로우와 연동(A3-22)', pri:'P1', phase:2, status:'phase2' },
     { id:'U4-08', screen:'U4', screenName:'MY학습', group:'알림', feature:'알림 수신 설정', desc:'이메일/앱 푸시 알림 ON/OFF. 수강 확정·D-day 리마인더·수료 완료 알림 개인 수신 설정', input:'토글 ON/OFF', output:'notifyPref 저장', note:'알림 채널 설정(A2-20) 이후 구현', pri:'P2', phase:2, status:'phase2' },
@@ -228,6 +233,7 @@
     U3: 'bg-orange-100 text-orange-700',
     U4: 'bg-teal-100 text-teal-700',
     U5: 'bg-cyan-100 text-cyan-700',
+    U7: 'bg-fuchsia-100 text-fuchsia-700',
   };
 
   /* ── 화면 ID → 프로토타입 URL 매핑 ── */
@@ -243,6 +249,7 @@
     U3: { url: '../user/course-detail.html',  label: '코스 상세 (user/course-detail.html)' },
     U4: { url: '../user/my.html',             label: 'MY 학습 (user/my.html)' },
     /* U5 QR 출석은 학습자 앱 내장 (별도 화면 없음) */
+    U7: { url: '../user/category.html',       label: '카테고리 (user/category.html)' },
   };
 
   /* ── 기능 ID → CSS selector 매핑 (data-feature-id 기반) ──
@@ -296,6 +303,10 @@
     'U4-01':   '[data-feature-id="U4-01"]',    // 진행중/완료/신청내역 탭
     'U4-02':   '[data-feature-id="U4-02"]',    // MY 코스 카드
     'U4-03':   '[data-feature-id="U4-03"]',    // 출석 내역 확인
+    /* user/category.html — U7 (카테고리) */
+    'U7-01':   '[data-feature-id="U7-01"]',    // 카테고리 검색
+    'U7-02':   '[data-feature-id="U7-02"]',    // 코스 유형 필터
+    'U7-03':   '[data-feature-id="U7-03"]',    // 카테고리 그리드 3섹션
   };
 
   /* ══ 사이드바 메뉴 ══ */
