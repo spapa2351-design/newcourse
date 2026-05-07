@@ -177,7 +177,7 @@
       <a class="nav-link" onclick="navTo('s4')">운영 정책</a>
       <a class="nav-sub nav-link" onclick="navTo('p-status')">출석 상태 5종</a>
       <a class="nav-sub nav-link" onclick="navTo('p-late')">지각 처리</a>
-      <a class="nav-sub nav-link" onclick="navTo('p-close')">회차 마감</a>
+      <a class="nav-sub nav-link" onclick="navTo('p-close')">회차 종료</a>
       <a class="nav-sub nav-link" onclick="navTo('p-cert')">수료 처리</a>
       <a class="nav-sub nav-link" onclick="navTo('p-enroll')">수강 신청</a>
       <a class="nav-sub nav-link" onclick="navTo('p-data')">데이터 정정</a>
@@ -451,7 +451,7 @@
   <!-- 4.1 출석 상태 -->
   <div id="p-status" class="policy-box">
     <div class="policy-title">4.1 출석 상태</div>
-    <p class="text-sm text-slate-500 mb-4">수강생은 회차(수업 1일)마다 아래 5가지 상태 중 하나를 가집니다. 상태는 수료 계산에 직결되므로, 회차 마감 전 반드시 확인하세요.</p>
+    <p class="text-sm text-slate-500 mb-4">수강생은 회차(수업 1일)마다 아래 5가지 상태 중 하나를 가집니다. 상태는 수료 계산에 직결되므로, 수업 종료 후 미확인 인원은 운영자가 직접 정리해주세요.</p>
 
     <div class="grid grid-cols-5 gap-3 mb-5">
       <div class="rounded-xl p-3 text-center bg-slate-100 border border-slate-200">
@@ -477,7 +477,7 @@
       <div class="rounded-xl p-3 text-center bg-red-50 border border-red-200">
         <div class="w-8 h-8 rounded-full bg-red-500 mx-auto mb-2"></div>
         <div class="font-bold text-sm text-red-700">결석</div>
-        <div class="text-xs text-red-600 mt-1 leading-relaxed">마감 시 미확인<br>→ 자동 전환,<br>또는 수동</div>
+        <div class="text-xs text-red-600 mt-1 leading-relaxed">운영자가<br>수동으로 처리</div>
       </div>
     </div>
 
@@ -559,48 +559,186 @@
     </div>
   </div>
 
-  <!-- 4.3 회차 마감 -->
+  <!-- 4.3 회차 종료 (시간 기반 자동) -->
   <div id="p-close" class="policy-box">
-    <div class="policy-title">4.3 회차 마감</div>
-    <p class="text-sm text-slate-500 mb-4">회차 마감 시 "미확인" 상태인 수강생 전원이 결석으로 전환됩니다. 마감 자체는 취소할 수 없지만, 이후 개별 상태 수정은 관리자가 언제든 할 수 있습니다.</p>
+    <div class="policy-title">4.3 회차 종료 (시간 기반 자동)</div>
+    <p class="text-sm text-slate-500 mb-4">
+      <strong>2026-05-06 정책 단순화</strong> — "마감"이라는 별도 이벤트와 버튼을 제거합니다. 회차는 <strong>수업 종료 시각이 지나면 자동으로 종료</strong>되며, 운영자가 별도로 닫는 행위는 없습니다. 이전엔 마감 = 출석률 분모 확정 + 미확인→결석 전환 + 운영자 정리 책임 등 4가지 효과를 묶고 있었는데, 모두 시간 트리거로 자동화 가능하다는 판단입니다.
+    </p>
 
     <div class="flex gap-3 items-start mb-5">
-      <div class="flex-1 bg-slate-50 rounded-xl p-4 text-center text-sm">
-        <div class="font-bold text-slate-700">수업 종료 후</div>
-        <div class="text-slate-500 text-xs mt-1">수업 중엔 마감 버튼 비활성</div>
+      <div class="flex-1 bg-blue-50 rounded-xl p-4 text-center text-sm">
+        <div class="font-bold text-blue-700">예정 / 진행중</div>
+        <div class="text-blue-600 text-xs mt-1">수업 시작 전·중</div>
       </div>
       <div class="text-slate-300 font-bold text-2xl self-center">→</div>
-      <div class="flex-1 bg-orange-50 rounded-xl p-4 text-center text-sm">
-        <div class="font-bold text-orange-700">"회차 마감" 클릭</div>
-        <div class="text-orange-600 text-xs mt-1">확인 팝업 표시</div>
-      </div>
-      <div class="text-slate-300 font-bold text-2xl self-center">→</div>
-      <div class="flex-1 bg-red-50 rounded-xl p-4 text-center text-sm">
-        <div class="font-bold text-red-700">미확인 → 전원 결석</div>
-        <div class="text-red-600 text-xs mt-1">마감 취소 불가</div>
+      <div class="flex-1 bg-emerald-50 rounded-xl p-4 text-center text-sm">
+        <div class="font-bold text-emerald-700">종료 (자동)</div>
+        <div class="text-emerald-600 text-xs mt-1">수업 종료 시각 즉시. 출석률 계산 시작</div>
       </div>
     </div>
 
     <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
-        <div class="font-bold text-green-700 mb-1">✅ 마감 후에도 가능한 것</div>
-        <div class="text-green-600 text-xs">관리자 무제한 정정 정책: 어떤 상태 → 어떤 상태든 제한 없이 수동 변경<br>(결석↔출석, 조퇴→출석 등 모두 가능)</div>
+      <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm">
+        <div class="font-bold text-emerald-700 mb-1">✅ 운영자가 할 수 있는 일</div>
+        <div class="text-emerald-700 text-xs">출석 정정(결석↔출석 등) 수동 변경.<br>"미확인 일괄 처리" 도구로 빠른 정리 가능 (전원 결석/전원 출석/개별).</div>
       </div>
-      <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
-        <div class="font-bold text-red-700 mb-1">❌ 마감 후 불가능한 것</div>
-        <div class="text-red-600 text-xs">마감 자체 취소 불가 (미확인→결석 일괄 전환 되돌리기 불가)<br>자동 마감 없음 (수동만 지원)</div>
+      <div class="bg-rose-50 border border-rose-200 rounded-lg p-3 text-sm">
+        <div class="font-bold text-rose-700 mb-1">❌ 운영자가 할 수 없는 일</div>
+        <div class="text-rose-700 text-xs">"마감 버튼" 자체가 없음 (시간 기반 자동 종료).<br>수업 종료 시각은 변경 불가 (회차 시간 변경은 가능하되 종료 후엔 잠금).</div>
       </div>
     </div>
 
-    <div class="callout callout-amber">
-      <strong>마감 전 확인 사항</strong>: "미확인" 인원이 남아 있다면, QR 스캔을 못 한 경우인지 실제 결석인지 먼저 확인하세요. 마감 후 개별 수정은 가능하지만 번거롭습니다.
+    <div class="callout callout-blue">
+      <strong>운영 가이드</strong>: "미확인" 인원은 운영자가 직접 정리(출석/지각/결석)합니다. Phase 1엔 자동 결석 처리 없음 — 운영자 수동 처리만.
     </div>
+
+    <!-- ▼▼▼ 회차 종료 정책 (시간 기반 자동) — 2026-05-06 마감 개념 제거 ▼▼▼ -->
+    <div class="mt-6 pt-5 border-t border-slate-200">
+      <div class="text-base font-bold text-slate-800 mb-1">4.3.1 회차 종료, 쉽게 풀어보기</div>
+      <p class="text-sm text-slate-600 mb-4">학습자가 자주 묻는 <strong>"오늘 못 가면 한 회차 까이는 거예요?"</strong> — "마감"이라는 별도 사건은 없어요. <strong>수업 시간이 끝나면 그 회차도 자동으로 끝나는 것</strong>으로 통일됩니다.</p>
+
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-5">
+        <div class="font-bold text-indigo-800 text-sm mb-2">🎯 한 줄 정의</div>
+        <div class="text-sm text-indigo-900 leading-relaxed">
+          <strong>회차 종료 = 수업 종료 시각이 지난 시점.</strong><br>
+          별도의 "마감 버튼"이나 운영자 행동 없이 <strong>자동으로 종료</strong>됩니다. 그 시점부터 출석률 계산에 그 회차가 들어가고, 미확인 인원은 운영자가 직접 정리합니다.
+        </div>
+      </div>
+
+      <div class="bg-slate-50 rounded-xl p-4 mb-4">
+        <div class="font-bold text-slate-800 text-sm mb-3">📅 시간 기반 자동 흐름</div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-xs text-slate-500 border-b border-slate-200">
+                <th class="text-left py-2 w-40">시점</th>
+                <th class="text-left py-2 w-40">회차 상태</th>
+                <th class="text-left py-2">일어나는 일</th>
+              </tr>
+            </thead>
+            <tbody class="text-slate-700">
+              <tr class="border-b border-slate-100">
+                <td class="py-2">수업 시작 전</td>
+                <td class="py-2 text-blue-700">예정 (scheduled)</td>
+                <td class="py-2 text-xs">출석률 계산에 안 들어감</td>
+              </tr>
+              <tr class="border-b border-slate-100">
+                <td class="py-2">수업 시간 동안</td>
+                <td class="py-2 text-blue-700">진행중 (in_progress)</td>
+                <td class="py-2 text-xs">QR 라이브 모드 활성, 학습자 출석/지각 자동 기록</td>
+              </tr>
+              <tr class="border-b border-slate-100">
+                <td class="py-2">수업 종료 시각</td>
+                <td class="py-2 text-emerald-700">종료 (ended) — 자동</td>
+                <td class="py-2 text-xs">출석률 계산 시작. 미확인 인원은 "출석 확인 중" 표시</td>
+              </tr>
+              <tr class="border-b border-slate-100">
+                <td class="py-2">종료 후</td>
+                <td class="py-2 text-emerald-700">종료 (정정 가능)</td>
+                <td class="py-2 text-xs">운영자가 미확인 인원 직접 정리 (출석/지각/결석). "미확인 일괄 처리" 도구 사용 가능</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+          <div class="font-bold text-emerald-800 text-sm mb-2">👤 학습자 화면에서 일어나는 일</div>
+          <div class="text-sm text-emerald-900 leading-relaxed space-y-1.5">
+            <div>① 수업 종료 즉시 출석률에 그 회차가 추가</div>
+            <div>② 자기 출석/지각/결석 결과가 바로 보임</div>
+            <div>③ 미확인 상태인 경우 "출석 확인 중" 표시</div>
+            <div class="text-xs text-emerald-700 mt-2 pt-2 border-t border-emerald-200">※ Phase 1은 <strong>즉시성 알림만 유지</strong> — QR 찍은 직후 "출석 처리됨" 푸시. 결석 통보·HR 연동 등 비-즉시 알림은 <strong>Phase 2 이월</strong>.</div>
+          </div>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div class="font-bold text-blue-800 text-sm mb-2">📊 운영자 화면에서 일어나는 일</div>
+          <div class="text-sm text-blue-900 leading-relaxed space-y-1.5">
+            <div>① "마감 버튼" 없음 (시간 기반 자동)</div>
+            <div>② 종료된 회차는 "종료" 배지 표시</div>
+            <div>③ 미확인 인원은 운영자가 직접 정리</div>
+            <div>④ "미확인 일괄 처리" 도구로 빠른 정리 (전원 출석/전원 결석/개별)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-pink-50 border border-pink-200 rounded-xl p-4 mb-4">
+        <div class="font-bold text-pink-800 text-sm mb-2">📢 학습자 알림 — 즉시성만 Phase 1, 나머지 Phase 2</div>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-white border border-pink-200 rounded-lg p-3">
+            <div class="font-bold text-pink-800 mb-1.5">✅ Phase 1 — 즉시성 알림</div>
+            <ul class="text-pink-900 leading-relaxed list-disc list-inside space-y-1">
+              <li><strong>출석 처리됨</strong> (QR 찍자마자) — "출석 처리됐어요"</li>
+              <li><strong>출석률 표시</strong> (수업 종료 즉시) — 학습자 화면 갱신</li>
+            </ul>
+          </div>
+          <div class="bg-white border border-pink-200 rounded-lg p-3">
+            <div class="font-bold text-pink-800 mb-1.5">⏸ Phase 2 이월</div>
+            <ul class="text-pink-900 leading-relaxed list-disc list-inside space-y-1">
+              <li>미확인 처리 중 알림 (약한 알림)</li>
+              <li>결석 확정 알림</li>
+              <li>HR 시스템 연동 (외부 시스템 통보)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-violet-50 border border-violet-200 rounded-xl p-4 mb-4">
+        <div class="font-bold text-violet-800 text-sm mb-2">✏️ 종료 후에도 출석은 고칠 수 있어요</div>
+        <div class="text-sm text-violet-900 leading-relaxed space-y-1">
+          <div>• 결석 → 출석으로 바꾸는 건 종료 후에도 가능 (관리자만)</div>
+          <div>• 바꾸는 즉시 출석률 다시 계산</div>
+          <div>• <strong>"마감 자체를 풀기"는 개념 자체가 없어요</strong> — 마감 사건이 없으니까. 수업 종료 시각이 지나면 자동 종료, 그 사실은 변하지 않음</div>
+          <div>• Phase 2 수료 확정 후 정정해도 수료 상태는 자동으로 안 바뀝니다 (별도 처리 필요)</div>
+        </div>
+      </div>
+
+      <div class="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-4">
+        <div class="font-bold text-rose-800 text-sm mb-2">👥 운영자 여러 명이 같이 보고 있을 때</div>
+        <div class="text-sm text-rose-900 leading-relaxed space-y-1.5">
+          <div>• <strong>라이브 모드를 여러 PC에 동시에 띄우는 건 OK.</strong> 100명 이상 큰 행사에서는 입장 게이트 2개로 나누고 QR 화면 2대 띄우는 게 정식 권장</div>
+          <div>• <strong>마감 버튼이 없어졌으니 동시 클릭 충돌 자체가 사라짐</strong></div>
+          <div>• 미확인 일괄 처리는 충돌 가능성 낮음 — 같은 데이터를 두 명이 동시에 바꾸려 하면 마지막 변경이 우선 (Last Write Wins) + audit log 기록</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 border-2 border-slate-300 rounded-xl p-4 mb-4">
+        <div class="font-bold text-slate-800 text-sm mb-2">🚫 수업 자체가 못 열린 경우 — 휴강 <span class="badge badge-plan2 ml-1">Phase 2</span></div>
+        <p class="text-sm text-slate-700 leading-relaxed mb-3">강사가 갑자기 못 오거나, 강의장 사고나 천재지변으로 수업 자체가 안 열린 경우. Phase 1에서는 운영자 임의 처리, Phase 2부터 정식 상태로 들어옵니다.</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white border border-slate-200 rounded-lg p-3 text-sm">
+            <div class="font-bold text-slate-700 mb-1.5">기본 처리</div>
+            <ul class="text-slate-600 leading-relaxed list-disc list-inside space-y-1 text-xs">
+              <li>회차 상태에 <strong>"휴강"</strong> 추가</li>
+              <li>휴강된 수업은 <strong>출석부에서 그 칸을 빼버려요</strong></li>
+              <li>"4번 수업 중 3번으로 점수 계산"이라고 표시</li>
+              <li>관리자만 처리 가능, 사유 입력 필수</li>
+            </ul>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-3 text-sm">
+            <div class="font-bold text-slate-700 mb-1.5">코스 설정 — "보강 강제" 토글</div>
+            <ul class="text-slate-600 leading-relaxed list-disc list-inside space-y-1 text-xs">
+              <li><strong>ON</strong>: 법정의무교육 — 보강 안 하면 수료 처리 불가</li>
+              <li><strong>OFF</strong>: 자율 교육 — 휴강은 출석부에서 빼고 진행</li>
+              <li>날짜선택형은 학습자에게 다른 날짜 자동 안내</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-blue">
+        <strong>용어 정리 (2026-05-06 변경)</strong>: <span class="line-through text-slate-400">"회차 마감"</span> → <strong>"회차 종료"</strong>로 통일. 학습자가 "회차 차감"이라고 부르는 건 같은 의미예요 (별도 사건이 아니라 수업 종료 시각이 지나는 것). 수업 자체가 못 열린 건 <strong>"휴강"</strong>입니다 ("회차 취소"는 신청 취소와 헷갈리니 사용 금지).
+      </div>
+    </div>
+    <!-- ▲▲▲ 회차 종료 정책 (시간 기반 자동) ▲▲▲ -->
   </div>
 
   <!-- 4.4 수료 처리 -->
   <div id="p-cert" class="policy-box">
     <div class="policy-title">4.4 수료 처리 <span class="badge badge-plan2 ml-2">Phase 2 예정</span></div>
-    <p class="text-sm text-slate-500 mb-4">전체 회차가 마감된 후, 출석률 75% 이상인 수강생을 일괄 수료 확정하는 기능입니다. <strong>Phase 1에서는 버튼을 제공하지 않습니다.</strong> (2026-04-28 결정 — 사이드이펙트 없음 확인. 수료 확정은 법적·인사 기록이므로 충분한 검토 후 Phase 2에서 구현)</p>
+    <p class="text-sm text-slate-500 mb-4">전체 회차가 종료된 후 (수업 종료 시각 기준), 출석률 75% 이상인 수강생을 일괄 수료 확정하는 기능입니다. <strong>Phase 1에서는 버튼을 제공하지 않습니다.</strong> (2026-04-28 결정 — 사이드이펙트 없음 확인. 수료 확정은 법적·인사 기록이므로 충분한 검토 후 Phase 2에서 구현)</p>
 
     <div class="bg-indigo-50 rounded-xl p-5 mb-5">
       <div class="font-bold text-indigo-800 text-sm mb-3">📊 수료 기준 예시 — 4회차 교육인 경우</div>
@@ -632,7 +770,7 @@
       <div>
         <div class="text-xs font-bold text-slate-500 mb-2">Phase 2 구현 예정 — 수료 처리 순서</div>
         <div class="space-y-2 text-sm">
-          <div class="flex gap-2 items-start"><span class="bg-indigo-400 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span><span>모든 회차 마감 완료 → 수료 처리 버튼 활성화</span></div>
+          <div class="flex gap-2 items-start"><span class="bg-indigo-400 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span><span>모든 회차 종료 완료 (운영자가 미확인 인원 정리 후) → 수료 처리 버튼 활성화</span></div>
           <div class="flex gap-2 items-start"><span class="bg-indigo-400 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span><span>"수료 처리" 클릭 → 수료 대상자 목록 미리보기</span></div>
           <div class="flex gap-2 items-start"><span class="bg-indigo-400 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span><span>확인 클릭 → 대상자 수료 확정, 나머지 미수료</span></div>
         </div>
@@ -648,7 +786,7 @@
     </div>
 
     <div class="callout callout-amber">
-      Phase 1에서는 수료 처리 버튼이 없습니다. 회차 마감 후 출석률 데이터는 통계로 확인할 수 있으며, 수료 확정 처리는 Phase 2에서 구현됩니다.
+      Phase 1에서는 수료 처리 버튼이 없습니다. 회차 종료 후 출석률 데이터는 통계로 확인할 수 있으며, 수료 확정 처리는 Phase 2에서 구현됩니다.
     </div>
   </div>
 
@@ -707,12 +845,12 @@
     <div class="space-y-2">
       <div class="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
         <span class="text-green-600 text-lg">🟢</span>
-        <div class="flex-1 text-sm"><strong>회차 마감 전 출석 수정</strong> — 자유롭게 가능</div>
+        <div class="flex-1 text-sm"><strong>회차 종료 전 (수업 종료 시각 전) 출석 수정</strong> — 자유롭게 가능</div>
         <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">HRD 담당자</span>
       </div>
       <div class="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
         <span class="text-green-600 text-lg">🟢</span>
-        <div class="flex-1 text-sm"><strong>회차 마감 후 출석 수정</strong> — 가능 (관리자 무제한 정정 정책 적용. Phase 2: 사유 입력 + 감사 로그 추가 예정)</div>
+        <div class="flex-1 text-sm"><strong>회차 종료 후 출석 수정</strong> — 관리자 수동 정정 가능 (Phase 2: 사유 입력 + 감사 로그 추가 예정)</div>
         <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">HRD 담당자</span>
       </div>
       <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 opacity-60">
@@ -810,7 +948,7 @@
         <div class="flow-step"><div class="flow-num bg-green-600">2</div><div class="flow-content"><div class="flow-action">"라이브 모드" 클릭</div><div class="flow-result">QR 코드 전체화면 표시 (30초마다 자동 갱신)</div></div></div>
         <div class="flow-step"><div class="flow-num bg-green-600">3</div><div class="flow-content"><div class="flow-action">수강생이 모바일로 QR 스캔</div><div class="flow-result">실시간 출석 반영 (우측 사이드바에 즉시 표시)</div></div></div>
         <div class="flow-step"><div class="flow-num bg-green-600">4</div><div class="flow-content"><div class="flow-action">수업 종료 후 미확인 인원 수동 처리</div><div class="flow-result">상태 드롭다운으로 개별 변경</div></div></div>
-        <div class="flow-step"><div class="flow-num bg-green-600">5</div><div class="flow-content"><div class="flow-action">"회차 마감" 클릭</div><div class="flow-result">미확인 → 결석 일괄 전환</div></div></div>
+        <div class="flow-step"><div class="flow-num bg-green-600">5</div><div class="flow-content"><div class="flow-action">수업 종료 시각 도래</div><div class="flow-result">회차 자동 종료. 미확인 인원은 운영자가 수동 정리</div></div></div>
       </div>
     </div>
 
@@ -836,7 +974,7 @@
       </div>
       <div class="font-bold text-base text-slate-800 mb-3">수료 처리 (HRD 담당자)</div>
       <div class="space-y-2">
-        <div class="flow-step"><div class="flow-num bg-amber-600">1</div><div class="flow-content"><div class="flow-action">출석 탭 → 전 회차 마감 여부 확인</div><div class="flow-result">미마감 회차 있으면 수료 처리 버튼 비활성</div></div></div>
+        <div class="flow-step"><div class="flow-num bg-amber-600">1</div><div class="flow-content"><div class="flow-action">출석 탭 → 전 회차 종료 여부 확인</div><div class="flow-result">진행중 회차 있으면 수료 처리 버튼 비활성</div></div></div>
         <div class="flow-step"><div class="flow-num bg-amber-600">2</div><div class="flow-content"><div class="flow-action">"수료 처리" 클릭</div><div class="flow-result">수료 대상자 목록 표시 (75% 이상)</div></div></div>
         <div class="flow-step"><div class="flow-num bg-amber-600">3</div><div class="flow-content"><div class="flow-action">확인 클릭</div><div class="flow-result">수료 확정. 미충족자는 미수료 유지</div></div></div>
       </div>
@@ -930,7 +1068,7 @@
         <tr><td><strong>수강</strong></td><td>수강생 테이블(상태/사진/이름/그룹/출석률/수강기간) · 수강생 등록 모달(차수 선택 시 회차별 정원 설정된 경우 바이올렛 배지로 회차별 정원 표시 · 잔여석 effective capacity 기준)</td></tr>
         <tr><td><strong>출석</strong></td><td>
           회차 선택 칩 (회차별 개별 정원 설정 시 "정원 N" 배지 표시) · 출석 현황 바 (회차별 정원 설정 시 "회차 정원 N명 · 개별 설정" 표시)<br>
-          출석 테이블: 상태 5종 · 개인별 체크인 시간(출석 0~8분·지각 12~31분 다양화) · 미확인→[출석] 원클릭+[···] 드롭다운 · 회차 마감 버튼
+          출석 테이블: 상태 5종 · 개인별 체크인 시간(출석 0~8분·지각 12~31분 다양화) · 미확인→[출석] 원클릭+[···] 드롭다운 · 미확인 일괄 처리 도구 (마감 버튼 제거)
         </td></tr>
         <tr><td><strong>라이브 모드</strong></td><td>QR 대형 표시 + 30초 카운트다운 · 우측 다크 대시보드(실시간 인원/상태별 카운트/최근 출석자 리스트)</td></tr>
       </tbody>
@@ -990,7 +1128,7 @@
         <tr><td>A03</td><td>지각 기준 0분</td><td>lateMinutes=0 → 30분 후 QR</td><td>"출석" 처리 (기준 없음)</td><td>4.3</td></tr>
         <tr><td>A04</td><td>관리자 수동 변경</td><td>출석 → 조퇴 변경</td><td>조퇴로 변경</td><td>4.1</td></tr>
         <tr><td>A05</td><td>조퇴 → 출석 정정</td><td>조퇴 상태 → 출석으로 관리자 수동 변경</td><td>가능 (관리자 무제한 정정 정책)</td><td>4.1</td></tr>
-        <tr><td>A06</td><td>회차 마감</td><td>미확인 5명 → "회차 마감"</td><td>5명 모두 결석 전환</td><td>4.4</td></tr>
+        <tr><td>A06</td><td>회차 자동 종료</td><td>수업 종료 시각 도래</td><td>회차 종료, 미확인 인원은 운영자가 수동 정리</td><td>4.3</td></tr>
         <tr><td>A07</td><td>마감 후 상태 변경</td><td>마감 완료 → 결석 → 출석 수동</td><td>가능 (로그 기록)</td><td>4.7</td></tr>
         <tr><td>A08</td><td>라이브 QR 30초 갱신</td><td>라이브 모드 → 30초 대기</td><td>QR 코드 자동 갱신</td><td>6.3</td></tr>
         <tr><td>A09</td><td>라이브 실시간 표시</td><td>라이브 모드 → 학습자 QR 스캔</td><td>사이드바에 즉시 출석 표시</td><td>6.3</td></tr>
@@ -1006,8 +1144,8 @@
     <table class="mt-3 opacity-50">
       <thead><tr><th>TC</th><th>시나리오</th><th>행동</th><th>기대 결과</th><th>근거</th></tr></thead>
       <tbody>
-        <tr><td>C01</td><td>정상 수료</td><td>전 회차 마감 + 출석률 80%</td><td>수료 확정</td><td>4.4</td></tr>
-        <tr><td>C02</td><td>미수료</td><td>전 회차 마감 + 출석률 70%</td><td>미수료 유지</td><td>4.4</td></tr>
+        <tr><td>C01</td><td>정상 수료</td><td>전 회차 종료 + 출석률 80%</td><td>수료 확정</td><td>4.4</td></tr>
+        <tr><td>C02</td><td>미수료</td><td>전 회차 종료 + 출석률 70%</td><td>미수료 유지</td><td>4.4</td></tr>
         <tr><td>C03</td><td>경계값 75%</td><td>4회차 중 3회 출석</td><td>수료 대상 (75% 이상)</td><td>4.4</td></tr>
         <tr><td>C04</td><td>경계값 74%</td><td>출석률 74%</td><td>미수료</td><td>4.4</td></tr>
         <tr><td>C05</td><td>미마감 회차 있음</td><td>1개 회차 미마감 → 수료 시도</td><td>버튼 비활성</td><td>4.4</td></tr>
@@ -1081,7 +1219,7 @@
           <div>• QR 라이브 출석 (30초 갱신)</div>
           <div>• 출석 상태 5종 (미확인/출석/지각/조퇴/결석)</div>
           <div>• 개인별 체크인 시간 다양화</div>
-          <div>• 회차 마감 (미확인 → 일괄 결석)</div>
+          <div>• 회차 자동 종료 (수업 종료 시각)</div>
           <div>• <strong>관리자 무제한 출석 정정</strong> (어떤 상태 → 어떤 상태든 가능)</div>
           <div>• 수강 관리 요약 카드 (N회차 구성 · 잔여석 강조 · 자동 레이아웃)</div>
           <div>• 수강 등록 모달 — 회차별 정원 표시</div>
@@ -1152,7 +1290,7 @@
           <span class="badge badge-important text-xs shrink-0 mt-0.5">Mid</span>
           <div>
             <div class="font-semibold text-slate-700">수료 처리 버튼 — 75% 이상 수강생 일괄 수료 확정</div>
-            <div class="text-xs text-slate-500 mt-0.5">전 회차 마감 후 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성 처리. (2026-04-28 Phase 2 이월 결정)</div>
+            <div class="text-xs text-slate-500 mt-0.5">전 회차 종료 후 (운영자가 미확인 인원 정리 완료 후) 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성 처리. (2026-04-28 Phase 2 이월 결정)</div>
           </div>
         </div>
         <div class="flex items-start gap-3 bg-orange-50 border border-orange-100 rounded-lg p-3 text-sm">
@@ -1423,8 +1561,13 @@
     </div>
     <div class="border-l-4 border-red-400 pl-4">
       <div class="text-xs text-slate-400 mb-1">2026-04-09</div>
-      <div class="font-semibold text-sm text-slate-800">자동 마감 없음 (수동만 지원)</div>
-      <div class="text-sm text-slate-600 mt-1">"QR 못 찍었는데 결석됐어요" 민원 방지. 자동 마감 도입 시 운영 신뢰 손상 위험.</div>
+      <div class="font-semibold text-sm text-slate-800">자동 마감 없음 (수동만 지원) <span class="text-xs text-slate-500">— 2026-05-06 정책 변경</span></div>
+      <div class="text-sm text-slate-600 mt-1">"QR 못 찍었는데 결석됐어요" 민원 방지로 Phase 1엔 운영자 수동 처리만 지원. 자동 결석 처리·운영자 단계별 알림은 Phase 2 이월. 4.3.1 회차 종료 정책 참고.</div>
+    </div>
+    <div class="border-l-4 border-emerald-400 pl-4">
+      <div class="text-xs text-slate-400 mb-1">2026-05-06</div>
+      <div class="font-semibold text-sm text-slate-800">회차 마감 개념 제거 — 시간 기반 자동 종료로 단순화</div>
+      <div class="text-sm text-slate-600 mt-1">기획·운영팀 4인 브레인스토밍 결과 — "마감"이라는 별도 사건과 버튼이 4가지 효과(분모 확정, 미확인 결석 전환, 학습자 결과 표시, 운영자 정리 책임)를 묶고 있었으나, 모두 시간 트리거로 대체 가능. <strong>마감 버튼 제거 → 수업 종료 시각이 회차 종료 시각.</strong> 미확인은 운영자가 수동 정리. 자동 결석 처리·운영자 단계별 알림·시스템 잠금은 모두 Phase 2 이월. 학습자 알림은 즉시성만 Phase 1(QR 직후 출석 처리됨, 출석률 표시), 결석 통보·HR 연동 등은 Phase 2 이월. 4.3 정책 전면 재작성. admin UI 마감 버튼 제거.</div>
     </div>
     <div class="border-l-4 border-amber-400 pl-4">
       <div class="text-xs text-slate-400 mb-1">2026-04-28</div>

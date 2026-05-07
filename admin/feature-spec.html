@@ -130,7 +130,7 @@
 
     /* ── A4. 출석 상태 관리 (Phase 1 브레인스토밍 확정사항) ── */
     { id:'A4-01', screen:'A4', screenName:'출석상태', group:'정책', feature:'출석 상태 5종', desc:'미확인(pending)/출석(attended)/지각(late)/조퇴(early_leave)/결석(absent). 출석인정 제거', input:'-', output:'-', note:'미확인=임시, 최종상태 아님', pri:'P1', phase:1, status:'todo' },
-    { id:'A4-02', screen:'A4', screenName:'출석상태', group:'정책', feature:'회차 마감 처리', desc:'관리자 수동 "회차 마감" 클릭 → 미확인→결석 일괄 전환. 자동마감 없음(민원 방지)', input:'회차 마감 버튼', output:'pending→absent 일괄', note:'자동마감 없음 결정', pri:'P1', phase:1, status:'todo' },
+    { id:'A4-02', screen:'A4', screenName:'출석상태', group:'정책', feature:'회차 자동 종료 (시간 기반)', desc:'2026-05-06 정책 변경 — "마감" 개념 제거. 수업 종료 시각이 지나면 회차 자동 종료. 수업 종료 후 7일째 미확인→결석 자동 처리. 30일 시스템 잠금 (회계 마감)', input:'시간 트리거 (수업 종료 시각, +7일, +30일)', output:'pending→absent 자동 (+7일), 잠금(+30일)', note:'마감 버튼 제거. 운영자는 정정만 수행', pri:'P1', phase:1, status:'todo' },
     { id:'A4-03', screen:'A4', screenName:'출석상태', group:'정책', feature:'수료 처리', desc:'완료 회차 75%+ 출석자 대상. completionCandidates → completedStudents Set', input:'수료 처리 버튼', output:'completedStudents Set 업데이트', note:'2026-04-28 Phase 2 이월 결정', pri:'P1', phase:2, status:'phase2' },
 
     /* ── A2 Phase 2: 코스 빌더 추가 기능 ── */
@@ -139,7 +139,7 @@
     { id:'A2-20', screen:'A2', screenName:'코스 빌더', group:'알림', feature:'알림 채널 설정', desc:'이메일 vs 앱 푸시 선택. 수강 확정·D-day 리마인더·수료 완료 알림 자동 발송 채널 설정', input:'라디오 선택', output:'notifyChannel state', note:'채널 미결정 시 오픈 불가', pri:'P1', phase:2, status:'phase2' },
 
     /* ── A3 Phase 2: 수강·출석 관리 추가 기능 ── */
-    { id:'A3-21', screen:'A3', screenName:'수강관리', group:'수료', feature:'수료 처리 버튼', desc:'전 회차 마감 후 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성. 취소 불가', input:'"수료 처리" 버튼 클릭', output:'completedStudents Set 확정', note:'2026-04-28 Phase 2 이월', pri:'P1', phase:2, status:'phase2' },
+    { id:'A3-21', screen:'A3', screenName:'수강관리', group:'수료', feature:'수료 처리 버튼', desc:'전 회차 종료 후 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성. 취소 불가', input:'"수료 처리" 버튼 클릭', output:'completedStudents Set 확정', note:'2026-04-28 Phase 2 이월. 회차 종료는 수업 종료 시각 자동', pri:'P1', phase:2, status:'phase2' },
     { id:'A3-22', screen:'A3', screenName:'수강관리', group:'출석', feature:'공결(사전결석) 제출·승인', desc:'학습자 사전 결석 신청 → 담당자 승인 → absent 자동 처리 또는 별도 공결 상태 표시', input:'학습자 신청 + 담당자 승인', output:'공결 상태 반영', note:'', pri:'P1', phase:2, status:'phase2' },
     { id:'A3-23', screen:'A3', screenName:'수강관리', group:'출석', feature:'출석 정정 감사 로그', desc:'출석 상태 변경 시 사유 입력 필수 + 변경 이력(Audit Log) 자동 기록. Phase 1은 무제한 정정만 허용', input:'상태 변경 + 사유 입력', output:'auditLog 배열 추가', note:'Phase 1에서는 사유/로그 없음', pri:'P1', phase:2, status:'phase2' },
     { id:'A3-24', screen:'A3', screenName:'수강관리', group:'출석', feature:'출석 일괄 정정 UI', desc:'복수 수강생 체크박스 선택 → 상태 일괄 변경. 개별 드롭다운 대신 멀티 선택 지원', input:'체크박스 다중 선택 + 상태 선택', output:'selectedRows 일괄 상태 변경', note:'', pri:'P2', phase:2, status:'phase2' },
