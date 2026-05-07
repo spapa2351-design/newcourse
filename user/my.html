@@ -472,7 +472,7 @@
   </div>
 
   <!-- ════ 메인 탭 ════ -->
-  <div class="main-tabs">
+  <div class="main-tabs" data-feature-id="U4-01">
     <button class="main-tab" onclick="selectTab(this)">코스</button>
     <button class="main-tab" onclick="selectTab(this)">PLUS 코스</button>
     <button class="main-tab" onclick="selectTab(this)">찜한 코스</button>
@@ -611,7 +611,7 @@
         </div>
 
         <!-- 카드 1: 진행중 코스 -->
-        <div class="course-card" onclick="location.href='course-enrolled.html'">
+        <div class="course-card" data-feature-id="U4-02" onclick="location.href='course-enrolled.html'">
           <div class="card-top">
             <div class="card-thumb" style="background: linear-gradient(135deg, #5569ff, #7B8BFF); color: #fff;">📋</div>
             <div class="card-info">
@@ -623,7 +623,7 @@
               <div class="card-sub">김민준 · 총 5회차</div>
             </div>
           </div>
-          <div class="attend-bar-wrap">
+          <div class="attend-bar-wrap" data-feature-id="U4-03">
             <div class="attend-label">
               <span class="label">출석률 (2/5회차 완료)</span>
               <span class="val">100%</span>
@@ -895,5 +895,6 @@ function showDemoToast(msg, color) {
 })();
 </script>
 
+<script src="../admin/feature-highlight.js"></script>
 </body>
 </html>

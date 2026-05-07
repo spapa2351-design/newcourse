@@ -172,7 +172,8 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · 2026-04-28</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v1.2 · 2026-05-07</span>
+  <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
 <script>
@@ -1430,7 +1431,7 @@ function closeMobileSidebar() {
       </table>
     </div>
     <div class="callout callout-green mt-2">
-      <strong>운영 결론</strong> — 우리 회사 1년 코스 라인업 20개 중 <strong>16개는 Phase 1으로 완전 정식 운영</strong>. 4개는 사전 조건·수동·워크어라운드로 보완. Phase 1 개발 완료 시점부터 즉시 시즌 운영 가능.
+      <strong>운영 결론</strong> — 우리 회사 1년 코스 라인업 20개 중 <strong>16개는 Phase 1 범위에서 정식 운영 가능</strong>. 4개는 사전 조건·수동·워크어라운드로 보완.
     </div>
   </div>
 </div>
@@ -1442,7 +1443,7 @@ function closeMobileSidebar() {
 <div id="page-case-phase1-matrix" class="page">
   <div class="page-tag">운영 케이스 Phase 1</div>
   <div class="page-title">Phase 1 실전 운영 매트릭스</div>
-  <div class="page-desc">Phase 1 개발이 완료됐을 때 <strong>실제로 운영팀이 내일부터 돌릴 수 있는 코스 케이스</strong>와 그 안에서 마주칠 현실 한계를 한 페이지로 정리합니다. 코스 개설부터 회차 종료까지 한 사이클이 끊김 없이 도는 케이스만 "정식 운영 가능"으로 분류했습니다.</div>
+  <div class="page-desc">Phase 1 범위에서 <strong>실제로 운영팀이 돌릴 수 있는 코스 케이스</strong>와 그 안에서 마주칠 현실 한계를 한 페이지로 정리합니다. 코스 개설부터 회차 종료까지 한 사이클이 끊김 없이 도는 케이스만 "정식 운영 가능"으로 분류했습니다.</div>
 
   <div class="callout callout-blue">
     <strong>분류 기준</strong> — ① 코스 개설 → ② 수강생 확정 → ③ QR 출석 → ④ 회차 종료 (시간 기반 자동) → ⑤ 출석률 통계 확인까지 시스템 안에서 끝나면 <strong>정식 가능</strong>, 중간에 엑셀·수작업이 끼면 <strong>부분 가능</strong> 또는 <strong>워크어라운드</strong>로 표기.
@@ -1515,7 +1516,7 @@ function closeMobileSidebar() {
       </table>
     </div>
     <div class="callout callout-green mt-2">
-      <strong>요약</strong>: Phase 1 개발 완료시 6개 유형 중 <strong>5개는 시스템 안에서 끝까지 정식 운영 가능</strong>. 임원 단발만 자율수강 + 외부 안내 워크어라운드.
+      <strong>요약</strong>: Phase 1 범위에서 6개 유형 중 <strong>5개는 시스템 안에서 끝까지 정식 운영 가능</strong>. 임원 단발만 자율수강 + 외부 안내 워크어라운드.
     </div>
   </div>
 
@@ -1620,7 +1621,7 @@ function closeMobileSidebar() {
         <tbody>
           <tr><td>블렌디드 코스 (온라인+오프라인 혼합)</td><td>온라인·오프라인 빌더가 분리 운영. 한 코스 안에 슬롯 단위 혼합 미설계</td><td><span class="b b-violet">Phase 3</span></td></tr>
           <tr><td>수료증 발급·이력 관리</td><td>출석률 통계는 있으나 수료 처리 버튼·수료증 PDF 발급 미구현</td><td><span class="b b-violet">Phase 2</span></td></tr>
-          <tr><td>커리큘럼별 대상자 분기</td><td>대상자 설정은 코스 레벨만. 슬롯 단위 "이건 개발팀만" 분기 없음 (2026-04-30 QA 참조)</td><td><span class="b b-violet">Phase 3 (블렌디드)</span></td></tr>
+          <tr><td>커리큘럼별 대상자 분기</td><td>대상자 설정은 코스 레벨만. 슬롯 단위 "이건 개발팀만" 분기 없음</td><td><span class="b b-violet">Phase 3 (블렌디드)</span></td></tr>
           <tr><td>학습 경로 (Learning Path)</td><td>온라인 그룹별 이수 조건·역할 기반 필수 콘텐츠 미설계 영역</td><td><span class="b b-slate">미정</span></td></tr>
           <tr><td>대기열·취소 시 자동 승격</td><td>정원 마감 시 단순 마감 배지. 대기 등록·자동 승격 흐름 없음</td><td><span class="b b-slate">미정</span></td></tr>
           <tr><td>유료 결제·환불</td><td>결제 모듈 자체 미설계</td><td><span class="b b-slate">미정</span></td></tr>
@@ -1973,12 +1974,12 @@ function closeMobileSidebar() {
 
 
 <!-- ══════════════════════════════════════════
-     2. 회차 종료 — 정책 (시간 기반 자동, 2026-05-06 단순화)
+     2. 회차 종료 — 정책 (시간 기반 자동)
 ══════════════════════════════════════════ -->
 <div id="page-close-flow" class="page">
   <div class="page-tag">2. 회차 종료</div>
   <div class="page-title">회차 종료 정책</div>
-  <div class="page-desc"><strong>2026-05-06 정책 단순화</strong> — "마감"이라는 별도 사건과 버튼을 제거합니다. <strong>회차 종료 = 수업 종료 시각이 지나는 것</strong>. 운영자가 따로 닫는 행위는 없어요. 미확인 인원은 운영자가 직접 정리합니다.</div>
+  <div class="page-desc"><strong>회차 종료 = 수업 종료 시각이 지나는 것.</strong> 별도 "마감" 이벤트나 버튼이 없습니다. 운영자가 따로 닫는 행위는 없어요. 미확인 인원은 운영자가 직접 정리합니다.</div>
 
   <div class="guide-section">
     <div class="section-title">한 줄 정리 <span class="section-tag">필독</span></div>
@@ -2039,7 +2040,7 @@ function closeMobileSidebar() {
         <div class="step-num">!</div>
         <div class="step-body">
           <div class="step-action">"마감 버튼"은 더 이상 없어요</div>
-          <div class="step-note">2026-05-06 정책 단순화로 마감 개념 제거. 회차는 수업 종료 시각에 자동 종료됩니다.</div>
+          <div class="step-note">마감 개념 없음. 회차는 수업 종료 시각에 자동 종료됩니다.</div>
         </div>
       </div>
     </div>
@@ -2047,7 +2048,7 @@ function closeMobileSidebar() {
 
   <div class="guide-section">
     <div class="section-title">왜 마감 개념을 제거했나요?</div>
-    <p class="text-sm text-slate-600 mt-2 mb-3">기획·운영팀 4인 브레인스토밍 결과 — "마감"이 묶고 있던 4가지 효과가 모두 시간 트리거로 자동화 가능했어요.</p>
+    <p class="text-sm text-slate-600 mt-2 mb-3">"마감"이 묶고 있던 4가지 효과가 모두 시간 트리거로 자동화 가능합니다.</p>
     <div class="overflow-x-auto mt-3">
       <table class="xl-table">
         <thead>
@@ -2126,7 +2127,7 @@ function closeMobileSidebar() {
           <tr><td>출석 → 결석 수동 변경</td><td><span class="b b-green">가능</span></td><td><span class="b b-green">가능</span></td><td>관리자 무제한 정정 정책</td></tr>
           <tr><td>"미확인 일괄 처리" 도구</td><td><span class="b b-green">가능</span></td><td><span class="b b-green">가능</span></td><td>전원 출석/전원 결석/개별 처리</td></tr>
           <tr><td>QR 자동 스캔 (라이브모드)</td><td><span class="b b-green">활성</span></td><td><span class="b b-slate">비활성</span></td><td>수업 시간 동안만 활성</td></tr>
-          <tr><td>"마감 버튼" 사용</td><td>—</td><td>—</td><td><span class="b b-slate">버튼 자체 없음</span> (2026-05-06 정책 변경 — 시간 기반 자동)</td></tr>
+          <tr><td>"마감 버튼" 사용</td><td>—</td><td>—</td><td><span class="b b-slate">버튼 자체 없음</span> (시간 기반 자동 종료)</td></tr>
           <tr><td>학습자 푸시·이메일 알림</td><td colspan="2" style="text-align:center"><span class="b b-green">즉시성 알림만</span> (Phase 1)</td><td>출석 처리됨 / 출석률 갱신만. 결석 통보·HR 연동은 Phase 2</td></tr>
         </tbody>
       </table>
@@ -2150,7 +2151,7 @@ function closeMobileSidebar() {
 
 
 <!-- ══════════════════════════════════════════
-     2. 회차 마감 — 회차차감 Q&A (2026-05-06 추가)
+     2. 회차 종료 — Q&A
 ══════════════════════════════════════════ -->
 <div id="page-close-deduction" class="page">
   <div class="page-tag">2. 회차 종료</div>
@@ -2161,7 +2162,7 @@ function closeMobileSidebar() {
     <div class="section-title">한 줄 정리 <span class="section-tag">필독</span></div>
     <div class="callout callout-blue mt-2">
       <strong>회차 종료 = 수업 종료 시각이 지나는 것.</strong><br>
-      별도의 "마감 버튼" 없이 시간 기반으로 자동 종료됩니다 (2026-05-06 정책 단순화). 그 시점부터 출석률 계산에 들어가고, 미확인 인원은 운영자가 직접 정리합니다.
+      별도의 "마감 버튼" 없이 시간 기반으로 자동 종료됩니다. 그 시점부터 출석률 계산에 들어가고, 미확인 인원은 운영자가 직접 정리합니다.
     </div>
   </div>
 
@@ -2219,7 +2220,7 @@ function closeMobileSidebar() {
         <div class="step-num">!</div>
         <div class="step-body">
           <div class="step-action">"마감 버튼"이 사라졌으니 동시 클릭 충돌 자체가 없어졌어요</div>
-          <div class="step-note">2026-05-06 정책 단순화로 회차는 수업 종료 시각에 자동 종료됩니다. 운영자가 따로 누를 버튼이 없어요.</div>
+          <div class="step-note">회차는 수업 종료 시각에 자동 종료됩니다. 운영자가 따로 누를 버튼이 없어요.</div>
         </div>
       </div>
     </div>
@@ -2260,13 +2261,13 @@ function closeMobileSidebar() {
   </div>
 
   <div class="guide-section">
-    <div class="section-title">Q8. "수업이 아예 못 열린 경우엔요? (휴강)" <span class="section-tag">Phase 2</span></div>
+    <div class="section-title">Q8. "수업이 아예 못 열린 경우엔요? (휴강)" <span class="section-tag">Phase 3</span></div>
     <p class="text-sm text-slate-600 mt-2 mb-3">강사가 갑자기 못 오거나, 강의장 사고나 천재지변으로 수업이 안 열린 경우. <strong>Phase 1에서는 운영자가 직접 처리</strong>(전원 출석 수동 처리 등)하지만, 사용자 클레임이 자주 나오는 영역이라 Phase 2부터 정식 상태로 들어옵니다.</p>
     <div class="overflow-x-auto mt-3">
       <table class="xl-table">
         <thead><tr><th style="width:200px">항목</th><th>처리</th></tr></thead>
         <tbody>
-          <tr><td>회차 상태</td><td>예정 / 진행중 / 종료 / <strong>휴강</strong> 4종 (Phase 2 추가)</td></tr>
+          <tr><td>회차 상태</td><td>예정 / 진행중 / 종료 / <strong>휴강</strong> 4종 (Phase 3 추가)</td></tr>
           <tr><td>출석부 칸 처리</td><td>휴강된 수업은 <strong>출석부에서 그 칸을 빼버림</strong>. 표기: "4번 수업 중 3번으로 점수 계산"</td></tr>
           <tr><td>처리 권한</td><td>관리자만, 사유 입력 필수</td></tr>
           <tr><td>법정의무교육 (보강 강제 ON)</td><td>휴강 시 <strong>보강 수업 추가 필수</strong>. 보강 전엔 수료 처리 불가</td></tr>
@@ -2286,11 +2287,11 @@ function closeMobileSidebar() {
       <table class="xl-table">
         <thead><tr><th style="width:160px">용어</th><th>의미</th><th>사용 안내</th></tr></thead>
         <tbody>
-          <tr><td><strong>회차 종료</strong></td><td>수업 종료 시각이 지나는 것. 시간 기반 자동.</td><td>운영자·spec 표준 용어 (2026-05-06 변경)</td></tr>
+          <tr><td><strong>회차 종료</strong></td><td>수업 종료 시각이 지나는 것. 시간 기반 자동.</td><td>운영자·spec 표준 용어</td></tr>
           <tr><td><span class="line-through text-slate-400">회차 마감</span></td><td>옛 용어 — 더 이상 사용 안 함</td><td>"회차 종료"로 대체 (마감 개념 제거)</td></tr>
           <tr><td>회차 차감</td><td>학습자 표현 ("한 회차 까이다")</td><td>학습자 응대 시 OK. 내부 문서엔 "종료"로</td></tr>
           <tr><td>출석부 칸</td><td>출석률 계산할 때 들어가는 회차 1개. "4번 수업 = 4칸"</td><td>고객사 응대 시 "분모/분자" 대신 사용</td></tr>
-          <tr><td><strong>휴강</strong></td><td>수업 자체가 못 열린 상태 (Phase 2)</td><td>"회차 취소"라고 부르지 마세요 (신청 취소와 헷갈림)</td></tr>
+          <tr><td><strong>휴강</strong></td><td>수업 자체가 못 열린 상태 (Phase 3 이월)</td><td>"회차 취소"라고 부르지 마세요 (신청 취소와 헷갈림)</td></tr>
           <tr><td>회차 취소</td><td><span class="b b-red">사용 금지</span></td><td>학습자에게도 운영자에게도 사용하지 마세요</td></tr>
         </tbody>
       </table>
@@ -2744,7 +2745,7 @@ function closeMobileSidebar() {
 <div id="page-att-rate-policy" class="page">
   <div class="page-tag">1. 출석 처리</div>
   <div class="page-title">출석률 계산 정책</div>
-  <div class="page-desc">학습자 출석률을 어떻게 계산하느냐를 정한 핵심 정책입니다. 진행 중에 회차가 추가되거나 삭제돼도 학습자가 부당하게 영향받지 않도록 만들어졌어요. 2026-05-06 기획·개발 합의 결과예요.</div>
+  <div class="page-desc">학습자 출석률을 어떻게 계산하느냐를 정한 핵심 정책입니다. 진행 중에 회차가 추가되거나 삭제돼도 학습자가 부당하게 영향받지 않도록 설계됐습니다.</div>
 
   <div class="guide-section">
     <div class="section-title">한 줄 정책 <span class="section-tag">핵심</span></div>
@@ -2837,7 +2838,7 @@ function closeMobileSidebar() {
       </table>
     </div>
     <div class="callout callout-amber mt-2">
-      <strong>2026-05-06 정책 수정</strong> — 별도 "현재까지" 라벨은 UI 구현 부담 + 표기 중복 사유로 제거됐어요. 표기 형식 + 차수 상태 배지 조합이 같은 메시지를 전달합니다.
+      별도 "현재까지" 라벨은 사용하지 않습니다 — 표기 형식 + 차수 상태 배지 조합이 같은 메시지를 전달합니다.
     </div>
   </div>
 
@@ -3155,7 +3156,7 @@ function closeMobileSidebar() {
 <div id="page-capacity-policy" class="page">
   <div class="page-tag">4. 수강신청 관리</div>
   <div class="page-title">정원 변경 정책</div>
-  <div class="page-desc">차수 정원을 줄일 때 현재 등록자보다 적게 만들면 어떻게 처리할지 정한 정책입니다. 2026-05-06 기획·개발 합의 결과예요.</div>
+  <div class="page-desc">차수 정원을 줄일 때 현재 등록자보다 적게 만들면 어떻게 처리할지 정한 정책입니다.</div>
 
   <div class="guide-section">
     <div class="section-title">정책 한 줄 <span class="section-tag">핵심</span></div>

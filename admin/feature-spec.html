@@ -41,7 +41,7 @@
 <body class="bg-[#f2f5f9] text-slate-800 antialiased">
 <div id="root"></div>
 <script type="text/babel" data-type="module">
-  import React, { useState, useMemo } from 'https://esm.sh/react@18.2.0';
+  import React, { useState, useMemo, useRef, useEffect } from 'https://esm.sh/react@18.2.0';
   import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
   import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
 
@@ -66,7 +66,8 @@
   const PHASE = {
     1: 'bg-indigo-100 text-indigo-700',
     2: 'bg-violet-100 text-violet-700',
-    3: 'bg-rose-100   text-rose-700',
+    3: 'bg-amber-100  text-amber-700',
+    4: 'bg-rose-100   text-rose-700',
   };
 
   /* ══════════════════════════════════════════════════════════════════
@@ -150,6 +151,23 @@
     { id:'A3-29', screen:'A3', screenName:'수강관리', group:'수강생', feature:'수강생 삭제', desc:'수강생 개별 또는 일괄 삭제. 삭제 시 출석 데이터 처리 방침 선택(보존/삭제)', input:'삭제 버튼 + 확인 모달', output:'LEARNERS 배열에서 제거', note:'복원 불가', pri:'P3', phase:2, status:'phase2' },
     { id:'A3-30', screen:'A3', screenName:'수강관리', group:'수강생', feature:'차수 직접 변경', desc:'수강생 차수 변경 — 현재는 기존 취소 후 재신청으로 처리. 직접 변경 기능으로 간소화', input:'차수 변경 버튼', output:'enrollment 차수 업데이트', note:'현재: 취소+재신청 2단계', pri:'P2', phase:2, status:'phase2' },
     { id:'A3-31', screen:'A3', screenName:'수강관리', group:'수료', feature:'수료 취소 기능', desc:'잘못 처리된 수료 확정 취소. 수료 상태 → 미수료 롤백. 감사 로그 필수', input:'수료 취소 버튼', output:'completedStudents에서 제거', note:'Phase 1 미지원', pri:'P2', phase:2, status:'phase2' },
+
+    /* ── Phase 3: 도메인 확장 (온라인·모바일·다국어) ── */
+    { id:'A1-04', screen:'A1', screenName:'코스 목록', group:'다국어', feature:'다국어 코스명 등록', desc:'국문/영문 동시 등록. 학습자 언어 설정에 따라 자동 노출', input:'국문/영문 입력', output:'i18n 데이터 저장', note:'', pri:'P3', phase:3, status:'phase2' },
+    { id:'A2-30', screen:'A2', screenName:'코스 빌더', group:'온라인 코스', feature:'영상 강의 등록', desc:'온라인 코스용 영상 업로드/스트리밍 + 진도율 추적', input:'영상 업로드', output:'video slot 생성', note:'블렌디드 코스 기반', pri:'P1', phase:3, status:'phase2' },
+    { id:'A2-31', screen:'A2', screenName:'코스 빌더', group:'온라인 코스', feature:'퀴즈·시험 빌더', desc:'객관식/주관식 문항 생성, 자동 채점, 패스 기준', input:'문항 입력', output:'exam slot 생성', note:'시험 부정 방지 Phase 4 연계', pri:'P1', phase:3, status:'phase2' },
+    { id:'A2-32', screen:'A2', screenName:'코스 빌더', group:'수료 조건', feature:'영상/시험/설문 슬롯 추가', desc:'completionRules에 video/exam/survey 타입 추가. 복합 수료 조건', input:'슬롯 타입 선택', output:'completionRules 확장', note:'Phase 1 스키마 예약 활용', pri:'P1', phase:3, status:'phase2' },
+    { id:'A3-32', screen:'A3', screenName:'수강관리', group:'본인 인증', feature:'본인 인증 (카메라/지문)', desc:'시험 응시 시 본인 확인 모달. 카메라 캡처 또는 지문 인증', input:'생체 인증', output:'auth 토큰', note:'시험 부정 방지', pri:'P2', phase:3, status:'phase2' },
+    { id:'A3-33', screen:'A3', screenName:'수강관리', group:'외부 연동', feature:'외부 LMS 연동 (SCORM/xAPI)', desc:'외부 LMS 콘텐츠 임포트 + 학습 기록 송수신 (SCORM 1.2/xAPI)', input:'SCORM 패키지 업로드', output:'외부 콘텐츠 통합', note:'대형 고객사 요청 시', pri:'P3', phase:3, status:'phase2' },
+    { id:'A4-04', screen:'A4', screenName:'출석상태', group:'휴강', feature:'회차 휴강 처리', desc:'4번째 회차 상태 "휴강" 추가. 휴강 회차는 출석률 분모에서 제외. "보강 강제" 코스 토글 + 사유 입력 + audit log + 자동 재배정 (날짜선택형)', input:'운영자 휴강 처리 + 사유', output:'session.status="cancelled" + 분모 제외', note:'2026-05-07 결정 — 부수 기능 묶음(보강 강제·자동 알림·재배정·audit log) 공수 부담으로 Phase 3 이월', pri:'P2', phase:3, status:'phase2' },
+
+    /* ── Phase 4: 데이터·분석·인텔리전스 ── */
+    { id:'A3-40', screen:'A3', screenName:'수강관리', group:'분석', feature:'출석률·수료율 예측 모델', desc:'머신러닝 기반 학습자별 수료 가능성 예측 — 조기 경보. 12개월 누적 데이터 후 가능', input:'학습 이력 데이터', output:'risk score', note:'데이터팀 1명 추가 필요', pri:'P3', phase:4, status:'phase2' },
+    { id:'A3-41', screen:'A3', screenName:'수강관리', group:'분석', feature:'학습자 페르소나 자동 분류', desc:'AI 클러스터링 기반 학습자 그룹 분류 (성실형/지각형/장기 미참여 등)', input:'학습 이력 데이터', output:'persona label', note:'', pri:'P3', phase:4, status:'phase2' },
+    { id:'A3-42', screen:'A3', screenName:'수강관리', group:'분석', feature:'AI 코스 추천 엔진', desc:'학습 이력 기반 다음 코스 추천. 부서·직급·과거 수강 패턴 활용', input:'학습자 ID', output:'추천 코스 리스트', note:'', pri:'P3', phase:4, status:'phase2' },
+    { id:'A3-43', screen:'A3', screenName:'수강관리', group:'경영', feature:'경영진 ROI 대시보드', desc:'1인당 교육비·수료율·효과성 KPI. 경영진 전용 뷰', input:'-', output:'ROI 차트', note:'재무 데이터 연동 필요', pri:'P3', phase:4, status:'phase2' },
+    { id:'A3-44', screen:'A3', screenName:'수강관리', group:'감사', feature:'법정의무교육 감사 리포트', desc:'법정의무교육 이수 현황 자동 리포트 — 감사 대응. PDF/엑셀 출력', input:'기간/코스 선택', output:'리포트 PDF', note:'', pri:'P2', phase:4, status:'phase2' },
+    { id:'A3-45', screen:'A3', screenName:'수강관리', group:'분석', feature:'수료 후 학습자 추적', desc:'수료 후 학습자 행동 추적 (재수강·후속 코스·평가). 효과성 측정', input:'-', output:'추적 데이터', note:'', pri:'P3', phase:4, status:'phase2' },
   ];
 
   /* ══════════════════════════════════════════════════════════════════
@@ -158,8 +176,7 @@
   const USER_ROWS = [
     /* ── U1. 홈 ── */
     { id:'U1-01', screen:'U1', screenName:'홈', group:'배너', feature:'히어로 배너', desc:'메인 추천 코스 또는 공지 배너 슬라이드. CTA 버튼 → 코스 상세', input:'-', output:'배너 렌더', note:'', pri:'P2', phase:1, status:'todo' },
-    { id:'U1-02', screen:'U1', screenName:'홈', group:'추천', feature:'추천 코스 섹션', desc:'카테고리별/최신 코스 카드 리스트. 썸네일, 코스명, 강사, 차수 수, D-day 뱃지', input:'-', output:'코스 카드 렌더', note:'', pri:'P2', phase:1, status:'todo' },
-    { id:'U1-03', screen:'U1', screenName:'홈', group:'진행중', feature:'내 진행중 코스', desc:'로그인 시 현재 수강 중인 코스 빠른 접근. 진행률 프로그레스 바', input:'-', output:'MY 코스 필터', note:'', pri:'P1', phase:1, status:'todo' },
+    { id:'U1-02', screen:'U1', screenName:'홈', group:'오프라인', feature:'오프라인 코스 섹션', desc:'홈 화면에 오프라인 코스 카드 리스트 노출. 썸네일, 코스명, 강사, 차수 수, D-day 뱃지', input:'-', output:'오프라인 코스 카드 렌더', note:'2026-05-07 추천 → 오프라인으로 변경', pri:'P2', phase:1, status:'todo' },
 
     /* ── U2. 코스 목록/검색 ── */
     { id:'U2-01', screen:'U2', screenName:'코스 목록', group:'필터', feature:'카테고리 필터', desc:'상단 탭 또는 사이드 필터로 직무역량/공통/IT 등 카테고리 전환', input:'탭/버튼 클릭', output:'카테고리 필터 적용', note:'', pri:'P1', phase:1, status:'todo' },
@@ -191,6 +208,13 @@
     /* ── U4 Phase 2: MY학습 추가 기능 ── */
     { id:'U4-07', screen:'U4', screenName:'MY학습', group:'공결', feature:'공결(사전결석) 신청', desc:'학습자가 교육일 전에 사전 결석 신청 제출. 신청 사유 입력 + 첨부파일. 담당자 승인 대기 표시', input:'공결 신청 버튼', output:'공결 신청 데이터 생성', note:'담당자 승인 플로우와 연동(A3-22)', pri:'P1', phase:2, status:'phase2' },
     { id:'U4-08', screen:'U4', screenName:'MY학습', group:'알림', feature:'알림 수신 설정', desc:'이메일/앱 푸시 알림 ON/OFF. 수강 확정·D-day 리마인더·수료 완료 알림 개인 수신 설정', input:'토글 ON/OFF', output:'notifyPref 저장', note:'알림 채널 설정(A2-20) 이후 구현', pri:'P2', phase:2, status:'phase2' },
+
+    /* ── Phase 3: 도메인 확장 (학습자 측) ── */
+    { id:'U2-10', screen:'U2', screenName:'코스 목록', group:'온라인', feature:'온라인 코스 목록 표시', desc:'온라인/블렌디드 코스 카드 표시 + 진도율 배지', input:'-', output:'온라인 코스 카드 렌더', note:'', pri:'P1', phase:3, status:'phase2' },
+    { id:'U3-10', screen:'U3', screenName:'코스 상세', group:'온라인', feature:'영상 강의 재생', desc:'온라인 코스 영상 플레이어 + 진도율 자동 추적 + 이수 시간 누적', input:'재생 버튼', output:'video progress 저장', note:'', pri:'P1', phase:3, status:'phase2' },
+    { id:'U3-11', screen:'U3', screenName:'코스 상세', group:'시험', feature:'퀴즈·시험 응시', desc:'객관식/주관식 응시 → 자동 채점 → 결과 표시', input:'답안 제출', output:'점수 + 패스 여부', note:'본인 인증 연계', pri:'P1', phase:3, status:'phase2' },
+    { id:'U6-01', screen:'U6', screenName:'모바일 앱', group:'네이티브', feature:'iOS/Android 네이티브 앱', desc:'React Native 또는 Flutter 기반 네이티브 앱. 푸시 알림 (FCM/APNS) 인프라 포함', input:'앱 설치/로그인', output:'학습자 앱 전체 기능', note:'Phase 2 알림 채널과 연계', pri:'P1', phase:3, status:'phase2' },
+    { id:'U6-02', screen:'U6', screenName:'모바일 앱', group:'다국어', feature:'다국어 UI (국·영문)', desc:'학습자 앱 UI 다국어 지원. 기기 언어 설정 자동 감지', input:'언어 토글', output:'i18n 적용', note:'', pri:'P2', phase:3, status:'phase2' },
   ];
 
   /* ── 화면 그룹 색상 ── */
@@ -204,6 +228,74 @@
     U3: 'bg-orange-100 text-orange-700',
     U4: 'bg-teal-100 text-teal-700',
     U5: 'bg-cyan-100 text-cyan-700',
+  };
+
+  /* ── 화면 ID → 프로토타입 URL 매핑 ── */
+  const SCREEN_URL_MAP = {
+    /* 관리자단 (admin/) */
+    A1: { url: 'index.html',                 label: '코스 목록 (index.html)' },
+    A2: { url: 'offline-builder.html',       label: '코스 빌더 (offline-builder.html)' },
+    A3: { url: 'offline-course-view.html',   label: '수강관리 (offline-course-view.html)' },
+    A4: { url: 'offline-course-view.html',   label: '출석 관리 (offline-course-view.html)' },
+    /* 사용자단 (user/) — 학습자 앱 */
+    U1: { url: '../user/home.html',           label: '홈 (user/home.html)' },
+    U2: { url: '../user/course-list.html',    label: '코스 목록 (user/course-list.html)' },
+    U3: { url: '../user/course-detail.html',  label: '코스 상세 (user/course-detail.html)' },
+    U4: { url: '../user/my.html',             label: 'MY 학습 (user/my.html)' },
+    /* U5 QR 출석은 학습자 앱 내장 (별도 화면 없음) */
+  };
+
+  /* ── 기능 ID → CSS selector 매핑 (data-feature-id 기반) ──
+     admin 페이지에 [data-feature-id="..."] 속성을 박아 사용.
+     매칭 안 되면 조용히 무시. */
+  const FEATURE_SELECTORS = {
+    /* admin/index.html — A1 (코스 목록) */
+    'A1-02':   '[data-feature-id="A1-02"]',    // 코스 상태 탭
+    'A1-02a':  '[data-feature-id="A1-02a"]',   // 추가 필터 빌더
+    'A1-03':   '[data-feature-id="A1-03"]',    // 카테고리 사이드바
+    'A1-04':   '[data-feature-id="A1-04"]',    // 코스 검색
+    'A1-05':   '[data-feature-id="A1-05"]',    // 코스 테이블 행
+    'A1-06':   '[data-feature-id="A1-06"]',    // D-day 배지
+    'A1-07':   '[data-feature-id="A1-07"]',    // 행 확장
+    'A1-08':   '[data-feature-id="A1-08"]',    // 수강관리 버튼
+    'A1-09':   '[data-feature-id="A1-09"]',    // 공개예약 코스 표시
+    'A1-10':   '[data-feature-id="A1-10"]',    // 코스 등록 버튼
+    'A1-11':   '[data-feature-id="A1-11"]',    // 코스 삭제 확인 모달
+    /* admin/offline-builder.html — A2 (코스 빌더) */
+    'A2-01':   '[data-feature-id="A2-01"]',    // 코스 기본정보
+    'A2-02':   '[data-feature-id="A2-02"]',    // 코스 상단 이미지
+    'A2-03':   '[data-feature-id="A2-03"]',    // 장소 설정
+    'A2-04':   '[data-feature-id="A2-04"]',    // 수강신청 기간
+    'A2-05':   '[data-feature-id="A2-05"]',    // 수강 등록 방식
+    'A2-13':   '[data-feature-id="A2-13"]',    // 임시저장
+    'A2-14':   '[data-feature-id="A2-14"]',    // 퍼블리싱
+    'A2-16':   '[data-feature-id="A2-16"]',    // 미리보기
+    /* admin/offline-course-view.html — A3·A4 (수강관리) */
+    'A3-01':   '[data-feature-id="A3-01"]',    // 코스 정보 사이드바
+    'A3-03':   '[data-feature-id="A3-03"]',    // 수강생 등록 버튼
+    'A3-04':   '[data-feature-id="A3-04"]',    // 라이브 출석 버튼
+    'A3-05':   '[data-feature-id="A3-05"]',    // 오늘 회차 배너
+    'A3-09':   '[data-feature-id="A3-09"]',    // 수강 탭
+    'A3-10':   '[data-feature-id="A3-10"]',    // 수강생 검색
+    'A3-14':   '[data-feature-id="A3-14"]',    // 출석 탭
+    'A4-02':   '[data-feature-id="A4-02"]',    // QR 라이브 모드 (회차 자동 종료)
+
+    /* user/home.html — U1 (홈) */
+    'U1-02':   '[data-feature-id="U1-02"]',    // 오프라인 코스 섹션
+    /* user/course-list.html — U2 (코스 목록) */
+    'U2-01':   '[data-feature-id="U2-01"]',    // 카테고리 필터
+    'U2-03':   '[data-feature-id="U2-03"]',    // 코스 검색
+    'U2-04':   '[data-feature-id="U2-04"]',    // 코스 카드
+    /* user/course-detail.html — U3 (코스 상세) */
+    'U3-01':   '[data-feature-id="U3-01"]',    // 코스 헤더 (커버)
+    'U3-02':   '[data-feature-id="U3-02"]',    // 자율 수강 신청 버튼
+    'U3-03':   '[data-feature-id="U3-03"]',    // 관리자 배정 안내
+    'U3-04':   '[data-feature-id="U3-04"]',    // 신청 기간 표시
+    'U3-05':   '[data-feature-id="U3-05"]',    // 커리큘럼 목록
+    /* user/my.html — U4 (MY학습) */
+    'U4-01':   '[data-feature-id="U4-01"]',    // 진행중/완료/신청내역 탭
+    'U4-02':   '[data-feature-id="U4-02"]',    // MY 코스 카드
+    'U4-03':   '[data-feature-id="U4-03"]',    // 출석 내역 확인
   };
 
   /* ══ 사이드바 메뉴 ══ */
@@ -245,6 +337,29 @@
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterScreen, setFilterScreen] = useState('all');
     const [search, setSearch] = useState('');
+    /* 우측 슬라이드 패널: 프로토타입 미리보기 */
+    const [previewScreen, setPreviewScreen] = useState(null); // {screen, label, url, selector?, featureId?, featureName?}
+    const [previewFullscreen, setPreviewFullscreen] = useState(false);
+    const iframeRef = useRef(null);
+    const iframeLoadedUrlRef = useRef(null);
+
+    /* previewScreen 변경 시 iframe이 같은 URL이면 즉시 하이라이트 갱신 */
+    useEffect(() => {
+      if (!previewScreen || !iframeRef.current) return;
+      const currentUrl = previewScreen.url;
+      if (iframeLoadedUrlRef.current === currentUrl) {
+        /* 같은 페이지면 즉시 postMessage */
+        try {
+          iframeRef.current.contentWindow.postMessage({
+            type: 'feature-highlight',
+            selector: previewScreen.selector || null,
+            featureId: previewScreen.featureId,
+            featureName: previewScreen.featureName,
+          }, '*');
+        } catch (err) { console.warn('postMessage 실패', err); }
+      }
+      /* 다른 URL이면 onLoad에서 처리됨 */
+    }, [previewScreen]);
 
     const rows = side === 'admin' ? ADMIN_ROWS : USER_ROWS;
 
@@ -275,6 +390,8 @@
       todo:   rows.filter(r=>r.status==='todo').length,
       p1:     rows.filter(r=>r.phase===1).length,
       p2:     rows.filter(r=>r.phase===2).length,
+      p3:     rows.filter(r=>r.phase===3).length,
+      p4:     rows.filter(r=>r.phase===4).length,
     }), [rows]);
 
     /* 행 그룹핑 — 화면 변경 시 구분선 */
@@ -283,95 +400,24 @@
     return (
       <div className="min-h-screen flex">
 
-        {/* ══ 글로벌 좌측 사이드바 ══ */}
-        {!isEmbed && (
-          <aside className="w-[200px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0 overflow-y-auto custom-scrollbar">
-            <div className="px-4 py-4 flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4"><path d="M7 2L2 5v7h4V9h2v3h4V5L7 2z" fill="white"/></svg>
-              </div>
-              <span className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">TOUCH<br/>CLASS</span>
-            </div>
-            <div className="h-px bg-slate-100 mx-3 mb-2"/>
-            <nav className="flex-1 px-3 pb-6 space-y-0.5">
-              {SIDEBAR_MENUS.map(menu => (
-                <div key={menu.id}>
-                  <button onClick={() => menu.hasChildren && toggleSideMenu(menu.id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors ${menu.active ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    {React.createElement(menu.icon, { size: 16, className: menu.active ? 'text-indigo-600' : 'text-slate-400' })}
-                    <span className="flex-1 text-left">{menu.label}</span>
-                    {menu.badge && <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{menu.badge}</span>}
-                    {menu.hasChildren && <span className="text-slate-400">{sideExpanded.has(menu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}</span>}
-                  </button>
-                  {menu.children && sideExpanded.has(menu.id) && (
-                    <div className="ml-7 mt-0.5 space-y-0.5">
-                      {menu.children.map(sub => (
-                        <a key={sub.id} href="#" className={`block px-3 py-1.5 rounded-md text-[13px] transition-colors ${sub.active ? 'text-indigo-700 font-bold' : 'text-slate-500 hover:bg-slate-50 font-medium'}`}>{sub.label}</a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </nav>
-          </aside>
-        )}
+        {/* 글로벌 좌측 사이드바 — 2026-05-07 제거 (기능명세서는 어드민 레이아웃과 무관한 단독 페이지) */}
 
         {/* ══ 메인 영역 ══ */}
         <div className="flex-1 flex flex-col min-h-screen bg-[#f2f5f9]">
 
-          {/* ── 글로벌 탑 네비게이션 ── */}
-          {!isEmbed && (
-            <div className="h-[52px] bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0 sticky top-0 z-40">
-              <div className="flex items-center gap-3">
-                <button className="flex items-center gap-1.5 text-slate-600 text-[13px] font-semibold hover:text-slate-800 transition-colors">
-                  <Star size={14} className="text-amber-400 fill-amber-400"/> 즐겨찾기 <ChevronDown size={13} className="text-slate-400"/>
-                </button>
-                <div className="w-px h-4 bg-slate-200"/>
-                <button className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-[12px] font-bold hover:bg-indigo-100 transition-colors">
-                  <Users size={12}/> 관리자 가이드
-                </button>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors">
-                  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5"><circle cx="10" cy="10" r="8" stroke="#7c3aed" strokeWidth="1.5"/><circle cx="10" cy="10" r="3.5" fill="#7c3aed"/></svg>
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><MessageSquare size={16}/></button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Play size={15} className="ml-0.5"/></button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><BarChart2 size={16}/></button>
-                <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
-                  <Filter size={15}/>
-                  <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none px-0.5">0</span>
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Settings size={16}/></button>
-                <div className="w-px h-5 bg-slate-200 mx-1.5"/>
-                <button className="flex items-center gap-1.5 hover:bg-slate-50 pl-0.5 pr-2 py-1 rounded-lg transition-colors">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">조</div>
-                  <span className="text-[13px] font-semibold text-slate-700">조찬현</span>
-                  <ChevronDown size={13} className="text-slate-400"/>
-                </button>
-              </div>
-            </div>
-          )}
+          {/* 글로벌 탑 네비게이션 — 2026-05-07 제거 (기능명세서 단독 페이지에서 불필요한 chrome) */}
 
           {/* 페이지 서브 헤더 */}
           {!isEmbed && (
             <header className="shrink-0 px-6 py-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <a href="index.html" className="flex items-center gap-1.5 text-slate-400 hover:text-slate-700 text-[13px] font-semibold transition-colors">
-                  <ArrowLeft size={15}/> 목록으로
-                </a>
-                <div className="w-px h-5 bg-slate-200"/>
-                <div className="flex items-center gap-2">
-                  <FileSpreadsheet size={18} className="text-indigo-500"/>
-                  <h1 className="text-[16px] font-black text-slate-900">기능명세서</h1>
-                  <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.0</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet size={18} className="text-indigo-500"/>
+                <h1 className="text-[16px] font-black text-slate-900">기능명세서</h1>
+                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.2</span>
+                <span className="text-[10px] font-black text-violet-700 bg-violet-100 border border-violet-300 px-2 py-0.5 rounded-full ml-1">📍 기능 라인 SSOT</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-04-28</span>
-                <button className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                  <Download size={13}/> 다운로드
-                </button>
+                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-05-07</span>
               </div>
             </header>
           )}
@@ -421,12 +467,16 @@
                   {val:'all', label:`전체 (${rows.length})`},
                   {val:'1',   label:`Phase 1 (${rows.filter(r=>r.phase===1).length})`},
                   {val:'2',   label:`Phase 2 (${rows.filter(r=>r.phase===2).length})`},
+                  {val:'3',   label:`Phase 3 (${rows.filter(r=>r.phase===3).length})`},
+                  {val:'4',   label:`Phase 4 (${rows.filter(r=>r.phase===4).length})`},
                 ].map(({val,label})=>(
                   <button key={val} onClick={()=>{setFilterPhase(val);setFilterScreen('all');}}
                     className={`w-full text-left px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors flex items-center gap-1.5
                       ${filterPhase===val?'bg-slate-100 text-slate-800':'text-slate-500 hover:bg-slate-50'}`}>
                     {val==='1' && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"/>}
                     {val==='2' && <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0"/>}
+                    {val==='3' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"/>}
+                    {val==='4' && <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"/>}
                     {label}
                   </button>
                 ))}
@@ -469,6 +519,8 @@
                 {label:'미구현', val:stats.todo, color:'text-amber-600'},
                 {label:'Phase 1', val:stats.p1, color:'text-indigo-500'},
                 {label:'Phase 2', val:stats.p2, color:'text-violet-600'},
+                {label:'Phase 3', val:stats.p3, color:'text-amber-600'},
+                {label:'Phase 4', val:stats.p4, color:'text-rose-600'},
               ].map((s,i)=>(
                 <div key={i} className="flex items-center gap-2">
                   {i>0 && <div className="w-px h-4 bg-slate-200"/>}
@@ -503,6 +555,7 @@
                     <th className="px-3 py-3 text-center w-[50px]">Phase</th>
                     <th className="px-3 py-3 text-center w-[80px]">구현상태</th>
                     <th className="px-3 py-3 text-left w-[160px]">비고</th>
+                    <th className="px-3 py-3 text-center w-[60px]">화면</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -516,7 +569,7 @@
                       <React.Fragment key={row.id}>
                         {isNewScreen && (
                           <tr>
-                            <td colSpan={12} className="bg-slate-100 border-t-2 border-slate-300 px-3 py-1.5" style={{position:'relative',zIndex:1}}>
+                            <td colSpan={13} className="bg-slate-100 border-t-2 border-slate-300 px-3 py-1.5" style={{position:'relative',zIndex:1}}>
                               <div className="flex items-center gap-2">
                                 <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${SCREEN_COLORS[row.screen]}`}>{row.screen}</span>
                                 <span className="text-[12px] font-black text-slate-700">{row.screenName}</span>
@@ -531,7 +584,15 @@
                             <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${SCREEN_COLORS[row.screen]}`}>{row.screen}</span>
                           </td>
                           <td className="sticky-col3 border-r border-slate-100 px-3 py-2.5 text-slate-600 font-semibold" style={{background:isEven?'#fff':'#f8fafc'}}>{row.screenName}</td>
-                          <td className="sticky-col4 border-r border-slate-200 px-3 py-2.5 font-bold text-slate-800" style={{background:isEven?'#fff':'#f8fafc'}}>{row.feature}</td>
+                          <td
+                            className={`sticky-col4 border-r border-slate-200 px-3 py-2.5 font-bold text-slate-800 ${SCREEN_URL_MAP[row.screen] ? 'cursor-pointer hover:text-indigo-600 hover:bg-indigo-50/40' : ''}`}
+                            style={{background:isEven?'#fff':'#f8fafc'}}
+                            onClick={() => SCREEN_URL_MAP[row.screen] && setPreviewScreen({ screen: row.screen, ...SCREEN_URL_MAP[row.screen], featureId: row.id, featureName: row.feature, selector: FEATURE_SELECTORS[row.id] || null })}
+                            title={SCREEN_URL_MAP[row.screen] ? `${row.screen} 화면 미리보기 — 클릭` : ''}>
+                            {row.feature}
+                            {SCREEN_URL_MAP[row.screen] && <Monitor size={11} className="inline-block ml-1.5 text-slate-300 group-hover:text-indigo-500" style={{verticalAlign:'middle'}}/>}
+                            {FEATURE_SELECTORS[row.id] && <span className="inline-block ml-1.5 text-[9px] font-bold bg-indigo-500 text-white px-1.5 py-0.5 rounded-full" title="이 기능은 화면에서 위치 하이라이트 가능">📍</span>}
+                          </td>
                           <td className="px-3 py-2.5 text-slate-500">
                             <span className="bg-slate-100 px-2 py-0.5 rounded-md text-[10px] font-bold">{row.group}</span>
                           </td>
@@ -551,6 +612,18 @@
                             </span>
                           </td>
                           <td className="px-3 py-2.5 text-slate-400 wrap">{row.note}</td>
+                          <td className="px-2 py-2.5 text-center">
+                            {SCREEN_URL_MAP[row.screen] ? (
+                              <button
+                                onClick={() => setPreviewScreen({ screen: row.screen, ...SCREEN_URL_MAP[row.screen], featureId: row.id, featureName: row.feature, selector: FEATURE_SELECTORS[row.id] || null })}
+                                title={`${row.screen} 화면 미리보기${FEATURE_SELECTORS[row.id] ? ' (📍 위치 하이라이트)' : ''}`}
+                                className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-indigo-50 hover:bg-indigo-500 hover:text-white text-indigo-600 border border-indigo-200 transition-colors">
+                                <Monitor size={13}/>
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-slate-300 font-medium">—</span>
+                            )}
+                          </td>
                         </tr>
                       </React.Fragment>
                     );
@@ -564,6 +637,106 @@
           </main>
           </div>
         </div>
+
+        {/* ══ 우측 슬라이드 패널: 프로토타입 미리보기 ══ */}
+        {previewScreen && (
+          <>
+            {/* 백드롭 — 전체 영역 클릭 시 닫기 (전체화면 모드는 진하게, 일반 모드는 살짝 투명) */}
+            <div
+              onClick={() => { setPreviewScreen(null); setPreviewFullscreen(false); iframeLoadedUrlRef.current = null; }}
+              className="fixed inset-0 z-40 cursor-pointer"
+              style={{
+                background: previewFullscreen ? 'rgba(0,0,0,0.4)' : 'rgba(15,23,42,0.08)',
+                transition: 'background .2s'
+              }}
+              title="클릭해서 닫기"
+            />
+            {/* 슬라이드 패널 */}
+            <aside
+              className="fixed top-0 right-0 h-full bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col transition-[width] duration-300"
+              style={(() => {
+                const isUserScreen = previewScreen.screen && previewScreen.screen.startsWith('U');
+                if (previewFullscreen) {
+                  return { width: '100vw', minWidth: 'auto', animation: 'slideInRight .25s ease-out' };
+                }
+                if (isUserScreen) {
+                  /* 사용자단 — 모바일 프레임(390px) + 좌우 여백 */
+                  return { width: 'min(35vw, 520px)', minWidth: '440px', animation: 'slideInRight .25s ease-out' };
+                }
+                /* 관리자단 — 데스크탑 풀폭 */
+                return { width: 'calc(100vw - 480px)', minWidth: '600px', animation: 'slideInRight .25s ease-out' };
+              })()}
+            >
+              {/* 패널 헤더 */}
+              <div className="shrink-0 px-5 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${SCREEN_COLORS[previewScreen.screen]}`}>{previewScreen.screen}</span>
+                  <Monitor size={14} className="text-indigo-500 shrink-0"/>
+                  <span className="text-[14px] font-black text-slate-800 truncate">{previewScreen.label}</span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => setPreviewFullscreen(v => !v)}
+                    title={previewFullscreen ? '축소 (75% 너비)' : '전체화면 (100% 너비)'}
+                    className={`px-2.5 h-8 inline-flex items-center gap-1 rounded-md text-[11px] font-bold transition-colors ${previewFullscreen ? 'bg-indigo-500 text-white hover:bg-indigo-600' : 'text-slate-500 hover:bg-white hover:text-indigo-600 border border-slate-200'}`}>
+                    {previewFullscreen ? <><span style={{transform:'rotate(180deg)'}}>⛶</span> 축소</> : <>⛶ 전체화면</>}
+                  </button>
+                  <a
+                    href={previewScreen.url}
+                    target="_blank"
+                    rel="noopener"
+                    title="새 창으로 열기"
+                    className="w-8 h-8 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-indigo-600 transition-colors border border-slate-200">
+                    <Eye size={15}/>
+                  </a>
+                  <button
+                    onClick={() => { setPreviewScreen(null); setPreviewFullscreen(false); iframeLoadedUrlRef.current = null; }}
+                    title="닫기 (Esc)"
+                    className="w-8 h-8 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-rose-600 transition-colors text-[18px] font-bold border border-slate-200">
+                    ×
+                  </button>
+                </div>
+              </div>
+              {/* iframe — 로드 후 postMessage로 selector 하이라이트 요청 */}
+              <iframe
+                ref={iframeRef}
+                src={previewScreen.url}
+                title={previewScreen.label}
+                className="flex-1 w-full border-0 bg-white"
+                onLoad={(e) => {
+                  iframeLoadedUrlRef.current = previewScreen.url;
+                  if (previewScreen.selector) {
+                    try {
+                      e.target.contentWindow.postMessage({
+                        type: 'feature-highlight',
+                        selector: previewScreen.selector,
+                        featureId: previewScreen.featureId,
+                        featureName: previewScreen.featureName,
+                      }, '*');
+                    } catch (err) { console.warn('postMessage 실패', err); }
+                  }
+                }}
+              />
+              {previewScreen.selector && (
+                <div className="shrink-0 px-4 py-1.5 bg-indigo-50 border-t border-indigo-200 text-[11px] text-indigo-700 flex items-center gap-2">
+                  <span className="font-bold">📍 위치 하이라이트</span>
+                  <span className="text-indigo-500">— 화면에서 [{previewScreen.featureName}] 위치 찾으면 툴팁 표시. 5초 후 자동 사라짐 / 클릭·Esc로 닫기</span>
+                </div>
+              )}
+              {/* 패널 푸터 */}
+              <div className="shrink-0 px-4 py-2 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-500 flex items-center justify-between">
+                <span>📍 admin/<strong>{previewScreen.url}</strong> {previewFullscreen && <span className="ml-2 text-indigo-600 font-bold">· 전체화면 모드</span>}</span>
+                <span className="text-slate-400">기능명 클릭 / 좌측 영역 클릭으로 닫기 / × 또는 ⛶ 전체화면</span>
+              </div>
+            </aside>
+            <style>{`
+              @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to   { transform: translateX(0); opacity: 1; }
+              }
+            `}</style>
+          </>
+        )}
       </div>
     );
   };

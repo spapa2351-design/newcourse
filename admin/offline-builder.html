@@ -941,13 +941,13 @@
                     마지막 저장: {lastSavedAt.toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' })}
                   </span>
                 )}
-                <button onClick={handleSaveDraft} className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
+                <button data-feature-id="A2-13" onClick={handleSaveDraft} className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
                   <Save size={15}/> 임시저장
                 </button>
-                <button onClick={() => setIsPreviewOpen(true)} className="px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-bold hover:bg-slate-600 transition-colors flex items-center gap-1.5 shadow-sm">
+                <button data-feature-id="A2-16" onClick={() => setIsPreviewOpen(true)} className="px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-bold hover:bg-slate-600 transition-colors flex items-center gap-1.5 shadow-sm">
                   <Eye size={15}/> 미리보기
                 </button>
-                <button onClick={() => setShowPublishModal(true)} disabled={!canPublish} className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 shadow-sm transition-colors ${canPublish ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                <button data-feature-id="A2-14" onClick={() => setShowPublishModal(true)} disabled={!canPublish} className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 shadow-sm transition-colors ${canPublish ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
                   <Send size={15}/> 퍼블리싱
                 </button>
               </div>
@@ -961,7 +961,7 @@
               <div className="w-[800px] mx-auto px-0 space-y-8">
 
               {/* 섹션 1: 기본 정보 */}
-              <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden" data-feature-id="A2-01">
                 <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center gap-2 cursor-pointer select-none" onClick={() => setSecOpen(p => ({...p, s1: !p.s1}))}>
                   <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
                   <h2 className="text-base font-bold text-slate-800">코스 기본 정보</h2>
@@ -973,7 +973,7 @@
                     <input type="text" value={courseInfo.title} onChange={e => setCourseInfo({...courseInfo, title: e.target.value})} className="w-full border border-slate-300 rounded-lg p-3 text-[15px] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all" placeholder="예: 2026 직무교육 — 프로젝트 관리 심화"/>
                   </div>
                   {/* ── 커버 이미지 ── */}
-                  <div>
+                  <div data-feature-id="A2-02">
                     <label className="block text-sm font-bold text-slate-700 mb-1.5">
                       커버 이미지 <span className="text-red-500">*</span>
                       <span className="text-slate-400 font-normal ml-2 text-[12px]">코스 목록에 표시되는 대표 이미지</span>
@@ -1125,7 +1125,7 @@
                   </div>
 
                   <div className="pt-6 border-t border-slate-100">
-                    <h4 className="text-[14px] font-bold text-indigo-600 flex items-center gap-1.5 mb-4"><MapPin size={16}/> 오프라인 교육 장소 설정</h4>
+                    <h4 className="text-[14px] font-bold text-indigo-600 flex items-center gap-1.5 mb-4" data-feature-id="A2-03"><MapPin size={16}/> 오프라인 교육 장소 설정</h4>
                     <div className="flex gap-4">
                       {/* 좌측: 입력 필드 */}
                       <div className="flex-1 space-y-3">
@@ -1183,7 +1183,7 @@
                 </div>
                 <div className={`p-6 space-y-6 ${!secOpen.s2 ? 'hidden' : ''}`}>
                   {/* 수강 신청 기간 — 항상 고정 */}
-                  <div>
+                  <div data-feature-id="A2-04">
                     <label className="block text-[14px] font-bold text-slate-800 mb-1">수강 신청 기간 <span className="text-red-500">*</span></label>
                     <p className="text-[12px] text-slate-400 mb-3">코스 운영 기간을 설정합니다. 오프라인 코스는 반드시 기간이 지정되어야 합니다.</p>
                     <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -1198,7 +1198,7 @@
                     </div>
                   </div>
 
-                  <div>
+                  <div data-feature-id="A2-05">
                   <h3 className="text-[15px] font-bold text-slate-800 mb-4">수강 등록 방식</h3>
                   <div className="border border-slate-200 rounded-xl overflow-hidden">
                     <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => setIsSelfEnroll(true)}>
@@ -2552,5 +2552,6 @@
     const root = createRoot(document.getElementById('root'));
     root.render(<App/>);
   </script>
+  <script src="feature-highlight.js"></script>
 </body>
 </html>

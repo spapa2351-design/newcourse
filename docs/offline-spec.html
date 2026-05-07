@@ -53,6 +53,8 @@
   .policy-title { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
   .print-btn { position: fixed; bottom: 24px; right: 24px; background: #4f46e5; color: white; border: none; border-radius: 50px; padding: 10px 20px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(79,70,229,.4); z-index: 100; }
   .print-btn:hover { background: #4338ca; }
+  .md-dl-btn { position: fixed; top: 16px; right: 24px; background: white; color: #4f46e5; border: 1.5px solid #c7d2fe; border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(79,70,229,.15); z-index: 101; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
+  .md-dl-btn:hover { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 12px rgba(79,70,229,.35); }
   /* ── 모바일 ── */
   #mobile-topbar { display: none; }
   #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
@@ -123,7 +125,7 @@
   }
 
   @media print {
-    #sidebar, .print-btn, #mobile-topbar { display: none !important; }
+    #sidebar, .print-btn, .md-dl-btn, #mobile-topbar { display: none !important; }
     main { margin-left: 0 !important; }
     .section-card { box-shadow: none; border: 1px solid #e2e8f0; break-inside: avoid; }
   }
@@ -149,19 +151,23 @@
     <div class="text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-1">Offline LMS</div>
     <div class="text-white font-bold text-base leading-tight">기획설계서</div>
     <div class="flex items-center gap-2 mt-2">
-      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.1</span>
-      <span class="text-slate-500 text-xs">2026-04-28</span>
+      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.2</span>
+      <span class="text-slate-500 text-xs">2026-05-07</span>
     </div>
     <div class="flex mt-3 rounded-lg overflow-hidden border border-slate-700">
       <button id="tab-btn-admin" class="tab-btn flex-1 py-1.5 text-xs font-semibold transition-colors bg-indigo-600 text-white" data-tab="admin" onclick="switchTab('admin')">관리자단</button>
       <button id="tab-btn-learner" class="tab-btn flex-1 py-1.5 text-xs font-semibold transition-colors text-slate-400 hover:text-slate-200" data-tab="learner" onclick="switchTab('learner')">학습자 앱</button>
     </div>
-    <button onclick="openSpecInline()" class="mt-3 w-full flex items-center justify-between px-3 py-2 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-600/30 hover:text-indigo-200 transition-colors text-xs font-semibold">
+    <a href="../admin/feature-spec.html" target="_blank" rel="noopener" class="mt-3 w-full flex items-center justify-between px-3 py-2 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-600/30 hover:text-indigo-200 transition-colors text-xs font-semibold">
       <span>⚡ 기능명세서</span>
-      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-    </button>
+      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
     <a href="guide-offline-lms.html" target="_blank" class="mt-2 w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-700/40 border border-slate-600/30 text-slate-300 hover:bg-slate-700/60 hover:text-slate-100 transition-colors text-xs font-semibold">
       <span>📘 오프라인 코스 가이드</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+    <a href="guide-ops-policy.html" target="_blank" class="mt-2 w-full flex items-center justify-between px-3 py-2 rounded-lg bg-orange-600/20 border border-orange-500/30 text-orange-300 hover:bg-orange-600/30 hover:text-orange-200 transition-colors text-xs font-semibold">
+      <span>🛠 운영팀 정책 가이드</span>
       <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.6"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
     </a>
   </div>
@@ -190,7 +196,6 @@
       <a class="nav-link" onclick="navTo('s8')">Phase 로드맵</a>
       <a class="nav-link" onclick="navTo('s9')">비즈니스 맥락</a>
       <a class="nav-link" onclick="navTo('s10')">용어 사전</a>
-      <a class="nav-link" onclick="navTo('s11')">결정 로그</a>
       <a class="nav-link" onclick="navTo('s12')">갭 & 핸드오프</a>
     </div>
     <div id="nav-learner" style="display:none">
@@ -237,8 +242,10 @@
 <div id="cover" data-tab="admin" class="bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 text-white px-12 py-6">
   <div class="max-w-4xl flex items-center gap-4">
     <h1 class="text-2xl font-bold leading-tight">오프라인 코스 기획설계서</h1>
-    <span class="bg-white/15 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0">Phase 1 완료</span>
+    <span class="bg-white/15 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0">Phase 1</span>
+    <span class="bg-emerald-400/30 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 border border-emerald-300/40">📍 정책 SSOT</span>
   </div>
+  <div class="mt-2 text-xs text-white/70">이 문서는 <strong>운영 정책의 단일 진실 원천(SSOT)</strong> · 기능 라인 아이템은 <a href="../admin/feature-spec.html" target="_blank" class="underline">admin/feature-spec.html</a> · 일정은 <a href="00-standard/phase-roadmap.html" target="_blank" class="underline">phase-roadmap.html</a> · 운영 가이드는 <a href="guide-ops-policy.html" target="_blank" class="underline">guide-ops-policy.html</a></div>
 </div>
 
 <!-- Team Guide -->
@@ -248,7 +255,7 @@
     <div class="grid grid-cols-5 gap-4">
       <div class="rounded-xl border border-slate-200 bg-white p-3">
         <div class="text-indigo-700 font-bold text-xs mb-2">기획</div>
-        <div class="text-slate-500 text-xs leading-relaxed">전체 필독<br>결정 로그 관리</div>
+        <div class="text-slate-500 text-xs leading-relaxed">전체 필독<br>정책 관리</div>
       </div>
       <div class="rounded-xl border border-slate-200 bg-white p-3">
         <div class="text-indigo-700 font-bold text-xs mb-2">개발</div>
@@ -563,7 +570,7 @@
   <div id="p-close" class="policy-box">
     <div class="policy-title">4.3 회차 종료 (시간 기반 자동)</div>
     <p class="text-sm text-slate-500 mb-4">
-      <strong>2026-05-06 정책 단순화</strong> — "마감"이라는 별도 이벤트와 버튼을 제거합니다. 회차는 <strong>수업 종료 시각이 지나면 자동으로 종료</strong>되며, 운영자가 별도로 닫는 행위는 없습니다. 이전엔 마감 = 출석률 분모 확정 + 미확인→결석 전환 + 운영자 정리 책임 등 4가지 효과를 묶고 있었는데, 모두 시간 트리거로 자동화 가능하다는 판단입니다.
+      "마감"이라는 별도 이벤트와 버튼이 없습니다. 회차는 <strong>수업 종료 시각이 지나면 자동으로 종료</strong>되며, 운영자가 별도로 닫는 행위는 없습니다. 미확인 인원은 운영자가 직접 정리합니다.
     </p>
 
     <div class="flex gap-3 items-start mb-5">
@@ -593,7 +600,7 @@
       <strong>운영 가이드</strong>: "미확인" 인원은 운영자가 직접 정리(출석/지각/결석)합니다. Phase 1엔 자동 결석 처리 없음 — 운영자 수동 처리만.
     </div>
 
-    <!-- ▼▼▼ 회차 종료 정책 (시간 기반 자동) — 2026-05-06 마감 개념 제거 ▼▼▼ -->
+    <!-- ▼▼▼ 회차 종료 정책 (시간 기반 자동) ▼▼▼ -->
     <div class="mt-6 pt-5 border-t border-slate-200">
       <div class="text-base font-bold text-slate-800 mb-1">4.3.1 회차 종료, 쉽게 풀어보기</div>
       <p class="text-sm text-slate-600 mb-4">학습자가 자주 묻는 <strong>"오늘 못 가면 한 회차 까이는 거예요?"</strong> — "마감"이라는 별도 사건은 없어요. <strong>수업 시간이 끝나면 그 회차도 자동으로 끝나는 것</strong>으로 통일됩니다.</p>
@@ -705,8 +712,8 @@
       </div>
 
       <div class="bg-slate-50 border-2 border-slate-300 rounded-xl p-4 mb-4">
-        <div class="font-bold text-slate-800 text-sm mb-2">🚫 수업 자체가 못 열린 경우 — 휴강 <span class="badge badge-plan2 ml-1">Phase 2</span></div>
-        <p class="text-sm text-slate-700 leading-relaxed mb-3">강사가 갑자기 못 오거나, 강의장 사고나 천재지변으로 수업 자체가 안 열린 경우. Phase 1에서는 운영자 임의 처리, Phase 2부터 정식 상태로 들어옵니다.</p>
+        <div class="font-bold text-slate-800 text-sm mb-2">🚫 수업 자체가 못 열린 경우 — 휴강 <span class="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold ml-1 text-[10px]">Phase 3 이월</span></div>
+        <p class="text-sm text-slate-700 leading-relaxed mb-3">강사가 갑자기 못 오거나, 강의장 사고나 천재지변으로 수업 자체가 안 열린 경우. 부수 기능 묶음(보강 강제 토글 / 자동 알림 / 자동 재배정 / audit log)이 <strong>Phase 3로 이월</strong>. Phase 1·2에서는 운영자 임의 처리(미확인 일괄 → 출석 또는 결석)로 우회.</p>
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-white border border-slate-200 rounded-lg p-3 text-sm">
             <div class="font-bold text-slate-700 mb-1.5">기본 처리</div>
@@ -728,8 +735,35 @@
         </div>
       </div>
 
+      <!-- Phase 2 자동화 예정 박스 -->
+      <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-4">
+        <div class="font-bold text-amber-900 text-sm mb-2">⏸ Phase 2 이월 — 자동화·시스템 잠금·알림</div>
+        <p class="text-sm text-amber-900 leading-relaxed mb-3">Phase 1은 의도적으로 단순화했습니다 — 회차 종료(시간 자동) + 운영자 수동 정리만. 아래 항목은 모두 <strong>Phase 2 이월</strong>이며, Phase 1 안정화 후 도입합니다.</p>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-white border border-amber-200 rounded-lg p-3">
+            <div class="font-bold text-amber-800 mb-1.5">⏰ 자동 처리</div>
+            <ul class="text-amber-900 leading-relaxed list-disc list-inside space-y-1">
+              <li>미확인 자동 결석 처리 (+7일)</li>
+              <li>시스템 잠금 — 회계 마감 (+30일)</li>
+              <li>코스별 "자동 결석 처리 OFF" 토글</li>
+            </ul>
+          </div>
+          <div class="bg-white border border-amber-200 rounded-lg p-3">
+            <div class="font-bold text-amber-800 mb-1.5">📧 알림</div>
+            <ul class="text-amber-900 leading-relaxed list-disc list-inside space-y-1">
+              <li>운영자 이메일 4단계 (24h/72h/6일/7일)</li>
+              <li>학습자 결석 확정 통보 (C3, 7일 지연)</li>
+              <li>HR 시스템 연동 (C4)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="text-xs text-amber-700 mt-3 pt-2 border-t border-amber-200">
+          <strong>Phase 1 운영 가이드</strong>: 운영자가 수업 종료 후 직접 미확인 인원을 정리하세요. "미확인 일괄 처리" 도구로 빠르게 가능합니다.
+        </div>
+      </div>
+
       <div class="callout callout-blue">
-        <strong>용어 정리 (2026-05-06 변경)</strong>: <span class="line-through text-slate-400">"회차 마감"</span> → <strong>"회차 종료"</strong>로 통일. 학습자가 "회차 차감"이라고 부르는 건 같은 의미예요 (별도 사건이 아니라 수업 종료 시각이 지나는 것). 수업 자체가 못 열린 건 <strong>"휴강"</strong>입니다 ("회차 취소"는 신청 취소와 헷갈리니 사용 금지).
+        <strong>용어 정리</strong>: <strong>"회차 종료"</strong>로 통일. 학습자가 "회차 차감"이라고 부르는 건 같은 의미예요 (별도 사건이 아니라 수업 종료 시각이 지나는 것). 수업 자체가 못 열린 건 <strong>"휴강"</strong>입니다 ("회차 취소"는 신청 취소와 헷갈리니 사용 금지).
       </div>
     </div>
     <!-- ▲▲▲ 회차 종료 정책 (시간 기반 자동) ▲▲▲ -->
@@ -738,7 +772,7 @@
   <!-- 4.4 수료 처리 -->
   <div id="p-cert" class="policy-box">
     <div class="policy-title">4.4 수료 처리 <span class="badge badge-plan2 ml-2">Phase 2 예정</span></div>
-    <p class="text-sm text-slate-500 mb-4">전체 회차가 종료된 후 (수업 종료 시각 기준), 출석률 75% 이상인 수강생을 일괄 수료 확정하는 기능입니다. <strong>Phase 1에서는 버튼을 제공하지 않습니다.</strong> (2026-04-28 결정 — 사이드이펙트 없음 확인. 수료 확정은 법적·인사 기록이므로 충분한 검토 후 Phase 2에서 구현)</p>
+    <p class="text-sm text-slate-500 mb-4">전체 회차가 종료된 후 (수업 종료 시각 기준), 출석률 75% 이상인 수강생을 일괄 수료 확정하는 기능입니다. <strong>Phase 1에서는 버튼을 제공하지 않습니다.</strong> 수료 확정은 법적·인사 기록이므로 Phase 2에서 구현 예정.</p>
 
     <div class="bg-indigo-50 rounded-xl p-5 mb-5">
       <div class="font-bold text-indigo-800 text-sm mb-3">📊 수료 기준 예시 — 4회차 교육인 경우</div>
@@ -992,88 +1026,37 @@
 
 <!-- S6: 기능 명세 -->
 <section id="s6" data-tab="admin" class="section-card">
-  <div class="section-title">6. 기능 명세</div>
-  <p class="section-desc">각 화면이 무엇을 하는가. 개발팀이 구현 시 참조하는 기능 목록.</p>
+  <div class="section-title">6. 기능 명세 — Phase별 분류</div>
+  <p class="section-desc">각 화면이 무엇을 하는가, 그리고 <strong>어느 Phase에 들어가는가</strong>. 개발팀 구현 우선순위·일정 산정 기준입니다.</p>
 
-  <div class="subsection">
-    <div class="subsection-title">6.1 코스 목록 (index.html)</div>
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <div class="text-xs font-semibold text-slate-500 mb-2">레이아웃</div>
-        <ul class="text-sm text-slate-600 space-y-1">
-          <li>• 상단: 상태 탭 (전체/준비중/모집중/진행중/완료) + 카운트</li>
-          <li>• 좌측 사이드바: 카테고리 분류 트리</li>
-          <li>• 메인: 코스 테이블</li>
-        </ul>
-      </div>
-      <div>
-        <div class="text-xs font-semibold text-slate-500 mb-2">기능</div>
-        <ul class="text-sm text-slate-600 space-y-1">
-          <li>• 상태/카테고리/검색 필터 복합 적용</li>
-          <li>• 행 클릭 → 차수 확장 (잔여석·일정 인라인)</li>
-          <li>• 단건 삭제 / 체크박스 다중 선택 삭제</li>
-          <li>• 수강관리 버튼 → offline-course-view.html</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div class="subsection">
-    <div class="subsection-title">6.2 코스 등록 빌더 (offline-builder.html)</div>
-    <div class="space-y-3">
-      <div class="bg-slate-50 rounded-lg p-4">
-        <div class="font-semibold text-sm text-slate-700 mb-2">섹션 1: 코스 기본정보</div>
-        <div class="text-sm text-slate-600">코스명 · 코스 상세 상단(코스 표지 기본 / 이미지 최대 5장) · 카테고리(5그룹) · 강사 · 강사소개 · 코스소개 · 교육 장소(장소명/주소/교통안내)</div>
-      </div>
-      <div class="bg-slate-50 rounded-lg p-4">
-        <div class="font-semibold text-sm text-slate-700 mb-2">섹션 2: 수강 신청 설정</div>
-        <div class="text-sm text-slate-600">신청 오픈/마감 일시 · 수강 등록 방식(자율/강제) · 신청 권한 그룹 · 취소 정책(언제든/기한부/불가) · 일정 변경 제한 토글</div>
-      </div>
-      <div class="bg-slate-50 rounded-lg p-4">
-        <div class="font-semibold text-sm text-slate-700 mb-2">섹션 3: 차수 생성 (요약 뷰)</div>
-        <div class="text-sm text-slate-600">Section 3은 요약 네비게이터 역할만 수행. 차수명·정원·그룹·회차 편집은 우측 사이드바에서 일원화.</div>
-      </div>
-      <div class="bg-indigo-50 rounded-lg p-4">
-        <div class="font-semibold text-sm text-indigo-700 mb-2">우측 사이드바: 차수 편집 (통합)</div>
-        <div class="text-sm text-indigo-600">
-          차수 헤더(다크 bg): 차수명 인라인 편집 · 정원 입력 · 복사·삭제·접기 버튼<br>
-          그룹 배정: 그룹 칩 + 할당 한도(limit) 입력 · 합산 유효성 · 미배정석 시각화<br>
-          <strong>회차별 개별 정원/그룹 설정</strong>: 회차 카드 내 "+ 개별 설정" 토글 → session.capacity·session.groups[] 오버라이드 (null = 차수 기본값 상속). 개별 설정 활성 시 바이올렛 테마 구분.<br>
-          <strong>수강 방식 토글 (sessionSelect)</strong>: 차수 헤더의 "전체수강 / 회차선택" 토글로 제어.<br>
-          &nbsp;&nbsp;• <em>전체수강</em>(기본): 학습자가 차수 신청 시 해당 차수의 모든 회차에 자동 등록.<br>
-          &nbsp;&nbsp;• <em>회차선택</em>: 학습자가 차수 신청 시 회차 목록에서 1개를 직접 선택 (법정의무교육·날짜 선택형 운영). 관리자 차수 1개로 N개 날짜를 운영 가능 → 차수 N개 생성 불필요.
+  <!-- 새 창 열기 버튼 -->
+  <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 rounded-2xl p-6 mb-5">
+    <div class="flex items-center justify-between gap-6 flex-wrap">
+      <div class="flex-1 min-w-[280px]">
+        <div class="font-black text-lg text-slate-900 mb-2">📋 기능 명세서 — admin/feature-spec.html</div>
+        <div class="text-sm text-slate-600 leading-relaxed">전체 라인 아이템 매트릭스. <strong>좌측 사이드바 필터</strong>로 관리자단/사용자단·화면(A1~A4·U2~U6)·Phase·우선순위·구현 상태별 추출 가능. 일정 산정·고객사 협의용 단일 문서.</div>
+        <div class="flex flex-wrap gap-2 text-xs mt-3">
+          <span class="inline-flex items-center gap-1.5 bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-bold">관리자단 79 + 사용자단 29 = 108</span>
+        </div>
+        <div class="flex flex-wrap gap-2 text-xs mt-2">
+          <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-bold">🟦 Phase 1 — 70</span>
+          <span class="inline-flex items-center gap-1.5 bg-violet-100 text-violet-800 px-2.5 py-1 rounded-full font-bold">🟩 Phase 2 — 20</span>
+          <span class="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold">🟨 Phase 3 — 12</span>
+          <span class="inline-flex items-center gap-1.5 bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full font-bold">🟧 Phase 4 — 6</span>
         </div>
       </div>
-      <div class="bg-slate-50 rounded-lg p-4">
-        <div class="font-semibold text-sm text-slate-700 mb-2">섹션 4: 수료 조건</div>
-        <div class="text-sm text-slate-600">Phase 1: 오프라인 출석 슬롯 고정(편집 불가) · 출석률 기준 설정(기본 75%)</div>
-      </div>
-      <div class="bg-indigo-50 rounded-lg p-4">
-        <div class="font-semibold text-sm text-indigo-700 mb-2">우측 사이드바: 커리큘럼 관리</div>
-        <div class="text-sm text-indigo-600">미니 캘린더 · 차수별 회차 카드(회차명/날짜/시간/장소) · 회차 추가 · 일괄 생성(요일+시간) · 차수/회차 DnD 정렬</div>
-      </div>
+      <a href="../admin/feature-spec.html" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-3.5 rounded-xl shadow-md transition-colors text-sm whitespace-nowrap">
+        📋 기능 명세서 열기
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      </a>
+    </div>
+    <div class="text-xs text-slate-500 mt-4 pt-3 border-t border-indigo-200">
+      🔗 관련 문서:
+      <a href="../admin/feature-spec.html" target="_blank" rel="noopener" class="text-indigo-600 underline ml-1">admin/feature-spec.html (기능 명세서)</a> ·
+      <a href="00-standard/phase-roadmap.html" target="_blank" rel="noopener" class="text-indigo-600 underline">phase-roadmap.html (일정 로드맵)</a>
     </div>
   </div>
 
-  <div class="subsection">
-    <div class="subsection-title">6.3 수강생·출석 관리 (offline-course-view.html)</div>
-    <table>
-      <thead><tr><th>탭</th><th>주요 기능</th></tr></thead>
-      <tbody>
-        <tr><td><strong>요약</strong></td><td>
-          KPI Strip (총수강/평균출석률/수료위험) · 주의사항 알림 배너 · 차수별 비교 카드 그리드<br>
-          <em>차수 카드</em>: "N회차 구성" pill 헤더 · 잔여석 색상(emerald/amber/rose) · 수강 인원 + 잔여석 인라인 · 회차별 출석률 바(≤5회차 세로바/회차명 레이블 | &gt;5회차 compact chip grid 자동 전환) · 다음 회차 D-Day · 출석 관리 바로가기<br>
-          우측 사이드바: 차수별 상세 카드 (수강 바 · 출석 바 · 회차 칩 · 효과 정원* 표시)
-        </td></tr>
-        <tr><td><strong>수강</strong></td><td>수강생 테이블(상태/사진/이름/그룹/출석률/수강기간) · 수강생 등록 모달(차수 선택 시 회차별 정원 설정된 경우 바이올렛 배지로 회차별 정원 표시 · 잔여석 effective capacity 기준)</td></tr>
-        <tr><td><strong>출석</strong></td><td>
-          회차 선택 칩 (회차별 개별 정원 설정 시 "정원 N" 배지 표시) · 출석 현황 바 (회차별 정원 설정 시 "회차 정원 N명 · 개별 설정" 표시)<br>
-          출석 테이블: 상태 5종 · 개인별 체크인 시간(출석 0~8분·지각 12~31분 다양화) · 미확인→[출석] 원클릭+[···] 드롭다운 · 미확인 일괄 처리 도구 (마감 버튼 제거)
-        </td></tr>
-        <tr><td><strong>라이브 모드</strong></td><td>QR 대형 표시 + 30초 카운트다운 · 우측 다크 대시보드(실시간 인원/상태별 카운트/최근 출석자 리스트)</td></tr>
-      </tbody>
-    </table>
-  </div>
 </section>
 
 <!-- S7: 테스트 매트릭스 -->
@@ -1139,7 +1122,7 @@
   <details class="subsection">
     <summary class="subsection-title cursor-pointer hover:text-indigo-600">7.4 수료 처리 (TC-C01~C08) <span class="badge badge-plan2 ml-2">Phase 2 예정</span></summary>
     <div class="callout callout-amber mt-3">
-      수료 처리 버튼은 2026-04-28 결정으로 Phase 2로 이월됐습니다. 아래 테스트 케이스는 Phase 2 구현 시 사용합니다.
+      수료 처리 버튼은 Phase 2로 이월됐습니다. 아래 테스트 케이스는 Phase 2 구현 시 사용합니다.
     </div>
     <table class="mt-3 opacity-50">
       <thead><tr><th>TC</th><th>시나리오</th><th>행동</th><th>기대 결과</th><th>근거</th></tr></thead>
@@ -1175,13 +1158,13 @@
 <!-- S8: Phase 로드맵 -->
 <section id="s8" data-tab="admin" class="section-card">
   <div class="section-title">8. Phase 로드맵</div>
-  <p class="section-desc">현재 어디까지 왔고, 다음에 무엇을 할 것인가.</p>
+  <p class="section-desc">Phase별 범위와 우선순위.</p>
 
   <!-- 탭 버튼 -->
   <div class="flex gap-1 mb-5 bg-slate-100 p-1 rounded-xl">
     <button onclick="showPhaseTab('p1')" id="ptab-p1"
-      class="phase-tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all bg-white text-green-700 shadow-sm">
-      ✅ Phase 1 <span class="text-xs font-normal text-green-500">완료</span>
+      class="phase-tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all bg-white text-indigo-700 shadow-sm">
+      📦 Phase 1 <span class="text-xs font-normal text-indigo-500">범위</span>
     </button>
     <button onclick="showPhaseTab('p2')" id="ptab-p2"
       class="phase-tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all text-slate-500 hover:text-blue-600">
@@ -1196,14 +1179,13 @@
   <!-- Phase 1 콘텐츠 -->
   <div id="ptab-content-p1">
     <div class="flex items-center gap-3 mb-4">
-      <span class="badge badge-done">✅ Phase 1 완료</span>
-      <span class="text-green-600 text-xs">2026-04-27 완결</span>
-      <span class="ml-auto text-xs text-green-600 font-semibold bg-green-100 px-2.5 py-1 rounded-full">18개 기능 100% · 수료 처리 Phase 2 이월</span>
+      <span class="badge badge-plan2">📦 Phase 1 범위</span>
+      <span class="ml-auto text-xs text-slate-600 font-semibold bg-slate-100 px-2.5 py-1 rounded-full">기능 18개 · 수료 처리 Phase 2 이월</span>
     </div>
     <div class="grid grid-cols-2 gap-4">
-      <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-        <div class="text-xs font-bold text-green-600 mb-2 uppercase tracking-wide">코스 · 빌더</div>
-        <div class="space-y-1.5 text-sm text-green-800">
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+        <div class="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-wide">코스 · 빌더</div>
+        <div class="space-y-1.5 text-sm text-indigo-900">
           <div>• 코스 목록 (필터, 차수 확장, 상태 탭)</div>
           <div>• 코스 개설 빌더 섹션 1~4 — 우측 패널 통합 편집</div>
           <div>• 차수/회차 관리 + 동일 날짜 시간대 추가</div>
@@ -1213,9 +1195,9 @@
           <div>• 글로벌 사이드바 (4개 파일 통일)</div>
         </div>
       </div>
-      <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-        <div class="text-xs font-bold text-green-600 mb-2 uppercase tracking-wide">출석 · 수료 · 수강</div>
-        <div class="space-y-1.5 text-sm text-green-800">
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+        <div class="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-wide">출석 · 수료 · 수강</div>
+        <div class="space-y-1.5 text-sm text-indigo-900">
           <div>• QR 라이브 출석 (30초 갱신)</div>
           <div>• 출석 상태 5종 (미확인/출석/지각/조퇴/결석)</div>
           <div>• 개인별 체크인 시간 다양화</div>
@@ -1290,7 +1272,7 @@
           <span class="badge badge-important text-xs shrink-0 mt-0.5">Mid</span>
           <div>
             <div class="font-semibold text-slate-700">수료 처리 버튼 — 75% 이상 수강생 일괄 수료 확정</div>
-            <div class="text-xs text-slate-500 mt-0.5">전 회차 종료 후 (운영자가 미확인 인원 정리 완료 후) 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성 처리. (2026-04-28 Phase 2 이월 결정)</div>
+            <div class="text-xs text-slate-500 mt-0.5">전 회차 종료 후 (운영자가 미확인 인원 정리 완료 후) 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성 처리.</div>
           </div>
         </div>
         <div class="flex items-start gap-3 bg-orange-50 border border-orange-100 rounded-lg p-3 text-sm">
@@ -1483,100 +1465,6 @@
   </div>
 </section>
 
-<!-- S11: 결정 로그 -->
-<section id="s11" data-tab="admin" class="section-card">
-  <div class="section-title">11. 결정 로그</div>
-  <p class="section-desc">언제, 무엇을, 왜 결정했는가. 회의·슬랙 합의는 여기에 기록 후 공식화됩니다.</p>
-
-  <div class="space-y-4">
-    <div class="border-l-4 border-violet-500 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-27</div>
-      <div class="font-semibold text-sm text-slate-800">회차 선택 모드 (sessionSelect) — Phase 1 포함 결정</div>
-      <div class="text-sm text-slate-600 mt-1">기획 3인(고윤정·신혜선·구교환) + 운영자 논의. 법정의무교육처럼 연간 10회 운영 중 직원이 날짜 1개를 선택하는 케이스를 현재 구조로 지원하려면 차수 10개 생성이 필요해 운영 불가 수준. 해결책: 차수에 <code>sessionSelect</code> 토글 추가. ON 시 학습자 신청 화면에서 해당 차수의 회차 목록을 라디오로 표시해 1개 선택. 구조 변경 없이 차수 1개로 N개 날짜 운영 가능. Phase 1 포함 결정 근거: 오픈 이후 CS 1순위 예상 + 개발 공수 미미.</div>
-    </div>
-    <div class="border-l-4 border-violet-500 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-27</div>
-      <div class="font-semibold text-sm text-slate-800">관리자 출석 무제한 정정 정책 확정</div>
-      <div class="text-sm text-slate-600 mt-1">운영자·기획자 논의 결과. 기업교육 특성상 교육 종료 후에도 결석→출석 정정 요청이 빈번하므로 관리자는 어떤 상태 → 어떤 상태든 시점·횟수 제한 없이 수동 변경 가능. 조퇴 → 출석·지각 소급도 허용. Phase 2에서 정정 사유 입력 + 감사 로그(Audit Log) + 일괄 정정 추가 예정. 전환 매트릭스(4.1)와 TC-A05 기대 결과 업데이트 완료.</div>
-    </div>
-    <div class="border-l-4 border-violet-500 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-27</div>
-      <div class="font-semibold text-sm text-slate-800">회차별 정원/그룹 개별 설정 도입 (session.capacity 오버라이드)</div>
-      <div class="text-sm text-slate-600 mt-1">고객사 스펙 ④ "같은 교육이라도 날짜별 장소·인원이 다를 수 있음" 대응. session.capacity = null(차수 상속) / 숫자(개별 정원) 패턴. 개별 설정 활성 회차는 바이올렛 테마로 시각 구분. 수강 관리 페이지에도 effective capacity 적용.</div>
-    </div>
-    <div class="border-l-4 border-violet-500 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-27</div>
-      <div class="font-semibold text-sm text-slate-800">빌더 UX 통합 — 좌우 패널 이원화 → 우측 패널 일원화</div>
-      <div class="text-sm text-slate-600 mt-1">시니어 기획·운영 4인 브레인스토밍 결과. Section 3 좌측 차수 생성 폼을 제거하고 요약 뷰로 전환. 차수명·정원·그룹·회차 편집을 우측 커리큘럼 사이드바에서 일원화. 관리자(생각 많이 안 하는)에게 더 직관적인 단방향 편집 흐름.</div>
-    </div>
-    <div class="border-l-4 border-violet-500 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-27</div>
-      <div class="font-semibold text-sm text-slate-800">수강 관리 요약 카드 UX 개선</div>
-      <div class="text-sm text-slate-600 mt-1">시니어 기획 2 + 운영 2 브레인스토밍. 3가지 수정: ① 헤더에 "N회차 구성" pill 추가 (구조 명시) ② 잔여석 color coding (emerald/amber/rose) ③ 회차 바: sess.name 표시 + ≤5회차 세로바 / &gt;5회차 compact chip grid 자동 전환.</div>
-    </div>
-    <div class="border-l-4 border-violet-500 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-27</div>
-      <div class="font-semibold text-sm text-slate-800">출석 데이터 회차별 다양화 + 개인별 체크인 시간</div>
-      <div class="text-sm text-slate-600 mt-1">기존 출석 초기화가 p.startDate 기준(버그) + 회차별 동일 패턴(버그). 수정: s.date 기준으로 과거/오늘/미래 판단, si 인덱스 시드(i+si×3)로 회차별 다른 분포 생성. getCheckInTime()으로 학생별 출석 0~8분·지각 12~31분 차등 시간 표시.</div>
-    </div>
-    <div class="border-l-4 border-indigo-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-27</div>
-      <div class="font-semibold text-sm text-slate-800">글로벌 사이드바 4개 파일 통일</div>
-      <div class="text-sm text-slate-600 mt-1">index.html과 동일한 사이드바를 online-builder, offline-builder, course-learners 3개 파일에 추가. UX 일관성 확보.</div>
-    </div>
-    <div class="border-l-4 border-indigo-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-27</div>
-      <div class="font-semibold text-sm text-slate-800">코스 상세 상단 UI 개선</div>
-      <div class="text-sm text-slate-600 mt-1">offline-builder에 코스 표지(기본) / 이미지(최대 5장) 라디오 선택 방식 추가. 기존 "상단 표시 방식" 섹션 삭제.</div>
-    </div>
-    <div class="border-l-4 border-violet-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-24</div>
-      <div class="font-semibold text-sm text-slate-800">기획 갭 12개 공식 등록 (gap-report.md)</div>
-      <div class="text-sm text-slate-600 mt-1">PM 관점 리뷰에서 Critical 3개, Important 5개, Minor 4개 발견. Phase 2 착수 전 Critical 3개 반드시 결정 필요.</div>
-    </div>
-    <div class="border-l-4 border-green-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-23</div>
-      <div class="font-semibold text-sm text-slate-800">Phase 1 완결 선언</div>
-      <div class="text-sm text-slate-600 mt-1">5개 파일 모두 Match Rate 100% 달성. 21개 갭 중 17건 즉시 해결, 4건 Phase 2 이월.</div>
-    </div>
-    <div class="border-l-4 border-amber-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-12</div>
-      <div class="font-semibold text-sm text-slate-800">용어 확정: 패키지 → 차수</div>
-      <div class="text-sm text-slate-600 mt-1">"패키지"는 개발 용어 느낌. 이러닝 현업 교육담당자가 실제로 쓰는 "차수" 확정. 코스→차수→회차 계층 완성.</div>
-    </div>
-    <div class="border-l-4 border-amber-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-12</div>
-      <div class="font-semibold text-sm text-slate-800">아키텍처 확정: 커리큘럼 중심 계층</div>
-      <div class="text-sm text-slate-600 mt-1">코스>커리큘럼>슬롯>차수>회차 계층 확정. Phase 3 블렌디드 확장 시 슬롯 타입(video/exam/survey)만 추가하면 됨.</div>
-    </div>
-    <div class="border-l-4 border-red-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-09</div>
-      <div class="font-semibold text-sm text-slate-800">출석 상태 5종 확정 (6종에서 단순화)</div>
-      <div class="text-sm text-slate-600 mt-1">"출석인정" 상태 제거. 관리자가 수동으로 "출석" 처리하면 그게 곧 출석인정. 관리자 혼란 감소.</div>
-    </div>
-    <div class="border-l-4 border-red-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-09</div>
-      <div class="font-semibold text-sm text-slate-800">QR 30초 갱신 확정</div>
-      <div class="text-sm text-slate-600 mt-1">10초: 스캔 실패 위험 / 60초: 대리촬영 공유 위험 → 30초로 결정. 보안과 편의성의 균형.</div>
-    </div>
-    <div class="border-l-4 border-red-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-09</div>
-      <div class="font-semibold text-sm text-slate-800">자동 마감 없음 (수동만 지원) <span class="text-xs text-slate-500">— 2026-05-06 정책 변경</span></div>
-      <div class="text-sm text-slate-600 mt-1">"QR 못 찍었는데 결석됐어요" 민원 방지로 Phase 1엔 운영자 수동 처리만 지원. 자동 결석 처리·운영자 단계별 알림은 Phase 2 이월. 4.3.1 회차 종료 정책 참고.</div>
-    </div>
-    <div class="border-l-4 border-emerald-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-05-06</div>
-      <div class="font-semibold text-sm text-slate-800">회차 마감 개념 제거 — 시간 기반 자동 종료로 단순화</div>
-      <div class="text-sm text-slate-600 mt-1">기획·운영팀 4인 브레인스토밍 결과 — "마감"이라는 별도 사건과 버튼이 4가지 효과(분모 확정, 미확인 결석 전환, 학습자 결과 표시, 운영자 정리 책임)를 묶고 있었으나, 모두 시간 트리거로 대체 가능. <strong>마감 버튼 제거 → 수업 종료 시각이 회차 종료 시각.</strong> 미확인은 운영자가 수동 정리. 자동 결석 처리·운영자 단계별 알림·시스템 잠금은 모두 Phase 2 이월. 학습자 알림은 즉시성만 Phase 1(QR 직후 출석 처리됨, 출석률 표시), 결석 통보·HR 연동 등은 Phase 2 이월. 4.3 정책 전면 재작성. admin UI 마감 버튼 제거.</div>
-    </div>
-    <div class="border-l-4 border-amber-400 pl-4">
-      <div class="text-xs text-slate-400 mb-1">2026-04-28</div>
-      <div class="font-semibold text-sm text-slate-800">수료 처리 버튼 — Phase 2 이월 결정</div>
-      <div class="text-sm text-slate-600 mt-1">기획 논의 결과, 수료 처리 기능은 출석·마감·QR과 의존성이 없고 파이프라인 최후단에 위치하므로 Phase 1 제거 시 사이드이펙트 없음 확인. 수료 확정은 법적·인사 기록에 해당하므로 충분한 검토 후 Phase 2에서 구현. UI 버튼 제거(offline-course-view.html), 4.4 정책·7.4 테스트 매트릭스·plan·report MD 모두 업데이트 완료.</div>
-    </div>
-  </div>
-</section>
-
 <!-- S12: 갭 & 핸드오프 -->
 <section id="s12" data-tab="admin" class="section-card">
   <div class="section-title">12. 기획 갭 현황 & 핸드오프</div>
@@ -1625,10 +1513,9 @@
     <div class="subsection-title">12.3 문서 관리 원칙</div>
     <div class="bg-slate-50 rounded-xl p-5 text-sm text-slate-600 space-y-2">
       <div>• 이 문서는 <strong>기획팀이 관리</strong>합니다.</div>
-      <div>• 정책 변경 → 해당 원본 문서 먼저 수정 → 이 파일의 4장 운영 정책 업데이트 → 11장 결정 로그에 기록</div>
+      <div>• 정책 변경 → 해당 원본 문서 먼저 수정 → 이 파일의 4장 운영 정책 업데이트</div>
       <div>• Phase 완료 시 → 1장 커버의 KPI 수치 + 8장 Phase 로드맵 업데이트</div>
       <div>• 새로운 갭 발견 시 → gap-report.md에 먼저 기록 → 12장 갭 현황 테이블 업데이트</div>
-      <div>• 슬랙·구두 합의는 11장 결정 로그에 반영되기 전까지 <strong>비공식</strong></div>
     </div>
   </div>
 
@@ -1640,7 +1527,7 @@
         <tr><td>기획 보완 문서</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/00-standard/offline-course-planning-supplement.md</code></td><td>운영 정책 원본, 사용자 흐름, 테스트 매트릭스, 용어 사전</td></tr>
         <tr><td>전체 설계 문서</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/offline-course-builder.md</code></td><td>아키텍처 결정, 데이터 모델, 운영 케이스 6종</td></tr>
         <tr><td>기획 갭 리포트</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/gap-report.md</code></td><td>12개 기획 구멍 상세</td></tr>
-        <tr><td>Phase 1 완결 리포트</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/04-report/phase1-completion.md</code></td><td>5파일 결과, 갭 처리 현황, Phase 2 이월 목록</td></tr>
+        <tr><td>Phase 1 범위 리포트</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/04-report/phase1-completion.md</code></td><td>5파일 결과, 갭 처리 현황, Phase 2 이월 목록</td></tr>
         <tr><td>통합 README</td><td><code class="bg-slate-100 px-1 rounded text-xs">docs/README.md</code></td><td>마크다운 버전 통합 문서</td></tr>
       </tbody>
     </table>
@@ -1654,7 +1541,7 @@
 <!-- s13 -->
 <section id="s13" data-tab="learner" class="section-card">
   <div class="section-title">13. 학습자 앱 개요</div>
-  <p class="section-desc">관리자단 Phase 1 완성 후, 학습자가 코스를 신청·출석·수료까지 완결하는 7개 HTML 화면의 공식 기획·설계 명세. CDN 직접 실행 환경(빌드 도구 없음)에서 기존 프로토타입의 갭을 정의·수정한다.</p>
+  <p class="section-desc">관리자단 Phase 1과 함께 진행되는 학습자 앱 7개 HTML 화면의 공식 기획·설계 명세. 학습자가 코스를 신청·출석·수료까지 진행하는 흐름을 정의. CDN 직접 실행 환경(빌드 도구 없음)에서 기존 프로토타입의 갭을 정의·수정한다.</p>
 
   <div class="subsection">
     <div class="subsection-title">13.1 Context Anchor</div>
@@ -1751,7 +1638,7 @@
       </tbody>
     </table>
     <div class="callout callout-amber mt-4">
-      <strong>GAP-U05 적용:</strong> home.html · category.html · course-list.html · my.html의 오프라인 코스 카드 onclick에 위 규칙을 반영한 href가 설정되어야 함. <span class="badge badge-done">Phase 1 완료</span>
+      <strong>GAP-U05 적용:</strong> home.html · category.html · course-list.html · my.html의 오프라인 코스 카드 onclick에 위 규칙을 반영한 href가 설정되어야 함.
     </div>
   </div>
 </section>
@@ -1993,22 +1880,7 @@
   </div>
 
   <div class="subsection">
-    <div class="subsection-title">19.2 브레인스토밍 주요 의사결정</div>
-    <table>
-      <thead><tr><th>결정 항목</th><th>결정 내용</th><th>제안자</th></tr></thead>
-      <tbody>
-        <tr><td>QR 결과 문구 톤</td><td>친근한 구어체, 결과별 아이콘+색상 각 차별화</td><td>카리나</td></tr>
-        <tr><td>다중조합 확인 화면</td><td>커리큘럼별 선택 요약 카드 추가 (단순 텍스트 → 카드 목록)</td><td>고윤정</td></tr>
-        <tr><td>히어로 5가지 뷰</td><td>D-7이상 / D-3 / 오늘 교육 / 라이브 / 없음 5분기</td><td>구교환</td></tr>
-        <tr><td>알림 트리거</td><td>Phase 2로 분류 (D-7 / D-1 / 당일 푸시)</td><td>태서</td></tr>
-        <tr><td>지도 버튼</td><td>Phase 1: 버튼만 노출, Phase 2: 실제 위치 연동</td><td>태서</td></tr>
-        <tr><td>졸업기준선</td><td>course-enrolled + course-completed 양쪽에 75% 기준선 명시</td><td>고윤정</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="subsection">
-    <div class="subsection-title">19.3 데이터 모델 — 출석 상태 7종</div>
+    <div class="subsection-title">19.2 데이터 모델 — 출석 상태 7종</div>
     <table>
       <thead><tr><th>status 값</th><th>표시 텍스트</th><th>원형 색상</th></tr></thead>
       <tbody>
@@ -2026,13 +1898,83 @@
 
 <!-- Footer -->
 <div class="text-center py-8 text-slate-400 text-sm">
-  오프라인 코스 기획설계서 v1.1 · 2026-04-28 · 기획팀 관리 문서
+  오프라인 코스 기획설계서 v1.2 · 2026-05-07 · 기획팀 관리 문서
 </div>
 
 </div><!-- max-w -->
 </main><!-- main -->
 
+<button class="md-dl-btn" onclick="downloadAsMarkdown()" title="이 문서를 Markdown 파일로 다운로드">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  MD 다운로드
+</button>
 <button class="print-btn" onclick="window.print()">🖨️ PDF 저장</button>
+
+<!-- Turndown CDN — HTML → Markdown 변환 -->
+<script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+<script>
+function downloadAsMarkdown() {
+  if (typeof TurndownService === 'undefined') {
+    alert('Markdown 변환 라이브러리를 로드하지 못했습니다. 인터넷 연결을 확인해주세요.');
+    return;
+  }
+
+  /* ── 변환할 본문 영역 추출 ── */
+  const main = document.querySelector('main') || document.body;
+  const clone = main.cloneNode(true);
+
+  /* ── 변환 전 정리: 사이드바·UI 요소 제거 ── */
+  clone.querySelectorAll('#sidebar, #mobile-topbar, .print-btn, .md-dl-btn, #spec-overlay, button, [data-tab="learner"]').forEach(el => el.remove());
+
+  /* ── Turndown 설정 ── */
+  const turndown = new TurndownService({
+    headingStyle: 'atx',         // # H1, ## H2 형식
+    bulletListMarker: '-',
+    codeBlockStyle: 'fenced',
+    emDelimiter: '_',
+    strongDelimiter: '**',
+    hr: '---',
+    linkStyle: 'inlined'
+  });
+
+  /* 표는 GFM 스타일 (turndown에 기본 지원 안 됨 — plugin 없이 직접 처리) */
+  turndown.addRule('table', {
+    filter: 'table',
+    replacement: function(content, node) {
+      const rows = Array.from(node.querySelectorAll('tr'));
+      if (rows.length === 0) return '';
+      const cellsOf = (tr) => Array.from(tr.querySelectorAll('th,td')).map(c => (c.textContent || '').replace(/\|/g, '\\|').replace(/\n+/g, ' ').trim());
+      const head = cellsOf(rows[0]);
+      const body = rows.slice(1).map(cellsOf);
+      let md = '\n| ' + head.join(' | ') + ' |\n';
+      md += '|' + head.map(() => ' --- ').join('|') + '|\n';
+      body.forEach(r => { md += '| ' + r.join(' | ') + ' |\n'; });
+      return md + '\n';
+    }
+  });
+
+  /* SVG·이미지 제거 */
+  turndown.remove(['svg', 'iframe', 'script', 'style']);
+
+  /* 변환 */
+  const md = turndown.turndown(clone);
+
+  /* 메타 헤더 추가 */
+  const today = new Date().toISOString().slice(0,10);
+  const finalMd = `---\ntitle: 오프라인 코스 기획설계서\nphase: Phase 1\ndownloadedAt: ${today}\nsource: docs/offline-spec.html\n---\n\n${md}`;
+
+  /* ── 다운로드 ── */
+  const blob = new Blob([finalMd], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `offline-spec_${today}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+</script>
 
 <script>
   function openSpecInline() {
@@ -2081,7 +2023,7 @@
   }
 
   // Active nav highlighting
-  const sections = ['cover','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18','s19'];
+  const sections = ['cover','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s12','s13','s14','s15','s16','s17','s18','s19'];
   const navLinks = document.querySelectorAll('.nav-link');
 
   const observer = new IntersectionObserver((entries) => {
