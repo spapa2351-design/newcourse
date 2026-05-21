@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학습 뷰어 — newcourse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet"/>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    /* Material Symbols Rounded — 모던 아이콘 (이모지 교체) */
+    .ms { font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal;
+          font-size: inherit; line-height: 1; letter-spacing: normal; text-transform: none;
+          display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr;
+          -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased;
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20; vertical-align: -0.15em; }
+    .ms.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20; }
+    html, body { height: 100%; margin: 0; }
+    body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; overflow: hidden; }
+
+    /* 학습자 web 뷰어 — 1800px 최대 너비 + 중앙 정렬. 좁은 화면은 100% (반응형 그대로) */
+    .viewer-container { height: 100vh; display: flex; flex-direction: column; background: #fff; max-width: 1800px; margin: 0 auto; }
+    .main-layout { flex: 1; display: flex; overflow: hidden; }
+    .content-area { flex: 1; overflow-y: auto; background: #fff; display: flex; flex-direction: column; }
+    .sidebar { width: 380px; border-left: 1px solid #f1f5f9; background: #fff; display: flex; flex-direction: column; height: 100%; }
+
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; flex: 1; overflow-y: auto; animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 모바일 자동 반응형 — 좁은 화면에서 자동 전환 */
+    .mobile-top-nav { display: none; }
+    @media (max-width: 768px) {
+      body { overflow: auto; }
+      .viewer-container { height: auto; min-height: 100vh; }
+      .main-layout { flex-direction: column; overflow: visible; flex: none; display: block; }
+      .content-area { overflow: visible; flex: none; display: block; }
+      .sidebar { width: 100%; border-left: none; height: auto; flex: none; display: block; }
+      .desktop-header { display: none !important; }
+      .mobile-top-nav { display: flex !important; }
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+<div class="viewer-container">
+
+        <!-- Mobile Top Nav -->
+        <div class="mobile-top-nav h-14 border-b border-slate-100 px-4 items-center justify-between shrink-0 bg-white sticky top-0 z-30">
+          <button class="text-slate-800 flex items-center justify-center w-8 h-8"><span class="ms" style="font-size:22px">arrow_back</span></button>
+          <h1 id="mobile-header-title" class="text-sm font-bold text-slate-900 truncate px-4">코스 소개 영상</h1>
+          <button class="text-slate-800 flex items-center justify-center w-8 h-8"><span class="ms" style="font-size:22px">more_vert</span></button>
+        </div>
+
+        <!-- Desktop Top Nav -->
+        <header class="desktop-header h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between shrink-0 z-20">
+          <div class="flex items-center gap-4">
+            <button class="text-slate-400 hover:text-slate-600 font-black flex items-center gap-1"><span class="ms" style="font-size:16px">arrow_back</span> 코스 홈</button>
+            <div class="h-4 w-px bg-slate-200"></div>
+            <h1 class="text-lg font-black text-slate-900 tracking-tight">2026년 핵심가치 내재화 과정</h1>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-slate-400">진도율</span>
+              <span id="overall-progress" class="text-sm font-black text-indigo-600">0%</span>
+              <div class="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div id="overall-progress-bar" class="h-full bg-indigo-600 rounded-full transition-all" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div class="main-layout custom-scroll">
+
+          <!-- Content Area -->
+          <div class="content-area">
+
+            <!-- View 1: 영상 (video) — 컨테이너 너비 100% + 16:9 비율 -->
+            <div id="view-video" class="flex flex-col">
+              <div class="w-full bg-black">
+                <div class="relative aspect-video w-full max-h-[70vh] mx-auto">
+                  <video id="video-player" class="absolute inset-0 w-full h-full object-contain bg-black" controls playsinline preload="metadata">
+                    <source src="../assets/test-video.mp4" type="video/mp4"/>
+                    이 브라우저는 video 태그를 지원하지 않습니다.
+                  </video>
+                  <span class="absolute top-3 right-3 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded pointer-events-none inline-flex items-center gap-0.5"><span class="ms" style="font-size:12px">lock</span> 스킵 방지</span>
+                </div>
+              </div>
+              <div class="px-6 py-6 border-b border-slate-100 bg-white shrink-0">
+                <div class="text-xs text-slate-500 mb-1" id="video-meta">01 - 1 · 동영상</div>
+                <h2 id="video-title" class="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-snug">
+                  코스 소개 영상
+                </h2>
+                <p id="video-cond" class="text-xs text-slate-500 mt-1">이수 조건 · 시청률 90% 이상</p>
+              </div>
+            </div>
+
+            <!-- View 2: PDF (자료) -->
+            <div id="view-pdf" class="hidden flex-1 flex flex-col">
+              <div class="px-6 py-10 bg-white flex-1 overflow-y-auto custom-scroll">
+                <div class="max-w-3xl mx-auto">
+                  <div class="text-xs text-slate-500 mb-1" id="pdf-meta">02 - 1 · 자료</div>
+                  <h2 id="pdf-title" class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-snug mb-6">
+                    2026년 핵심가치 가이드북
+                  </h2>
+                  <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                    <div class="flex items-center justify-between px-4 py-2.5 border-b border-slate-200 bg-white">
+                      <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
+                        <span class="inline-flex items-center gap-1"><span class="ms text-slate-500" style="font-size:14px">picture_as_pdf</span> <span id="pdf-filename">test.pdf</span></span>
+                        <span id="pdf-pages" class="text-slate-400">· 24p</span>
+                      </div>
+                      <a id="pdf-download" href="../assets/test.pdf" download class="text-xs font-bold text-indigo-600 hover:text-indigo-700">↓ 다운로드</a>
+                    </div>
+                    <iframe id="pdf-frame" src="../assets/test.pdf#view=FitH&toolbar=1"
+                      class="w-full border-0 bg-white"
+                      style="height: 600px"></iframe>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-3">정보성 자료 · 수료 영향 없음</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- View 3: 시험 (exam) -->
+            <div id="view-exam" class="hidden flex-1 flex flex-col">
+              <div class="px-6 py-10 bg-white flex-1 overflow-y-auto custom-scroll">
+                <div class="max-w-2xl mx-auto">
+                  <div class="text-xs text-slate-500 mb-1">02 - 2 · 시험</div>
+                  <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight">중간 점검 퀴즈</h2>
+                    <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">합격 60점 / 10문항</span>
+                  </div>
+
+                  <div class="space-y-5">
+                    <div class="border border-slate-200 rounded-xl p-5">
+                      <div class="flex items-center gap-2 mb-3">
+                        <span class="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                        <span class="text-xs text-slate-500">객관식</span>
+                      </div>
+                      <p class="text-sm font-bold text-slate-800 mb-4">2026년 회사의 핵심가치 중 첫 번째는 무엇입니까?</p>
+                      <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30">
+                          <input type="radio" name="q1" class="accent-indigo-500"/>
+                          <span class="text-sm text-slate-700">고객 중심</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30">
+                          <input type="radio" name="q1" class="accent-indigo-500"/>
+                          <span class="text-sm text-slate-700">혁신과 도전</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30">
+                          <input type="radio" name="q1" class="accent-indigo-500"/>
+                          <span class="text-sm text-slate-700">팀워크</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <button class="w-full py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700">
+                      제출하기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- View 4: 설문 (survey) -->
+            <div id="view-survey" class="hidden flex-1 flex flex-col">
+              <div class="px-6 py-10 bg-white flex-1 overflow-y-auto custom-scroll">
+                <div class="max-w-2xl mx-auto">
+                  <div class="text-xs text-slate-500 mb-1">03 - 1 · 설문</div>
+                  <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mb-6">만족도 설문</h2>
+
+                  <div class="space-y-5">
+                    <div class="border border-slate-200 rounded-xl p-5">
+                      <p class="text-sm font-bold text-slate-800 mb-4">이 코스의 전반적인 만족도를 평가해 주세요.</p>
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-500">매우 불만</span>
+                        <div class="flex gap-2">
+                          <button class="w-10 h-10 border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:border-indigo-400 hover:text-indigo-600">1</button>
+                          <button class="w-10 h-10 border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:border-indigo-400 hover:text-indigo-600">2</button>
+                          <button class="w-10 h-10 border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:border-indigo-400 hover:text-indigo-600">3</button>
+                          <button class="w-10 h-10 border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:border-indigo-400 hover:text-indigo-600">4</button>
+                          <button class="w-10 h-10 border border-indigo-500 bg-indigo-500 text-white rounded-lg text-sm font-bold">5</button>
+                        </div>
+                        <span class="text-xs text-slate-500">매우 만족</span>
+                      </div>
+                    </div>
+
+                    <div class="border border-slate-200 rounded-xl p-5">
+                      <p class="text-sm font-bold text-slate-800 mb-4">자유 의견 (선택)</p>
+                      <textarea rows="4" placeholder="코스에 대한 의견을 자유롭게 작성해 주세요"
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-indigo-400 outline-none resize-none"></textarea>
+                    </div>
+
+                    <button class="w-full py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700">
+                      응답 제출
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Sidebar -->
+          <aside class="sidebar bg-white">
+
+            <!-- Tab Header — 시험·설문은 의견 탭 비노출 -->
+            <div class="flex px-4 border-b border-slate-200 sticky top-0 bg-white z-10 shrink-0" id="tab-header">
+              <button onclick="switchTab('curriculum')" id="tab-btn-curriculum" class="py-3 px-3 text-sm font-black transition-all border-b-2 border-indigo-900 text-slate-900">커리큘럼</button>
+              <button onclick="switchTab('opinion')" id="tab-btn-opinion" class="py-3 px-3 text-sm font-bold transition-all border-b-2 border-transparent text-slate-500 hover:text-slate-800">
+                의견 <span id="opinion-count" class="text-[10px] text-slate-400 ml-0.5">12</span>
+              </button>
+            </div>
+
+            <!-- Tab: Curriculum -->
+            <div id="tab-curriculum" class="tab-content active custom-scroll pb-6 bg-slate-50/60">
+              <!-- 그룹 + 항목 모두 JS에서 렌더링 -->
+              <div id="curriculum-root" class="py-2"></div>
+            </div>
+
+            <!-- Tab: Opinion -->
+            <div id="tab-opinion" class="tab-content custom-scroll pb-10">
+              <!-- 항목별 의견 목록 (의견 기능 ON인 항목만) -->
+              <div id="opinion-context" class="p-4 border-b border-slate-100 bg-indigo-50/30">
+                <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-1">현재 학습 항목</p>
+                <p id="opinion-current-title" class="text-sm font-black text-slate-900 truncate">코스 소개 영상</p>
+              </div>
+
+              <div id="opinion-disabled-state" class="hidden p-8 text-center">
+                <div class="text-slate-300 mb-2"><span class="ms" style="font-size:36px">chat_bubble_outline</span></div>
+                <p class="text-sm font-bold text-slate-600 mb-1">이 항목은 의견 기능이 꺼져 있습니다</p>
+                <p class="text-xs text-slate-400 leading-relaxed">운영자가 이 항목에 의견 기능을 사용하지 않도록 설정했습니다.</p>
+              </div>
+
+              <div id="opinion-active" class="">
+                <div class="p-4 border-b border-slate-100">
+                  <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 shrink-0"></div>
+                    <input type="text" placeholder="의견을 남겨보세요..."
+                      class="flex-1 bg-slate-50 border border-slate-200 rounded-full px-4 text-xs focus:outline-none focus:border-indigo-400"/>
+                  </div>
+                </div>
+                <div id="opinion-list" class="p-4 space-y-5">
+                  <!-- 의견 목록 JS에서 렌더링 -->
+                </div>
+              </div>
+            </div>
+
+          </aside>
+
+        </div>
+</div>
+
+<!-- ── Lock Modal: 이전 커리큘럼 미이수 시 ── -->
+<div id="lock-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[1000] flex items-center justify-center p-4" onclick="closeLockModal(event)">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onclick="event.stopPropagation()">
+    <div class="px-6 pt-6 pb-4 text-center">
+      <div class="w-14 h-14 mx-auto bg-amber-50 border border-amber-200 rounded-full flex items-center justify-center mb-3">
+        <span class="ms text-amber-600" style="font-size:28px">lock</span>
+      </div>
+      <h3 class="text-base font-black text-slate-900 mb-2">이전 커리큘럼을 먼저 이수해주세요</h3>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        <span id="lock-prev-ch" class="font-bold text-slate-800">—</span>의<br/>
+        필수 항목 <span id="lock-blocker" class="font-bold text-indigo-600">—</span>을(를) 먼저 이수해야<br/>
+        다음 커리큘럼으로 이동할 수 있습니다.
+      </p>
+    </div>
+    <div class="px-6 pb-6">
+      <button onclick="closeLockModal()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-colors">확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── 데이터 모델 (online-builder-v1과 일치) ───
+  // progress: 0~100 (영상=시청률, PDF=페이지진도, 시험·설문=제출 시 100)
+  const chapters = [
+    { id: 1, title: '오리엔테이션', items: [
+      { id: 11, type: 'video',   title: '코스 소개 영상',  duration: '15:00', isRequired: true, condText: '시청률 90% 이상',
+        progress: 100,
+        community: { enabled: true }, opinions: [
+          { user: '김태수', date: '2026-05-15', text: '환영사에서 말씀하신 가치가 실무에서는 어떻게 구체화되는지 궁금하네요.' },
+          { user: '이지영', date: '2026-05-16', text: '15분 영상에 핵심 메시지가 잘 압축되어 있어 좋았습니다.' },
+        ]},
+      { id: 12, type: 'pdf',     title: '2026년 핵심가치 가이드북', pages: 24, isRequired: false, condText: '',
+        progress: 0,
+        community: { enabled: false }, opinions: [] },
+    ]},
+    { id: 2, title: '핵심 개념 이해', items: [
+      { id: 21, type: 'video',   title: '1강. 핵심 개념', duration: '22:30', isRequired: true, condText: '시청률 90% 이상',
+        progress: 0,
+        community: { enabled: true }, opinions: [
+          { user: '박서준', date: '2026-05-17', text: '핵심 개념 정리가 깔끔합니다.' },
+        ]},
+      { id: 22, type: 'exam',    title: '중간 점검 퀴즈', isRequired: true, condText: '60점 이상 / 10문항',
+        progress: 0,
+        /* 시험은 의견 기능 미지원 */
+        opinions: [] },
+    ]},
+    { id: 3, title: '마무리', items: [
+      { id: 31, type: 'survey',  title: '만족도 설문', isRequired: true, condText: '전 문항 응답 후 제출',
+        progress: 0,
+        /* 설문은 의견 기능 미지원 */
+        opinions: [] },
+    ]},
+  ];
+
+  const TYPE_META = {
+    video:  { icon: 'play_circle',     label: '동영상' },
+    pdf:    { icon: 'picture_as_pdf',  label: 'PDF' },
+    exam:   { icon: 'quiz',            label: '시험' },
+    survey: { icon: 'poll',            label: '설문' },
+  };
+  // 아이콘 렌더 헬퍼 (Material Symbols Rounded)
+  function iconHTML(name, opts = {}) {
+    const size = opts.size ?? 14;
+    const cls  = opts.className ?? '';
+    return `<span class="ms ${cls}" style="font-size:${size}px">${name}</span>`;
+  }
+
+  // 자료(pdf) 판정 — 수료 무관, 정보성
+  function isMaterial(item) { return item.type === 'pdf'; }
+  // 의견 기능 지원 타입 — 시험·설문은 미지원
+  function supportsCommunity(item) { return item && item.type !== 'exam' && item.type !== 'survey'; }
+  // 이수 판정 — 자료는 수료 카운트에서 제외(아래 overallProgress 참고),
+  // 단 시각 표시(✓)는 열람 여부 기준 (progress >= 100)
+  function isCompleted(item) {
+    const p = item.progress ?? 0;
+    if (item.type === 'video') return p >= 90;
+    return p >= 100;
+  }
+  // 진도율 텍스트
+  function progressText(item) {
+    const p = item.progress ?? 0;
+    if (isMaterial(item))      return p >= 100 ? '열람함' : '미열람';
+    if (item.type === 'video') return `${p}%`;
+    if (item.type === 'exam')  return p >= 100 ? '응시 완료' : '미응시';
+    return p >= 100 ? '제출 완료' : '미응답';
+  }
+  // 커리큘럼 진입 가능 여부 — 자료는 필수 체크에서 제외
+  function canEnterItem(itemId) {
+    const targetChIdx = chapters.findIndex(ch => ch.items.some(it => it.id === itemId));
+    if (targetChIdx <= 0) return { ok: true };
+    for (let i = 0; i < targetChIdx; i++) {
+      const ch = chapters[i];
+      const blocker = ch.items.find(it => it.isRequired && !isMaterial(it) && !isCompleted(it));
+      if (blocker) return { ok: false, prevCh: ch, blocker };
+    }
+    return { ok: true };
+  }
+  // 전체 진도율 — 자료는 분모·분자 모두 제외 (수료 영향 없음)
+  function overallProgress() {
+    const learnable = chapters.flatMap(ch => ch.items).filter(it => !isMaterial(it));
+    if (learnable.length === 0) return 0;
+    const done = learnable.filter(isCompleted).length;
+    return Math.round(done / learnable.length * 100);
+  }
+
+  // ─── State ───
+  let currentItemId = 11;
+
+  // ─── 커리큘럼 리스트 렌더 ───
+  function renderCurriculum() {
+    // 전체 진도율 갱신
+    const overall = overallProgress();
+    const overallEl = document.getElementById('overall-progress');
+    const overallBarEl = document.getElementById('overall-progress-bar');
+    if (overallEl) overallEl.textContent = overall + '%';
+    if (overallBarEl) overallBarEl.style.width = overall + '%';
+
+    const root = document.getElementById('curriculum-root');
+    if (!root) return;
+
+    root.innerHTML = chapters.map((ch, chIdx) => {
+      const learnable = ch.items.filter(it => !isMaterial(it));
+      const totalLearn = learnable.length;
+      const doneLearn = learnable.filter(isCompleted).length;
+      const reqTotal = learnable.filter(it => it.isRequired).length;
+      const reqDone  = learnable.filter(it => it.isRequired && isCompleted(it)).length;
+      const materialCount = ch.items.filter(isMaterial).length;
+      // 커리큘럼 그룹 lock 상태
+      const groupLock = chIdx > 0 && !canEnterItem(ch.items[0]?.id ?? -1).ok;
+
+      const itemsHtml = ch.items.map(item => {
+        const isActive = item.id === currentItemId;
+        const meta = TYPE_META[item.type];
+        const opCount = item.opinions?.length ?? 0;
+        const opTag = (item.community?.enabled && supportsCommunity(item))
+          ? `<span class="inline-flex items-center gap-1 text-[11px] text-slate-500">${iconHTML('chat_bubble', { size: 12 })}${opCount}</span>`
+          : '';
+
+        // 자료(pdf) — slim 스타일, 학습 항목과 동일 좌측 아이콘 + 우측 상태 원
+        if (isMaterial(item)) {
+          const matCompleted = isCompleted(item);
+          const matCircle = matCompleted
+            ? `<div class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">${iconHTML('check', { size: 14 })}</div>`
+            : '<div class="w-6 h-6 rounded-full border-2 border-slate-300 shrink-0"></div>';
+          return `
+            <div onclick="selectItem(${item.id})"
+              class="flex items-start gap-2.5 py-2.5 px-4 border-t border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors group ${isActive ? 'bg-indigo-50/40' : ''}">
+              <span class="ms shrink-0 mt-0.5 ${isActive ? 'text-indigo-500' : 'text-slate-400'}" style="font-size:20px">attach_file</span>
+              <div class="flex-1 min-w-0 pr-2">
+                <h4 class="text-[12.5px] font-bold ${isActive ? 'text-indigo-900' : 'text-slate-600'} group-hover:text-indigo-600 truncate">${item.title}</h4>
+                <p class="text-[10.5px] text-slate-400 mt-0.5">자료 · ${item.pages ?? '–'}페이지${matCompleted ? ' · 열람함' : ''}</p>
+              </div>
+              ${opTag}
+              ${matCircle}
+            </div>
+          `;
+        }
+
+        const completed = isCompleted(item);
+        const pText = progressText(item);
+        const itemLock = !canEnterItem(item.id).ok;
+        const statusCircle = completed
+          ? `<div class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">${iconHTML('check', { size: 14 })}</div>`
+          : itemLock
+          ? `<div class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">${iconHTML('lock', { size: 12 })}</div>`
+          : '<div class="w-6 h-6 rounded-full border-2 border-slate-300 shrink-0"></div>';
+        return `
+          <div onclick="selectItem(${item.id})"
+            class="flex items-start gap-2.5 py-3 px-4 border-t border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors group ${isActive ? 'bg-indigo-50/40' : ''} ${itemLock ? 'opacity-60' : ''}">
+            <span class="ms shrink-0 mt-0.5 ${isActive ? 'text-indigo-500' : 'text-slate-400'}" style="font-size:20px">${meta.icon}</span>
+            <div class="flex-1 min-w-0 pr-2">
+              <h4 class="text-[13px] font-bold ${isActive ? 'text-indigo-900' : 'text-slate-800'} mb-1 group-hover:text-indigo-600 truncate">${item.title}</h4>
+              <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium flex-wrap">
+                ${item.duration ? `<span>${item.duration}</span>` : `<span>${meta.label}</span>`}
+                ${opTag}
+                ${item.isRequired ? '<span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">필수</span>' : ''}
+                <span class="text-[10px] font-bold ${completed ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-slate-500 bg-slate-50 border-slate-200'} border px-1.5 py-0.5 rounded">${pText}</span>
+              </div>
+            </div>
+            ${statusCircle}
+          </div>
+        `;
+      }).join('');
+
+      const headerLockChip = groupLock
+        ? `<span class="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded inline-flex items-center gap-1">${iconHTML('lock', { size: 10 })} 잠김</span>`
+        : '';
+      return `
+        <div class="bg-white border border-slate-200 rounded-xl mx-3 my-2.5 overflow-hidden">
+          <header class="px-4 pt-4 pb-3 flex items-center gap-2.5 bg-slate-50/40 border-b border-slate-100">
+            <div class="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[12px] font-black shrink-0">${String(chIdx+1).padStart(2,'0')}</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5">
+                <h3 class="text-[13px] font-black text-slate-900 truncate">${ch.title}</h3>
+                ${headerLockChip}
+              </div>
+              <p class="text-[10px] text-slate-500 font-medium mt-0.5">
+                학습 ${doneLearn}/${totalLearn}${reqTotal > 0 ? ` · 필수 ${reqDone}/${reqTotal}` : ''}${materialCount > 0 ? ` · 자료 ${materialCount}` : ''}
+              </p>
+            </div>
+          </header>
+          ${itemsHtml}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ─── 의견 탭 렌더 ───
+  function renderOpinion() {
+    const item = findItem(currentItemId);
+    document.getElementById('opinion-current-title').textContent = item.title;
+    document.getElementById('opinion-count').textContent = item.opinions?.length ?? 0;
+
+    if (!item.community?.enabled) {
+      document.getElementById('opinion-disabled-state').classList.remove('hidden');
+      document.getElementById('opinion-active').classList.add('hidden');
+      return;
+    }
+    document.getElementById('opinion-disabled-state').classList.add('hidden');
+    document.getElementById('opinion-active').classList.remove('hidden');
+
+    // 의견 목록
+    const list = document.getElementById('opinion-list');
+    if (!item.opinions || item.opinions.length === 0) {
+      list.innerHTML = `
+        <div class="text-center py-10">
+          <div class="text-slate-300 mb-2"><span class="ms" style="font-size:36px">chat_bubble_outline</span></div>
+          <p class="text-sm text-slate-500">첫 의견을 남겨보세요</p>
+        </div>
+      `;
+      return;
+    }
+    list.innerHTML = item.opinions.map(op => `
+      <div class="flex gap-3">
+        <div class="w-8 h-8 rounded-full bg-indigo-200 shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-xs font-bold text-slate-800">${op.user}</span>
+            <span class="text-[10px] text-slate-400">${op.date}</span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mb-2">${op.text}</p>
+          <button class="text-[10px] font-bold text-slate-400 hover:text-indigo-600">답글 달기</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ─── 항목 선택 ───
+  const VIDEO_FALLBACK = '../assets/test-video.mp4';
+  function selectItem(itemId) {
+    // 진입 가능 여부 체크 — 이전 커리큘럼 필수 항목 완료 필요
+    const gate = canEnterItem(itemId);
+    if (!gate.ok) {
+      showLockModal(gate);
+      return;
+    }
+    currentItemId = itemId;
+    const item = findItem(itemId);
+    if (!item) return;
+
+    // 자료(pdf) — 열람 시 진도율 100% 자동 (정보성 자료, 기존 운영 정책 유지)
+    if (isMaterial(item)) {
+      item.progress = 100;
+    }
+
+    // 본문 뷰 전환
+    ['video', 'pdf', 'exam', 'survey'].forEach(t => {
+      document.getElementById(`view-${t}`).classList.toggle('hidden', t !== item.type);
+    });
+
+    // 자료(pdf) 메타·제목·iframe 동적 갱신
+    if (item.type === 'pdf') {
+      const ch = chapters.find(c => c.items.some(it => it.id === itemId));
+      const chIdx = chapters.indexOf(ch);
+      const itIdx = ch.items.indexOf(item);
+      const pdfUrl = (item.fileUrl && item.fileUrl.trim()) || '../assets/test.pdf';
+      const metaEl = document.getElementById('pdf-meta');
+      const titleEl = document.getElementById('pdf-title');
+      const pagesEl = document.getElementById('pdf-pages');
+      const filenameEl = document.getElementById('pdf-filename');
+      const downloadEl = document.getElementById('pdf-download');
+      const frameEl = document.getElementById('pdf-frame');
+      if (metaEl) metaEl.textContent = `${String(chIdx+1).padStart(2,'0')} - ${itIdx+1} · 자료`;
+      if (titleEl) titleEl.textContent = item.title;
+      if (pagesEl) pagesEl.textContent = item.pages ? `· ${item.pages}p` : '';
+      if (filenameEl) filenameEl.textContent = pdfUrl.split('/').pop();
+      if (downloadEl) downloadEl.href = pdfUrl;
+      if (frameEl) {
+        const nextSrc = pdfUrl + '#view=FitH&toolbar=1';
+        if (frameEl.getAttribute('src') !== nextSrc) frameEl.setAttribute('src', nextSrc);
+      }
+    }
+
+    // 영상 메타·소스 동적 갱신
+    if (item.type === 'video') {
+      const player = document.getElementById('video-player');
+      const nextSrc = item.videoUrl && item.videoUrl.trim() ? item.videoUrl : VIDEO_FALLBACK;
+      if (player) {
+        const currentSrc = player.currentSrc || player.src;
+        if (!currentSrc.endsWith(nextSrc.replace(/^\.\.?\//, ''))) {
+          player.pause();
+          player.src = nextSrc;
+          player.load();
+        }
+      }
+      const ch = chapters.find(c => c.items.some(it => it.id === itemId));
+      const chIdx = chapters.indexOf(ch);
+      const itIdx = ch.items.indexOf(item);
+      const meta = document.getElementById('video-meta');
+      const titleEl = document.getElementById('video-title');
+      const condEl = document.getElementById('video-cond');
+      if (meta) meta.textContent = `${String(chIdx+1).padStart(2,'0')} - ${itIdx+1} · 동영상`;
+      if (titleEl) titleEl.textContent = item.title;
+      if (condEl) condEl.textContent = item.condText ? `이수 조건 · ${item.condText}` : '';
+    }
+
+    // 모바일 타이틀
+    const mobileTitle = document.getElementById('mobile-header-title');
+    if (mobileTitle) mobileTitle.textContent = item.title;
+
+    // 의견 탭 버튼 노출/숨김 — 시험·설문은 의견 미지원
+    const opinionBtn = document.getElementById('tab-btn-opinion');
+    if (opinionBtn) {
+      const supports = supportsCommunity(item);
+      opinionBtn.style.display = supports ? '' : 'none';
+      // 의견 탭이 활성인 채로 시험·설문으로 이동하면 자동 커리큘럼 전환
+      if (!supports && document.getElementById('tab-opinion').classList.contains('active')) {
+        switchTab('curriculum');
+      }
+    }
+
+    renderCurriculum();
+    renderOpinion();
+    document.querySelector('.content-area').scrollTop = 0;
+  }
+
+  function findItem(id) {
+    for (const ch of chapters) {
+      for (const it of ch.items) if (it.id === id) return it;
+    }
+    return null;
+  }
+
+  // ─── 탭 ───
+  function switchTab(target) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById(`tab-${target}`).classList.add('active');
+    ['curriculum', 'opinion'].forEach(t => {
+      const btn = document.getElementById(`tab-btn-${t}`);
+      if (t === target) {
+        btn.className = "py-3 px-3 text-sm font-black transition-all border-b-2 border-indigo-900 text-slate-900";
+      } else {
+        btn.className = "py-3 px-3 text-sm font-bold transition-all border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+      }
+    });
+    if (target === 'opinion') renderOpinion();
+  }
+
+  // ─── Lock Modal ───
+  function showLockModal(gate) {
+    document.getElementById('lock-prev-ch').textContent = gate.prevCh.title;
+    document.getElementById('lock-blocker').textContent = gate.blocker.title;
+    document.getElementById('lock-modal').classList.remove('hidden');
+  }
+  function closeLockModal(e) {
+    // 배경 클릭(e.target === modal) 또는 인자 없이 호출(확인 버튼)만 닫기
+    if (e && e.target && e.target.id !== 'lock-modal') return;
+    document.getElementById('lock-modal').classList.add('hidden');
+  }
+
+  // ─── 영상 진도 자동 추적 ───
+  function attachVideoProgressTracking() {
+    const player = document.getElementById('video-player');
+    if (!player) return;
+    player.addEventListener('timeupdate', () => {
+      const item = findItem(currentItemId);
+      if (!item || item.type !== 'video' || !player.duration) return;
+      const pct = Math.min(100, Math.round(player.currentTime / player.duration * 100));
+      // 5% 단위로만 리렌더
+      if (Math.floor(pct / 5) > Math.floor((item.progress ?? 0) / 5)) {
+        item.progress = pct;
+        renderCurriculum();
+      }
+    });
+    player.addEventListener('ended', () => {
+      const item = findItem(currentItemId);
+      if (!item || item.type !== 'video') return;
+      item.progress = 100;
+      renderCurriculum();
+    });
+  }
+
+  // ─── Init ───
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCurriculum();
+    renderOpinion();
+    attachVideoProgressTracking();
+  });
+</script>
+
+</body>
+</html>
