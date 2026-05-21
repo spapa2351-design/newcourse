@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수강관리 — newcourse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet"/>
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['"Pretendard"', '-apple-system', '"Segoe UI"', 'sans-serif'] },
+    }}}
+  </script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    body { font-family: 'Pretendard', sans-serif; font-size: 14px; line-height: 1.5; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+    .ms { font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal;
+          font-size: inherit; line-height: 1; display: inline-block; white-space: nowrap;
+          direction: ltr; -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased;
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20; vertical-align: -0.15em; }
+    .ms.fill { font-variation-settings: 'FILL' 1, 'wght' 400; }
+  </style>
+</head>
+<body class="bg-[#f2f5f9] text-slate-800 antialiased custom-scrollbar">
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    import React, { useState, useMemo } from 'https://esm.sh/react@18.2.0';
+    import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+    import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
+
+    const {
+      Plus, Search, ChevronDown, ChevronRight, ChevronLeft, Monitor, Layers,
+      Calendar, Users, Trash2, Star, Download, X, CheckCircle, Clock, Archive,
+      AlertCircle, BookOpen, QrCode, Eye, Settings, Filter, MessageSquare, Play,
+      BarChart2, MapPin, Copy, List, TrendingUp, Award
+    } = Lucide;
+
+    // Material Symbols 아이콘 헬퍼
+    const MS = ({ name, size = 16, className = '', fill }) => (
+      <span className={`ms ${fill ? 'fill' : ''} ${className}`} style={{ fontSize: size }}>{name}</span>
+    );
+
+    // ─── 글로벌 사이드 nav (admin 표준) — online-list.html과 동일 구조 ───
+    const SIDEBAR_MENUS = [
+      { id: 'member', label: '회원', icon: Users, hasChildren: true },
+      { id: 'course', label: '코스', icon: BookOpen, hasChildren: true, children: [
+        { id: 'course-main', label: '코스' },
+        { id: 'course-plus', label: 'PLUS 코스' },
+      ]},
+      /* 오프라인/온라인 코스는 '코스v2' children으로 이동 (NEW_MENUS 참조) */
+      { id: 'content', label: '콘텐츠', icon: Copy, hasChildren: true },
+      { id: 'ttube', label: 'T튜브', icon: Monitor, hasChildren: true },
+      { id: 'ai-quiz', label: 'AI 퀴메이커', icon: Star, badge: 'N' },
+      { id: 'question-bank', label: '문제 은행', icon: Archive },
+      { id: 'opinion', label: '의견', icon: AlertCircle },
+      { id: 'live', label: '라이브 스트리밍', icon: Eye, hasChildren: true },
+      { id: 'attendance', label: '출석 체크', icon: CheckCircle },
+      { id: 'stats', label: '통계', icon: Filter },
+      { id: 'notice', label: '공지사항', icon: Archive },
+    ];
+
+    /* ── 코스v2 (newcourse 전통 LMS) ──
+       이 페이지는 온라인 코스 상세 → online-course active.
+       블렌디드는 Phase 2 — 숨김.
+    */
+    const NEW_MENUS = [
+      { id: 'course-v2', label: '코스v2', icon: BarChart2, isHighlight: true, badge: 'N', hasChildren: true, children: [
+        { id: 'online-course',   label: '온라인 코스',   icon: Monitor, href: 'online-list.html',  active: true, tooltip: '영상 중심, 진도율 정확히 추적.' },
+        { id: 'offline-course',  label: '오프라인 코스', icon: MapPin,  href: 'offline-list.html', tooltip: '오프라인 일정·출석 기반 코스.' },
+      ]},
+    ];
+
+    // ─── 더미 코스 + 수강생 데이터 ───
+    const COURSE = {
+      id: 1,
+      title: '2026년 핵심가치 내재화 교육',
+      coverUrl: null,
+      status: 'running',  // running | scheduled | closed
+      studyPeriod: { type: 'unlimited' },
+      completionRule: '필수 콘텐츠 전체 이수',
+      chapters: [
+        { id: 1, title: '오리엔테이션', items: [
+          { id: 11, type: 'video', title: '코스 소개 영상', isRequired: true, duration: '15:00' },
+          { id: 12, type: 'pdf',   title: '2026년 핵심가치 가이드북', pages: 24 },
+        ]},
+        { id: 2, title: '핵심 개념 이해', items: [
+          { id: 21, type: 'video', title: '1강. 핵심 개념', isRequired: true, duration: '22:30' },
+          { id: 22, type: 'exam',  title: '중간 점검 퀴즈', isRequired: true },
+        ]},
+        { id: 3, title: '마무리', items: [
+          { id: 31, type: 'survey', title: '만족도 설문', isRequired: true },
+        ]},
+      ],
+    };
+
+    /* ─── 콘텐츠별 진행 (기획 인사이트) ─── */
+    const CONTENT_PROGRESS = [
+      { id: 'v1', type: 'video',  title: '코스 소개 영상', chapter: '오리엔테이션', total: 18, done: 16, rate: 89, required: true },
+      { id: 'p1', type: 'pdf',    title: '핵심가치 가이드북', chapter: '오리엔테이션', total: 18, done: 10, rate: 56, required: false },
+      { id: 'v2', type: 'video',  title: '1강. 핵심 개념',   chapter: '핵심 개념 이해', total: 18, done: 11, rate: 61, required: true },
+      { id: 'e1', type: 'exam',   title: '중간 점검 퀴즈',   chapter: '핵심 개념 이해', total: 18, done: 9,  rate: 50, required: true },
+      { id: 's1', type: 'survey', title: '만족도 설문',      chapter: '마무리', total: 18, done: 7,  rate: 39, required: true },
+    ];
+
+    /* ─── 소속별 수료 (기획 인사이트, offline 패턴 차용) ─── */
+    const DEPT_STATS = [
+      { dept: '개발팀',   count: 5, completed: 3 },
+      { dept: '기획팀',   count: 4, completed: 3 },
+      { dept: '디자인팀', count: 3, completed: 1 },
+      { dept: '영업팀',   count: 3, completed: 1 },
+      { dept: '인사팀',   count: 2, completed: 0 },
+      { dept: '재무팀',   count: 1, completed: 0 },
+    ];
+
+    /* ─── 7일 학습 트렌드 (스파크라인용) ─── */
+    const WEEK_TREND = [
+      { day: '월', learners: 6 }, { day: '화', learners: 8 }, { day: '수', learners: 5 },
+      { day: '목', learners: 9 }, { day: '금', learners: 11 }, { day: '토', learners: 4 },
+      { day: '일', learners: 5 },
+    ];
+
+    const ENROLLEES = Array.from({ length: 18 }, (_, i) => ({
+      id: 1000 + i,
+      photo: null,
+      userId: ['minjoon.kim', 'serina', 'choe.h', 'inhwa.lim', 'ds.kang', 'jw.park', 'sh.lee', 'hg.han', 'jeongmin', 'tae.so', 'eunji.j', 'ydw', 'kk.choi', 'sungho.j', 'aram.lim', 'mihee.k', 'yura.cha', 'jaehoon.shin'][i],
+      name: ['김민준', '강세린', '최현', '임인화', '강대수', '박지원', '이수현', '한하경', '정민', '소태경', '주은지', '양다은', '최강국', '장성호', '임아람', '김미희', '차유라', '신재훈'][i],
+      groups: [
+        ['기획팀'], ['디자인팀', '시니어'], ['개발팀'],
+        ['마케팅팀'], ['개발팀'], ['기획팀', '리더'],
+        ['디자인팀'], ['영업팀'], ['개발팀'], ['인사팀'],
+        ['마케팅팀'], ['기획팀'], ['개발팀', '시니어'], ['영업팀'], ['디자인팀'],
+        ['재무팀'], ['기획팀'], ['개발팀']
+      ][i],
+      period: '2026-01-15 ~ 무제한',
+      progress: [100, 100, 90, 75, 60, 100, 50, 30, 100, 80, 45, 100, 95, 70, 25, 100, 55, 0][i],
+      studyTime: ['1h 42m', '2h 10m', '58m', '45m', '32m', '1h 55m', '24m', '12m', '2h 02m', '47m', '20m', '1h 28m', '1h 12m', '34m', '8m', '1h 36m', '22m', '0m'][i],
+      completed: [true, true, true, false, false, true, false, false, true, false, false, true, true, false, false, true, false, false][i],
+    }));
+
+    /* ─── 메인 App ─── */
+    const App = () => {
+      const [sideExpanded, setSideExpanded] = useState(new Set(['course', 'course-v2']));
+      const toggle = id => setSideExpanded(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+      const [showCreateModal, setShowCreateModal] = useState(false);
+      React.useEffect(() => {
+        if (!showCreateModal) return;
+        const onKey = (e) => { if (e.key === 'Escape') setShowCreateModal(false); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      }, [showCreateModal]);
+      const goBuilder = (type) => {
+        window.location.href = type === 'online' ? 'online-builder.html' : 'offline-builder.html';
+      };
+
+      const [tab, setTab] = useState('dashboard');
+      const [showEnrollModal, setShowEnrollModal] = useState(false);
+      const [selectedRow, setSelectedRow] = useState(null);
+      const [progressFilter, setProgressFilter] = useState('all'); // 진도 구간 필터 (대시보드 막대 클릭 → 수강생 탭 점프)
+      const [contentCat, setContentCat] = useState('all');         // 콘텐츠 탭 카테고리 필터
+
+      const allItems = useMemo(() => COURSE.chapters.flatMap(c => c.items), []);
+
+      // ── offline-view 패턴 차용: 탭 4개 (대시보드/수강생/콘텐츠/통계) ──
+      const TABS = [
+        { id: 'dashboard', label: '대시보드', icon: 'dashboard',    tip: '진도율 분포·조치 필요·콘텐츠별 진행을 한눈에' },
+        { id: 'enrollees', label: '수강생',   icon: 'group',         tip: '수강생 명단·진도·이수 처리' },
+        { id: 'content',   label: '콘텐츠',   icon: 'layers',        tip: '영상·시험·설문·자료 진행 현황' },
+        { id: 'stats',     label: '통계',     icon: 'bar_chart',     tip: '부서·기간·구간별 분석 (기획팀 인사이트)' },
+      ];
+
+      /* 진도율 구간 분포 (운영 즉시 액션용) — 막대 클릭 → 수강생 탭 + 필터 */
+      const PROGRESS_BUCKETS = useMemo(() => {
+        const b = { 'none': 0, 'low': 0, 'mid': 0, 'high': 0, 'done': 0 };
+        ENROLLEES.forEach(e => {
+          if (e.progress === 0) b.none++;
+          else if (e.progress < 30) b.low++;
+          else if (e.progress < 60) b.mid++;
+          else if (e.progress < 100) b.high++;
+          else b.done++;
+        });
+        return b;
+      }, []);
+
+      const goEnrolleesWithFilter = (bucket) => {
+        setProgressFilter(bucket);
+        setTab('enrollees');
+      };
+
+      // KPI
+      const totalEnrolled = ENROLLEES.length;
+      const learners = ENROLLEES.filter(e => e.progress > 0).length;
+      const avgProgress = Math.round(ENROLLEES.reduce((sum, e) => sum + e.progress, 0) / totalEnrolled);
+      const completed = ENROLLEES.filter(e => e.completed).length;
+      const avgStudyMin = 47; // placeholder
+
+      return (
+        <div className="min-h-screen flex">
+          {/* ══ 글로벌 좌측 사이드바 ══ */}
+          <aside className="w-[200px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0 overflow-y-auto custom-scrollbar">
+            <div className="px-4 py-4 flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0 shadow-sm">
+                <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4"><path d="M7 2L2 5v7h4V9h2v3h4V5L7 2z" fill="white"/></svg>
+              </div>
+              <span className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">TOUCH<br/>CLASS</span>
+            </div>
+            <div className="h-px bg-slate-100 mx-3 mb-2"/>
+            <nav className="flex-1 px-3 pb-6 space-y-0.5">
+              {SIDEBAR_MENUS.map(menu => (
+                <React.Fragment key={menu.id}>
+                  <div>
+                    <button onClick={() => menu.hasChildren && toggle(menu.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors
+                        ${menu.active ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}>
+                      {React.createElement(menu.icon, { size: 16, className: menu.active ? 'text-indigo-600' : 'text-slate-400' })}
+                      <span className="flex-1 text-left">{menu.label}</span>
+                      {menu.badge && <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{menu.badge}</span>}
+                      {menu.hasChildren && <span className="text-slate-400">{sideExpanded.has(menu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}</span>}
+                    </button>
+                    {menu.children && sideExpanded.has(menu.id) && (
+                      <div className="ml-7 mt-0.5 space-y-0.5">
+                        {menu.children.map(sub => (
+                          <a key={sub.id} href="#" className={`block px-3 py-1.5 rounded-md text-[13px] transition-colors ${sub.active ? 'text-indigo-700 font-bold' : 'text-slate-500 hover:bg-slate-50 font-medium'}`}>{sub.label}</a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── 코스 그룹 직후: 코스v2 섹션 (구분선으로 패러다임 분리) ── */}
+                  {menu.id === 'course' && (
+                    <>
+                      <div className="my-2 mx-1 h-px bg-slate-200"/>
+                      {NEW_MENUS.map(newMenu => (
+                        <div key={newMenu.id}>
+                          <button
+                            onClick={() => newMenu.hasChildren && toggle(newMenu.id)}
+                            title={newMenu.tooltip || ''}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors
+                              ${newMenu.isHighlight ? 'text-slate-700 font-bold bg-emerald-50/60 hover:bg-emerald-50' : 'text-slate-600 hover:bg-slate-50'}`}
+                          >
+                            {React.createElement(newMenu.icon, { size: 16, className: newMenu.isHighlight ? 'text-emerald-600' : 'text-slate-400' })}
+                            <span className="flex-1 text-left">{newMenu.label}</span>
+                            {newMenu.badge && (
+                              <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{newMenu.badge}</span>
+                            )}
+                            {newMenu.hasChildren && (
+                              <span className={newMenu.isHighlight ? 'text-emerald-600' : 'text-slate-400'}>
+                                {sideExpanded.has(newMenu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
+                              </span>
+                            )}
+                          </button>
+                          {newMenu.children && sideExpanded.has(newMenu.id) && (
+                            <div className="ml-7 mt-0.5 space-y-0.5">
+                              {/* ── 코스 만들기 CTA (코스v2 children 최상단) ── */}
+                              <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="w-full px-3 py-1.5 rounded-md text-[13px] flex items-center gap-1.5 transition-colors text-slate-700 font-semibold hover:bg-emerald-50"
+                              >
+                                <Plus size={14} className="text-emerald-600"/>
+                                <span className="flex-1 text-left">코스 만들기</span>
+                              </button>
+                              {newMenu.children.map(sub => (
+                                <a key={sub.id} href={sub.disabled ? undefined : (sub.href || '#')} title={sub.tooltip || ''}
+                                  className={`px-3 py-1.5 rounded-md text-[13px] flex items-center gap-1.5 transition-colors
+                                    ${sub.disabled
+                                      ? 'text-slate-400 font-medium cursor-not-allowed'
+                                      : sub.active
+                                        ? 'text-emerald-700 bg-emerald-50 font-bold'
+                                        : 'text-slate-700 font-semibold hover:bg-emerald-50'}`}
+                                >
+                                  {sub.icon && React.createElement(sub.icon, { size: 14, className: sub.disabled ? 'text-slate-400' : 'text-emerald-600' })}
+                                  <span className="flex-1">{sub.label}</span>
+                                  {sub.badge && (
+                                    <span className="text-[9.5px] font-bold text-slate-400 px-1.5 py-0.5 bg-slate-100 rounded">{sub.badge}</span>
+                                  )}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <div className="my-2 mx-1 h-px bg-slate-200"/>
+                    </>
+                  )}
+                </React.Fragment>
+              ))}
+            </nav>
+          </aside>
+
+          <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#f2f5f9]">
+
+            {/* ── 글로벌 탑 ── */}
+            <div className="h-[52px] bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0">
+              <div className="flex items-center gap-3">
+                <button className="flex items-center gap-1.5 text-slate-600 text-[14px] font-semibold">
+                  <Star size={14} className="text-amber-400 fill-amber-400"/> 즐겨찾기
+                </button>
+                <div className="w-px h-4 bg-slate-200"/>
+                <button className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-[13px] font-bold">
+                  <Users size={12}/> 관리자 가이드
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="flex items-center gap-1.5 hover:bg-slate-50 pl-0.5 pr-2 py-1 rounded-lg">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-[12px] font-bold">조</div>
+                  <span className="text-[14px] font-semibold text-slate-700">조찬현</span>
+                  <ChevronDown size={13} className="text-slate-400"/>
+                </button>
+              </div>
+            </div>
+
+            {/* ── 페이지 헤더 ── */}
+            <div className="px-8 py-5 flex justify-between items-start shrink-0 bg-[#f2f5f9]">
+              <div className="flex items-center gap-3 min-w-0">
+                <a href="online-list.html" className="w-8 h-8 bg-white border border-slate-200 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors shrink-0" title="온라인 코스">
+                  <ChevronLeft size={18}/>
+                </a>
+                <div className="min-w-0">
+                  <div className="text-[13px] text-slate-400 font-semibold mb-1 flex items-center gap-1.5">
+                    <a href="online-list.html" className="hover:text-slate-600">온라인 코스</a>
+                    <ChevronRight size={11}/>
+                    <span>수강관리</span>
+                  </div>
+                  <h1 className="text-[20px] font-black text-slate-900 leading-tight truncate">{COURSE.title}</h1>
+                </div>
+                <span className="ml-2 px-2.5 py-1 rounded-full text-[12px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200 shrink-0">
+                  운영중
+                </span>
+              </div>
+              <button onClick={() => setShowEnrollModal(true)}
+                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-sm shrink-0">
+                <Plus size={15}/> 수강생 등록
+              </button>
+            </div>
+
+            {/* ── 본문 (좌측 메타 + 메인 — offline-view 톤 차용) ── */}
+            <div className="flex flex-1 overflow-hidden gap-3 px-4 pb-4 pt-0 items-start">
+
+              {/* ══ 좌측 메타 패널 (230px — offline-view 톤 그대로 차용) ══ */}
+              <aside className="w-[230px] bg-white rounded-xl shadow-sm shrink-0 flex flex-col overflow-hidden self-stretch border border-slate-100">
+                {/* 커버 영역 */}
+                <div className="bg-white px-3 pt-3 pb-2 shrink-0 border-b border-slate-100 flex flex-col items-center gap-2">
+                  {/* 배지 블록 */}
+                  <div className="w-full flex gap-1">
+                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">의무 교육</span>
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">운영중</span>
+                  </div>
+                  {/* 표지 9:16 (offline 톤) */}
+                  <div className="w-[100px] rounded-md bg-gradient-to-br from-indigo-100 to-violet-100 border border-slate-200 flex items-center justify-center" style={{ aspectRatio: '9/16' }}>
+                    <MS name="image" size={28} className="text-slate-300"/>
+                  </div>
+                  {/* 타이틀 */}
+                  <div className="w-full text-[13px] font-black text-slate-900 leading-snug">{COURSE.title}</div>
+                </div>
+
+                {/* 코스 정보 영역 */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-0">
+                  {/* 메타 테이블 (label-value, offline 패턴) */}
+                  <div className="space-y-2 pb-4 border-b border-slate-100">
+                    {[
+                      { label: '완료 조건', value: COURSE.completionRule },
+                      { label: '커리큘럼', value: `${COURSE.chapters.length}챕터 · ${allItems.length}항목` },
+                      { label: '필수 항목', value: `${allItems.filter(i => i.isRequired).length}개` },
+                      { label: '수강 기간', value: '제한 없음' },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="flex items-start justify-between gap-2 text-[13px]">
+                        <span className="text-slate-400 font-bold w-14 shrink-0">{label}</span>
+                        <span className="text-slate-700 font-semibold text-right leading-snug">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 수강 현황 */}
+                  <div className="py-4 border-b border-slate-100">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">수강 현황</div>
+                    <div className="flex items-baseline gap-1 mb-1.5">
+                      <span className="text-[22px] font-black text-slate-900 leading-none">{totalEnrolled}</span>
+                      <span className="text-[14px] font-bold text-slate-400">명 신청</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${learners / totalEnrolled * 100}%` }}/>
+                    </div>
+                    <div className="text-[11px] text-slate-400 font-medium mt-1">학습중 {learners}명 · {Math.round(learners / totalEnrolled * 100)}%</div>
+                  </div>
+
+                  {/* 수료 현황 */}
+                  <div className="py-4 border-b border-slate-100">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">수료 현황</div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-[22px] font-black text-emerald-600 leading-none">{completed}</span>
+                      <span className="text-[14px] font-bold text-slate-400">/ {totalEnrolled}명</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mt-1.5">
+                      <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${Math.round(completed / totalEnrolled * 100)}%` }}/>
+                    </div>
+                    <div className="text-[11px] text-emerald-600 font-semibold mt-1">수료율 {Math.round(completed / totalEnrolled * 100)}%</div>
+                  </div>
+
+                  {/* 평균 진도율 (offline의 평균 출석률 자리) */}
+                  <div className="py-4 border-b border-slate-100">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">평균 진도율</div>
+                    <div className="text-[22px] font-black text-amber-500 leading-none">{avgProgress}%</div>
+                    <div className="text-[11px] text-slate-400 font-medium mt-0.5">평균 학습 시간 {avgStudyMin}분</div>
+                  </div>
+
+                  {/* QR 코드 (작게 — 클릭 시 별도 확장 가능) */}
+                  <div className="py-3">
+                    <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
+                      <MS name="qr_code_2" size={14}/>
+                      <span className="flex-1 text-left">코스 QR 코드</span>
+                      <MS name="chevron_right" size={13} className="text-slate-400"/>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 액션 버튼 (offline 패턴) */}
+                <div className="p-4 border-t border-slate-100 space-y-2 shrink-0">
+                  <a href="online-builder.html"
+                    className="w-full flex items-center justify-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[14px] py-2 rounded-xl transition-colors border border-indigo-200">
+                    <MS name="info" size={13}/> 코스 정보
+                  </a>
+                  <button
+                    className="w-full flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[13px] py-2 rounded-xl transition-colors">
+                    <MS name="stop_circle" size={12}/> 운영 종료
+                  </button>
+                </div>
+              </aside>
+
+              {/* ══ 메인 영역 (KPI + 탭 카드 — offline-view 톤) ══ */}
+              <main className="flex-1 overflow-y-auto custom-scrollbar space-y-4 self-stretch">
+
+                {/* KPI 4개 (메인 안 — offline 패턴) */}
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    { label: '총 수강생',   value: `${totalEnrolled}명`, sub: '신규 +3 (7일)',                                              color: 'text-indigo-600',  bg: 'bg-indigo-50',  icon: Users      },
+                    { label: '평균 진도율', value: `${avgProgress}%`,    sub: `학습중 ${learners}명`,                                       color: 'text-emerald-600', bg: 'bg-emerald-50', icon: TrendingUp },
+                    { label: '수료 완료',   value: `${completed}명`,     sub: `전체의 ${Math.round(completed / totalEnrolled * 100)}%`,    color: 'text-violet-600',  bg: 'bg-violet-50',  icon: Award      },
+                    { label: '7일 학습 인원', value: '11명',             sub: '어제 5명',                                                   color: 'text-amber-600',   bg: 'bg-amber-50',   icon: Clock      },
+                  ].map((s, i) => (
+                    <div key={i} className="bg-white rounded-xl px-4 py-3.5 shadow-sm flex items-center gap-3">
+                      <div className={`w-9 h-9 ${s.bg} rounded-xl flex items-center justify-center shrink-0`}>
+                        <s.icon size={17} className={s.color}/>
+                      </div>
+                      <div>
+                        <div className={`text-[18px] font-black ${s.color} leading-none`}>{s.value}</div>
+                        <div className="text-[12px] text-slate-400 font-medium mt-0.5">{s.label} · {s.sub}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 탭 카드 (offline-view 톤) */}
+                <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
+                {/* 탭바 (4개, 아이콘 + tooltip — offline 패턴) */}
+                <div className="flex border-b border-slate-100 shrink-0 bg-white">
+                  {TABS.map(t => (
+                    <div key={t.id} className="relative group">
+                      <button onClick={() => setTab(t.id)}
+                        className={`flex items-center gap-2 px-6 py-4 text-[14px] font-bold border-b-2 transition-colors
+                          ${tab === t.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-700'}`}>
+                        <MS name={t.icon} size={15}/>{t.label}
+                      </button>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2.5 py-1.5 bg-slate-800 text-white text-[12px] rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                        {t.tip}
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"/>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 탭 콘텐츠 — 각 탭이 자체 padding 보유 */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+
+                  {/* ─── 대시보드 탭 (운영 위 + 기획 아래) ─── */}
+                  {tab === 'dashboard' && (
+                    <div className="p-5 space-y-5 animate-fadeIn">
+
+                      {/* [운영] 진도율 구간 분포 — 막대 클릭 → 수강생 탭 + 필터 */}
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-[13px] font-bold text-slate-400 uppercase tracking-wide">진도율 분포</div>
+                          <div className="text-[12px] text-slate-400">막대 클릭 → 수강생 명단으로 이동</div>
+                        </div>
+                        <div className="grid grid-cols-5 gap-2">
+                          {[
+                            { key: 'none', label: '0%',     range: '미시작',  count: PROGRESS_BUCKETS.none, color: 'bg-rose-100 hover:bg-rose-200 text-rose-700 border-rose-200' },
+                            { key: 'low',  label: '1-29%',  range: '저조',    count: PROGRESS_BUCKETS.low,  color: 'bg-amber-100 hover:bg-amber-200 text-amber-700 border-amber-200' },
+                            { key: 'mid',  label: '30-59%', range: '진행중',  count: PROGRESS_BUCKETS.mid,  color: 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200' },
+                            { key: 'high', label: '60-99%', range: '거의 완료', count: PROGRESS_BUCKETS.high, color: 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700 border-indigo-200' },
+                            { key: 'done', label: '100%',   range: '수료',    count: PROGRESS_BUCKETS.done, color: 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-emerald-200' },
+                          ].map(b => {
+                            const pct = totalEnrolled > 0 ? Math.round(b.count / totalEnrolled * 100) : 0;
+                            return (
+                              <button key={b.key} onClick={() => goEnrolleesWithFilter(b.key)}
+                                className={`p-4 rounded-xl border cursor-pointer transition-all text-left ${b.color}`}>
+                                <div className="text-[11px] font-bold opacity-80 mb-1">{b.range}</div>
+                                <div className="text-[24px] font-black leading-none tabular-nums">{b.count}<span className="text-[14px] font-bold opacity-70 ml-0.5">명</span></div>
+                                <div className="text-[11px] font-bold opacity-70 mt-1">{b.label} · {pct}%</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* 2열 그리드: 조치 필요 + 콘텐츠별 진행 */}
+                      <div className="grid grid-cols-2 gap-4">
+
+                        {/* [운영] 조치 필요 */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                          <div className="flex items-center gap-1.5 mb-3">
+                            <AlertCircle size={13} className="text-amber-500"/>
+                            <span className="text-[14px] font-bold text-slate-700">조치 필요</span>
+                          </div>
+                          <div className="space-y-2">
+                            {[
+                              { badge: '진도', text: `7일+ 정체자 ${PROGRESS_BUCKETS.none + PROGRESS_BUCKETS.low}명 — 푸시 대상`, sev: 'rose',  jump: 'none' },
+                              { badge: '시험', text: `중간 점검 퀴즈 미응시 ${Math.round(totalEnrolled * 0.5)}명`,                  sev: 'amber', jump: null   },
+                              { badge: '설문', text: `만족도 설문 미응답 ${Math.round(totalEnrolled * 0.61)}명`,                    sev: 'amber', jump: null   },
+                              { badge: '수료', text: `완료 임박 (90%+) ${PROGRESS_BUCKETS.high}명 — 마지막 푸시`,                  sev: 'indigo', jump: 'high' },
+                            ].map((item, i) => {
+                              const colors = {
+                                amber:  'text-amber-600 bg-amber-50 border-amber-200',
+                                rose:   'text-rose-600 bg-rose-50 border-rose-200',
+                                indigo: 'text-indigo-600 bg-indigo-50 border-indigo-200',
+                              };
+                              return (
+                                <div key={i} onClick={() => item.jump && goEnrolleesWithFilter(item.jump)}
+                                  className={`flex items-center gap-2.5 bg-slate-50 rounded-lg px-3 py-2.5 border border-slate-100 ${item.jump ? 'cursor-pointer hover:bg-slate-100' : ''} transition-colors`}>
+                                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${colors[item.sev]}`}>{item.badge}</span>
+                                  <span className="text-[13px] font-semibold text-slate-700 leading-tight flex-1">{item.text}</span>
+                                  {item.jump && <ChevronRight size={13} className="text-slate-400 shrink-0"/>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* [기획] 콘텐츠별 진행 — 빨강 = 막힌 콘텐츠 인사이트 */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                          <div className="flex items-center gap-1.5 mb-3">
+                            <MS name="layers" size={14} className="text-violet-500"/>
+                            <span className="text-[14px] font-bold text-slate-700">콘텐츠별 진행</span>
+                            <span className="text-[11px] font-bold text-slate-400 ml-auto">기획 인사이트</span>
+                          </div>
+                          <div className="space-y-2.5">
+                            {CONTENT_PROGRESS.map(c => {
+                              const ICONS = { video: 'play_circle', pdf: 'attach_file', exam: 'quiz', survey: 'poll' };
+                              const tone = c.rate >= 75 ? 'bg-emerald-400' : c.rate >= 50 ? 'bg-indigo-400' : 'bg-rose-400';
+                              return (
+                                <div key={c.id} onClick={() => { setContentCat(c.type); setTab('content'); }}
+                                  className="cursor-pointer hover:bg-slate-50 -mx-1 px-1 py-0.5 rounded transition-colors">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <MS name={ICONS[c.type]} size={13} className="text-slate-400 shrink-0"/>
+                                    <span className="text-[13px] font-semibold text-slate-600 truncate flex-1">{c.title}</span>
+                                    {c.required && <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded shrink-0">필수</span>}
+                                    <span className={`text-[12px] font-black tabular-nums ${c.rate >= 75 ? 'text-emerald-600' : c.rate >= 50 ? 'text-indigo-600' : 'text-rose-500'}`}>{c.rate}%</span>
+                                  </div>
+                                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full transition-all ${tone}`} style={{ width: `${c.rate}%` }}/>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 2열 그리드: 소속별 수료 + 7일 학습 트렌드 */}
+                      <div className="grid grid-cols-2 gap-4">
+
+                        {/* [기획] 소속별 수료 (offline 패턴 그대로) */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                          <div className="text-[14px] font-bold text-slate-700 mb-3">소속별 수료 현황</div>
+                          <div className="space-y-3">
+                            {DEPT_STATS.map((d, i) => {
+                              const rate = Math.round(d.completed / d.count * 100);
+                              return (
+                                <div key={i}>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-[13px] font-semibold text-slate-600">{d.dept}</span>
+                                    <div className="flex items-center gap-2.5 text-[12px]">
+                                      <span className="text-slate-400">{d.count}명 수강</span>
+                                      <span className={`font-bold ${rate === 0 ? 'text-slate-400' : 'text-emerald-600'}`}>수료 {d.completed}명</span>
+                                    </div>
+                                  </div>
+                                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full transition-all ${rate >= 60 ? 'bg-emerald-400' : rate > 0 ? 'bg-amber-400' : 'bg-slate-200'}`} style={{ width: `${rate}%` }}/>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* [기획] 7일 학습 트렌드 — 미니 막대 차트 */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-[14px] font-bold text-slate-700">7일 학습 트렌드</span>
+                            <span className="text-[11px] font-bold text-slate-400">일별 학습 인원</span>
+                          </div>
+                          <div className="flex items-end justify-between gap-2 h-[120px]">
+                            {WEEK_TREND.map((d, i) => {
+                              const maxV = Math.max(...WEEK_TREND.map(w => w.learners));
+                              const h = maxV > 0 ? Math.round(d.learners / maxV * 100) : 0;
+                              const isToday = i === WEEK_TREND.length - 1;
+                              return (
+                                <div key={i} className="flex-1 flex flex-col items-center justify-end h-full gap-1.5">
+                                  <span className={`text-[11px] font-bold tabular-nums ${isToday ? 'text-indigo-600' : 'text-slate-400'}`}>{d.learners}</span>
+                                  <div className={`w-full rounded-t-md transition-all ${isToday ? 'bg-indigo-500' : 'bg-indigo-200'}`} style={{ height: `${Math.max(h, 4)}%` }}/>
+                                  <span className={`text-[11px] font-bold ${isToday ? 'text-indigo-600' : 'text-slate-400'}`}>{d.day}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {tab === 'enrollees' && (
+                    <div className="p-5 animate-fadeIn">
+                      {/* 진도 구간 필터 칩 (대시보드 막대 클릭으로 진입 시 활성) */}
+                      {progressFilter !== 'all' && (
+                        <div className="mb-3 flex items-center gap-2">
+                          <span className="text-[12px] font-bold text-slate-400">진도 필터:</span>
+                          <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full">
+                            {progressFilter === 'none' ? '0% (미시작)' : progressFilter === 'low' ? '1-29% (저조)' : progressFilter === 'mid' ? '30-59% (진행중)' : progressFilter === 'high' ? '60-99% (거의 완료)' : '100% (수료)'}
+                            <button onClick={() => setProgressFilter('all')} className="hover:text-indigo-900"><X size={11}/></button>
+                          </span>
+                        </div>
+                      )}
+
+                      {/* 필터 + 액션 */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="relative">
+                            <MS name="search" size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"/>
+                            <input type="text" placeholder="이름·아이디 검색"
+                              className="pl-8 pr-3 py-1.5 text-[13px] border border-slate-200 rounded-lg w-[200px] focus:border-indigo-400 outline-none"/>
+                          </div>
+                          <select className="text-[13px] border border-slate-200 rounded-lg px-2 py-1.5 font-semibold text-slate-600">
+                            <option>전체 회원</option>
+                            <option>정회원</option>
+                            <option>준회원</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button className="text-[13px] font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                            <MS name="schedule" size={12}/> 전체 수강기간 변경
+                          </button>
+                          <button className="text-[13px] font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                            <MS name="download" size={12}/> 다운로드
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 테이블 */}
+                      <div className="border border-slate-200 rounded-xl overflow-hidden">
+                        <table className="w-full text-[13.5px]">
+                          <thead className="bg-slate-50 border-b border-slate-200">
+                            <tr className="text-left text-slate-500 font-bold text-[12px]">
+                              <th className="px-3 py-2.5 w-10"><input type="checkbox" className="w-3.5 h-3.5 accent-indigo-600"/></th>
+                              <th className="px-3 py-2.5">회원</th>
+                              <th className="px-3 py-2.5 w-[140px]">아이디</th>
+                              <th className="px-3 py-2.5 w-[100px]">이름</th>
+                              <th className="px-3 py-2.5">소속</th>
+                              <th className="px-3 py-2.5 w-[180px]">수강 기간</th>
+                              <th className="px-3 py-2.5 w-[100px]">진도율</th>
+                              <th className="px-3 py-2.5 w-[80px] text-right">학습 시간</th>
+                              <th className="px-3 py-2.5 w-[60px] text-center">이수</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {ENROLLEES.filter(e => {
+                              if (progressFilter === 'all')  return true;
+                              if (progressFilter === 'none') return e.progress === 0;
+                              if (progressFilter === 'low')  return e.progress > 0 && e.progress < 30;
+                              if (progressFilter === 'mid')  return e.progress >= 30 && e.progress < 60;
+                              if (progressFilter === 'high') return e.progress >= 60 && e.progress < 100;
+                              if (progressFilter === 'done') return e.progress === 100;
+                              return true;
+                            }).map(e => (
+                              <tr key={e.id} onClick={() => setSelectedRow(e)}
+                                className="border-t border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                                <td className="px-3 py-2.5" onClick={ev => ev.stopPropagation()}>
+                                  <input type="checkbox" className="w-3.5 h-3.5 accent-indigo-600"/>
+                                </td>
+                                <td className="px-3 py-2.5">
+                                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-white text-[11px] font-bold">
+                                    {e.name.charAt(0)}
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2.5 text-slate-600 font-mono text-[12.5px]">{e.userId}</td>
+                                <td className="px-3 py-2.5 font-bold text-slate-800">{e.name}</td>
+                                <td className="px-3 py-2.5">
+                                  <div className="flex flex-wrap gap-1">
+                                    {e.groups.map((g, i) => (
+                                      <span key={i} className="inline-block text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">{g}</span>
+                                    ))}
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2.5 text-[12px] text-slate-600 font-medium">{e.period}</td>
+                                <td className="px-3 py-2.5">
+                                  <div className="flex items-center gap-1.5">
+                                    <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                      <div className={`h-full ${e.progress === 100 ? 'bg-emerald-500' : e.progress >= 50 ? 'bg-indigo-500' : 'bg-rose-400'}`}
+                                        style={{ width: `${e.progress}%` }}/>
+                                    </div>
+                                    <span className={`text-[12px] font-black tabular-nums w-8 text-right ${e.progress === 100 ? 'text-emerald-600' : 'text-slate-700'}`}>{e.progress}%</span>
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2.5 text-right text-[12px] text-slate-600 font-semibold tabular-nums">{e.studyTime}</td>
+                                <td className="px-3 py-2.5 text-center">
+                                  {e.completed ? (
+                                    <span className="inline-flex w-6 h-6 rounded-full bg-indigo-600 text-white items-center justify-center">
+                                      <MS name="check" size={14}/>
+                                    </span>
+                                  ) : (
+                                    <span className="inline-block w-6 h-6 rounded-full border-2 border-slate-200"/>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* 페이지네이션 */}
+                      <div className="flex items-center justify-between mt-4">
+                        <p className="text-[12px] text-slate-500">총 {totalEnrolled}명</p>
+                        <div className="flex items-center gap-1">
+                          <button className="w-7 h-7 rounded-md hover:bg-slate-100 text-slate-400"><MS name="chevron_left" size={14}/></button>
+                          <button className="w-7 h-7 rounded-md bg-indigo-600 text-white text-[13px] font-bold">1</button>
+                          <button className="w-7 h-7 rounded-md hover:bg-slate-100 text-slate-600 text-[13px] font-semibold">2</button>
+                          <button className="w-7 h-7 rounded-md hover:bg-slate-100 text-slate-400"><MS name="chevron_right" size={14}/></button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ─── 콘텐츠 탭 (영상·시험·설문·자료 통합 + 카테고리 필터) ─── */}
+                  {tab === 'content' && (
+                    <div className="p-5 animate-fadeIn">
+                      {/* 카테고리 칩 */}
+                      <div className="flex items-center gap-2 mb-4">
+                        {[
+                          { k: 'all',    label: '전체',     icon: 'layers' },
+                          { k: 'video',  label: '영상',     icon: 'play_circle' },
+                          { k: 'exam',   label: '시험',     icon: 'quiz' },
+                          { k: 'survey', label: '설문',     icon: 'poll' },
+                          { k: 'pdf',    label: '자료',     icon: 'attach_file' },
+                        ].map(c => (
+                          <button key={c.k} onClick={() => setContentCat(c.k)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-colors border
+                              ${contentCat === c.k ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>
+                            <MS name={c.icon} size={13}/>{c.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* 항목 카드 그리드 */}
+                      <div className="grid grid-cols-2 gap-3">
+                        {CONTENT_PROGRESS.filter(c => contentCat === 'all' || c.type === contentCat).map(c => {
+                          const ICONS = { video: 'play_circle', pdf: 'attach_file', exam: 'quiz', survey: 'poll' };
+                          const ICON_COLORS = { video: 'text-indigo-500 bg-indigo-50', pdf: 'text-amber-600 bg-amber-50', exam: 'text-violet-500 bg-violet-50', survey: 'text-pink-500 bg-pink-50' };
+                          const tone = c.rate >= 75 ? 'bg-emerald-400' : c.rate >= 50 ? 'bg-indigo-400' : 'bg-rose-400';
+                          return (
+                            <div key={c.id} className="bg-white border border-slate-200 rounded-xl p-4">
+                              <div className="flex items-start gap-2.5 mb-3">
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${ICON_COLORS[c.type]}`}>
+                                  <MS name={ICONS[c.type]} size={16}/>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-[11px] font-bold text-slate-400 mb-0.5">{c.chapter}</div>
+                                  <div className="text-[14px] font-black text-slate-800 leading-tight truncate">{c.title}</div>
+                                </div>
+                                {c.required
+                                  ? <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded shrink-0">필수</span>
+                                  : <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded shrink-0">선택</span>}
+                              </div>
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-[12px] text-slate-400 font-medium">{c.done}/{c.total}명 완료</span>
+                                <span className={`text-[14px] font-black tabular-nums ${c.rate >= 75 ? 'text-emerald-600' : c.rate >= 50 ? 'text-indigo-600' : 'text-rose-500'}`}>{c.rate}%</span>
+                              </div>
+                              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full transition-all ${tone}`} style={{ width: `${c.rate}%` }}/>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ─── 통계 탭 (기획 인사이트 — Phase 2 본격 구현 예정) ─── */}
+                  {tab === 'stats' && (
+                    <div className="p-5 animate-fadeIn">
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* 평균 점수 분포 placeholder */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-5">
+                          <div className="flex items-center gap-1.5 mb-3">
+                            <MS name="quiz" size={14} className="text-violet-500"/>
+                            <span className="text-[14px] font-bold text-slate-700">시험 점수 분포</span>
+                          </div>
+                          <div className="bg-slate-50 border border-dashed border-slate-300 rounded-lg p-8 text-center">
+                            <div className="text-[24px] font-black text-slate-700 mb-1">평균 72점</div>
+                            <p className="text-[12px] text-slate-400">응시 {Math.round(totalEnrolled * 0.5)}명 · 최고 95점 · 최저 48점</p>
+                            <p className="text-[11px] text-slate-400 mt-3 italic">Phase 2: 점수대별 히스토그램 차트</p>
+                          </div>
+                        </div>
+
+                        {/* 학습 시간대 분포 placeholder */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-5">
+                          <div className="flex items-center gap-1.5 mb-3">
+                            <MS name="schedule" size={14} className="text-amber-500"/>
+                            <span className="text-[14px] font-bold text-slate-700">학습 시간대</span>
+                          </div>
+                          <div className="bg-slate-50 border border-dashed border-slate-300 rounded-lg p-8 text-center">
+                            <div className="text-[14px] font-bold text-slate-600 mb-1">피크: <span className="text-slate-900 font-black">점심·퇴근직전</span></div>
+                            <p className="text-[12px] text-slate-400">12-13시, 17-19시 학습 집중</p>
+                            <p className="text-[11px] text-slate-400 mt-3 italic">Phase 2: 24시간 히트맵 차트</p>
+                          </div>
+                        </div>
+
+                        {/* 부서×진도 매트릭스 placeholder */}
+                        <div className="col-span-2 bg-white border border-slate-200 rounded-xl p-5">
+                          <div className="flex items-center gap-1.5 mb-3">
+                            <MS name="grid_on" size={14} className="text-indigo-500"/>
+                            <span className="text-[14px] font-bold text-slate-700">부서 × 진도 구간 매트릭스</span>
+                            <span className="text-[11px] font-bold text-slate-400 ml-auto">기획 인사이트 — 부서별 진도 편차 시각화</span>
+                          </div>
+                          <div className="bg-slate-50 border border-dashed border-slate-300 rounded-lg p-10 text-center">
+                            <p className="text-[13px] text-slate-400">Phase 2: 부서×구간(미시작/저조/진행/완료) 히트맵</p>
+                            <p className="text-[12px] text-slate-400 mt-1">붉을수록 부진 부서 → 푸시·면담 트리거</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                </div>  {/* 탭 콘텐츠 닫기 */}
+                </div>  {/* 탭 카드 닫기 */}
+              </main>  {/* 메인 영역 닫기 */}
+            </div>  {/* 본문 flex 닫기 */}
+          </div>  {/* 페이지 wrapper 닫기 */}
+
+          {/* 수강생 등록 모달 */}
+          {showEnrollModal && (
+            <EnrollModal onClose={() => setShowEnrollModal(false)}/>
+          )}
+
+          {/* 개인 상세 사이드 시트 (placeholder) */}
+          {selectedRow && (
+            <div className="fixed inset-0 bg-slate-900/40 z-[100] flex justify-end animate-fadeIn" onClick={() => setSelectedRow(null)}>
+              <div className="w-[440px] bg-white h-full overflow-y-auto custom-scrollbar shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                  <h3 className="text-[15px] font-black text-slate-900">수강생 상세</h3>
+                  <button onClick={() => setSelectedRow(null)} className="text-slate-400 hover:text-slate-600"><X size={20}/></button>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-white text-[20px] font-bold">{selectedRow.name.charAt(0)}</div>
+                    <div>
+                      <p className="text-[16px] font-black text-slate-900">{selectedRow.name}</p>
+                      <p className="text-[13px] text-slate-500 font-mono">{selectedRow.userId}</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedRow.groups.map((g, i) => (
+                          <span key={i} className="inline-block text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">{g}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                      <p className="text-[11px] font-bold text-slate-400 mb-1">진도율</p>
+                      <p className="text-[20px] font-black text-slate-900">{selectedRow.progress}<span className="text-[13px] text-slate-500">%</span></p>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                      <p className="text-[11px] font-bold text-slate-400 mb-1">학습 시간</p>
+                      <p className="text-[20px] font-black text-slate-900">{selectedRow.studyTime}</p>
+                    </div>
+                  </div>
+                  <p className="text-[13px] font-bold text-slate-400 mb-2">항목별 진행</p>
+                  <div className="space-y-2">
+                    {COURSE.chapters.flatMap(ch => ch.items).map(it => (
+                      <div key={it.id} className="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2">
+                        <MS name={it.type === 'video' ? 'play_circle' : it.type === 'pdf' ? 'attach_file' : it.type === 'exam' ? 'quiz' : 'poll'} size={16} className="text-slate-400"/>
+                        <span className="flex-1 text-[13px] font-bold text-slate-700 truncate">{it.title}</span>
+                        <span className="text-[11px] font-bold text-slate-500">미시작</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-slate-400 text-center mt-6 italic">Phase 1: 항목별 진행 데이터 연동 예정</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══ 코스 만들기 모달 (코스v2 진입) ══ */}
+          {showCreateModal && (
+            <div
+              className="fixed inset-0 z-[100] bg-slate-900/40 flex items-center justify-center p-6"
+              onClick={() => setShowCreateModal(false)}
+            >
+              <div
+                className="bg-[#f7f9fc] rounded-3xl shadow-2xl w-[1100px] max-w-[95vw] max-h-[92vh] overflow-y-auto p-12 relative"
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  aria-label="닫기"
+                >
+                  <X size={18}/>
+                </button>
+
+                <h1 className="text-[34px] font-black text-center text-slate-900 mb-14">어떤 코스를 개설하시겠어요?</h1>
+
+                <div className="grid grid-cols-2 gap-6 max-w-[820px] mx-auto">
+                  <button
+                    onClick={() => goBuilder('online')}
+                    className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all relative overflow-hidden"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-indigo-50 flex items-center justify-center mb-5">
+                      <Monitor size={26} className="text-indigo-600"/>
+                    </div>
+                    <h3 className="text-[19px] font-black text-slate-900 mb-2.5">온라인 코스</h3>
+                    <p className="text-[14.5px] text-slate-500 leading-relaxed mb-5">
+                      비대면·자기주도 학습 과정을 설계합니다.<br/>VOD, 문서, 시험을 자유롭게 조합하세요.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">VOD</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">문서</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">시험/퀴즈</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => goBuilder('offline')}
+                    className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-rose-300 hover:shadow-lg transition-all relative overflow-hidden"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-rose-50 flex items-center justify-center mb-5">
+                      <MapPin size={26} className="text-rose-600"/>
+                    </div>
+                    <h3 className="text-[19px] font-black text-slate-900 mb-2.5">오프라인 코스</h3>
+                    <p className="text-[14.5px] text-slate-500 leading-relaxed mb-5">
+                      집합 교육과 출석 관리에 최적화된 플로우입니다.<br/>QR 출석 및 회차 관리를 지원합니다.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">회차 관리</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">QR 출석</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">수기 처리</span>
+                    </div>
+                  </button>
+                </div>
+
+                <p className="text-center text-[12.5px] text-slate-400 mt-12">등록 후에도 코스 유형 일부 설정은 변경 가능합니다</p>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    /* ─── 수강생 등록 모달 (회원·그룹·아이디 3탭) ─── */
+    const EnrollModal = ({ onClose }) => {
+      const [t, setT] = useState('member');
+      const [memberMode, setMemberMode] = useState('all');
+      return (
+        <div className="fixed inset-0 bg-slate-900/60 z-[200] flex items-center justify-center p-4 animate-fadeIn" onClick={onClose}>
+          <div className="bg-white rounded-2xl shadow-2xl w-[520px] max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-[15px] font-black text-slate-900 flex items-center gap-2">
+                <MS name="person_add" size={18} className="text-indigo-500"/> 수강생 등록
+              </h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20}/></button>
+            </div>
+            {/* 탭 */}
+            <div className="flex border-b border-slate-200 px-4 shrink-0">
+              {[
+                { id: 'member', label: '회원' },
+                { id: 'group',  label: '그룹' },
+                { id: 'id',     label: '아이디 입력' },
+                { id: 'csv',    label: '대량 등록 (Phase 2)', disabled: true },
+              ].map(x => (
+                <button key={x.id} onClick={() => !x.disabled && setT(x.id)}
+                  disabled={x.disabled}
+                  className={`px-3 py-3 text-[13.5px] transition-colors border-b-2
+                    ${x.disabled ? 'text-slate-300 cursor-not-allowed border-transparent' :
+                      t === x.id ? 'font-black text-slate-900 border-indigo-600' : 'font-bold text-slate-500 border-transparent hover:text-slate-800'}`}>
+                  {x.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+              {t === 'member' && (
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={memberMode === 'all'} onChange={() => setMemberMode('all')} className="accent-indigo-600"/>
+                    <span className="text-[14px] font-bold text-slate-700">전체 회원</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={memberMode === 'select'} onChange={() => setMemberMode('select')} className="accent-indigo-600"/>
+                    <span className="text-[14px] font-bold text-slate-700">선택한 회원</span>
+                  </label>
+                  {memberMode === 'select' && (
+                    <button className="w-full mt-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[14px] font-bold flex items-center justify-center gap-1.5">
+                      <Plus size={14}/> 회원 선택
+                    </button>
+                  )}
+                </div>
+              )}
+              {t === 'group' && (
+                <div>
+                  <p className="text-[13px] font-bold text-slate-500 mb-2">등록할 그룹 선택</p>
+                  <button className="w-full py-3 bg-white border border-slate-300 hover:border-indigo-400 rounded-xl text-[14px] font-bold text-slate-600 flex items-center justify-center gap-1.5">
+                    <MS name="groups" size={14}/> 그룹 선택
+                  </button>
+                </div>
+              )}
+              {t === 'id' && (
+                <div>
+                  <p className="text-[13px] font-bold text-slate-500 mb-2">아이디 직접 입력 (쉼표·줄바꿈 구분)</p>
+                  <textarea rows="6" placeholder="user1, user2&#10;user3"
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-[14px] font-mono focus:border-indigo-400 outline-none resize-none"></textarea>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-2 shrink-0">
+              <button onClick={onClose} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-[14px] font-bold text-slate-600 hover:bg-slate-50">취소</button>
+              <button className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5">
+                <MS name="check" size={14}/> 등록
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

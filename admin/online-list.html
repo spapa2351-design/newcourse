@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>온라인 코스</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Pretendard"', '"Roboto"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Helvetica', 'Arial', 'sans-serif'],
+          },
+          colors: {
+            indigo: {
+              50: '#EEF0FF', 100: '#E0E4FF', 200: '#C7CDFF', 300: '#9BA8FF',
+              400: '#7B8AFF', 500: '#5569FF', 600: '#4454CC', 700: '#3340A6',
+              800: '#2A3587', 900: '#000C57', 950: '#000940',
+            },
+          },
+          boxShadow: {
+            card: '0px 9px 16px rgba(159,162,191,.18), 0px 2px 2px rgba(159,162,191,0.32)',
+            'card-sm': '0px 2px 3px rgba(159,162,191,.18), 0px 1px 1px rgba(159,162,191,0.32)',
+          },
+          fontSize: {
+            xs: ['13px', { lineHeight: '1.5' }],
+            sm: ['15px', { lineHeight: '1.5' }],
+          },
+        },
+      },
+    }
+  </script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.25s ease-out forwards; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    table { border-collapse: separate; border-spacing: 0; }
+  </style>
+</head>
+<body class="bg-[#f2f5f9] text-slate-800 antialiased custom-scrollbar">
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    import React, { useState, useMemo, useEffect } from 'https://esm.sh/react@18.2.0';
+    import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+    import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
+
+    const {
+      Plus, Search, ChevronDown, ChevronRight, ChevronLeft, MapPin, Monitor, Layers,
+      Calendar, Users, Trash2, Copy, Edit3, Star, Download, Grid3X3, List,
+      Link2, MoreHorizontal, X, CheckCircle, Clock, Archive, AlertCircle,
+      BookOpen, QrCode, Eye, GripVertical, Settings, Filter, ImageIcon, FileText,
+      MessageSquare, Play, BarChart2,
+    } = Lucide;
+
+    /* ══════════════════════════════════════
+       더미 데이터 (온라인 코스 — newcourse 모델)
+       Course { id, title, status, classification, category, curriculumCount, assetCount,
+                enrollMode, studyPeriod, applyPeriod, enrolledCount, createdAt, createdBy }
+    ══════════════════════════════════════ */
+    const COURSES = [
+      { id: 1, title: '2025 핵심가치 내재화 교육', status: 'running', classification: 'mandatory', category: '업무 역량',
+        curriculumCount: 4, assetCount: 12, enrollMode: 'auto',
+        studyPeriod: { type: 'unlimited' }, applyPeriod: { start: '2026-01-01', end: '2026-12-31' },
+        enrolledCount: 320, createdAt: '2026-01-15 11:22', createdBy: 'jiyoungkim' },
+      { id: 2, title: '직장 내 성희롱 예방 교육 (법정의무)', status: 'running', classification: 'mandatory', category: '공통/입사 교육',
+        curriculumCount: 3, assetCount: 8, enrollMode: 'auto',
+        studyPeriod: { type: 'unlimited' }, applyPeriod: { start: '2025-10-01', end: '2026-10-01' },
+        enrolledCount: 545, createdAt: '2025-10-05 14:00', createdBy: 'jiyoungkim' },
+      { id: 3, title: '신입사원 OJT 1주차', status: 'running', classification: 'normal', category: '공통/입사 교육',
+        curriculumCount: 5, assetCount: 18, enrollMode: 'admin',
+        studyPeriod: { type: 'days', days: 30 }, applyPeriod: { start: '2026-03-01', end: '2026-06-30' },
+        enrolledCount: 42, createdAt: '2026-03-01 09:00', createdBy: 'youchan' },
+      { id: 4, title: '리더십 역량 강의 (1~3강)', status: 'running', classification: 'normal', category: '리더십',
+        curriculumCount: 3, assetCount: 6, enrollMode: 'self',
+        studyPeriod: { type: 'fixed', start: '2026-04-01', end: '2026-08-31' }, applyPeriod: { start: '2026-03-15', end: '2026-04-15' },
+        enrolledCount: 78, createdAt: '2026-03-12 10:30', createdBy: 'jongsoo' },
+      { id: 5, title: 'AI 활용 업무 자동화 입문', status: 'closed_apply', classification: 'normal', category: 'IT',
+        curriculumCount: 6, assetCount: 22, enrollMode: 'self',
+        studyPeriod: { type: 'fixed', start: '2026-04-01', end: '2026-04-30' }, applyPeriod: { start: '2026-03-15', end: '2026-03-31' },
+        enrolledCount: 95, createdAt: '2026-03-10 16:20', createdBy: 'jongsoo' },
+      { id: 6, title: '2026 정보보안 인식 교육', status: 'running', classification: 'mandatory', category: 'IT',
+        curriculumCount: 2, assetCount: 5, enrollMode: 'auto',
+        studyPeriod: { type: 'days', days: 60 }, applyPeriod: { start: '2026-02-01', end: '2026-12-31' },
+        enrolledCount: 412, createdAt: '2026-02-01 11:00', createdBy: 'jiyoungkim' },
+      { id: 7, title: '영업 전략 부트캠프 5기 (온라인 모듈)', status: 'draft', classification: 'normal', category: '영업',
+        curriculumCount: 4, assetCount: 0, enrollMode: 'admin',
+        studyPeriod: { type: 'fixed', start: '2026-06-01', end: '2026-07-31' }, applyPeriod: { start: '2026-05-15', end: '2026-05-31' },
+        enrolledCount: 0, createdAt: '2026-05-10 14:00', createdBy: 'jiyoungkim' },
+      { id: 8, title: '데이터 분석 입문 (Python)', status: 'running', classification: 'normal', category: 'IT',
+        curriculumCount: 8, assetCount: 35, enrollMode: 'self',
+        studyPeriod: { type: 'days', days: 90 }, applyPeriod: { start: '2026-01-01', end: '2026-12-31' },
+        enrolledCount: 156, createdAt: '2026-01-08 09:30', createdBy: 'youchan' },
+      { id: 9, title: '디자인 시스템 가이드', status: 'running', classification: 'normal', category: '직무 역량',
+        curriculumCount: 5, assetCount: 14, enrollMode: 'self',
+        studyPeriod: { type: 'unlimited' }, applyPeriod: { start: '2026-02-15', end: '2027-02-15' },
+        enrolledCount: 89, createdAt: '2026-02-15 13:45', createdBy: 'miyeon' },
+      { id: 10, title: '신규 입사자 사내 시스템 안내', status: 'running', classification: 'mandatory', category: '공통/입사 교육',
+        curriculumCount: 3, assetCount: 9, enrollMode: 'auto',
+        studyPeriod: { type: 'days', days: 14 }, applyPeriod: { start: '2026-01-01', end: '2026-12-31' },
+        enrolledCount: 76, createdAt: '2026-01-05 10:00', createdBy: 'jiyoungkim' },
+      { id: 11, title: '신임 팀장 코칭 워크북', status: 'ended', classification: 'normal', category: '리더십',
+        curriculumCount: 4, assetCount: 11, enrollMode: 'admin',
+        studyPeriod: { type: 'fixed', start: '2025-09-01', end: '2025-11-30' }, applyPeriod: { start: '2025-08-15', end: '2025-08-31' },
+        enrolledCount: 32, createdAt: '2025-08-10 11:30', createdBy: 'jaewan' },
+      { id: 12, title: '글로벌 매너·비즈니스 영어', status: 'admin_ended', classification: 'normal', category: '직무 역량',
+        curriculumCount: 6, assetCount: 18, enrollMode: 'self',
+        studyPeriod: { type: 'fixed', start: '2026-01-01', end: '2026-12-31' }, applyPeriod: { start: '2025-12-15', end: '2026-01-15' },
+        enrolledCount: 124, createdAt: '2025-12-10 16:00', createdBy: 'miyeon' },
+      { id: 13, title: '게임화 학습 베타 (DX 시범)', status: 'draft', classification: 'normal', category: 'DX',
+        curriculumCount: 2, assetCount: 3, enrollMode: 'self',
+        studyPeriod: { type: 'days', days: 30 }, applyPeriod: { start: '2026-06-01', end: '2026-08-31' },
+        enrolledCount: 0, createdAt: '2026-05-18 17:00', createdBy: 'youchan' },
+      { id: 14, title: '2025 윤리경영·반부패 의무 교육', status: 'ended', classification: 'mandatory', category: '공통/입사 교육',
+        curriculumCount: 2, assetCount: 4, enrollMode: 'auto',
+        studyPeriod: { type: 'fixed', start: '2025-06-01', end: '2025-12-31' }, applyPeriod: { start: '2025-05-15', end: '2025-12-15' },
+        enrolledCount: 612, createdAt: '2025-05-10 09:00', createdBy: 'jiyoungkim' },
+      { id: 15, title: '프레젠테이션 스킬 향상', status: 'running', classification: 'normal', category: '직무 역량',
+        curriculumCount: 3, assetCount: 7, enrollMode: 'self',
+        studyPeriod: { type: 'unlimited' }, applyPeriod: { start: '2026-03-01', end: '2027-03-01' },
+        enrolledCount: 67, createdAt: '2026-03-01 14:20', createdBy: 'jongsoo' },
+      { id: 16, title: 'DX 전사 캠페인 1기', status: 'running', classification: 'normal', category: 'DX',
+        curriculumCount: 5, assetCount: 15, enrollMode: 'admin',
+        studyPeriod: { type: 'fixed', start: '2026-05-01', end: '2026-07-31' }, applyPeriod: { start: '2026-04-15', end: '2026-04-30' },
+        enrolledCount: 220, createdAt: '2026-04-10 11:00', createdBy: 'jaewan' },
+      { id: 17, title: '신입 채용 면접관 교육', status: 'closed_apply', classification: 'normal', category: '리더십',
+        curriculumCount: 3, assetCount: 8, enrollMode: 'admin',
+        studyPeriod: { type: 'days', days: 14 }, applyPeriod: { start: '2026-04-01', end: '2026-04-30' },
+        enrolledCount: 28, createdAt: '2026-03-25 10:00', createdBy: 'jiyoungkim' },
+      { id: 18, title: '엑셀 실무 활용 기초', status: 'running', classification: 'normal', category: '직무 역량',
+        curriculumCount: 5, assetCount: 13, enrollMode: 'self',
+        studyPeriod: { type: 'unlimited' }, applyPeriod: { start: '2026-02-01', end: '2027-02-01' },
+        enrolledCount: 134, createdAt: '2026-02-01 09:00', createdBy: 'youchan' },
+      { id: 19, title: '협업 도구 활용 (Slack·Notion)', status: 'running', classification: 'normal', category: 'IT',
+        curriculumCount: 4, assetCount: 10, enrollMode: 'self',
+        studyPeriod: { type: 'unlimited' }, applyPeriod: { start: '2026-01-15', end: '2027-01-15' },
+        enrolledCount: 98, createdAt: '2026-01-15 16:00', createdBy: 'miyeon' },
+      { id: 20, title: '하반기 핵심 리더 양성 프로그램', status: 'draft', classification: 'normal', category: '리더십',
+        curriculumCount: 6, assetCount: 0, enrollMode: 'admin',
+        studyPeriod: { type: 'fixed', start: '2026-07-01', end: '2026-12-31' }, applyPeriod: { start: '2026-06-01', end: '2026-06-30' },
+        enrolledCount: 0, createdAt: '2026-05-15 13:00', createdBy: 'jaewan' },
+      { id: 21, title: '연 1회 개인정보 보호 교육', status: 'running', classification: 'mandatory', category: '공통/입사 교육',
+        curriculumCount: 2, assetCount: 5, enrollMode: 'auto',
+        studyPeriod: { type: 'unlimited' }, applyPeriod: { start: '2026-01-01', end: '2026-12-31' },
+        enrolledCount: 487, createdAt: '2026-01-02 09:00', createdBy: 'jiyoungkim' },
+      { id: 22, title: 'GitHub 협업 워크플로 (개발팀 전용)', status: 'running', classification: 'normal', category: 'IT',
+        curriculumCount: 4, assetCount: 12, enrollMode: 'admin',
+        studyPeriod: { type: 'unlimited' }, applyPeriod: { start: '2026-03-15', end: '2027-03-15' },
+        enrolledCount: 35, createdAt: '2026-03-15 15:00', createdBy: 'youchan' },
+    ];
+
+    const CATEGORIES = [
+      { id: 'all', label: '전체', children: [] },
+      { id: 'work', label: '업무 역량', children: [
+        { id: 'job', label: '직무 역량' },
+        { id: 'leader', label: '리더십' },
+        { id: 'sales', label: '영업' },
+      ]},
+      { id: 'common', label: '공통/입사 교육', children: [] },
+      { id: 'it', label: 'IT', children: [] },
+      { id: 'dx', label: 'DX', children: [] },
+    ];
+
+    /* ── 상태 설정 맵 (newcourse 5종) ── */
+    const STATUS_CFG = {
+      draft:        { label: '초안',          bg: 'bg-slate-100',  text: 'text-slate-500',   dot: 'bg-slate-400' },
+      running:      { label: '운영중',        bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-500' },
+      closed_apply: { label: '수강중',        bg: 'bg-amber-50',   text: 'text-amber-600',   dot: 'bg-amber-500' },
+      ended:        { label: '종료',          bg: 'bg-slate-50',   text: 'text-slate-400',   dot: 'bg-slate-300' },
+      admin_ended:  { label: '관리자 종료',   bg: 'bg-rose-50',    text: 'text-rose-600',    dot: 'bg-rose-500' },
+    };
+
+    const ENROLL_MODE_CFG = {
+      admin: { label: '관리자 수동', color: 'text-slate-500' },
+      self:  { label: '자율 신청',   color: 'text-indigo-500' },
+      auto:  { label: '가입 시 자동', color: 'text-emerald-600' },
+    };
+
+    const CLASSIFICATION_CFG = {
+      mandatory: { label: '필수', bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-200' },
+      normal:    { label: '일반', bg: '', text: '', border: '' },
+    };
+
+    const TODAY = '2026-04-28';
+
+    const fmtDate = (d) => d ? d.replace(/-/g, '.').slice(5) : '';
+    const fmtRange = (s, e) => {
+      if (!s) return '-';
+      const fs = fmtDate(s);
+      return e && e !== s ? `${fs} ~ ${fmtDate(e)}` : fs;
+    };
+
+    /* ══════════════════════════════════════
+       App
+    ══════════════════════════════════════ */
+    const App = () => {
+      const [coverImages, setCoverImages] = useState({});
+      const [courses, setCourses] = useState(COURSES);
+
+      useEffect(() => {
+        const map = {};
+        COURSES.forEach(c => {
+          const saved = localStorage.getItem('lms_cover_' + c.id);
+          if (saved) {
+            try { map[c.id] = JSON.parse(saved); } catch(e) {}
+          }
+        });
+        setCoverImages(map);
+      }, []);
+      const [statusFilter, setStatusFilter] = useState('all');
+      const [search, setSearch] = useState('');
+      const [expandedIds, setExpandedIds] = useState(new Set());
+      const [selectedIds, setSelectedIds] = useState(new Set());
+      const [catFilter, setCatFilter] = useState('all');
+      const [expandedCats, setExpandedCats] = useState(new Set(['work']));
+      const [activeFilters, setActiveFilters] = useState([]);
+      const [filterPopup, setFilterPopup] = useState(null); // null | 'select' | fieldKey
+      const [filterInput, setFilterInput] = useState('');
+
+      const FILTER_FIELDS = [
+        { key: 'classification', label: '필수 여부', options: [{ val:'mandatory',label:'필수' },{ val:'normal',label:'일반' }] },
+        { key: 'enrollMode', label: '등록 채널', options: [
+          { val: 'admin', label: '관리자 수동' },
+          { val: 'self',  label: '자율 신청' },
+          { val: 'auto',  label: '가입 시 자동' },
+        ]},
+        { key: 'createdBy', label: '생성자' },
+      ];
+
+      const addFilter = (field, value) => {
+        if (!value.trim()) return;
+        setActiveFilters(prev => {
+          const without = prev.filter(f => f.key !== field.key);
+          return [...without, { key: field.key, label: field.label, value }];
+        });
+        setFilterPopup(null);
+        setFilterInput('');
+      };
+      const removeFilter = (key) => setActiveFilters(prev => prev.filter(f => f.key !== key));
+
+      const toggleExpand = (id) => setExpandedIds(prev => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      });
+      const toggleSelect = (id) => setSelectedIds(prev => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      });
+      const toggleCatExpand = (id) => setExpandedCats(prev => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      });
+
+      /* ── 상태별 카운트 (newcourse 5종) ── */
+      const statusCounts = useMemo(() => ({
+        all:          courses.length,
+        draft:        courses.filter(c => c.status === 'draft').length,
+        running:      courses.filter(c => c.status === 'running').length,
+        closed_apply: courses.filter(c => c.status === 'closed_apply').length,
+        ended:        courses.filter(c => c.status === 'ended').length,
+        admin_ended:  courses.filter(c => c.status === 'admin_ended').length,
+      }), [courses]);
+
+      const filtered = useMemo(() => {
+        let list = courses;
+        if (statusFilter !== 'all') list = list.filter(c => c.status === statusFilter);
+        if (catFilter !== 'all') list = list.filter(c => c.category === catFilter);
+        if (search.trim()) {
+          const q = search.trim().toLowerCase();
+          list = list.filter(c => c.title.toLowerCase().includes(q));
+        }
+        activeFilters.forEach(f => {
+          if (f.key === 'classification') list = list.filter(c => c.classification === f.value);
+          if (f.key === 'enrollMode')     list = list.filter(c => c.enrollMode === f.value);
+          if (f.key === 'createdBy')      list = list.filter(c => (c.createdBy || '').toLowerCase().includes(f.value.toLowerCase()));
+        });
+        /* 등록일 최신순 정렬 (디폴트) */
+        return [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      }, [courses, statusFilter, catFilter, search, activeFilters]);
+
+      /* 페이지네이션 */
+      const [page, setPage] = useState(1);
+      const [pageSize, setPageSize] = useState(10);
+      React.useEffect(() => { setPage(1); }, [statusFilter, catFilter, search, activeFilters, pageSize]);
+      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+      const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+      /* 표시할 페이지 번호 목록 (ellipsis 포함) */
+      const visiblePages = useMemo(() => {
+        const out = [];
+        if (totalPages <= 7) {
+          for (let i = 1; i <= totalPages; i++) out.push(i);
+          return out;
+        }
+        const window = 1; // 현재 페이지 좌우 1개씩
+        out.push(1);
+        const start = Math.max(2, page - window);
+        const end = Math.min(totalPages - 1, page + window);
+        if (start > 2) out.push('...');
+        for (let i = start; i <= end; i++) out.push(i);
+        if (end < totalPages - 1) out.push('...');
+        out.push(totalPages);
+        return out;
+      }, [page, totalPages]);
+
+      const allSelected = filtered.length > 0 && filtered.every(c => selectedIds.has(c.id));
+      const toggleAll = () => {
+        if (allSelected) setSelectedIds(new Set());
+        else setSelectedIds(new Set(filtered.map(c => c.id)));
+      };
+
+      const [deleteModal, setDeleteModal] = useState(null); // null | { type:'single', course } | { type:'bulk', courses:[] }
+      const [deleteInput, setDeleteInput] = useState('');
+
+      const handleDelete = (id) => {
+        const course = courses.find(c => c.id === id);
+        setDeleteInput('');
+        setDeleteModal({ type: 'single', course });
+      };
+
+      const handleBulkDelete = () => {
+        if (selectedIds.size === 0) return;
+        const targets = courses.filter(c => selectedIds.has(c.id));
+        setDeleteInput('');
+        setDeleteModal({ type: 'bulk', courses: targets });
+      };
+
+      const executeDelete = () => {
+        if (deleteModal.type === 'single') {
+          setCourses(prev => prev.filter(c => c.id !== deleteModal.course.id));
+          setSelectedIds(prev => { const n = new Set(prev); n.delete(deleteModal.course.id); return n; });
+        } else {
+          const ids = new Set(deleteModal.courses.map(c => c.id));
+          setCourses(prev => prev.filter(c => !ids.has(c.id)));
+          setSelectedIds(new Set());
+        }
+        setDeleteModal(null);
+        setDeleteInput('');
+      };
+
+      /* ── 코스의 날짜 범위 요약 ── */
+      const getDateRange = (course) => {
+        if (course.packages.length === 0) return '-';
+        const starts = course.packages.map(p => p.startDate).filter(Boolean).sort();
+        const ends = course.packages.map(p => p.endDate).filter(Boolean).sort();
+        if (starts.length === 0) return '-';
+        return fmtRange(starts[0], ends[ends.length - 1]);
+      };
+
+      /* ── 장소 요약 ── */
+      const getPlaceSummary = (course) => {
+        const places = [...new Set(course.packages.map(p => p.place).filter(Boolean))];
+        if (places.length === 0) return '';
+        if (places.length === 1) return places[0];
+        return `${places[0]} 외 ${places.length - 1}곳`;
+      };
+
+      /* ── 총 회차 수 ── */
+      const getTotalSessions = (course) => course.packages.reduce((s, p) => s + (p.sessions || 0), 0);
+
+      /* ── D-day ── */
+      const getDday = (course) => {
+        const today = new Date(TODAY);
+        const upcoming = course.packages
+          .map(p => p.startDate).filter(d => d && d >= TODAY).sort();
+        if (upcoming.length === 0) return null;
+        const diff = Math.round((new Date(upcoming[0]) - today) / 86400000);
+        return diff === 0 ? 'D-Day' : `D-${diff}`;
+      };
+
+      const SIDEBAR_MENUS = [
+        { id: 'member', label: '회원', icon: Users, hasChildren: true },
+        { id: 'course', label: '코스', icon: BookOpen, hasChildren: true, children: [
+          { id: 'course-main', label: '코스' },
+          { id: 'course-plus', label: 'PLUS 코스' },
+        ]},
+        /* 오프라인/온라인 코스는 '코스v2' children으로 이동 (NEW_MENUS 참조) */
+        { id: 'content', label: '콘텐츠', icon: Copy, hasChildren: true },
+        { id: 'ttube', label: 'T튜브', icon: Monitor, hasChildren: true },
+        { id: 'ai-quiz', label: 'AI 퀴메이커', icon: Star, badge: 'N' },
+        { id: 'translation', label: 'Translation', icon: List, hasChildren: true },
+        { id: 'question-bank', label: '문제 은행', icon: Archive },
+        { id: 'opinion', label: '의견', icon: AlertCircle },
+        { id: 'gamification', label: '게이미피케이션', icon: Grid3X3, hasChildren: true },
+        { id: 'live', label: '라이브 스트리밍', icon: Eye, hasChildren: true },
+        { id: 'touch', label: '터치투게더', icon: Users },
+        { id: 'attendance', label: '출석 체크', icon: CheckCircle },
+        { id: 'ai-chat', label: 'AI 챗봇', icon: Monitor, badge: 'N' },
+        { id: 'stats', label: '통계', icon: Filter },
+        { id: 'notice', label: '공지사항', icon: Archive },
+        { id: 'popup', label: '팝업', icon: Layers },
+      ];
+
+      /* ── 코스v2 (newcourse 전통 LMS) ──
+         위치: 코스 그룹 바로 아래. 기존 SIDEBAR의 오프라인/온라인 코스를 children으로 흡수.
+         라벨: '코스v2' + 우측 빨간 N 배지 (별도 상단 라벨 제거).
+         블렌디드 코스는 Phase 2 — 사이드바·모달 양쪽 숨김 처리.
+         children 클릭 → href 라우팅 (각자 list 페이지).
+      */
+      const NEW_MENUS = [
+        { id: 'course-v2', label: '코스v2', icon: BarChart2, isHighlight: true, badge: 'N', hasChildren: true, children: [
+          { id: 'online-course',   label: '온라인 코스',   icon: Monitor, href: 'online-list.html',  active: true, tooltip: '영상 중심, 진도율 정확히 추적.' },
+          { id: 'offline-course',  label: '오프라인 코스', icon: MapPin,  href: 'offline-list.html', tooltip: '오프라인 일정·출석 기반 코스.' },
+        ]},
+      ];
+
+      const [sideExpanded, setSideExpanded] = useState(new Set(['course', 'course-v2']));
+      const [showCreateModal, setShowCreateModal] = useState(false);
+
+      /* 모달 ESC 닫기 */
+      React.useEffect(() => {
+        if (!showCreateModal) return;
+        const onKey = (e) => { if (e.key === 'Escape') setShowCreateModal(false); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      }, [showCreateModal]);
+
+      const goBuilder = (type) => {
+        window.location.href = type === 'online' ? 'online-builder.html' : 'offline-builder.html';
+      };
+      const toggleSideMenu = (id) => setSideExpanded(prev => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      });
+
+      /* ── 상태 필터 탭 정의 ── */
+      const STATUS_TABS = [
+        { key: 'all',          label: '전체' },
+        { key: 'draft',        label: '초안' },
+        { key: 'running',      label: '운영중' },
+        { key: 'closed_apply', label: '수강중' },
+        { key: 'ended',        label: '종료' },
+        { key: 'admin_ended',  label: '관리자 종료' },
+      ];
+
+      return (
+        <div className="min-h-screen flex">
+
+          {/* ══ 글로벌 좌측 사이드바 ══ */}
+          <aside className="w-[200px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0 overflow-y-auto custom-scrollbar">
+            {/* 로고 */}
+            <div className="px-4 py-4 flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0 shadow-sm">
+                <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4"><path d="M7 2L2 5v7h4V9h2v3h4V5L7 2z" fill="white"/></svg>
+              </div>
+              <span className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">TOUCH<br/>CLASS</span>
+            </div>
+            <div className="h-px bg-slate-100 mx-3 mb-2"/>
+            {/* 메뉴 */}
+            <nav className="flex-1 px-3 pb-6 space-y-0.5">
+              {SIDEBAR_MENUS.map(menu => (
+                <React.Fragment key={menu.id}>
+                  <div>
+                    <button
+                      onClick={() => menu.hasChildren && toggleSideMenu(menu.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors
+                        ${menu.active ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                      {React.createElement(menu.icon, { size: 16, className: menu.active ? 'text-indigo-600' : 'text-slate-400' })}
+                      <span className="flex-1 text-left">{menu.label}</span>
+                      {menu.badge && (
+                        <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{menu.badge}</span>
+                      )}
+                      {menu.hasChildren && (
+                        <span className="text-slate-400">
+                          {sideExpanded.has(menu.id)
+                            ? <ChevronDown size={14}/>
+                            : <ChevronRight size={14}/>
+                          }
+                        </span>
+                      )}
+                    </button>
+                    {menu.children && sideExpanded.has(menu.id) && (
+                      <div className="ml-7 mt-0.5 space-y-0.5">
+                        {menu.children.map(sub => (
+                          <a key={sub.id} href="#"
+                            className={`block px-3 py-1.5 rounded-md text-[13px] transition-colors
+                              ${sub.active ? 'text-indigo-700 font-bold' : 'text-slate-500 hover:bg-slate-50 font-medium'}`}
+                          >
+                            {sub.label}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── 코스 그룹 직후: 코스v2 섹션 (구분선으로 패러다임 분리) ── */}
+                  {menu.id === 'course' && (
+                    <>
+                      <div className="my-2 mx-1 h-px bg-slate-200"/>
+                      {NEW_MENUS.map(newMenu => (
+                        <div key={newMenu.id}>
+                          <button
+                            onClick={() => newMenu.hasChildren && toggleSideMenu(newMenu.id)}
+                            title={newMenu.tooltip || ''}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors
+                              ${newMenu.isHighlight ? 'text-slate-700 font-bold bg-emerald-50/60 hover:bg-emerald-50' : 'text-slate-600 hover:bg-slate-50'}`}
+                          >
+                            {React.createElement(newMenu.icon, { size: 16, className: newMenu.isHighlight ? 'text-emerald-600' : 'text-slate-400' })}
+                            <span className="flex-1 text-left">{newMenu.label}</span>
+                            {newMenu.badge && (
+                              <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{newMenu.badge}</span>
+                            )}
+                            {newMenu.hasChildren && (
+                              <span className={newMenu.isHighlight ? 'text-emerald-600' : 'text-slate-400'}>
+                                {sideExpanded.has(newMenu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
+                              </span>
+                            )}
+                          </button>
+                          {newMenu.children && sideExpanded.has(newMenu.id) && (
+                            <div className="ml-7 mt-0.5 space-y-0.5">
+                              {/* ── 코스 만들기 CTA (코스v2 children 최상단) ── */}
+                              <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="w-full px-3 py-1.5 rounded-md text-[13px] flex items-center gap-1.5 transition-colors text-slate-700 font-semibold hover:bg-emerald-50"
+                              >
+                                <Plus size={14} className="text-emerald-600"/>
+                                <span className="flex-1 text-left">코스 만들기</span>
+                              </button>
+                              {newMenu.children.map(sub => (
+                                <a key={sub.id} href={sub.disabled ? undefined : (sub.href || '#')} title={sub.tooltip || ''}
+                                  className={`px-3 py-1.5 rounded-md text-[13px] flex items-center gap-1.5 transition-colors
+                                    ${sub.disabled
+                                      ? 'text-slate-400 font-medium cursor-not-allowed'
+                                      : sub.active
+                                        ? 'text-emerald-700 bg-emerald-50 font-bold'
+                                        : 'text-slate-700 font-semibold hover:bg-emerald-50'}`}
+                                >
+                                  {sub.icon && React.createElement(sub.icon, { size: 14, className: sub.disabled ? 'text-slate-400' : 'text-emerald-600' })}
+                                  <span className="flex-1">{sub.label}</span>
+                                  {sub.badge && (
+                                    <span className="text-[9.5px] font-bold text-slate-400 px-1.5 py-0.5 bg-slate-100 rounded">{sub.badge}</span>
+                                  )}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <div className="my-2 mx-1 h-px bg-slate-200"/>
+                    </>
+                  )}
+                </React.Fragment>
+              ))}
+            </nav>
+          </aside>
+
+          {/* ══ 메인 영역 (탑 네비 + 헤더 + 콘텐츠) ══ */}
+          <div className="flex-1 flex flex-col min-h-screen bg-[#f2f5f9]">
+
+          {/* ── 글로벌 탑 네비게이션 ── */}
+          <div className="h-[52px] bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0 sticky top-0 z-40">
+            <div className="flex items-center gap-3">
+              <button className="flex items-center gap-1.5 text-slate-600 text-[13px] font-semibold hover:text-slate-800 transition-colors">
+                <Star size={14} className="text-amber-400 fill-amber-400"/> 즐겨찾기 <ChevronDown size={13} className="text-slate-400"/>
+              </button>
+              <div className="w-px h-4 bg-slate-200"/>
+              <button className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-[12px] font-bold hover:bg-indigo-100 transition-colors">
+                <Users size={12}/> 관리자 가이드
+              </button>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors">
+                <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5"><circle cx="10" cy="10" r="8" stroke="#7c3aed" strokeWidth="1.5"/><circle cx="10" cy="10" r="3.5" fill="#7c3aed"/></svg>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <MessageSquare size={16}/>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <Play size={15} className="ml-0.5"/>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <BarChart2 size={16}/>
+              </button>
+              <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <Filter size={15}/>
+                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none px-0.5">0</span>
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                <Settings size={16}/>
+              </button>
+              <div className="w-px h-5 bg-slate-200 mx-1.5"/>
+              <button className="flex items-center gap-1.5 hover:bg-slate-50 pl-0.5 pr-2 py-1 rounded-lg transition-colors">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">조</div>
+                <span className="text-[13px] font-semibold text-slate-700">조찬현</span>
+                <ChevronDown size={13} className="text-slate-400"/>
+              </button>
+            </div>
+          </div>
+
+          {/* ── 페이지 타이틀 (배경 위 텍스트) ── */}
+          <header className="shrink-0">
+            <div className="px-6 py-4 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <h1 className="text-[18px] font-black text-slate-900">온라인 코스</h1>
+                <button className="text-slate-300 hover:text-amber-400 transition-colors">
+                  <Star size={15}/>
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => alert('현재 기능과 같음')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+                  <List size={14}/> 코스 순서 관리
+                </button>
+                <button onClick={() => alert('현재 기능과 같음')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+                  <Plus size={14}/> 수강생 등록
+                </button>
+                <a href="online-builder.html" data-feature-id="A1-10" className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-[14px] font-bold hover:bg-indigo-600 transition-colors flex items-center gap-1.5 shadow-sm">
+                  <Plus size={14}/> 등록
+                </a>
+              </div>
+            </div>
+          </header>
+
+          <div className="flex flex-1 overflow-hidden gap-3 px-4 pb-4 pt-0 items-start">
+
+            {/* ── 좌측 분류 사이드바 (카드) ── */}
+            <aside className="w-[180px] bg-white rounded-xl shadow-card overflow-y-auto custom-scrollbar shrink-0 py-4 self-stretch" data-feature-id="A1-03">
+              <div className="px-4 mb-3 flex items-center justify-between">
+                <span className="text-[14px] font-bold text-slate-800">분류</span>
+                <div className="flex items-center gap-1">
+                  <button className="text-slate-400 hover:text-slate-600"><Settings size={14}/></button>
+                  <button className="text-slate-400 hover:text-slate-600"><ChevronDown size={14}/></button>
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                {/* 전체 */}
+                <button
+                  onClick={() => setCatFilter('all')}
+                  className={`w-full text-left px-4 py-1.5 text-[13px] font-semibold transition-colors
+                    ${catFilter === 'all' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  전체
+                </button>
+                {CATEGORIES.filter(c => c.id !== 'all').map(cat => (
+                  <div key={cat.id}>
+                    <button
+                      onClick={() => cat.children.length > 0 ? toggleCatExpand(cat.id) : setCatFilter(cat.label)}
+                      className={`w-full text-left px-4 py-1.5 text-[13px] font-semibold flex items-center gap-1 transition-colors
+                        ${catFilter === cat.label ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                      {cat.children.length > 0 && (
+                        <span className="text-slate-400">{expandedCats.has(cat.id) ? <ChevronDown size={12}/> : <ChevronRight size={12}/>}</span>
+                      )}
+                      {cat.label}
+                    </button>
+                    {cat.children.length > 0 && expandedCats.has(cat.id) && (
+                      <div className="ml-3">
+                        {cat.children.map(sub => (
+                          <button
+                            key={sub.id}
+                            onClick={() => setCatFilter(sub.label)}
+                            className={`w-full text-left px-4 py-1 text-[12px] transition-colors
+                              ${catFilter === sub.label ? 'text-indigo-700 font-bold bg-indigo-50' : 'text-slate-500 hover:bg-slate-50 font-medium'}`}
+                          >
+                            {sub.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </aside>
+
+            {/* ── 메인 콘텐츠 (카드) ── */}
+            <main className="flex-1 overflow-y-auto custom-scrollbar bg-white rounded-xl shadow-card overflow-hidden">
+              {/* 필터 바 — 상태 탭 + 필터 추가 */}
+              <div className="bg-white border-b border-slate-200 px-6 py-3 relative" data-feature-id="A1-02">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {STATUS_TABS.map(tab => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setStatusFilter(tab.key)}
+                      className={`px-3.5 py-1.5 rounded-lg text-[13px] font-bold border transition-all flex items-center gap-1.5
+                        ${statusFilter === tab.key
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'}`}
+                    >
+                      {tab.label}
+                      <span className={`${statusFilter === tab.key ? 'text-indigo-200' : 'text-slate-300'}`}>{statusCounts[tab.key]}</span>
+                    </button>
+                  ))}
+
+                  {/* 적용된 필터 칩 */}
+                  {activeFilters.map(f => (
+                    <div key={f.key} className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 border border-indigo-200 rounded-lg text-[12px] font-bold text-indigo-700 animate-fadeIn">
+                      <span className="text-indigo-400 text-[10px] font-bold">{f.label}</span>
+                      <span>{f.key === 'enrollMethod' ? (f.value === 'self' ? '자율 수강' : '강제 할당') : f.value}</span>
+                      <button onClick={() => removeFilter(f.key)} className="ml-0.5 text-indigo-300 hover:text-indigo-600 transition-colors"><X size={11}/></button>
+                    </div>
+                  ))}
+
+                  {/* + 필터 추가 버튼 */}
+                  <div className="relative z-30">
+                    <button
+                      data-feature-id="A1-02a"
+                      onClick={() => { setFilterPopup(p => p ? null : 'select'); setFilterInput(''); }}
+                      className={`flex items-center gap-1 text-[13px] font-semibold border rounded-lg px-3 py-1.5 transition-colors
+                        ${filterPopup ? 'border-indigo-400 text-indigo-500 bg-indigo-50' : 'border-dashed border-slate-300 text-slate-400 hover:border-indigo-400 hover:text-indigo-500'}`}
+                    >
+                      <Plus size={12}/> 필터 추가
+                      <ChevronDown size={11} className={`transition-transform ${filterPopup ? 'rotate-180' : ''}`}/>
+                    </button>
+
+                    {/* 필터 선택 팝업 */}
+                    {filterPopup === 'select' && (
+                      <div className="absolute left-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-card w-[200px] z-30 overflow-hidden animate-fadeIn">
+                        <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wide border-b border-slate-100">필터 항목 선택</div>
+                        {FILTER_FIELDS.map(f => (
+                          <button key={f.key}
+                            onClick={() => { setFilterPopup(f.key); setFilterInput(''); }}
+                            className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center justify-between">
+                            {f.label}
+                            <ChevronRight size={12} className="text-slate-300"/>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 값 입력 팝업 */}
+                    {filterPopup && filterPopup !== 'select' && (() => {
+                      const field = FILTER_FIELDS.find(f => f.key === filterPopup);
+                      if (!field) return null;
+                      return (
+                        <div className="absolute left-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-card w-[260px] z-30 animate-fadeIn">
+                          <div className="px-4 pt-4 pb-3">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-[13px] font-bold text-slate-800">{field.label}</span>
+                              <button onClick={() => setFilterPopup(null)} className="text-slate-300 hover:text-slate-600 transition-colors"><X size={13}/></button>
+                            </div>
+                            {field.options ? (
+                              <div className="space-y-1">
+                                {field.options.map(opt => (
+                                  <button key={opt.val}
+                                    onClick={() => addFilter(field, opt.val)}
+                                    className="w-full text-left px-3 py-2 rounded-lg text-[13px] font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-transparent hover:border-indigo-200">
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <>
+                                <div className="border border-slate-200 rounded-lg px-3 py-2 focus-within:border-indigo-400 transition-colors">
+                                  <div className="text-[10px] font-bold text-slate-400 mb-1">{field.label}</div>
+                                  <input
+                                    autoFocus
+                                    value={filterInput}
+                                    onChange={e => setFilterInput(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && addFilter(field, filterInput)}
+                                    placeholder={`${field.label} 입력`}
+                                    className="w-full text-[13px] outline-none text-slate-800 placeholder-slate-300"
+                                  />
+                                </div>
+                                <div className="flex justify-end mt-3">
+                                  <button
+                                    onClick={() => addFilter(field, filterInput)}
+                                    disabled={!filterInput.trim()}
+                                    className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-bold transition-colors
+                                      ${filterInput.trim() ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
+                                  >
+                                    <CheckCircle size={12}/> 적용
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* 전체 초기화 */}
+                  {activeFilters.length > 0 && (
+                    <button onClick={() => setActiveFilters([])}
+                      className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors ml-1">
+                      초기화
+                    </button>
+                  )}
+                </div>
+
+                {/* 팝업 외부 클릭 닫기 */}
+                {filterPopup && <div className="fixed inset-0 z-20" style={{zIndex:15}} onClick={() => setFilterPopup(null)}/>}
+              </div>
+
+              {/* 카운트 + 검색 */}
+              <div className="px-6 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[14px] font-bold text-slate-700">총 <span className="text-indigo-600">{filtered.length}</span></span>
+                  <div className="relative" data-feature-id="A1-04">
+                    <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-300"/>
+                    <input
+                      type="text" value={search} onChange={e => setSearch(e.target.value)}
+                      placeholder="코스명 검색"
+                      className="border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-[13px] w-[220px] outline-none focus:border-indigo-400 transition-all bg-white placeholder-slate-300"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[12px] text-slate-400 font-medium">등록일 최신순</span>
+                  {selectedIds.size > 0 && (
+                    <button
+                      onClick={handleBulkDelete}
+                      className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[13px] font-bold hover:bg-rose-600 transition-colors flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Trash2 size={13}/> 선택 삭제 ({selectedIds.size})
+                    </button>
+                  )}
+                  <button className="p-1.5 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 bg-white"><Download size={14}/></button>
+                </div>
+              </div>
+
+              {/* ── 테이블 (newcourse 모델) ── */}
+              <div className="px-6 pb-4">
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-slate-100 bg-slate-50/80">
+                        <th className="w-10 px-3 py-3">
+                          <input type="checkbox"
+                            checked={pageItems.length > 0 && pageItems.every(c => selectedIds.has(c.id))}
+                            onChange={() => {
+                              const ids = pageItems.map(c => c.id);
+                              const allSel = ids.every(id => selectedIds.has(id));
+                              setSelectedIds(prev => {
+                                const next = new Set(prev);
+                                if (allSel) ids.forEach(id => next.delete(id));
+                                else ids.forEach(id => next.add(id));
+                                return next;
+                              });
+                            }}
+                            className="w-4 h-4 rounded accent-indigo-600"/>
+                        </th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[88px]">상태</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[52px] text-center">표지</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400">코스명</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[90px] text-center whitespace-nowrap">수강관리</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[120px] whitespace-nowrap">커리큘럼</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[110px]">분류</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[160px] whitespace-nowrap">수강 기간</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[80px] text-right">수강 인원</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[130px]">등록일</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[100px]">생성자</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[90px] text-center">관리</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pageItems.map(course => {
+                        const statusCfg = STATUS_CFG[course.status] || STATUS_CFG.draft;
+                        const isSelected = selectedIds.has(course.id);
+                        const isMandatory = course.classification === 'mandatory';
+                        const enrollCfg = ENROLL_MODE_CFG[course.enrollMode] || ENROLL_MODE_CFG.self;
+                        const periodLabel = course.studyPeriod.type === 'unlimited' ? '제한 없음'
+                          : course.studyPeriod.type === 'days' ? `등록 후 ${course.studyPeriod.days}일`
+                          : `${course.studyPeriod.start} ~ ${course.studyPeriod.end}`;
+                        const isRunning = course.status === 'running';
+
+                        return (
+                          <tr key={course.id} className={`border-b border-slate-100 transition-colors group
+                            ${isSelected ? 'bg-indigo-50/30' : 'hover:bg-slate-50/80'}`}>
+                            {/* 체크 */}
+                            <td className="px-3 py-3">
+                              <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(course.id)} className="w-4 h-4 rounded accent-indigo-600"/>
+                            </td>
+                            {/* 상태 */}
+                            <td className="px-3 py-3">
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold whitespace-nowrap ${statusCfg.bg} ${statusCfg.text}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusCfg.dot}`}/>
+                                {statusCfg.label}
+                              </span>
+                            </td>
+                            {/* 표지 썸네일 */}
+                            <td className="px-3 py-2 text-center">
+                              <div className="w-8 h-[53px] bg-gradient-to-br from-indigo-100 to-violet-100 border border-slate-200 rounded inline-flex items-center justify-center">
+                                <ImageIcon size={12} className="text-indigo-300"/>
+                              </div>
+                            </td>
+                            {/* 코스명 */}
+                            <td className="px-3 py-3">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {isMandatory && (
+                                  <span className="shrink-0 text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">필수</span>
+                                )}
+                                <a href={`online-builder.html?courseId=${course.id}`} className="text-[14px] font-bold text-slate-800 hover:text-indigo-600 transition-colors leading-snug">
+                                  {course.title}
+                                </a>
+                              </div>
+                              <div className={`text-[11px] mt-0.5 font-medium ${enrollCfg.color}`}>
+                                {enrollCfg.label}
+                              </div>
+                            </td>
+                            {/* 수강관리 */}
+                            <td className="px-3 py-3 text-center">
+                              {isRunning ? (
+                                <a href={`online-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
+                                  <Users size={10}/> 수강관리
+                                </a>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 bg-slate-50 text-slate-300 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold cursor-not-allowed whitespace-nowrap" title="운영중일 때만 이용 가능">
+                                  <Users size={10}/> 수강관리
+                                </span>
+                              )}
+                            </td>
+                            {/* 커리큘럼 */}
+                            <td className="px-3 py-3">
+                              <span className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-1 rounded-md text-[11px] font-bold whitespace-nowrap">
+                                <Layers size={10}/> 커리큘럼 {course.curriculumCount} · 에셋 {course.assetCount}
+                              </span>
+                            </td>
+                            {/* 분류 */}
+                            <td className="px-3 py-3">
+                              <span className="inline-block bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px] font-bold">{course.category}</span>
+                            </td>
+                            {/* 수강 기간 */}
+                            <td className="px-3 py-3 text-[12px] text-slate-600 font-medium whitespace-nowrap">
+                              {periodLabel}
+                            </td>
+                            {/* 수강 인원 */}
+                            <td className="px-3 py-3 text-right">
+                              <span className="text-[13px] font-black text-slate-800 tabular-nums">{course.enrolledCount.toLocaleString()}</span>
+                              <span className="text-[11px] text-slate-400 font-medium ml-0.5">명</span>
+                            </td>
+                            {/* 등록일 */}
+                            <td className="px-3 py-3 text-[12px] text-slate-500 font-medium tabular-nums whitespace-nowrap">{course.createdAt}</td>
+                            {/* 생성자 */}
+                            <td className="px-3 py-3 text-[12px] text-slate-500 font-medium truncate">{course.createdBy}</td>
+                            {/* 관리 */}
+                            <td className="px-3 py-3">
+                              <div className="flex items-center justify-center gap-0.5">
+                                <button title="링크 복사" className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"><Link2 size={14}/></button>
+                                <a href={`online-builder.html?courseId=${course.id}`} title="편집" className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"><Edit3 size={14}/></a>
+                                <button onClick={() => handleDelete(course.id)} title="삭제" className="p-1 text-slate-400 hover:text-rose-500 transition-colors"><Trash2 size={14}/></button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {filtered.length === 0 && (
+                    <div className="py-20 text-center">
+                      <Search size={32} className="text-slate-200 mx-auto mb-3"/>
+                      <div className="text-[14px] font-bold text-slate-400">검색 결과가 없습니다</div>
+                    </div>
+                  )}
+
+                  {/* 페이지네이션 — 좌(여백) · 중앙(페이지 번호) · 우(페이지 크기) */}
+                  {filtered.length > 0 && (
+                    <div className="px-6 py-3 border-t border-slate-200 grid grid-cols-3 items-center bg-white">
+                      {/* 좌측 여백 (정보 자리, 1차는 비움) */}
+                      <div/>
+
+                      {/* 중앙: 페이지 번호 */}
+                      <div className="flex items-center justify-center gap-1 text-slate-500">
+                        <button onClick={() => setPage(p => Math.max(1, p - 1))}
+                          disabled={page === 1}
+                          aria-label="이전"
+                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                          <ChevronLeft size={14}/>
+                        </button>
+                        {visiblePages.map((p, i) => (
+                          p === '...' ? (
+                            <span key={`e${i}`} className="w-8 h-8 flex items-center justify-center text-[13px] text-slate-300 select-none">…</span>
+                          ) : (
+                            <button key={p}
+                              onClick={() => setPage(p)}
+                              aria-current={page === p ? 'page' : undefined}
+                              className={`w-8 h-8 flex items-center justify-center rounded-md text-[13px] font-bold tabular-nums transition-colors
+                                ${page === p
+                                  ? 'bg-indigo-600 text-white shadow-sm'
+                                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}>
+                              {p}
+                            </button>
+                          )
+                        ))}
+                        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                          disabled={page === totalPages}
+                          aria-label="다음"
+                          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                          <ChevronRight size={14}/>
+                        </button>
+                      </div>
+
+                      {/* 우측: 페이지 크기 셀렉터 */}
+                      <div className="flex items-center justify-end">
+                        <select value={pageSize}
+                          onChange={e => setPageSize(parseInt(e.target.value, 10))}
+                          aria-label="페이지당 개수"
+                          className="text-[13px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-md pl-2 pr-1 py-1 focus:border-indigo-400 outline-none cursor-pointer hover:border-slate-300">
+                          <option value={10}>10</option>
+                          <option value={20}>20</option>
+                          <option value={50}>50</option>
+                          <option value={100}>100</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </main>
+          </div>
+
+          </div>{/* 메인 영역 끝 */}
+
+          {/* ══ 삭제 확인 모달 ══ */}
+          {deleteModal && (() => {
+            const isBulk = deleteModal.type === 'bulk';
+            const courseName = isBulk ? null : deleteModal.course.title;
+            const totalEnrolled = isBulk
+              ? deleteModal.courses.reduce((s, c) => s + (c.enrolledCount || 0), 0)
+              : (deleteModal.course.enrolledCount || 0);
+            const canConfirm = deleteInput === '삭제';
+            return (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 animate-fadeIn" onClick={e => { if(e.target === e.currentTarget) { setDeleteModal(null); setDeleteInput(''); } }}>
+                <div className="bg-white rounded-2xl shadow-2xl w-[440px] overflow-hidden animate-slideUp" data-feature-id="A1-11">
+                  {/* 상단 아이콘 + 타이틀 */}
+                  <div className="px-8 pt-8 pb-5 text-center">
+                    <div className="w-14 h-14 bg-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7"><path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <h2 className="text-[18px] font-black text-slate-900 mb-1.5">정말 삭제하시겠습니까?</h2>
+                    <p className="text-[13px] text-slate-500 leading-relaxed">
+                      선택한 코스와 관련된 모든 데이터가 삭제되며,<br/>삭제 후에는 복구할 수 없습니다.
+                    </p>
+                  </div>
+
+                  <div className="px-8 pb-6 space-y-4">
+                    {/* 삭제 대상 코스명 */}
+                    <div className="bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 flex items-center gap-2">
+                      <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-rose-400 shrink-0"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                      <span className="text-[13px] text-rose-700 font-medium">
+                        {isBulk ? `삭제할 코스: ${deleteModal.courses.length}개 선택됨` : `삭제할 코스: ${courseName}`}
+                      </span>
+                    </div>
+
+                    {/* 수강생 경고 */}
+                    {totalEnrolled > 0 && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-amber-500 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                        <span className="text-[13px] text-amber-700 font-semibold">{totalEnrolled}명의 수강생 데이터가 함께 삭제됩니다.</span>
+                      </div>
+                    )}
+
+                    {/* 삭제 항목 목록 */}
+                    <ul className="space-y-1.5 pl-1">
+                      {[
+                        '수강생 등록 정보 (수강생 목록, 출석 기록 등)',
+                        '차수·회차 일정 / 정원 / 장소',
+                        '코스 통계',
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[13px] text-slate-600">
+                          <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 shrink-0"/>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* 텍스트 입력 확인 */}
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 text-indigo-500"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><polyline points="22 4 12 14.01 9 11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="text-[13px] font-semibold text-slate-700">계속하려면 <strong className="text-slate-900">삭제</strong>를 입력하세요.</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={deleteInput}
+                        onChange={e => setDeleteInput(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && canConfirm && executeDelete()}
+                        placeholder="삭제"
+                        autoFocus
+                        className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-[14px] outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 placeholder-slate-300"
+                      />
+                    </div>
+
+                    {/* 버튼 */}
+                    <div className="flex gap-3 pt-1">
+                      <button
+                        onClick={() => { setDeleteModal(null); setDeleteInput(''); }}
+                        className="flex-1 py-2.5 border border-slate-200 rounded-xl text-[14px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                      >취소</button>
+                      <button
+                        onClick={executeDelete}
+                        disabled={!canConfirm}
+                        className={`flex-1 py-2.5 rounded-xl text-[14px] font-bold transition-colors ${canConfirm ? 'bg-rose-500 text-white hover:bg-rose-600' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                      >확인</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ══ 코스 만들기 모달 (코스v2 진입) ══ */}
+          {showCreateModal && (
+            <div
+              className="fixed inset-0 z-[100] bg-slate-900/40 flex items-center justify-center p-6"
+              onClick={() => setShowCreateModal(false)}
+            >
+              <div
+                className="bg-[#f7f9fc] rounded-3xl shadow-2xl w-[1100px] max-w-[95vw] max-h-[92vh] overflow-y-auto p-12 relative"
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  aria-label="닫기"
+                >
+                  <X size={18}/>
+                </button>
+
+                <h1 className="text-[34px] font-black text-center text-slate-900 mb-14">어떤 코스를 개설하시겠어요?</h1>
+
+                <div className="grid grid-cols-2 gap-6 max-w-[820px] mx-auto">
+                  <button
+                    onClick={() => goBuilder('online')}
+                    className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all relative overflow-hidden"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-indigo-50 flex items-center justify-center mb-5">
+                      <Monitor size={26} className="text-indigo-600"/>
+                    </div>
+                    <h3 className="text-[19px] font-black text-slate-900 mb-2.5">온라인 코스</h3>
+                    <p className="text-[14.5px] text-slate-500 leading-relaxed mb-5">
+                      비대면·자기주도 학습 과정을 설계합니다.<br/>VOD, 문서, 시험을 자유롭게 조합하세요.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">VOD</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">문서</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">시험/퀴즈</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => goBuilder('offline')}
+                    className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-rose-300 hover:shadow-lg transition-all relative overflow-hidden"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-rose-50 flex items-center justify-center mb-5">
+                      <MapPin size={26} className="text-rose-600"/>
+                    </div>
+                    <h3 className="text-[19px] font-black text-slate-900 mb-2.5">오프라인 코스</h3>
+                    <p className="text-[14.5px] text-slate-500 leading-relaxed mb-5">
+                      집합 교육과 출석 관리에 최적화된 플로우입니다.<br/>QR 출석 및 회차 관리를 지원합니다.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">회차 관리</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">QR 출석</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">수기 처리</span>
+                    </div>
+                  </button>
+                </div>
+
+                <p className="text-center text-[12.5px] text-slate-400 mt-12">등록 후에도 코스 유형 일부 설정은 변경 가능합니다</p>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(<App/>);
+  </script>
+  <script src="feature-highlight.js"></script>
+</body>
+</html>

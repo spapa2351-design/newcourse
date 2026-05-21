@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>콘텐츠 라이브러리</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Pretendard"', '"Roboto"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Helvetica', 'Arial', 'sans-serif'],
+          },
+          colors: {
+            indigo: {
+              50: '#EEF0FF', 100: '#E0E4FF', 200: '#C7CDFF', 300: '#9BA8FF',
+              400: '#7B8AFF', 500: '#5569FF', 600: '#4454CC', 700: '#3340A6',
+              800: '#2A3587', 900: '#000C57', 950: '#000940',
+            },
+          },
+          boxShadow: {
+            card: '0px 9px 16px rgba(159,162,191,.18), 0px 2px 2px rgba(159,162,191,0.32)',
+            'card-sm': '0px 2px 3px rgba(159,162,191,.18), 0px 1px 1px rgba(159,162,191,0.32)',
+          },
+          fontSize: {
+            xs: ['13px', { lineHeight: '1.5' }],
+            sm: ['15px', { lineHeight: '1.5' }],
+          },
+        },
+      },
+    }
+  </script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.25s ease-out forwards; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#f2f5f9] text-slate-800 antialiased custom-scrollbar">
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    import React, { useState, useMemo } from 'https://esm.sh/react@18.2.0';
+    import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+    import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
+
+    const {
+      Plus, Search, ChevronDown, ChevronRight, MapPin, Monitor, Layers,
+      Users, Trash2, Copy, Edit3, Star, Download, Grid3X3, List,
+      X, CheckCircle, AlertCircle, BookOpen, Eye, Settings, Filter,
+      FileText, MessageSquare, Play, BarChart2, Video, Archive,
+      Upload, AlertTriangle, ExternalLink, Pencil,
+    } = Lucide;
+
+    /* ══════════════════════════════════════
+       Mock 데이터 — 라이브러리 시드
+       (실제로는 빌더와 공유되는 단일 store. 1차는 페이지 단일 mock)
+       ══════════════════════════════════════ */
+    const SAMPLE_THUMB_V = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&q=70';
+    const SAMPLE_THUMB_V2 = 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&q=70';
+    const SAMPLE_THUMB_V3 = 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&q=70';
+    const SAMPLE_VIDEO_URL = '../assets/test-video.mp4';
+    const SAMPLE_PDF_URL = '../assets/test.pdf';
+
+    const SEED = [
+      {
+        id:'l1', type:'video',
+        title:'2025년 기업문화 핵심가치 내재화 특강',
+        description:'회사의 핵심가치 4가지를 사례 기반으로 풀어내며, 임직원 행동 원칙과 실제 의사결정 상황에서의 적용 방법을 다룹니다.',
+        thumbnailUrl: SAMPLE_THUMB_V,
+        meta:{ duration:'45:20', sizeMB: 320 },
+        uploadedAt:'2026.01.15', uploadedBy:'인사팀',
+        videoUrl: SAMPLE_VIDEO_URL,
+        source:'tenant_upload', master_ref_id:null, is_fork:false, frozen_version:null,
+        usedIn:[
+          { courseId:'c1', courseName:'2025 핵심가치 교육' },
+          { courseId:'c2', courseName:'신입 OJT 1주차' },
+        ],
+      },
+      {
+        id:'l2', type:'video',
+        title:'직장 내 성희롱 예방 교육 (법정의무)',
+        description:'남녀고용평등법에 따른 연 1회 법정의무 교육. 사례·예방 행동·신고 절차·2차 가해 방지까지 표준 커리큘럼.',
+        thumbnailUrl: SAMPLE_THUMB_V2,
+        meta:{ duration:'60:00', sizeMB: 420 },
+        uploadedAt:'2025.10.05', uploadedBy:'인사팀',
+        videoUrl: SAMPLE_VIDEO_URL,
+        source:'tenant_upload', master_ref_id:null, is_fork:false, frozen_version:null,
+        usedIn:[
+          { courseId:'c3', courseName:'2025 의무 교육 패키지' },
+          { courseId:'c4', courseName:'2025 신입 의무 교육' },
+          { courseId:'c5', courseName:'2025 관리자 의무 교육' },
+        ],
+      },
+      {
+        id:'l3', type:'video',
+        title:'신입사원 온보딩 영상 1',
+        description:'신입사원 첫 출근 ~ 첫 주에 필요한 모든 정보. 회사 소개, 조직 구조, 사내 시스템 사용법, 복지·문화 가이드.',
+        thumbnailUrl: SAMPLE_THUMB_V3,
+        meta:{ duration:'30:00', sizeMB: 240 },
+        uploadedAt:'2026.03.01', uploadedBy:'인사팀',
+        videoUrl: SAMPLE_VIDEO_URL,
+        source:'tenant_upload', master_ref_id:null, is_fork:false, frozen_version:null,
+        usedIn:[{ courseId:'c2', courseName:'신입 OJT 1주차' }],
+      },
+      {
+        id:'l4', type:'video',
+        title:'리더십 역량 강의 1강',
+        description:'실무 리더가 첫 팀을 맡았을 때 가장 먼저 부딪히는 5가지 상황과 그 대응 방법. 신임 팀장·리드 대상.',
+        thumbnailUrl: SAMPLE_THUMB_V,
+        meta:{ duration:'52:10', sizeMB: 380 },
+        uploadedAt:'2026.01.20', uploadedBy:'교육팀',
+        videoUrl: SAMPLE_VIDEO_URL,
+        source:'tenant_upload', master_ref_id:null, is_fork:false, frozen_version:null,
+        usedIn:[],
+      },
+      {
+        id:'l5', type:'pdf',
+        title:'신입사원 핸드아웃 (2026)',
+        description:'신입사원이 첫 주에 숙지해야 할 사내 시스템·복지·매너 가이드 묶음.',
+        thumbnailUrl: null,
+        meta:{ pages: 18, sizeMB: 2.4 },
+        uploadedAt:'2026.03.05', uploadedBy:'인사팀',
+        fileUrl: SAMPLE_PDF_URL,
+        source:'builder_auto', master_ref_id:null, is_fork:false, frozen_version:null,
+        usedIn:[{ courseId:'c2', courseName:'신입 OJT 1주차' }],
+      },
+      {
+        id:'l6', type:'pdf',
+        title:'리더십 강의 1강 강의자료',
+        description:'리더십 1강 강의 후 참고 자료. 발표 슬라이드와 추가 사례.',
+        thumbnailUrl: null,
+        meta:{ pages: 32, sizeMB: 4.1 },
+        uploadedAt:'2026.01.22', uploadedBy:'교육팀',
+        fileUrl: SAMPLE_PDF_URL,
+        source:'tenant_upload', master_ref_id:null, is_fork:false, frozen_version:null,
+        usedIn:[],
+      },
+      {
+        id:'l7', type:'pdf',
+        title:'성희롱 예방 교육 보조 교재',
+        description:'법정의무 교육 영상과 함께 배포되는 보조 교재. 사례 워크북.',
+        thumbnailUrl: null,
+        meta:{ pages: 24, sizeMB: 3.2 },
+        uploadedAt:'2025.10.06', uploadedBy:'인사팀',
+        fileUrl: SAMPLE_PDF_URL,
+        source:'tenant_upload', master_ref_id:null, is_fork:false, frozen_version:null,
+        usedIn:[
+          { courseId:'c3', courseName:'2025 의무 교육 패키지' },
+          { courseId:'c4', courseName:'2025 신입 의무 교육' },
+        ],
+      },
+    ];
+
+    /* 좌측 사이드바 메뉴 — index.html 동일 셸 + 콘텐츠 라이브러리 active */
+    const SIDEBAR_MENUS = [
+      { id: 'member', label: '회원', icon: Users, hasChildren: true },
+      { id: 'course', label: '코스', icon: BookOpen, hasChildren: true, children: [
+        { id: 'course-main', label: '코스' },
+        { id: 'course-plus', label: 'PLUS 코스' },
+      ]},
+      /* 오프라인/온라인 코스는 '코스v2' children으로 이동 (NEW_MENUS 참조) */
+      { id: 'content', label: '콘텐츠', icon: Copy, hasChildren: true },
+      { id: 'ttube', label: 'T튜브', icon: Monitor, hasChildren: true },
+      { id: 'ai-quiz', label: 'AI 퀴메이커', icon: Star, badge: 'N' },
+      { id: 'translation', label: 'Translation', icon: List, hasChildren: true },
+      { id: 'question-bank', label: '문제 은행', icon: Archive },
+      { id: 'opinion', label: '의견', icon: AlertCircle },
+      { id: 'gamification', label: '게이미피케이션', icon: Grid3X3, hasChildren: true },
+      { id: 'live', label: '라이브 스트리밍', icon: Eye, hasChildren: true },
+      { id: 'touch', label: '터치투게더', icon: Users },
+      { id: 'attendance', label: '출석 체크', icon: CheckCircle },
+      { id: 'ai-chat', label: 'AI 챗봇', icon: Monitor, badge: 'N' },
+      { id: 'stats', label: '통계', icon: Filter },
+      { id: 'notice', label: '공지사항', icon: Archive },
+      { id: 'popup', label: '팝업', icon: Layers },
+    ];
+
+    /* ── 코스v2 (newcourse 전통 LMS) ──
+       기존 SIDEBAR의 오프라인/온라인 코스를 children으로 흡수.
+       블렌디드는 Phase 2 — 사이드바·모달 양쪽 숨김. children 클릭 → href 라우팅.
+    */
+    const NEW_MENUS = [
+      { id: 'course-v2', label: '코스v2', icon: BarChart2, isHighlight: true, badge: 'N', hasChildren: true, children: [
+        { id: 'online-course',   label: '온라인 코스',   icon: Monitor, href: 'online-list.html',  tooltip: '영상 중심, 진도율 정확히 추적.' },
+        { id: 'offline-course',  label: '오프라인 코스', icon: MapPin,  href: 'offline-list.html', tooltip: '오프라인 일정·출석 기반 코스.' },
+      ]},
+      { id: 'newcourse-library', label: '콘텐츠 라이브러리', icon: Archive, isHighlight: true, active: true, tooltip: '코스v2 빌더용 자사 콘텐츠 풀.' },
+    ];
+
+    /* ══════════════════════════════════════ App ══════════════════════════════════════ */
+    const App = () => {
+      const [items, setItems] = useState(SEED);
+      const [sideExpanded, setSideExpanded] = useState(new Set(['course', 'course-v2']));
+      const toggleSideMenu = (id) => setSideExpanded(prev => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      });
+
+      const [showCreateModal, setShowCreateModal] = useState(false);
+      React.useEffect(() => {
+        if (!showCreateModal) return;
+        const onKey = (e) => { if (e.key === 'Escape') setShowCreateModal(false); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      }, [showCreateModal]);
+      const goBuilder = (type) => {
+        window.location.href = type === 'online' ? 'online-builder.html' : 'offline-builder.html';
+      };
+
+      const [typeFilter, setTypeFilter] = useState('all'); // 'all' | 'video' | 'pdf'
+      const [sortKey, setSortKey] = useState('uploadedAt'); // 'uploadedAt' | 'title' | 'usage'
+      const [query, setQuery] = useState('');
+      const [page, setPage] = useState(1);
+      const pageSize = 20;
+      const [selectedIds, setSelectedIds] = useState(new Set());
+
+      const [detailId, setDetailId] = useState(null);
+      const [editingMeta, setEditingMeta] = useState(false);
+      const [draftMeta, setDraftMeta] = useState({ title:'', description:'' });
+      const [showUpload, setShowUpload] = useState(false);
+      const [deleteConfirm, setDeleteConfirm] = useState(null); // libItem
+      const [usageModal, setUsageModal] = useState(null); // libItem
+
+      /* 필터·정렬·검색 변경 시 1페이지로 리셋 */
+      React.useEffect(() => { setPage(1); }, [typeFilter, query, sortKey]);
+
+      /* 파생 */
+      const filtered = useMemo(() => {
+        let arr = items;
+        if (typeFilter !== 'all') arr = arr.filter(i => i.type === typeFilter);
+        if (query.trim()) {
+          const q = query.toLowerCase();
+          arr = arr.filter(i =>
+            i.title.toLowerCase().includes(q) ||
+            (i.description || '').toLowerCase().includes(q)
+          );
+        }
+        if (sortKey === 'title') arr = [...arr].sort((a,b) => a.title.localeCompare(b.title, 'ko'));
+        else if (sortKey === 'usage') arr = [...arr].sort((a,b) => b.usedIn.length - a.usedIn.length);
+        else arr = [...arr].sort((a,b) => b.uploadedAt.localeCompare(a.uploadedAt));
+        return arr;
+      }, [items, typeFilter, query, sortKey]);
+
+      const counts = {
+        all: items.length,
+        video: items.filter(i => i.type === 'video').length,
+        pdf: items.filter(i => i.type === 'pdf').length,
+      };
+
+      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+      const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+      const detail = items.find(i => i.id === detailId);
+
+      const openDetail = (item) => {
+        setDetailId(item.id);
+        setEditingMeta(false);
+      };
+      const closeDetail = () => { setDetailId(null); setEditingMeta(false); };
+
+      const startEditMeta = () => {
+        setDraftMeta({ title: detail.title, description: detail.description || '' });
+        setEditingMeta(true);
+      };
+      const saveMeta = () => {
+        setItems(prev => prev.map(i => i.id === detail.id ? { ...i, title: draftMeta.title, description: draftMeta.description } : i));
+        setEditingMeta(false);
+      };
+
+      const onDelete = (item) => {
+        if (item.usedIn.length > 0) {
+          setDeleteConfirm(item); // 가드 모달 (사용 중)
+        } else {
+          setDeleteConfirm(item); // 빈 삭제 confirm
+        }
+      };
+      const confirmDelete = () => {
+        if (deleteConfirm.usedIn.length === 0) {
+          setItems(prev => prev.filter(i => i.id !== deleteConfirm.id));
+          if (detailId === deleteConfirm.id) closeDetail();
+        }
+        setDeleteConfirm(null);
+      };
+
+      /* 업로드 모달 — 매우 단순 mock */
+      const [uploadForm, setUploadForm] = useState({ type:'video', title:'', description:'' });
+      const submitUpload = () => {
+        if (!uploadForm.title.trim()) return;
+        const newId = `l${Date.now()}`;
+        const newItem = {
+          id: newId,
+          type: uploadForm.type,
+          title: uploadForm.title.trim(),
+          description: uploadForm.description.trim(),
+          thumbnailUrl: uploadForm.type === 'video' ? SAMPLE_THUMB_V3 : null,
+          videoUrl: uploadForm.type === 'video' ? SAMPLE_VIDEO_URL : undefined,
+          fileUrl: uploadForm.type === 'pdf' ? SAMPLE_PDF_URL : undefined,
+          meta: uploadForm.type === 'video' ? { duration:'00:00', sizeMB: 0 } : { pages: 0, sizeMB: 0 },
+          uploadedAt: new Date().toISOString().slice(0,10).replace(/-/g,'.'),
+          uploadedBy: '관리자',
+          source: 'tenant_upload',
+          master_ref_id: null, is_fork: false, frozen_version: null,
+          usedIn: [],
+        };
+        setItems(prev => [newItem, ...prev]);
+        setUploadForm({ type:'video', title:'', description:'' });
+        setShowUpload(false);
+      };
+
+      return (
+        <div className="min-h-screen flex">
+          {/* ══ 글로벌 좌측 사이드바 ══ */}
+          <aside className="w-[200px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0 overflow-y-auto custom-scrollbar">
+            <div className="px-4 py-4 flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0 shadow-sm">
+                <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4"><path d="M7 2L2 5v7h4V9h2v3h4V5L7 2z" fill="white"/></svg>
+              </div>
+              <span className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">TOUCH<br/>CLASS</span>
+            </div>
+            <div className="h-px bg-slate-100 mx-3 mb-2"/>
+            <nav className="flex-1 px-3 pb-6 space-y-0.5">
+              {SIDEBAR_MENUS.map(menu => (
+                <React.Fragment key={menu.id}>
+                  <div>
+                    <button
+                      onClick={() => menu.hasChildren && toggleSideMenu(menu.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors
+                        ${menu.active ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                      {React.createElement(menu.icon, { size: 16, className: menu.active ? 'text-indigo-600' : 'text-slate-400' })}
+                      <span className="flex-1 text-left">{menu.label}</span>
+                      {menu.badge && (
+                        <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{menu.badge}</span>
+                      )}
+                      {menu.hasChildren && (
+                        <span className="text-slate-400">
+                          {sideExpanded.has(menu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
+                        </span>
+                      )}
+                    </button>
+                    {menu.children && sideExpanded.has(menu.id) && (
+                      <div className="ml-7 mt-0.5 space-y-0.5">
+                        {menu.children.map(sub => (
+                          <a key={sub.id} href="#"
+                            className={`block px-3 py-1.5 rounded-md text-[13px] transition-colors
+                              ${sub.active ? 'text-indigo-700 font-bold' : 'text-slate-500 hover:bg-slate-50 font-medium'}`}>
+                            {sub.label}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── 코스 그룹 직후: 코스v2 섹션 (구분선으로 패러다임 분리) ── */}
+                  {menu.id === 'course' && (
+                    <>
+                      <div className="my-2 mx-1 h-px bg-slate-200"/>
+                      {NEW_MENUS.map(newMenu => (
+                        <div key={newMenu.id}>
+                          <button
+                            onClick={() => newMenu.hasChildren && toggleSideMenu(newMenu.id)}
+                            title={newMenu.tooltip || ''}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors
+                              ${newMenu.active
+                                ? 'text-emerald-700 bg-emerald-50 font-bold'
+                                : newMenu.isHighlight
+                                  ? 'text-slate-700 font-bold bg-emerald-50/60 hover:bg-emerald-50'
+                                  : 'text-slate-600 hover:bg-slate-50'}`}
+                          >
+                            {React.createElement(newMenu.icon, { size: 16, className: newMenu.active || newMenu.isHighlight ? 'text-emerald-600' : 'text-slate-400' })}
+                            <span className="flex-1 text-left">{newMenu.label}</span>
+                            {newMenu.badge && (
+                              <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{newMenu.badge}</span>
+                            )}
+                            {newMenu.hasChildren && (
+                              <span className={newMenu.isHighlight ? 'text-emerald-600' : 'text-slate-400'}>
+                                {sideExpanded.has(newMenu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
+                              </span>
+                            )}
+                          </button>
+                          {newMenu.children && sideExpanded.has(newMenu.id) && (
+                            <div className="ml-7 mt-0.5 space-y-0.5">
+                              {/* ── 코스 만들기 CTA (코스v2 children 최상단, course-v2에만 노출) ── */}
+                              {newMenu.id === 'course-v2' && (
+                                <button
+                                  onClick={() => setShowCreateModal(true)}
+                                  className="w-full px-3 py-1.5 rounded-md text-[13px] flex items-center gap-1.5 transition-colors text-slate-700 font-semibold hover:bg-emerald-50"
+                                >
+                                  <Plus size={14} className="text-emerald-600"/>
+                                  <span className="flex-1 text-left">코스 만들기</span>
+                                </button>
+                              )}
+                              {newMenu.children.map(sub => (
+                                <a key={sub.id} href={sub.disabled ? undefined : (sub.href || '#')} title={sub.tooltip || ''}
+                                  className={`px-3 py-1.5 rounded-md text-[13px] flex items-center gap-1.5 transition-colors
+                                    ${sub.disabled
+                                      ? 'text-slate-400 font-medium cursor-not-allowed'
+                                      : sub.active
+                                        ? 'text-emerald-700 bg-emerald-50 font-bold'
+                                        : 'text-slate-700 font-semibold hover:bg-emerald-50'}`}>
+                                  {sub.icon && React.createElement(sub.icon, { size: 14, className: sub.disabled ? 'text-slate-400' : 'text-emerald-600' })}
+                                  <span className="flex-1">{sub.label}</span>
+                                  {sub.badge && (
+                                    <span className="text-[9.5px] font-bold text-slate-400 px-1.5 py-0.5 bg-slate-100 rounded">{sub.badge}</span>
+                                  )}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <div className="my-2 mx-1 h-px bg-slate-200"/>
+                    </>
+                  )}
+                </React.Fragment>
+              ))}
+            </nav>
+          </aside>
+
+          {/* ══ 메인 영역 ══ */}
+          <div className="flex-1 flex flex-col min-h-screen bg-[#f2f5f9]">
+
+            {/* ── 글로벌 탑 네비게이션 ── */}
+            <div className="h-[52px] bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0 sticky top-0 z-40">
+              <div className="flex items-center gap-3">
+                <button className="flex items-center gap-1.5 text-slate-600 text-[13px] font-semibold hover:text-slate-800 transition-colors">
+                  <Star size={14} className="text-amber-400 fill-amber-400"/> 즐겨찾기 <ChevronDown size={13} className="text-slate-400"/>
+                </button>
+                <div className="w-px h-4 bg-slate-200"/>
+                <button className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-[12px] font-bold hover:bg-indigo-100 transition-colors">
+                  <Users size={12}/> 관리자 가이드
+                </button>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors">
+                  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5"><circle cx="10" cy="10" r="8" stroke="#7c3aed" strokeWidth="1.5"/><circle cx="10" cy="10" r="3.5" fill="#7c3aed"/></svg>
+                </button>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><MessageSquare size={16}/></button>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Play size={15} className="ml-0.5"/></button>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><BarChart2 size={16}/></button>
+                <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
+                  <Filter size={15}/>
+                  <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none px-0.5">0</span>
+                </button>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Settings size={16}/></button>
+                <div className="w-px h-5 bg-slate-200 mx-1.5"/>
+                <button className="flex items-center gap-1.5 hover:bg-slate-50 pl-0.5 pr-2 py-1 rounded-lg transition-colors">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">조</div>
+                  <span className="text-[13px] font-semibold text-slate-700">조찬현</span>
+                  <ChevronDown size={13} className="text-slate-400"/>
+                </button>
+              </div>
+            </div>
+
+            {/* ── 페이지 타이틀 ── */}
+            <header className="shrink-0">
+              <div className="px-6 py-4 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-[18px] font-black text-slate-900">콘텐츠 라이브러리</h1>
+                  <button className="text-slate-300 hover:text-amber-400 transition-colors">
+                    <Star size={15}/>
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setShowUpload(true)}
+                    className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-[14px] font-bold hover:bg-indigo-600 transition-colors flex items-center gap-1.5 shadow-sm">
+                    <Plus size={14}/> 콘텐츠 업로드
+                  </button>
+                </div>
+              </div>
+            </header>
+
+            {/* ── 메인 콘텐츠 카드 ── */}
+            <div className="flex-1 px-4 pb-4 pt-0">
+              <main className="bg-white rounded-xl shadow-card overflow-hidden">
+                {/* 툴바 */}
+                <div className="border-b border-slate-200 px-6 py-3.5 flex items-center gap-3 flex-wrap">
+                  {/* 타입 필터 */}
+                  <div className="flex items-center gap-1.5">
+                    {[
+                      { key: 'all', label: '전체' },
+                      { key: 'video', label: '영상' },
+                      { key: 'pdf', label: '자료(PDF)' },
+                    ].map(t => (
+                      <button key={t.key}
+                        onClick={() => setTypeFilter(t.key)}
+                        className={`px-3 py-1.5 rounded-lg text-[13px] font-bold border transition-all flex items-center gap-1.5
+                          ${typeFilter === t.key
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'}`}>
+                        {t.label}
+                        <span className={typeFilter === t.key ? 'text-indigo-200' : 'text-slate-300'}>{counts[t.key]}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="w-px h-5 bg-slate-200"/>
+
+                  {/* 검색 */}
+                  <div className="relative flex-1 min-w-[200px] max-w-[320px]">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                    <input type="text" value={query}
+                      onChange={e => setQuery(e.target.value)}
+                      placeholder="제목·설명 검색"
+                      className="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:border-indigo-400 outline-none"/>
+                  </div>
+
+                  {/* 정렬 */}
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    <span className="text-[12px] font-bold text-slate-400">정렬</span>
+                    <select value={sortKey}
+                      onChange={e => setSortKey(e.target.value)}
+                      className="text-[13px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg px-2 py-1.5 focus:border-indigo-400 outline-none cursor-pointer">
+                      <option value="uploadedAt">등록일</option>
+                      <option value="title">이름</option>
+                      <option value="usage">사용 빈도</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 카운트 바 */}
+                <div className="px-6 py-2.5 border-b border-slate-100 bg-slate-50/40 flex items-center justify-between">
+                  <p className="text-[12px] text-slate-500">
+                    전체 <span className="font-bold text-slate-700">{filtered.length}</span>개
+                    {selectedIds.size > 0 && (
+                      <span className="ml-2 text-indigo-600 font-bold">· {selectedIds.size}개 선택됨</span>
+                    )}
+                  </p>
+                  <button title="현재 목록 CSV 다운로드 (mock)"
+                    className="inline-flex items-center gap-1 px-3 py-1 text-[12px] font-bold text-slate-500 bg-white border border-slate-200 rounded-md hover:border-indigo-300 hover:text-indigo-600 transition-colors">
+                    <Download size={12}/> 다운로드
+                  </button>
+                </div>
+
+                {/* 테이블 */}
+                {filtered.length === 0 ? (
+                  <div className="text-center py-16 text-slate-400">
+                    <Archive size={32} className="mx-auto mb-3 opacity-30"/>
+                    <p className="text-[14px] font-semibold">검색 결과가 없습니다</p>
+                    <p className="text-[12px] mt-1">검색어를 줄이거나 [+ 콘텐츠 업로드]로 새 항목을 추가하세요</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-[12px]">
+                      <thead>
+                        <tr className="bg-white border-b border-slate-200 text-slate-400">
+                          <th className="px-4 py-2.5 w-9 text-left">
+                            <input type="checkbox"
+                              checked={pageItems.length > 0 && pageItems.every(i => selectedIds.has(i.id))}
+                              onChange={e => {
+                                const ids = pageItems.map(i => i.id);
+                                setSelectedIds(prev => {
+                                  const next = new Set(prev);
+                                  if (e.target.checked) ids.forEach(id => next.add(id));
+                                  else ids.forEach(id => next.delete(id));
+                                  return next;
+                                });
+                              }}
+                              className="accent-indigo-500 cursor-pointer"/>
+                          </th>
+                          <th className="px-2 py-2.5 w-14 text-left font-bold tracking-wide">타입</th>
+                          <th className="px-2 py-2.5 w-16 text-left font-bold tracking-wide">썸네일</th>
+                          <th className="px-3 py-2.5 text-left font-bold tracking-wide">제목</th>
+                          <th className="px-3 py-2.5 w-24 text-left font-bold tracking-wide">메타</th>
+                          <th className="px-3 py-2.5 w-20 text-right font-bold tracking-wide">용량(MB)</th>
+                          <th className="px-3 py-2.5 w-28 text-left font-bold tracking-wide">업로드일</th>
+                          <th className="px-3 py-2.5 w-20 text-left font-bold tracking-wide">등록자</th>
+                          <th className="px-3 py-2.5 w-24 text-center font-bold tracking-wide">사용 코스</th>
+                          <th className="px-3 py-2.5 w-24 text-right font-bold tracking-wide">{/* 액션 */}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pageItems.map(item => {
+                          const isVideo = item.type === 'video';
+                          const isSelected = selectedIds.has(item.id);
+                          return (
+                            <tr key={item.id}
+                              className={`group border-b border-slate-100 transition-colors cursor-pointer
+                                ${isSelected ? 'bg-indigo-50/60' : 'hover:bg-slate-50'}`}
+                              onClick={() => openDetail(item)}>
+                              <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
+                                <input type="checkbox"
+                                  checked={isSelected}
+                                  onChange={e => {
+                                    setSelectedIds(prev => {
+                                      const next = new Set(prev);
+                                      e.target.checked ? next.add(item.id) : next.delete(item.id);
+                                      return next;
+                                    });
+                                  }}
+                                  className="accent-indigo-500 cursor-pointer"/>
+                              </td>
+                              <td className="px-2 py-2.5">
+                                <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold border
+                                  ${isVideo ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                                  {isVideo ? '영상' : 'PDF'}
+                                </span>
+                              </td>
+                              <td className="px-2 py-2">
+                                {isVideo && item.thumbnailUrl ? (
+                                  <div className="w-12 h-7 rounded overflow-hidden bg-slate-900 shrink-0">
+                                    <img src={item.thumbnailUrl} alt="" className="w-full h-full object-cover"/>
+                                  </div>
+                                ) : (
+                                  <div className="w-7 h-7 rounded bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0">
+                                    <FileText size={12} className="text-amber-500"/>
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-3 py-2.5 min-w-0">
+                                <p className="text-[13px] font-bold text-slate-800 truncate group-hover:text-indigo-600 transition-colors">{item.title}</p>
+                                {item.description && (
+                                  <p className="text-[11px] text-slate-400 truncate">{item.description}</p>
+                                )}
+                              </td>
+                              <td className="px-3 py-2.5 text-slate-600 tabular-nums whitespace-nowrap">
+                                {isVideo ? item.meta.duration : `${item.meta.pages}p`}
+                              </td>
+                              <td className="px-3 py-2.5 text-slate-600 tabular-nums text-right whitespace-nowrap">{item.meta.sizeMB}</td>
+                              <td className="px-3 py-2.5 text-slate-500 tabular-nums whitespace-nowrap">{item.uploadedAt}</td>
+                              <td className="px-3 py-2.5 text-slate-600 truncate">{item.uploadedBy}</td>
+                              <td className="px-3 py-2.5 text-center" onClick={e => e.stopPropagation()}>
+                                {item.usedIn.length > 0 ? (
+                                  <button onClick={() => setUsageModal(item)}
+                                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[11px] font-bold">
+                                    {item.usedIn.length}개
+                                  </button>
+                                ) : (
+                                  <span className="text-[11px] text-slate-300 font-semibold">미사용</span>
+                                )}
+                              </td>
+                              <td className="px-3 py-2.5 text-right" onClick={e => e.stopPropagation()}>
+                                <div className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => openDetail(item)}
+                                    title="열기"
+                                    className="w-7 h-7 inline-flex items-center justify-center rounded-md text-slate-500 hover:bg-indigo-50 hover:text-indigo-700">
+                                    <Eye size={13}/>
+                                  </button>
+                                  <button onClick={() => onDelete(item)}
+                                    title={item.usedIn.length > 0 ? '사용 중 (삭제 가드)' : '삭제'}
+                                    className={`w-7 h-7 inline-flex items-center justify-center rounded-md
+                                      ${item.usedIn.length > 0
+                                        ? 'text-slate-300 cursor-not-allowed'
+                                        : 'text-slate-500 hover:bg-red-50 hover:text-red-600'}`}>
+                                    <Trash2 size={13}/>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* 페이지네이션 */}
+                {filtered.length > pageSize && (
+                  <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between bg-white">
+                    <p className="text-[12px] text-slate-500">
+                      {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, filtered.length)} / 전체 <span className="font-bold text-slate-700">{filtered.length}</span>개
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-2 py-1 text-[12px] font-bold text-slate-500 border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                        이전
+                      </button>
+                      <span className="px-3 py-1 text-[12px] font-bold text-slate-700">{page} / {totalPages}</span>
+                      <button onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                        className="px-2 py-1 text-[12px] font-bold text-slate-500 border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                        다음
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </main>
+            </div>
+          </div>
+
+          {/* ── 업로드 모달 ── */}
+          {showUpload && (
+            <div className="fixed inset-0 bg-slate-900/70 z-[200] flex items-center justify-center animate-fadeIn" onClick={() => setShowUpload(false)}>
+              <div className="bg-white rounded-2xl shadow-2xl w-[480px] max-w-[92vw] overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                  <h3 className="text-[16px] font-bold flex items-center gap-2">
+                    <Upload size={18} className="text-indigo-600"/> 콘텐츠 업로드
+                  </h3>
+                  <button onClick={() => setShowUpload(false)} className="text-slate-400 hover:text-slate-600"><X size={18}/></button>
+                </div>
+                <div className="p-6 space-y-4">
+                  {/* 타입 선택 */}
+                  <div>
+                    <label className="text-[12px] font-bold text-slate-500 block mb-2">유형</label>
+                    <div className="flex gap-2">
+                      {[
+                        { key: 'video', label: '영상', icon: Video },
+                        { key: 'pdf', label: 'PDF 자료', icon: FileText },
+                      ].map(t => (
+                        <button key={t.key}
+                          onClick={() => setUploadForm(p => ({ ...p, type: t.key }))}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-[13px] font-bold transition-colors
+                            ${uploadForm.type === t.key
+                              ? 'bg-indigo-50 border-indigo-400 text-indigo-700'
+                              : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300'}`}>
+                          {React.createElement(t.icon, { size: 14 })} {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 파일 영역 (mock) */}
+                  <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center bg-slate-50/50">
+                    <Upload size={20} className="text-slate-400 mx-auto mb-2"/>
+                    <p className="text-[12px] text-slate-500 font-semibold">파일을 끌어다 놓거나 클릭해서 업로드</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">{uploadForm.type === 'video' ? 'MP4 · 최대 2GB' : 'PDF · 최대 50MB'}</p>
+                  </div>
+
+                  {/* 제목 */}
+                  <div>
+                    <label className="text-[12px] font-bold text-slate-500 block mb-1">제목 *</label>
+                    <input type="text" value={uploadForm.title}
+                      onChange={e => setUploadForm(p => ({ ...p, title: e.target.value }))}
+                      placeholder="콘텐츠 제목"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:border-indigo-400 outline-none"/>
+                  </div>
+
+                  {/* 설명 */}
+                  <div>
+                    <label className="text-[12px] font-bold text-slate-500 block mb-1">설명</label>
+                    <textarea value={uploadForm.description}
+                      onChange={e => setUploadForm(p => ({ ...p, description: e.target.value }))}
+                      placeholder="콘텐츠 설명 (선택)"
+                      rows={3}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:border-indigo-400 outline-none resize-none"/>
+                  </div>
+                </div>
+                <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex gap-2">
+                  <button onClick={() => setShowUpload(false)}
+                    className="flex-1 py-2.5 border border-slate-200 bg-white text-slate-600 rounded-lg text-[13px] font-semibold hover:bg-slate-50">취소</button>
+                  <button onClick={submitUpload} disabled={!uploadForm.title.trim()}
+                    className={`flex-1 py-2.5 rounded-lg text-[13px] font-bold transition-colors flex items-center justify-center gap-1.5
+                      ${uploadForm.title.trim() ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                    <Plus size={13}/> 라이브러리에 등록
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── 상세 모달 ── */}
+          {detail && (
+            <div className="fixed inset-0 bg-slate-900/70 z-[150] flex items-center justify-center animate-fadeIn" onClick={closeDetail}>
+              <div className="bg-white rounded-2xl shadow-2xl w-[720px] max-w-[94vw] max-h-[88vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold
+                      ${detail.type === 'video' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
+                      {detail.type === 'video' ? '영상' : 'PDF 자료'}
+                    </span>
+                    <span className="text-[12px] text-slate-400">
+                      {detail.type === 'video'
+                        ? `${detail.meta.duration} · ${detail.meta.sizeMB}MB`
+                        : `${detail.meta.pages}p · ${detail.meta.sizeMB}MB`}
+                    </span>
+                  </div>
+                  <button onClick={closeDetail} className="text-slate-400 hover:text-slate-600"><X size={18}/></button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 space-y-5">
+                  {/* 미리보기 — video: 플레이어 / pdf: 안내 박스 */}
+                  {detail.type === 'video' ? (
+                    <div className="rounded-xl overflow-hidden bg-slate-900 aspect-video">
+                      {detail.videoUrl ? (
+                        <video
+                          key={detail.id}
+                          controls
+                          controlsList="nodownload"
+                          poster={detail.thumbnailUrl || undefined}
+                          src={detail.videoUrl}
+                          className="w-full h-full object-contain bg-black">
+                          영상 재생을 지원하지 않는 브라우저입니다.
+                        </video>
+                      ) : detail.thumbnailUrl ? (
+                        <img src={detail.thumbnailUrl} alt="" className="w-full h-full object-cover"/>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-500 text-[12px]">미리보기 영상이 없습니다</div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl overflow-hidden bg-slate-100 border border-slate-200 relative" style={{height: '480px'}}>
+                      {detail.fileUrl ? (
+                        <>
+                          <iframe
+                            key={detail.id}
+                            src={`${detail.fileUrl}#toolbar=0&navpanes=0&view=FitH`}
+                            title={detail.title}
+                            className="w-full h-full border-0"/>
+                          <a href={detail.fileUrl} target="_blank" rel="noopener noreferrer"
+                            title="새 창에서 열기"
+                            className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur border border-slate-200 rounded-md text-[11px] font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-300 shadow-sm">
+                            <ExternalLink size={11}/> 새 창
+                          </a>
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-center text-amber-700">
+                          <FileText size={48} className="text-amber-400 mb-2"/>
+                          <p className="text-[12px] font-semibold">PDF 미리보기를 불러올 수 없습니다</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 메타 표시 / 편집 */}
+                  {!editingMeta ? (
+                    <div>
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <h2 className="text-[18px] font-bold text-slate-900">{detail.title}</h2>
+                        <button onClick={startEditMeta}
+                          className="shrink-0 inline-flex items-center gap-1 text-[12px] font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1 rounded-md">
+                          <Pencil size={12}/> 편집
+                        </button>
+                      </div>
+                      <p className="text-[13px] text-slate-600 leading-relaxed whitespace-pre-line">{detail.description || <span className="text-slate-400 italic">설명이 없습니다.</span>}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-500 block mb-1">제목</label>
+                        <input value={draftMeta.title}
+                          onChange={e => setDraftMeta(p => ({ ...p, title: e.target.value }))}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[14px] font-bold focus:border-indigo-400 outline-none"/>
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-500 block mb-1">설명</label>
+                        <textarea value={draftMeta.description}
+                          onChange={e => setDraftMeta(p => ({ ...p, description: e.target.value }))}
+                          rows={4}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:border-indigo-400 outline-none resize-none"/>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => setEditingMeta(false)}
+                          className="flex-1 py-2 border border-slate-200 bg-white text-slate-600 rounded-lg text-[12px] font-semibold hover:bg-slate-50">취소</button>
+                        <button onClick={saveMeta}
+                          className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[12px] font-bold">저장</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 등록 정보 */}
+                  <div className="grid grid-cols-2 gap-3 text-[12px]">
+                    <div className="bg-slate-50 rounded-lg px-3 py-2">
+                      <p className="text-[10px] font-bold text-slate-400 mb-0.5">등록일</p>
+                      <p className="font-semibold text-slate-700">{detail.uploadedAt}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg px-3 py-2">
+                      <p className="text-[10px] font-bold text-slate-400 mb-0.5">등록자</p>
+                      <p className="font-semibold text-slate-700">{detail.uploadedBy}</p>
+                    </div>
+                  </div>
+
+                  {/* 사용처 */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-[13px] font-bold text-slate-700 flex items-center gap-1.5">
+                        <Layers size={14} className="text-indigo-500"/>
+                        사용 중인 코스 <span className="text-indigo-600">{detail.usedIn.length}</span>
+                      </h3>
+                    </div>
+                    {detail.usedIn.length === 0 ? (
+                      <div className="bg-slate-50 border border-dashed border-slate-200 rounded-lg px-3 py-4 text-center text-[12px] text-slate-400">
+                        아직 어느 코스에서도 사용되지 않습니다
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {detail.usedIn.map(u => (
+                          <a key={u.courseId} href="#"
+                            className="flex items-center justify-between px-3 py-2 bg-white border border-slate-200 rounded-lg text-[13px] hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors">
+                            <span className="font-semibold text-slate-700">{u.courseName}</span>
+                            <ExternalLink size={12} className="text-slate-400"/>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="px-6 py-3 border-t border-slate-200 bg-slate-50/60 flex gap-2 shrink-0">
+                  <button onClick={() => onDelete(detail)}
+                    className="px-3 py-2 border border-slate-200 bg-white text-slate-500 hover:text-red-600 hover:border-red-300 rounded-lg text-[12px] font-semibold flex items-center gap-1.5">
+                    <Trash2 size={12}/> 삭제
+                  </button>
+                  <div className="flex-1"/>
+                  {(detail.videoUrl || detail.fileUrl) && (
+                    <a
+                      href={detail.videoUrl || detail.fileUrl}
+                      download={detail.title + (detail.type === 'video' ? '.mp4' : '.pdf')}
+                      className="px-3 py-2 border border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:text-indigo-700 rounded-lg text-[12px] font-semibold flex items-center gap-1.5">
+                      <Download size={12}/> 다운로드
+                    </a>
+                  )}
+                  <button onClick={closeDetail}
+                    className="px-4 py-2 bg-slate-900 text-white rounded-lg text-[12px] font-bold hover:bg-slate-800">닫기</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── 사용처 모달 (카드에서 직접 호출 시) ── */}
+          {usageModal && (
+            <div className="fixed inset-0 bg-slate-900/70 z-[160] flex items-center justify-center animate-fadeIn" onClick={() => setUsageModal(null)}>
+              <div className="bg-white rounded-2xl shadow-2xl w-[460px] max-w-[92vw] overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                  <h3 className="text-[15px] font-bold flex items-center gap-2">
+                    <Layers size={16} className="text-indigo-500"/> 사용 중인 코스 ({usageModal.usedIn.length})
+                  </h3>
+                  <button onClick={() => setUsageModal(null)} className="text-slate-400 hover:text-slate-600"><X size={16}/></button>
+                </div>
+                <div className="p-5 max-h-[60vh] overflow-y-auto">
+                  <p className="text-[12px] text-slate-500 mb-3 truncate">{usageModal.title}</p>
+                  {usageModal.usedIn.length === 0 ? (
+                    <p className="text-[12px] text-slate-400 text-center py-6">사용 중인 코스가 없습니다</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {usageModal.usedIn.map(u => (
+                        <a key={u.courseId} href="#"
+                          className="flex items-center justify-between px-3 py-2 bg-white border border-slate-200 rounded-lg text-[13px] hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors">
+                          <span className="font-semibold text-slate-700">{u.courseName}</span>
+                          <ExternalLink size={12} className="text-slate-400"/>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── 삭제 확인/가드 모달 ── */}
+          {deleteConfirm && (
+            <div className="fixed inset-0 bg-slate-900/70 z-[170] flex items-center justify-center animate-fadeIn" onClick={() => setDeleteConfirm(null)}>
+              <div className="bg-white rounded-2xl shadow-2xl w-[440px] max-w-[92vw] overflow-hidden" onClick={e => e.stopPropagation()}>
+                {deleteConfirm.usedIn.length > 0 ? (
+                  <>
+                    <div className="px-6 py-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <AlertTriangle size={18} className="text-amber-500"/>
+                        <h3 className="text-[15px] font-bold text-slate-900">삭제할 수 없습니다</h3>
+                      </div>
+                      <p className="text-[13px] text-slate-600 mb-3">
+                        이 콘텐츠는 현재 <span className="font-bold text-amber-700">{deleteConfirm.usedIn.length}개 코스</span>에서 사용 중입니다.
+                        먼저 사용 중인 코스에서 항목을 제거한 뒤 다시 시도하세요.
+                      </p>
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-1">
+                        {deleteConfirm.usedIn.slice(0, 5).map(u => (
+                          <p key={u.courseId} className="text-[12px] font-semibold text-amber-800">· {u.courseName}</p>
+                        ))}
+                        {deleteConfirm.usedIn.length > 5 && (
+                          <p className="text-[11px] text-amber-600">…외 {deleteConfirm.usedIn.length - 5}개</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+                      <button onClick={() => setDeleteConfirm(null)}
+                        className="px-4 py-2 bg-slate-900 text-white rounded-lg text-[12px] font-bold hover:bg-slate-800">확인</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="px-6 py-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Trash2 size={18} className="text-red-500"/>
+                        <h3 className="text-[15px] font-bold text-slate-900">콘텐츠를 삭제할까요?</h3>
+                      </div>
+                      <p className="text-[13px] text-slate-600">
+                        <span className="font-bold text-slate-900">{deleteConfirm.title}</span><br/>
+                        라이브러리에서 영구 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+                      </p>
+                    </div>
+                    <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 flex gap-2 justify-end">
+                      <button onClick={() => setDeleteConfirm(null)}
+                        className="px-4 py-2 border border-slate-200 bg-white text-slate-600 rounded-lg text-[12px] font-semibold hover:bg-slate-50">취소</button>
+                      <button onClick={confirmDelete}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg text-[12px] font-bold hover:bg-red-700">삭제</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ══ 코스 만들기 모달 (코스v2 진입) ══ */}
+          {showCreateModal && (
+            <div
+              className="fixed inset-0 z-[100] bg-slate-900/40 flex items-center justify-center p-6"
+              onClick={() => setShowCreateModal(false)}
+            >
+              <div
+                className="bg-[#f7f9fc] rounded-3xl shadow-2xl w-[1100px] max-w-[95vw] max-h-[92vh] overflow-y-auto p-12 relative"
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  aria-label="닫기"
+                >
+                  <X size={18}/>
+                </button>
+
+                <h1 className="text-[34px] font-black text-center text-slate-900 mb-14">어떤 코스를 개설하시겠어요?</h1>
+
+                <div className="grid grid-cols-2 gap-6 max-w-[820px] mx-auto">
+                  <button
+                    onClick={() => goBuilder('online')}
+                    className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all relative overflow-hidden"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-indigo-50 flex items-center justify-center mb-5">
+                      <Monitor size={26} className="text-indigo-600"/>
+                    </div>
+                    <h3 className="text-[19px] font-black text-slate-900 mb-2.5">온라인 코스</h3>
+                    <p className="text-[14.5px] text-slate-500 leading-relaxed mb-5">
+                      비대면·자기주도 학습 과정을 설계합니다.<br/>VOD, 문서, 시험을 자유롭게 조합하세요.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">VOD</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">문서</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">시험/퀴즈</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => goBuilder('offline')}
+                    className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-rose-300 hover:shadow-lg transition-all relative overflow-hidden"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-rose-50 flex items-center justify-center mb-5">
+                      <MapPin size={26} className="text-rose-600"/>
+                    </div>
+                    <h3 className="text-[19px] font-black text-slate-900 mb-2.5">오프라인 코스</h3>
+                    <p className="text-[14.5px] text-slate-500 leading-relaxed mb-5">
+                      집합 교육과 출석 관리에 최적화된 플로우입니다.<br/>QR 출석 및 회차 관리를 지원합니다.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">회차 관리</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">QR 출석</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">수기 처리</span>
+                    </div>
+                  </button>
+                </div>
+
+                <p className="text-center text-[12.5px] text-slate-400 mt-12">등록 후에도 코스 유형 일부 설정은 변경 가능합니다</p>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    /* ══════════════════════════════════════ ContentCard ══════════════════════════════════════ */
+    const ContentCard = ({ item, onOpen, onShowUsage, onDelete }) => {
+      const isVideo = item.type === 'video';
+      const usageCount = item.usedIn.length;
+
+      return (
+        <div onClick={onOpen}
+          className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-indigo-300 hover:shadow-card-sm transition-all cursor-pointer flex flex-col">
+          {/* 썸네일 */}
+          <div className={`relative aspect-video overflow-hidden ${isVideo ? 'bg-slate-900' : 'bg-amber-50 flex items-center justify-center'}`}>
+            {isVideo && item.thumbnailUrl ? (
+              <img src={item.thumbnailUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform"/>
+            ) : (
+              <Lucide.FileText size={36} className="text-amber-400"/>
+            )}
+            {/* 타입 배지 */}
+            <span className={`absolute top-2 left-2 px-1.5 py-0.5 rounded-md text-[10px] font-bold backdrop-blur-sm
+              ${isVideo ? 'bg-blue-500/90 text-white' : 'bg-amber-500/90 text-white'}`}>
+              {isVideo ? '영상' : 'PDF'}
+            </span>
+            {/* 메타 칩 (썸네일 우하단) */}
+            <span className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-slate-900/80 text-white rounded text-[10px] font-bold tabular-nums backdrop-blur-sm">
+              {isVideo ? item.meta.duration : `${item.meta.pages}p`}
+            </span>
+          </div>
+
+          {/* 메타 */}
+          <div className="p-3 flex-1 flex flex-col">
+            <p className="text-[13px] font-bold text-slate-800 line-clamp-2 min-h-[36px] group-hover:text-indigo-600 transition-colors">{item.title}</p>
+            <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">{item.description || ' '}</p>
+
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+              <span className="text-[10px] text-slate-400 font-semibold">{item.uploadedAt}</span>
+              <button onClick={e => { e.stopPropagation(); onShowUsage(); }}
+                className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors
+                  ${usageCount > 0
+                    ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                    : 'bg-slate-100 text-slate-400'}`}>
+                {usageCount > 0 ? `사용 ${usageCount}개 코스` : '미사용'}
+              </button>
+            </div>
+          </div>
+
+          {/* 호버 액션 */}
+          <div className="px-3 pb-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onClick={e => { e.stopPropagation(); onOpen(); }}
+              title="미리보기·편집"
+              className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 text-[11px] font-bold bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 rounded-md transition-colors">
+              <Lucide.Eye size={11}/> 열기
+            </button>
+            <button onClick={e => { e.stopPropagation(); onDelete(); }}
+              title={usageCount > 0 ? '사용 중 (삭제 가드)' : '삭제'}
+              className={`px-2 py-1.5 text-[11px] font-bold rounded-md transition-colors
+                ${usageCount > 0
+                  ? 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                  : 'bg-slate-50 hover:bg-red-50 text-slate-500 hover:text-red-600'}`}>
+              <Lucide.Trash2 size={11}/>
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

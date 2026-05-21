@@ -58,12 +58,14 @@
     P3: { label:'P3 선택', bg:'bg-slate-100', text:'text-slate-500', border:'border-slate-200' },
   };
   const ST = {
-    done:    { label:'구현완료', bg:'bg-emerald-50', text:'text-emerald-700', dot:'bg-emerald-400' },
-    wip:     { label:'구현중',   bg:'bg-indigo-50',  text:'text-indigo-600',  dot:'bg-indigo-400 animate-pulse' },
-    todo:    { label:'미구현',   bg:'bg-slate-100',  text:'text-slate-500',   dot:'bg-slate-300' },
-    phase2:  { label:'범위 외',  bg:'bg-violet-50',  text:'text-violet-600',  dot:'bg-violet-400' },
+    done:     { label:'구현완료', bg:'bg-emerald-50', text:'text-emerald-700', dot:'bg-emerald-400' },
+    wip:      { label:'구현중',   bg:'bg-indigo-50',  text:'text-indigo-600',  dot:'bg-indigo-400 animate-pulse' },
+    todo:     { label:'미구현',   bg:'bg-slate-100',  text:'text-slate-500',   dot:'bg-slate-300' },
+    phase2:   { label:'범위 외',  bg:'bg-violet-50',  text:'text-violet-600',  dot:'bg-violet-400' },
+    obsolete: { label:'폐기',     bg:'bg-rose-50',    text:'text-rose-600',    dot:'bg-rose-400' },
   };
   const PHASE = {
+    0: 'bg-slate-100  text-slate-500',
     1: 'bg-indigo-100 text-indigo-700',
     2: 'bg-violet-100 text-violet-700',
     3: 'bg-amber-100  text-amber-700',
@@ -74,8 +76,9 @@
      관리자단 기능명세
   ══════════════════════════════════════════════════════════════════ */
   const ADMIN_ROWS = [
-    /* ── A1. 코스 목록 (index.html) ── */
-    { id:'A1-01', screen:'A1', screenName:'코스 목록', group:'필터/탭', feature:'코스 타입 탭', desc:'전체/오프라인/온라인/블렌디드 탭 전환, 각 카운트 표시', input:'탭 클릭', output:'typeFilter 변경 → 테이블 재렌더', note:'현재 오프라인 전용 프로토타입. P1 → Phase 2에서 온라인 통합 시 구현', pri:'P1', phase:2, status:'phase2' },
+    /* ── A1. 코스 목록 (offline-list.html) ── */
+    { id:'A1-01', screen:'A1', screenName:'코스 목록', group:'필터/탭', feature:'코스 타입 탭 (폐기)', desc:'기존 단일 페이지에 타입 탭으로 분기하려던 안. 폐기. 현재는 코스v2 그룹에 별도 페이지 분리 (offline-list / online-list)', input:'-', output:'-', note:'폐기됨 (2026-05-21). 사이드바 코스v2 그룹에서 직접 진입 패턴으로 대체', pri:'P3', phase:0, status:'obsolete' },
+    { id:'A1-00', screen:'A1', screenName:'코스 목록', group:'진입', feature:'사이드바 코스v2 → 오프라인 코스', desc:'어드민 좌측 사이드바 코스(legacy) 그룹 직후 구분선 + 코스v2 그룹 → "오프라인 코스" 메뉴 클릭으로 진입', input:'사이드바 클릭', output:'offline-list.html 이동', note:'코스v2 children 최상단 "+ 코스 만들기" CTA도 사용 가능 (유형 선택 모달)', pri:'P1', phase:1, status:'todo' },
     { id:'A1-02', screen:'A1', screenName:'코스 목록', group:'필터/탭', feature:'코스 상태 탭', desc:'전체/운영중/공개예약/임시저장/종료 — 각 카운트 뱃지 표시', input:'탭 클릭', output:'statusFilter 변경', note:'scheduled(공개예약) 2026-04-28 추가', pri:'P1', phase:1, status:'todo' },
     { id:'A1-02a', screen:'A1', screenName:'코스 목록', group:'필터/탭', feature:'추가 필터 빌더', desc:'+ 필터 추가 버튼 → 항목 선택 팝업 → 값 입력 팝업 → 인디고 칩 표시. 강사명(부분검색)/장소(부분검색)/수강방식(선택) 지원. × 개별 제거, 초기화 전체 제거', input:'+ 필터 추가 클릭', output:'activeFilters 배열 → filtered 재계산', note:'2026-04-28 구현. z-index: 버튼 z-30 > 오버레이 z-15', pri:'P1', phase:1, status:'todo' },
     { id:'A1-03', screen:'A1', screenName:'코스 목록', group:'필터/탭', feature:'카테고리 사이드바', desc:'WORK > 직무역량/리더십/공통/IT/DX 트리 — 클릭으로 catFilter 변경', input:'카테고리 클릭', output:'catFilter 변경', note:'중첩 accordion', pri:'P2', phase:1, status:'todo' },
@@ -83,9 +86,9 @@
     { id:'A1-05', screen:'A1', screenName:'코스 목록', group:'테이블', feature:'코스 테이블 행', desc:'상태뱃지 | 필수 | 표지 | 코스명 | 차수수 | 분류 | 교육기간+D-day | 수강인원 | 등록일 | 관리버튼', input:'-', output:'COURSES 배열 렌더', note:'컬럼 적응형 렌더링', pri:'P1', phase:1, status:'todo' },
     { id:'A1-06', screen:'A1', screenName:'코스 목록', group:'테이블', feature:'D-day 배지', desc:'향후 시작 패키지 중 최근일 기준 D-Day/D-N 자동 계산. D-Day=rose, D-N=amber', input:'TODAY 상수, packages[].startDate', output:'교육기간 컬럼에 뱃지 표시', note:'getDday() 함수', pri:'P2', phase:1, status:'todo' },
     { id:'A1-07', screen:'A1', screenName:'코스 목록', group:'테이블', feature:'행 확장 (차수 미니표)', desc:'▶ 클릭 시 인라인으로 차수별 패키지 미니 테이블 펼침 — 기간/장소/정원/신청/잔여석', input:'행 확장 버튼 클릭', output:'expandedRows Set 토글', note:'잔여석 0 = 마감(rose)', pri:'P2', phase:1, status:'todo' },
-    { id:'A1-08', screen:'A1', screenName:'코스 목록', group:'테이블', feature:'수강관리 버튼', desc:'active/closed 코스에 indigo "수강관리" 버튼 → offline-course-view.html. draft/scheduled는 disabled 회색', input:'-', output:'href 이동', note:'운영보기+수강관리 2버튼 → 단일 통합 (2026-04-28)', pri:'P1', phase:1, status:'todo' },
+    { id:'A1-08', screen:'A1', screenName:'코스 목록', group:'테이블', feature:'수강관리 버튼', desc:'active/closed 코스에 indigo "수강관리" 버튼 → offline-view.html. draft/scheduled는 disabled 회색', input:'-', output:'href 이동', note:'운영보기+수강관리 2버튼 → 단일 통합 (2026-04-28)', pri:'P1', phase:1, status:'todo' },
     { id:'A1-09', screen:'A1', screenName:'코스 목록', group:'테이블', feature:'공개예약 코스 표시', desc:'scheduled 코스 행에 violet Clock 아이콘 + 공개 예정일시 서브텍스트 표시', input:'status === scheduled', output:'scheduledAt 날짜 포맷 표시', note:'animate-pulse dot', pri:'P2', phase:1, status:'todo' },
-    { id:'A1-10', screen:'A1', screenName:'코스 목록', group:'액션', feature:'코스 등록 버튼', desc:'헤더 우측 "+ 코스 등록" → offline-builder.html 이동', input:'버튼 클릭', output:'href 이동', note:'', pri:'P1', phase:1, status:'todo' },
+    { id:'A1-10', screen:'A1', screenName:'코스 목록', group:'액션', feature:'코스 등록 버튼', desc:'헤더 우측 "+ 코스 등록" → offline-builder.html 이동', input:'버튼 클릭', output:'href 이동', note:'사이드바 코스v2 → "+ 코스 만들기" CTA 경로도 사용 가능 (유형 모달에서 오프라인 선택)', pri:'P1', phase:1, status:'todo' },
     { id:'A1-11', screen:'A1', screenName:'코스 목록', group:'액션', feature:'코스 삭제 확인 모달', desc:'Trash 아이콘 클릭 → 오버레이 모달. ① 코스명 하이라이트박스 ② 수강생 N명 경고(>0시) ③ 삭제 항목 bullet ④ "삭제" 텍스트 입력 확인. 일치 시 확인버튼 활성(rose). 배경 클릭·취소 시 닫힘', input:'Trash 아이콘 / 선택 삭제 버튼 클릭', output:'deleteModal state 오픈 → executeDelete()', note:'기존 window.confirm() 제거. 2026-04-28 모달로 교체', pri:'P1', phase:1, status:'todo' },
 
     /* ── A2. 오프라인 코스 빌더 (offline-builder.html) ── */
@@ -107,7 +110,7 @@
     { id:'A2-15', screen:'A2', screenName:'코스 빌더', group:'퍼블리싱', feature:'공개 시점 선택', desc:'요건 충족 시 즉시 공개 / 예약 공개(datetime picker) 선택', input:'라디오 + datetime', output:'courseStatus=published or scheduled', note:'예약 선택 시 scheduledAt 저장', pri:'P1', phase:1, status:'todo' },
     { id:'A2-16', screen:'A2', screenName:'코스 빌더', group:'미리보기', feature:'모바일 미리보기', desc:'340×720 폰 프레임 모달. 코스헤더/신청기간/패키지목록 렌더. 자율=카드리스트, 강제=관리자배정블록', input:'미리보기 버튼', output:'isPreviewOpen=true', note:'', pri:'P2', phase:1, status:'todo' },
 
-    /* ── A3. 수강관리 — offline-course-view.html ── */
+    /* ── A3. 수강관리 — offline-view.html ── */
     { id:'A3-01', screen:'A3', screenName:'수강관리', group:'사이드바', feature:'코스 정보 사이드바', desc:'인디고 그라디언트 커버, 강사/차수/회차/기간/장소 정보 표시', input:'-', output:'COURSE 데이터 렌더', note:'230px 고정', pri:'P1', phase:1, status:'todo' },
     { id:'A3-02', screen:'A3', screenName:'수강관리', group:'사이드바', feature:'수강/수료/출석률 현황', desc:'수강(enrollment 프로그레스바), 수료(completion 바), 평균 출석률 수치 표시', input:'-', output:'LEARNERS_RAW + COMPLETION 계산', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A3-03', screen:'A3', screenName:'수강관리', group:'사이드바', feature:'수강생 등록 버튼', desc:'사이드바 하단 "수강생 등록" → 등록 모달 open', input:'버튼 클릭', output:'showEnrollModal=true', note:'', pri:'P1', phase:1, status:'todo' },
@@ -238,17 +241,23 @@
 
   /* ── 화면 ID → 프로토타입 URL 매핑 ── */
   const SCREEN_URL_MAP = {
-    /* 관리자단 (admin/) */
-    A1: { url: 'index.html',                 label: '코스 목록 (index.html)' },
-    A2: { url: 'offline-builder.html',       label: '코스 빌더 (offline-builder.html)' },
-    A3: { url: 'offline-course-view.html',   label: '수강관리 (offline-course-view.html)' },
-    A4: { url: 'offline-course-view.html',   label: '출석 관리 (offline-course-view.html)' },
+    /* 관리자단 — 오프라인 코스 (offline 계열) */
+    A1: { url: 'offline-list.html',           label: '오프라인 코스 목록 (offline-list.html)' },
+    A2: { url: 'offline-builder.html',        label: '오프라인 코스 빌더 (offline-builder.html)' },
+    A3: { url: 'offline-view.html',           label: '오프라인 수강관리 (offline-view.html)' },
+    A4: { url: 'offline-view.html',           label: '오프라인 출석 관리 (offline-view.html)' },
+    /* 관리자단 — 온라인 코스 (newcourse v2 · CONTENT) */
+    B1: { url: 'online-list.html',            label: '온라인 코스 목록 (online-list.html)' },
+    B2: { url: 'online-builder.html',         label: '온라인 코스 빌더 (online-builder.html)' },
+    B3: { url: 'online-view.html',            label: '온라인 수강관리 (online-view.html)' },
+    /* 관리자단 — 공용 */
+    C1: { url: 'content-library.html',        label: '콘텐츠 라이브러리 (content-library.html)' },
+    C2: { url: 'blended-builder.html',        label: '블렌디드 빌더 (blended-builder.html, Phase 2)' },
     /* 사용자단 (user/) — 학습자 앱 */
     U1: { url: '../user/home.html',           label: '홈 (user/home.html)' },
     U2: { url: '../user/course-list.html',    label: '코스 목록 (user/course-list.html)' },
     U3: { url: '../user/course-detail.html',  label: '코스 상세 (user/course-detail.html)' },
     U4: { url: '../user/my.html',             label: 'MY 학습 (user/my.html)' },
-    /* U5 QR 출석은 학습자 앱 내장 (별도 화면 없음) */
     U7: { url: '../user/category.html',       label: '카테고리 (user/category.html)' },
   };
 
@@ -256,7 +265,7 @@
      admin 페이지에 [data-feature-id="..."] 속성을 박아 사용.
      매칭 안 되면 조용히 무시. */
   const FEATURE_SELECTORS = {
-    /* admin/index.html — A1 (코스 목록) */
+    /* admin/offline-list.html — A1 (코스 목록) */
     'A1-02':   '[data-feature-id="A1-02"]',    // 코스 상태 탭
     'A1-02a':  '[data-feature-id="A1-02a"]',   // 추가 필터 빌더
     'A1-03':   '[data-feature-id="A1-03"]',    // 카테고리 사이드바
@@ -277,7 +286,7 @@
     'A2-13':   '[data-feature-id="A2-13"]',    // 임시저장
     'A2-14':   '[data-feature-id="A2-14"]',    // 퍼블리싱
     'A2-16':   '[data-feature-id="A2-16"]',    // 미리보기
-    /* admin/offline-course-view.html — A3·A4 (수강관리) */
+    /* admin/offline-view.html — A3·A4 (수강관리) */
     'A3-01':   '[data-feature-id="A3-01"]',    // 코스 정보 사이드바
     'A3-03':   '[data-feature-id="A3-03"]',    // 수강생 등록 버튼
     'A3-04':   '[data-feature-id="A3-04"]',    // 라이브 출석 버튼
@@ -309,14 +318,14 @@
     'U7-03':   '[data-feature-id="U7-03"]',    // 카테고리 그리드 3섹션
   };
 
-  /* ══ 사이드바 메뉴 ══ */
+  /* ══ 사이드바 메뉴 — online-list.html과 동일 구조 (오프라인/온라인 코스는 코스v2 children으로 흡수) ══ */
   const SIDEBAR_MENUS = [
     { id: 'member', label: '회원', icon: Users, hasChildren: true },
     { id: 'course', label: '코스', icon: BookOpen, hasChildren: true, children: [
       { id: 'course-main', label: '코스' },
       { id: 'course-plus', label: 'PLUS 코스' },
     ]},
-    { id: 'offline-course', label: '오프라인 코스', icon: MapPin },
+    /* 오프라인/온라인 코스는 '코스v2' children으로 이동 (NEW_MENUS 참조) */
     { id: 'content', label: '콘텐츠', icon: Copy, hasChildren: true },
     { id: 'ttube', label: 'T튜브', icon: Monitor, hasChildren: true },
     { id: 'ai-quiz', label: 'AI 퀴메이커', icon: Star, badge: 'N' },

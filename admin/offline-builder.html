@@ -242,7 +242,7 @@
         { id: 'course-main', label: '코스' },
         { id: 'course-plus', label: 'PLUS 코스' },
       ]},
-      { id: 'offline-course', label: '오프라인 코스', icon: MapPin, active: true },
+      /* 오프라인/온라인 코스는 코스v2 children으로 이동 (online-list.html 표준). 빌더는 chrome-off라 미렌더링이지만 데이터 일관성 유지 */
       { id: 'content', label: '콘텐츠', icon: Copy, hasChildren: true },
       { id: 'ttube', label: 'T튜브', icon: Monitor, hasChildren: true },
       { id: 'ai-quiz', label: 'AI 퀴메이커', icon: Star, badge: 'N' },
@@ -535,7 +535,42 @@
         if (!isFirstSave) {
           toastTimer.current = setTimeout(dismissToast, 3000);
         }
+        setIsDirty(false);
       };
+
+      /* ─── 나가기 가드 ─── */
+      const [showExitModal, setShowExitModal] = useState(false);
+      const [isDirty, setIsDirty] = useState(true); // 빌더 진입 = 작업 중으로 간주, 임시저장 시 false
+      const isDirtyRef = useRef(true); // beforeunload·이동 직전 동기 참조용
+      useEffect(() => { isDirtyRef.current = isDirty; }, [isDirty]);
+      useEffect(() => { setIsDirty(true); }, [courseInfo, regPeriod, options]);
+      const exitToList = () => {
+        isDirtyRef.current = false; // 이동 직전 동기 해제 → beforeunload 가드 무력화
+        window.location.href = 'offline-list.html';
+      };
+      const tryExit = (e) => {
+        if (e) e.preventDefault();
+        if (isDirty) setShowExitModal(true);
+        else exitToList();
+      };
+      const saveAndExit = () => {
+        handleSaveDraft();
+        exitToList();
+      };
+      const discardAndExit = () => {
+        exitToList();
+      };
+      useEffect(() => {
+        if (!showExitModal) return;
+        const h = (e) => { if (e.key === 'Escape') setShowExitModal(false); };
+        window.addEventListener('keydown', h);
+        return () => window.removeEventListener('keydown', h);
+      }, [showExitModal]);
+      useEffect(() => {
+        const h = (e) => { if (isDirtyRef.current) { e.preventDefault(); e.returnValue = ''; } };
+        window.addEventListener('beforeunload', h);
+        return () => window.removeEventListener('beforeunload', h);
+      }, []);
 
       const getValidation = () => [
         { label: '코스명 입력', ok: !!courseInfo.title.trim() },
@@ -845,76 +880,32 @@
       };
       const canPublish = getValidation().every(v => v.ok);
 
+      /* 스텝 미니맵 검증 — 좌측 사이드 진행도 */
+      const titleOk = !!courseInfo.title.trim();
+      const instructorOk = !!courseInfo.instructor.trim();
+      const locationOk = !!courseInfo.location.trim();
+      const regOk = !!regPeriod.start && !!regPeriod.end;
+      const optionsOk = options.length > 0 && options.every(o => o.sessions.length > 0) && options.every(o => o.sessions.every(s => s.date && s.startTime && s.endTime));
+      const completionOk = completionRules.length > 0;
+      const stepValidation = [
+        { id: 'step-info',       label: '코스 기본 정보',  required: true, status: (titleOk && instructorOk && locationOk) ? 'ok' : 'warn',
+          detail: !titleOk ? '코스명 입력 필요' : !instructorOk ? '강사 지정 필요' : !locationOk ? '교육 장소 설정 필요' : '코스명·강사·장소 입력됨' },
+        { id: 'step-register',   label: '모집 설정',      required: true, status: regOk ? 'ok' : 'warn',
+          detail: regOk ? '신청 기간 설정됨' : '신청 기간 미지정' },
+        /* step-options(차수·회차) sentinel은 차수 제거 정론에 따라 제거됨 — 좌측 미니맵 항목도 함께 삭제 */
+        { id: 'step-completion', label: '수료 조건',      required: true, status: completionOk ? 'ok' : 'warn',
+          detail: completionOk ? `수료 조건 ${completionRules.length}개` : '수료 조건 최소 1개 필요' },
+      ];
+      const stepRequiredOk = stepValidation.filter(s => s.required && s.status === 'ok').length;
+      const stepRequiredTotal = stepValidation.filter(s => s.required).length;
+
       return (
-        <div className="min-h-screen flex">
-          {/* ══ 글로벌 좌측 사이드바 ══ */}
-          <aside className="w-[200px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0 overflow-y-auto custom-scrollbar">
-            <div className="px-4 py-4 flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4"><path d="M7 2L2 5v7h4V9h2v3h4V5L7 2z" fill="white"/></svg>
-              </div>
-              <span className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">TOUCH<br/>CLASS</span>
-            </div>
-            <div className="h-px bg-slate-100 mx-3 mb-2"/>
-            <nav className="flex-1 px-3 pb-6 space-y-0.5">
-              {SIDEBAR_MENUS.map(menu => (
-                <div key={menu.id}>
-                  <button onClick={() => menu.hasChildren && toggleSideMenu(menu.id)} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-semibold transition-colors ${menu.active ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    {React.createElement(menu.icon, { size: 16, className: menu.active ? 'text-indigo-600' : 'text-slate-400' })}
-                    <span className="flex-1 text-left">{menu.label}</span>
-                    {menu.badge && <span className="w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{menu.badge}</span>}
-                    {menu.hasChildren && <span className="text-slate-400">{sideExpanded.has(menu.id) ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}</span>}
-                  </button>
-                  {menu.children && sideExpanded.has(menu.id) && (
-                    <div className="ml-7 mt-0.5 space-y-0.5">
-                      {menu.children.map(sub => (
-                        <a key={sub.id} href="#" className={`block px-3 py-1.5 rounded-md text-[13px] transition-colors ${sub.active ? 'text-indigo-700 font-bold' : 'text-slate-500 hover:bg-slate-50 font-medium'}`}>{sub.label}</a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </nav>
-          </aside>
-          <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#f2f5f9]">
-
-          {/* ── 글로벌 탑 네비게이션 ── */}
-          <div className="h-[52px] bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0 sticky top-0 z-40">
-            <div className="flex items-center gap-3">
-              <button className="flex items-center gap-1.5 text-slate-600 text-[13px] font-semibold hover:text-slate-800 transition-colors">
-                <Star size={14} className="text-amber-400 fill-amber-400"/> 즐겨찾기 <ChevronDown size={13} className="text-slate-400"/>
-              </button>
-              <div className="w-px h-4 bg-slate-200"/>
-              <button className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-[12px] font-bold hover:bg-indigo-100 transition-colors">
-                <Users size={12}/> 관리자 가이드
-              </button>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 transition-colors">
-                <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5"><circle cx="10" cy="10" r="8" stroke="#7c3aed" strokeWidth="1.5"/><circle cx="10" cy="10" r="3.5" fill="#7c3aed"/></svg>
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><MessageSquare size={16}/></button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Play size={15} className="ml-0.5"/></button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><BarChart2 size={16}/></button>
-              <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors">
-                <Filter size={15}/>
-                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none px-0.5">0</span>
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"><Settings size={16}/></button>
-              <div className="w-px h-5 bg-slate-200 mx-1.5"/>
-              <button className="flex items-center gap-1.5 hover:bg-slate-50 pl-0.5 pr-2 py-1 rounded-lg transition-colors">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">조</div>
-                <span className="text-[13px] font-semibold text-slate-700">조찬현</span>
-                <ChevronDown size={13} className="text-slate-400"/>
-              </button>
-            </div>
-          </div>
-
-          {/* 페이지 서브 헤더 */}
-          <header className="shrink-0">
-            <div className="px-8 py-4 flex justify-between items-center">
+        <div className="relative flex flex-col h-screen overflow-hidden bg-[#f2f5f9]">
+          {/* 빌더 자체 헤더 (우측 사이드바 폭만큼 우측 여백) */}
+          <header className="shrink-0 px-4 pt-4 pr-[516px]">
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-5 py-3 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <a href="index.html" className="w-8 h-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors" title="코스 목록">
+                <a href="offline-list.html" onClick={tryExit} className="w-8 h-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors" title="코스 목록">
                   <ChevronLeft size={18}/>
                 </a>
                 <div className="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center font-bold shadow-sm"><MapPin size={18}/></div>
@@ -954,14 +945,70 @@
             </div>
           </header>
 
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex overflow-hidden pr-[500px]">
+
+            {/* 좌측 스텝 미니맵 (floating round card, sticky) */}
+            <nav className="w-[224px] shrink-0 px-4 pt-2 pb-4 overflow-y-auto custom-scrollbar h-full">
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sticky top-2">
+                <div className="mb-4">
+                  <div className="text-[10px] font-bold text-slate-400 tracking-widest mb-1">등록 진행도</div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className={`text-[22px] font-black tabular-nums ${stepRequiredOk === stepRequiredTotal ? 'text-emerald-600' : 'text-slate-900'}`}>{stepRequiredOk}</span>
+                    <span className="text-[12px] font-bold text-slate-500">/ {stepRequiredTotal} 필수</span>
+                  </div>
+                  <div className="mt-2 h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div className={`h-full transition-all ${stepRequiredOk === stepRequiredTotal ? 'bg-emerald-500' : 'bg-indigo-500'}`}
+                      style={{ width: `${stepRequiredTotal ? (stepRequiredOk / stepRequiredTotal * 100) : 0}%` }}/>
+                  </div>
+                </div>
+                <div className="space-y-0.5">
+                  {stepValidation.map((step, i) => (
+                    <a key={step.id} href={`#${step.id}`}
+                      className={`block px-2.5 py-2 rounded-lg text-[12.5px] transition-colors group
+                        ${step.status === 'ok' ? 'hover:bg-emerald-50' :
+                          step.status === 'warn' ? 'hover:bg-rose-50' :
+                          'hover:bg-slate-50'}`}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0
+                          ${step.status === 'ok' ? 'bg-emerald-500 text-white' :
+                            step.status === 'warn' ? 'bg-white border-2 border-rose-400' :
+                            'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                          {step.status === 'ok' ? '✓' : step.status === 'warn' ? '' : String(i+1).padStart(2,'0')}
+                        </span>
+                        <span className={`flex-1 truncate font-bold
+                          ${step.status === 'ok' ? 'text-emerald-700' :
+                            step.status === 'warn' ? 'text-rose-700' :
+                            'text-slate-700'}`}>{step.label}</span>
+                        {step.required && step.status === 'warn' && (
+                          <span className="text-[9px] font-bold text-rose-500 bg-rose-50 px-1 py-0.5 rounded">필수</span>
+                        )}
+                      </div>
+                      {step.detail && (
+                        <p className="text-[10px] text-slate-500 mt-1 ml-7 leading-snug">{step.detail}</p>
+                      )}
+                    </a>
+                  ))}
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100">
+                  <button onClick={() => canPublish ? setShowPublishModal(true) : null}
+                    className={`w-full py-2.5 rounded-lg text-[12px] font-bold transition-colors flex items-center justify-center gap-1.5
+                      ${canPublish ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
+                    disabled={!canPublish}>
+                    <Send size={12}/> 퍼블리싱 준비
+                  </button>
+                  {!canPublish && (
+                    <p className="text-[10px] text-slate-400 text-center mt-2 leading-snug">미충족 항목을<br/>먼저 완료해 주세요</p>
+                  )}
+                </div>
+              </div>
+            </nav>
 
             {/* Main */}
             <main className="flex-1 overflow-y-auto custom-scrollbar py-10 space-y-8 animate-fadeIn pb-32">
               <div className="w-[800px] mx-auto px-0 space-y-8">
 
               {/* 섹션 1: 기본 정보 */}
-              <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden" data-feature-id="A2-01">
+              <section id="step-info" className="scroll-mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden" data-feature-id="A2-01">
                 <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center gap-2 cursor-pointer select-none" onClick={() => setSecOpen(p => ({...p, s1: !p.s1}))}>
                   <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
                   <h2 className="text-base font-bold text-slate-800">코스 기본 정보</h2>
@@ -1175,7 +1222,7 @@
               </section>
 
               {/* 섹션 2: 모집 설정 */}
-              <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <section id="step-register" className="scroll-mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center gap-2 cursor-pointer select-none" onClick={() => setSecOpen(p => ({...p, s2: !p.s2}))}>
                   <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
                   <h2 className="text-base font-bold text-slate-800">모집 및 수강 신청 설정</h2>
@@ -1406,7 +1453,7 @@
               </section>
 
               {/* 섹션 3: 수료 조건 설정 */}
-              <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <section id="step-completion" className="scroll-mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 cursor-pointer select-none" onClick={() => setSecOpen(p => ({...p, s4: !p.s4}))}>
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</div>
@@ -1539,8 +1586,8 @@
               </div>
             </main>
 
-            {/* ── 우측 사이드바 ── */}
-            <aside className="w-[500px] bg-white border-l border-slate-200 flex flex-col z-20 shadow-[-10px_0_20px_-10px_rgba(0,0,0,0.05)] shrink-0 overflow-hidden">
+            {/* ── 우측 사이드바 (top까지 고정) ── */}
+            <aside className="absolute top-0 right-0 w-[500px] h-screen bg-white border-l border-slate-200 flex flex-col z-30 shadow-[-10px_0_20px_-10px_rgba(0,0,0,0.05)] shrink-0 overflow-hidden">
               <div className="px-4 py-2.5 border-b border-slate-200 shrink-0 bg-slate-900 text-white flex items-center gap-2">
                 <Calendar size={14} className="text-indigo-400 shrink-0"/>
                 <h3 className="font-bold text-[13px]">차수 · 회차 관리</h3>
@@ -1934,7 +1981,7 @@
                         수정 모드
                       </button>
                     </div>
-                    <a href="offline-course-view.html" className="w-full bg-indigo-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-600 transition-colors text-[14px] shadow-sm">
+                    <a href="offline-view.html" className="w-full bg-indigo-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-600 transition-colors text-[14px] shadow-sm">
                       <Users size={15}/> 수강관리
                     </a>
                   </div>
@@ -2351,6 +2398,37 @@
             );
           })()}
 
+          {/* ── 나가기 가드 모달 (뒤로가기 클릭 시) ── */}
+          {showExitModal && (
+            <div className="fixed inset-0 z-[200] bg-slate-900/40 flex items-center justify-center p-6 animate-fadeIn"
+              onClick={(e) => { if (e.target === e.currentTarget) setShowExitModal(false); }}>
+              <div className="bg-white rounded-3xl shadow-2xl w-[440px] max-w-[92vw] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}>
+                <div className="px-8 pt-8 pb-5 text-center">
+                  <div className="w-14 h-14 bg-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Save size={28} className="text-white" strokeWidth={2.5}/>
+                  </div>
+                  <h2 className="text-[18px] font-black text-slate-900 mb-1.5">작성 중인 내용이 있습니다</h2>
+                  <p className="text-[13px] text-slate-500 leading-relaxed">저장하지 않으면 입력하신 내용이 사라집니다.</p>
+                </div>
+                <div className="px-8 pb-7 space-y-2">
+                  <button onClick={saveAndExit}
+                    className="w-full py-3 rounded-xl bg-rose-600 text-white text-[14px] font-bold hover:bg-rose-700 transition-colors">
+                    임시저장하고 나가기
+                  </button>
+                  <button onClick={discardAndExit}
+                    className="w-full py-3 rounded-xl text-[14px] font-semibold text-slate-500 hover:bg-slate-50 transition-colors">
+                    저장 안 하고 나가기
+                  </button>
+                  <button onClick={() => setShowExitModal(false)}
+                    className="w-full py-3 rounded-xl border border-slate-200 text-[14px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                    취소
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── 퍼블리싱 모달 ── */}
           {showPublishModal && (() => {
             const checks = getValidation();
@@ -2497,7 +2575,7 @@
                     <button onClick={dismissToast} className="px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-colors">
                       계속 편집
                     </button>
-                    <a href="index.html" className="px-3.5 py-2 bg-indigo-500 text-white rounded-lg text-[13px] font-bold hover:bg-indigo-600 transition-colors">
+                    <a href="offline-list.html" className="px-3.5 py-2 bg-indigo-500 text-white rounded-lg text-[13px] font-bold hover:bg-indigo-600 transition-colors">
                       목록으로 이동
                     </a>
                   </div>
@@ -2514,7 +2592,7 @@
                   <span className="text-[12px] text-slate-400 font-medium">
                     {lastSavedAt && lastSavedAt.toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' })}
                   </span>
-                  <a href="index.html" className="text-[12px] font-bold text-indigo-300 hover:text-indigo-200 transition-colors ml-1">
+                  <a href="offline-list.html" className="text-[12px] font-bold text-indigo-300 hover:text-indigo-200 transition-colors ml-1">
                     목록으로 이동
                   </a>
                 </div>
@@ -2532,7 +2610,6 @@
               ) : null}
             </div>
           )}
-          </div>{/* flex-1 wrapper 끝 */}
 
           {/* 시간대 추가 fixed 툴팁 (overflow 짤림 방지) */}
           {timeSlotTip && (
