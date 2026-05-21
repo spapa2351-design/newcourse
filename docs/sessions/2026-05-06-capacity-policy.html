@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정원 변경 정책 — 2026-05-06</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+  .dev-q { background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 0 10px 10px 0; padding: 14px 18px; margin-bottom: 12px; }
+  .plan-a { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 20px 24px; }
+  .rule-box { background: #ecfdf5; border: 2px solid #10b981; border-radius: 12px; padding: 20px 24px; text-align: center; }
+  .rule-box .rule-text { font-size: 16px; font-weight: 700; color: #065f46; }
+  .rule-box .rule-sub { font-size: 13px; color: #047857; margin-top: 8px; }
+  .reason-list { list-style: none; padding: 0; margin: 0; }
+  .reason-list li { padding: 12px 0; border-bottom: 1px solid #f1f5f9; display: flex; gap: 12px; align-items: flex-start; }
+  .reason-list li:last-child { border-bottom: none; }
+  .reason-num { background: #ea580c; color: white; font-weight: 700; font-size: 12px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .reason-text { font-size: 14px; color: #334155; line-height: 1.65; }
+  .reason-text strong { color: #0f172a; }
+</style>
+</head>
+<body class="bg-slate-50">
+
+<div class="max-w-3xl mx-auto p-8">
+
+<!-- Header -->
+<div class="mb-6">
+  <div class="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-2">Session Note · 2026-05-06</div>
+  <h1 class="text-2xl font-bold text-slate-900">정원 변경 정책</h1>
+  <p class="text-slate-500 text-sm mt-1">개발자 ↔ 기획자 문답 — 정원 줄일 때 등록자보다 적으면 어떻게 처리?</p>
+</div>
+
+<!-- Q -->
+<div class="dev-q">
+  <div class="text-xs font-bold text-blue-500 mb-1">👨‍💻 개발자</div>
+  <div class="text-sm text-blue-900">
+    차수 정원 30명, 현재 등록 25명. 관리자가 정원을 20명으로 줄이면 어떻게 처리해야 할까요?<br>
+    옵션은 A 원천 차단 / B Soft 허용 / C 자동 취소가 있습니다.
+  </div>
+</div>
+
+<!-- A -->
+<div class="plan-a mb-6">
+  <div class="text-xs font-bold text-indigo-500 mb-3">🙋 기획자</div>
+  <p class="text-sm text-slate-700 mb-4">A·B·C 셋 다 어딘가 어색해서 <strong>새 옵션 D</strong>로 갑니다. A와 B를 합친 형태예요. C(시스템 자동 취소)는 채택 안 합니다.</p>
+
+  <div class="rule-box">
+    <div class="rule-text">"정원은 현재 등록자 수 이상이어야 한다."</div>
+    <div class="rule-sub">정원 &lt; 등록자 → 차단 &nbsp;·&nbsp; 정원 ≥ 등록자 → 허용 (자유 변경)</div>
+  </div>
+
+  <h3 class="text-sm font-bold text-slate-800 mt-6 mb-2">왜 D인가</h3>
+  <ul class="reason-list">
+    <li>
+      <span class="reason-num">1</span>
+      <span class="reason-text"><strong>이미 신청한 사람의 자리를 시스템이 빼앗으면 안 되기 때문</strong>이에요. 25명이 신청을 마쳤다는 건 회사가 "자리 잡아드렸습니다"라고 약속한 상태예요. 정원 숫자 한 번 바꾸는 걸로 그 약속을 깨면 안 돼요.</span>
+    </li>
+    <li>
+      <span class="reason-num">2</span>
+      <span class="reason-text"><strong>운영자가 "사람 먼저 정리"를 자연스럽게 하게 유도하기 때문</strong>이에요. 차단되면 "5명 먼저 안내해야 한다"는 신호가 즉시 와요. 미루지 않게 됩니다.</span>
+    </li>
+    <li>
+      <span class="reason-num">3</span>
+      <span class="reason-text"><strong>비정상 상태(정원 &lt; 등록자)를 데이터에 안 만들기 때문</strong>이에요. 잔여석 계산·통계·신청 가능 여부 등 곳곳에서 비정상 분기가 안 생겨요. 부가 코드·UI가 다 없어집니다.</span>
+    </li>
+    <li>
+      <span class="reason-num">4</span>
+      <span class="reason-text"><strong>늘리는 건 막을 이유가 없기 때문</strong>이에요. 강의장에 의자 더 들어왔거나 옆방 합쳤으면 정원 늘려서 신청 더 받으면 됩니다.</span>
+    </li>
+    <li>
+      <span class="reason-num">5</span>
+      <span class="reason-text"><strong>Phase 1엔 단순할수록 운영이 쉬워지기 때문</strong>이에요. over capacity 추적, 노란 배지, 자동 리마인더 다 멋있지만 Phase 1엔 과해요. 룰 한 줄이 운영팀·개발팀·학습자 모두에게 가장 친절합니다.</span>
+    </li>
+  </ul>
+
+  <h3 class="text-sm font-bold text-slate-800 mt-6 mb-2">운영 흐름</h3>
+  <p class="text-sm text-slate-700">정원 줄이려면 → 수강생 관리에서 사람 먼저 정리 → 정원 변경.</p>
+
+  <div class="bg-indigo-50 border-l-4 border-indigo-400 rounded-r-lg p-3 text-sm text-indigo-900 mt-5">
+    <strong>한 줄 요약 —</strong> "정원은 등록자 수 이상이어야 한다. 줄이려면 사람 먼저 정리, 늘리는 건 자유."
+  </div>
+</div>
+
+</div>
+</body>
+</html>

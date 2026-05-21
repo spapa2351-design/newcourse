@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>온라인 코스 기획설계서</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --black: #000000; --white: #ffffff;
+    --hover-gray: #e2e2e2; --chip-gray: #efefef;
+    --body-gray: #4b4b4b; --muted-gray: #afafaf;
+    --shadow-light: rgba(0,0,0,0.12); --shadow-medium: rgba(0,0,0,0.16);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Pretendard Variable", Pretendard, system-ui, -apple-system, sans-serif; color: var(--black); background: var(--white); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 1136px; margin: 0 auto; padding: 0 32px; }
+  .cover { background: var(--black); color: var(--white); padding: 112px 32px; }
+  .cover-inner { max-width: 1136px; margin: 0 auto; }
+  .cover .label { font-size: 14px; font-weight: 500; color: var(--muted-gray); margin-bottom: 16px; letter-spacing: 0.02em; }
+  .cover h1 { font-size: 52px; font-weight: 700; line-height: 1.23; margin: 0 0 16px; letter-spacing: -0.01em; }
+  .cover .lede { font-size: 18px; font-weight: 500; color: var(--white); line-height: 1.5; max-width: 760px; }
+  .cover-meta { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { display: inline-flex; align-items: center; padding: 10px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; background: rgba(255,255,255,0.1); color: var(--white); border: 1px solid rgba(255,255,255,0.2); }
+  body { background: #f5f5f5; }
+  main { padding: 80px 0; }
+  section { background: var(--white); border: 1px solid var(--chip-gray); border-radius: 20px; padding: 56px 48px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  section + section { margin-top: 32px; }
+  h2 { font-size: 32px; font-weight: 700; line-height: 1.25; margin: 0 0 8px; letter-spacing: -0.01em; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+  h2 .n { display: inline-block; background: var(--black); color: var(--white); padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  h3 { font-size: 20px; font-weight: 700; line-height: 1.4; margin: 48px 0 16px; }
+  .lede-sm { font-size: 16px; color: var(--body-gray); margin: 0 0 36px; max-width: 760px; }
+  p { font-size: 16px; color: var(--body-gray); line-height: 1.55; margin: 0 0 12px; }
+  strong { color: var(--black); font-weight: 700; }
+  .cover strong, footer strong { color: var(--white); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; margin: 16px 0 8px; }
+  th, td { text-align: left; padding: 14px 0; border-bottom: 1px solid var(--chip-gray); vertical-align: top; }
+  th { font-weight: 700; color: var(--black); width: 28%; }
+  td { color: var(--body-gray); }
+  tr:last-child th, tr:last-child td { border-bottom: none; }
+  ul { padding-left: 0; margin: 12px 0; list-style: none; }
+  li { font-size: 16px; color: var(--body-gray); line-height: 1.6; padding: 6px 0 6px 18px; position: relative; }
+  li::before { content: ''; position: absolute; left: 0; top: 16px; width: 6px; height: 6px; background: var(--black); border-radius: 50%; }
+  .note { background: var(--chip-gray); padding: 18px 22px; border-radius: 12px; font-size: 15px; color: var(--body-gray); line-height: 1.6; margin: 24px 0; }
+  .note strong { color: var(--black); }
+  .reasons { counter-reset: r; margin: 24px 0; }
+  .reason { padding: 20px 0; border-top: 1px solid var(--chip-gray); display: grid; grid-template-columns: 60px 1fr; gap: 16px; }
+  .reason:first-child { border-top: none; padding-top: 0; }
+  .reason::before { counter-increment: r; content: counter(r, decimal-leading-zero); font-size: 14px; font-weight: 700; color: var(--muted-gray); letter-spacing: 0.06em; }
+  .reason-body .rt { font-size: 17px; font-weight: 700; margin: 0 0 4px; color: var(--black); line-height: 1.4; }
+  .reason-body .rd { font-size: 15px; color: var(--body-gray); line-height: 1.6; }
+  .phases { margin: 20px 0; }
+  .phase { padding: 24px 0; border-top: 1px solid var(--chip-gray); display: grid; grid-template-columns: 140px 1fr; gap: 24px; }
+  .phase:first-child { border-top: none; padding-top: 0; }
+  @media (max-width: 720px) { .phase { grid-template-columns: 1fr; gap: 8px; } }
+  .phase .pstep { font-size: 14px; font-weight: 700; letter-spacing: 0.06em; }
+  .phase .pstep-sub { font-size: 13px; color: var(--muted-gray); margin-top: 4px; }
+  .phase-name { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+  .phase-desc { font-size: 15.5px; color: var(--body-gray); line-height: 1.6; margin: 0; }
+  .phase-items { margin: 12px 0 0; }
+  .phase-items li { font-size: 14.5px; padding: 4px 0 4px 16px; }
+  .phase-items li::before { top: 13px; }
+  .tbd { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; background: var(--white); color: var(--black); border: 1px dashed var(--body-gray); font-size: 11px; font-weight: 600; margin-left: 6px; white-space: nowrap; }
+  a { color: var(--black); text-decoration: underline; text-underline-offset: 3px; }
+  a:hover { color: var(--body-gray); }
+  .toc { position: fixed; left: 24px; top: 50%; transform: translateY(-50%); width: 220px; max-height: 80vh; overflow-y: auto; padding: 20px 18px; background: var(--white); border: 1px solid var(--chip-gray); border-radius: 12px; box-shadow: 0 4px 16px var(--shadow-light); z-index: 50; display: none; }
+  .toc-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--muted-gray); text-transform: uppercase; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--chip-gray); }
+  .toc-list { list-style: none; padding: 0; margin: 0; }
+  .toc-list li { padding: 0; margin: 0; position: static; }
+  .toc-list li::before { display: none; content: none; }
+  .toc-list a { display: flex; align-items: baseline; gap: 8px; padding: 7px 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--body-gray); text-decoration: none; line-height: 1.4; }
+  .toc-list a:hover { background: var(--chip-gray); color: var(--black); }
+  .toc-list a.active { background: var(--black); color: var(--white); font-weight: 700; }
+  .toc-list .num { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted-gray); min-width: 22px; }
+  .toc-list a.active .num { color: var(--white); }
+  .toc-back { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--chip-gray); font-size: 11px; color: var(--muted-gray); text-decoration: none; display: block; text-align: center; }
+  @media (min-width: 1280px) { .toc { display: block; } }
+  footer { background: var(--black); color: var(--muted-gray); padding: 80px 32px; margin-top: 120px; font-size: 14px; }
+  .footer-inner { max-width: 1136px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  footer strong { color: var(--white); font-weight: 700; }
+  @media (max-width: 720px) { .container { padding: 0 20px; } .cover { padding: 72px 20px 80px; } .cover h1 { font-size: 36px; } main { padding: 48px 0 60px; } section { padding: 36px 24px; border-radius: 16px; } section + section { margin-top: 24px; } h2 { font-size: 24px; } h3 { margin: 36px 0 12px; } }
+</style>
+</head>
+<body>
+
+<nav class="toc" aria-label="목차">
+  <div class="toc-title">목차</div>
+  <ul class="toc-list">
+    <li><a href="#sec-00"><span class="num">00</span><span>한눈에 보기</span></a></li>
+    <li><a href="#sec-01"><span class="num">01</span><span>코스 빌더</span></a></li>
+    <li><a href="#sec-02"><span class="num">02</span><span>코스 목록</span></a></li>
+    <li><a href="#sec-03"><span class="num">03</span><span>콘텐츠 라이브러리</span></a></li>
+    <li><a href="#sec-04"><span class="num">04</span><span>데이터 모델</span></a></li>
+    <li><a href="#sec-05"><span class="num">05</span><span>진입 흐름</span></a></li>
+    <li><a href="#sec-06"><span class="num">06</span><span>Phase 로드맵</span></a></li>
+    <li><a href="#sec-07"><span class="num">07</span><span>부록</span></a></li>
+  </ul>
+  <a href="#" class="toc-back" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ 맨 위로</a>
+</nav>
+
+<header class="cover">
+  <div class="cover-inner">
+    <div class="label">온라인 코스 · 기획설계서</div>
+    <h1>온라인 코스</h1>
+    <p class="lede">온라인 코스는 newcourse 시스템의 콘텐츠형(CONTENT) 코스 유형입니다. 영상·시험·설문·PDF를 슬롯 단위로 묶어 진도율 100% 정합을 보장하며, 의무 교육·법정 교육·표준 직무 강의에 적합합니다.</p>
+    <div class="cover-meta">
+      <span class="pill">v1.0 · 2026-05-21</span>
+      <span class="pill">코스v2 그룹 · 온라인 코스</span>
+      <span class="pill">코드: CONTENT</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<section id="sec-00">
+  <h2><span class="n">00 / Summary</span>한눈에 보기</h2>
+
+  <h3>한 줄 룰</h3>
+  <div class="note">
+    <strong>코스 = 커리큘럼(그룹) → 슬롯(에셋 + 수료 조건)의 순서 인덱싱.</strong> 모든 측정·이수·자격은 슬롯 단위로 정밀하게 한다.
+  </div>
+
+  <h3>다섯 가지 이유</h3>
+  <div class="reasons">
+    <div class="reason"><div class="reason-body">
+      <p class="rt">정합성 — 페이지 머무르기로 진도율 부정 학습 차단.</p>
+      <p class="rd">슬롯 단위로 측정하면 영상은 실제 재생 시간, 시험은 점수 기준. 학습 안 하고 페이지 열어두는 행위가 통하지 않는다.</p>
+    </div></div>
+    <div class="reason"><div class="reason-body">
+      <p class="rt">재사용성 — 같은 슬롯이 컴플라이언스·부트캠프·자유학습 케이스 모두 표현 가능.</p>
+      <p class="rd">슬롯 단위 기능이 다양한 코스 유형을 동일한 모델로 지원한다.</p>
+    </div></div>
+    <div class="reason"><div class="reason-body">
+      <p class="rt">운영자 부담 최소화 — 단순 케이스는 일괄설정, 복잡 케이스는 슬롯별 정밀 편집.</p>
+      <p class="rd">"전체 순서대로 수강", "모두 필수" 같은 일괄설정으로 빠르게 만들고, 필요하면 슬롯별로 세부 편집.</p>
+    </div></div>
+    <div class="reason"><div class="reason-body">
+      <p class="rt">확장성 — 블렌디드(Phase 2)도 같은 모델 재사용.</p>
+      <p class="rd">온라인 슬롯 + 오프라인 슬롯이 같은 코스 안에 공존 가능.</p>
+    </div></div>
+    <div class="reason"><div class="reason-body">
+      <p class="rt">콘텐츠 재사용 — 라이브러리에서 한 번 올린 영상·PDF를 여러 코스에 참조.</p>
+      <p class="rd">중복 업로드 없음. 사용처가 어디인지 추적 가능.</p>
+    </div></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sec-01">
+  <h2><span class="n">01 / Builder</span>코스 빌더</h2>
+  <p class="lede-sm">단일 화면 4섹션 폼 + 우측 커리큘럼 사이드바 + 좌측 진행도 미니맵.</p>
+
+  <h3>화면 구조</h3>
+  <table>
+    <tr><th>헤더</th><td>← 뒤로 / 코스명 / 상태칩 / 커리큘럼 버전 칩 / 임시저장 / 학습 뷰어 미리보기 / 퍼블리싱</td></tr>
+    <tr><th>좌측 미니맵</th><td>등록 진행도 (N / M 필수) · 4 step (코스 기본 정보 · 수강 신청 설정 · 수강 기간 · 커리큘럼·항목)</td></tr>
+    <tr><th>섹션 1 코스 기본 정보</th><td>코스명 / 커버 이미지(720×1200, 5MB) / 카테고리(optgroup) / 강사(default 강사 없음 ON) / 강사 소개 / 코스 소개</td></tr>
+    <tr><th>섹션 2 수강 신청 설정</th><td>신청 기간 / 등록 방식(자율/강제 라디오 — 동시 ON X) / L1 코스 등록 자격(그룹 픽커)</td></tr>
+    <tr><th>섹션 3 수강 기간 설정</th><td>시작일~종료일 / 등록 후 N일 / 무제한</td></tr>
+    <tr><th>섹션 4 학습 진행 룰</th><td>의무 교육: 수강 시간 제한 · 자리비움 모니터링 · 서명 문서 / 일정 학습: 단계별 공개</td></tr>
+    <tr><th>우측 사이드바</th><td>커리큘럼 관리: 커리큘럼 → 항목(슬롯) 2계층, DnD, 라이브러리 가져오기, [⚙ 일괄설정] 모달</td></tr>
+  </table>
+
+  <h3>빌더 chrome-off</h3>
+  <div class="note">
+    빌더는 풀스크린 작업 모드. 글로벌 사이드바·탑바 제거, 빌더 자체 헤더만 유지. 운영자가 한 번에 코스 구성에 집중.
+  </div>
+
+  <h3>일괄설정 모달</h3>
+  <p>우측 사이드바 [⚙ 일괄설정] 버튼이 모달 트리거. 모달 안에 3섹션:</p>
+  <table>
+    <tr><th>① 필수/선택</th><td>모두 필수 / 모두 선택 / 영상만 필수 — 3종 액션</td></tr>
+    <tr><th>② 순차 학습</th><td>전체 순차 진입 적용 / 모두 해제 — 항목별 prerequisite 일괄 설정</td></tr>
+    <tr><th>③ 공개일 (단계별 공개)</th><td>N일 간격 적용 + 커리큘럼별 개별 편집</td></tr>
+  </table>
+  <p>액션 클릭 → 모달 하단 amber 패널에 변경 요약 → [적용] / [취소] 2단계.</p>
+
+  <h3>퍼블리싱 검증 체크리스트</h3>
+  <ul>
+    <li>코스명 입력</li>
+    <li>담당 강사 지정 (또는 강사 없음 토글)</li>
+    <li>신청 기간 설정</li>
+    <li>수강 기간 설정</li>
+    <li>커리큘럼 최소 1개</li>
+    <li>필수 콘텐츠 최소 1개</li>
+  </ul>
+  <p>모두 충족 시 [퍼블리싱] 버튼 활성. 미충족 시 미니맵에서 빨간 동그라미 표시.</p>
+
+  <h3>구현 파일</h3>
+  <div class="note">
+    <code>admin/online-builder.html</code> — React 18 CDN + Tailwind CDN + Lucide. 단일 HTML 파일, 백엔드 미연결 (mock).
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sec-02">
+  <h2><span class="n">02 / List</span>코스 목록</h2>
+  <p class="lede-sm">레거시 목록 셸 차용. 1000+ 코스 페이지네이션 처리.</p>
+
+  <h3>레이아웃</h3>
+  <p>좌측 글로벌 사이드바(200px) + 좌측 분류 트리(180px) + 메인 카드 (상태 탭 + 필터 칩 + 검색 + 테이블 + 페이지네이션).</p>
+
+  <h3>컬럼 (11개)</h3>
+  <table>
+    <tr><th>☐</th><td>체크박스 (전체선택 헤더 포함)</td></tr>
+    <tr><th>상태</th><td>5종 칩 — 초안 · 운영중 · 수강중 · 종료 · 관리자 종료</td></tr>
+    <tr><th>표지</th><td>40×60 portrait 썸네일</td></tr>
+    <tr><th>코스명</th><td>bold + prefix [필수] 칩 (필수 코스만) + 하단 등록 채널 미세 라벨</td></tr>
+    <tr><th>커리큘럼</th><td>"커리큘럼 N · 에셋 M" 요약 칩</td></tr>
+    <tr><th>수강관리</th><td>[수강관리] 버튼 (자체 컬럼)</td></tr>
+    <tr><th>분류</th><td>분류명 칩</td></tr>
+    <tr><th>수강 기간</th><td>"제한 없음" 또는 날짜 범위</td></tr>
+    <tr><th>수강 인원</th><td>N명</td></tr>
+    <tr><th>등록일</th><td>날짜 + 시간</td></tr>
+    <tr><th>관리</th><td>링크·편집·삭제 3아이콘</td></tr>
+  </table>
+
+  <h3>페이지네이션</h3>
+  <ul>
+    <li>디폴트 10개/페이지 (10/20/50/100 셀렉트)</li>
+    <li>중앙 페이지 번호 + 좌우 화살표 + ellipsis (1·2·3 … 마지막)</li>
+    <li>필터·검색·정렬 변경 시 1페이지 자동 리셋</li>
+  </ul>
+
+  <h3>상태 5종</h3>
+  <table>
+    <tr><th>초안</th><td>draft. 퍼블리시 안 됨. 운영자에게만 보임. slate</td></tr>
+    <tr><th>운영중</th><td>published + 신청 기간 진행 중. 신규 등록 가능. emerald</td></tr>
+    <tr><th>수강중</th><td>신청 기간 끝. 수강만 진행. 신규 등록 불가. amber. (학습자 측 라벨은 "신청 마감")</td></tr>
+    <tr><th>종료</th><td>수강 기간까지 끝. 학습 종료. slate dim</td></tr>
+    <tr><th>관리자 종료</th><td>관리자가 강제 종료. 즉시 차단. rose</td></tr>
+  </table>
+
+  <h3>일괄 액션 (1차)</h3>
+  <ul>
+    <li>일괄 삭제만 (운영중·수강 인원>0 가드)</li>
+    <li>일괄 종료·공개·분류 변경은 v2</li>
+  </ul>
+
+  <h3>구현 파일</h3>
+  <div class="note">
+    <code>admin/online-list.html</code> — 레거시 코스 목록 셸 복제 + newcourse 모델 정합.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sec-03">
+  <h2><span class="n">03 / Library</span>콘텐츠 라이브러리</h2>
+  <p class="lede-sm">영상·PDF를 한 곳에 모아 여러 코스에서 재사용.</p>
+
+  <h3>한 줄 룰</h3>
+  <div class="note">
+    <strong>콘텐츠는 라이브러리에 한 번만 존재하고, 코스는 라이브러리 항목을 참조한다.</strong>
+  </div>
+
+  <h3>핵심 동작 (1차)</h3>
+  <table>
+    <tr><th>콘텐츠 타입</th><td>영상 · PDF (시험·설문은 별도 기능 후속)</td></tr>
+    <tr><th>등록 흐름</th><td>2-way: 라이브러리 직접 업로드 + 빌더에서 만들 때 자동 적재</td></tr>
+    <tr><th>검색·필터</th><td>텍스트 + 타입 칩(영상/PDF) + 정렬(등록일·이름·사용 빈도)</td></tr>
+    <tr><th>사용처 추적</th><td>카드에 "사용 코스 N개" 칩 + 클릭 시 사용처 리스트 모달</td></tr>
+    <tr><th>삭제 가드</th><td>사용 중 콘텐츠 삭제 차단. 사용처 안내 다이얼로그</td></tr>
+    <tr><th>편집</th><td>메타(이름·설명·썸네일)만 라이브러리에서. 본문은 빌더 안</td></tr>
+    <tr><th>권한</th><td>단일 tenant 조직 공용 (멀티테넌트 마스터는 v2)</td></tr>
+  </table>
+
+  <h3>테이블 컬럼 (목록 뷰)</h3>
+  <ul>
+    <li>☐ · 타입(영상/PDF) · 썸네일(40×24 영상 / 24×24 PDF) · 제목+설명</li>
+    <li>메타(재생시간/페이지수) · 용량(MB) · 업로드일 · 등록자 · 사용 코스 · 액션</li>
+  </ul>
+
+  <h3>상세 모달</h3>
+  <ul>
+    <li>영상: 인라인 <code>&lt;video controls&gt;</code> 플레이어</li>
+    <li>PDF: 인라인 <code>&lt;iframe&gt;</code> 뷰어 (480px 높이)</li>
+    <li>메타 인라인 편집 (제목·설명)</li>
+    <li>사용 코스 리스트 (각 코스로 이동 링크)</li>
+    <li>푸터: [삭제] · [↓ 다운로드] · [닫기]</li>
+  </ul>
+
+  <h3>구현 파일</h3>
+  <div class="note">
+    <code>admin/content-library.html</code> — 사이드바 신규 영역에서 진입.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sec-04">
+  <h2><span class="n">04 / Model</span>데이터 모델</h2>
+  <p class="lede-sm">코스·커리큘럼·슬롯의 위계와 핵심 필드.</p>
+
+  <h3>Course (코스)</h3>
+  <pre class="note" style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:13px;line-height:1.7;">Course {
+  id, title, coverImage,
+  source: 'v2',
+  type: 'CONTENT',
+  classification: 'normal' | 'mandatory',
+  category, status,
+  enrollMode: 'admin' | 'self' | 'auto',
+  studyPeriod: { type: 'fixed' | 'days' | 'unlimited', start?, end?, days? },
+  applyPeriod: { start?, end? },
+  enrolledCount, createdAt, createdBy,
+}</pre>
+
+  <h3>Curriculum (커리큘럼)</h3>
+  <pre class="note" style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:13px;line-height:1.7;">Curriculum {
+  id, title,
+  releaseAfter: number,    // 단계별 공개 일수
+  slots: Slot[]
+}</pre>
+
+  <h3>Slot (슬롯 = 에셋 + 수료 조건)</h3>
+  <pre class="note" style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:13px;line-height:1.7;">Slot {
+  id, type: 'video' | 'exam' | 'survey' | 'pdf',
+  title, isRequired,
+  cond: { /* type별 */ },
+  source: 'library' | 'upload' | 'empty',
+  libRef,
+  prerequisiteIds: slotId[]
+}</pre>
+
+  <h3>슬롯 타입별 수료 조건</h3>
+  <table>
+    <tr><th>video</th><td>watchRate (시청률 %) — 기본 90</td></tr>
+    <tr><th>exam</th><td>passScore, totalQ — 기본 60점 / 20문항</td></tr>
+    <tr><th>survey</th><td>(없음 — 제출 기준)</td></tr>
+    <tr><th>pdf</th><td>(없음 — 조회 기준)</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<section id="sec-05">
+  <h2><span class="n">05 / Flow</span>진입 흐름</h2>
+
+  <h3>운영자 흐름</h3>
+  <pre class="note" style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:13px;line-height:1.7;">사이드바 [코스v2 → 온라인 코스]
+   ↓
+온라인 코스 목록 (admin/online-list.html)
+   ↓ ([+ 등록] 또는 [+ 코스 만들기] CTA)
+온라인 코스 빌더 (admin/online-builder.html)
+   ↓ (퍼블리싱)
+운영중 상태로 목록에 노출
+   ↓ (코스 행 → [수강관리])
+수강관리 (admin/online-view.html)</pre>
+
+  <h3>학습자 흐름</h3>
+  <pre class="note" style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:13px;line-height:1.7;">앱 카테고리 → 코스 카드 클릭
+   ↓
+코스 상세 (커리큘럼·슬롯 리스트)
+   ↓ (슬롯 선택)
+영상 재생 / 시험 응시 / 설문 제출 / PDF 열람
+   ↓ (이수 조건 충족)
+슬롯 ✓ 표시
+   ↓ (모든 필수 슬롯 ✓)
+수료 → 수료증 발급</pre>
+</section>
+
+<!-- ============================================================ -->
+<section id="sec-06">
+  <h2><span class="n">06 / Roadmap</span>Phase 로드맵</h2>
+
+  <div class="phases">
+    <div class="phase">
+      <div>
+        <div class="pstep">PHASE 1</div>
+        <div class="pstep-sub">현재</div>
+      </div>
+      <div>
+        <div class="phase-name">빌더·목록·라이브러리 + 슬롯 단위 진도율</div>
+        <p class="phase-desc">코스 등록·수정·삭제 + 슬롯 4종(video·exam·survey·pdf) + 라이브러리 영상·PDF + 일괄설정 모달.</p>
+        <ul class="phase-items">
+          <li>빌더 4섹션 폼 + 우측 사이드바 + chrome-off</li>
+          <li>목록 11컬럼 테이블 + 페이지네이션 + 일괄 삭제</li>
+          <li>라이브러리 영상·PDF + 사용처 추적 + 삭제 가드</li>
+          <li>일괄설정 모달 (필수/선택 · 순차 학습 · 단계별 공개)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div>
+        <div class="pstep">PHASE 2</div>
+        <div class="pstep-sub">확장 정책 <span class="tbd">시점 미정</span></div>
+      </div>
+      <div>
+        <div class="phase-name">컴플라이언스 옵션 · 단계별 공개 정착</div>
+        <p class="phase-desc">의무 교육 운영자 요구를 위한 시간대 제한·자리비움 모니터링·서명 문서 실 동작.</p>
+        <ul class="phase-items">
+          <li>수강 시간 제한 (요일별 시간 윈도우)</li>
+          <li>자리비움 모니터링 (N분 inactive)</li>
+          <li>서명 문서 첨부 (감사 대비)</li>
+          <li>커리큘럼 버전 발행 로직</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div>
+        <div class="pstep">PHASE 3</div>
+        <div class="pstep-sub">멀티테넌트 라이브러리 <span class="tbd">시점 미정</span></div>
+      </div>
+      <div>
+        <div class="phase-name">슈퍼관리자 마스터 라이브러리 + 레퍼런스/Fork</div>
+        <p class="phase-desc">법정 의무 영상 같은 표준 콘텐츠를 슈퍼관리자가 N개 고객사에 배포.</p>
+        <ul class="phase-items">
+          <li>Master Library (슈퍼관리자 전용)</li>
+          <li>레퍼런스 디폴트 + 명시적 fork</li>
+          <li>master 업데이트 시 freeze 룰 (학습 중 학습자 보호)</li>
+          <li>회수(라이센스 만료) · grace period</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sec-07">
+  <h2><span class="n">07 / Appendix</span>부록 — 참조 문서</h2>
+  <p class="lede-sm">상위 시스템·오프라인·plan/design 문서.</p>
+
+  <table>
+    <tr><th>newcourse 종합 기획설계서</th><td><a href="newcourse.html">newcourse.html</a> — 코스 시스템 전체</td></tr>
+    <tr><th>오프라인 코스 기획설계서</th><td><a href="offline-course.html">offline-course.html</a></td></tr>
+    <tr><th>온라인 빌더 Plan</th><td><a href="01-plan/features/online-builder.plan.md">online-builder.plan.md</a></td></tr>
+    <tr><th>온라인 빌더 Design</th><td><a href="02-design/features/online-builder.design.md">online-builder.design.md</a></td></tr>
+    <tr><th>온라인 코스 목록 Plan</th><td><a href="01-plan/features/online-course-list.plan.md">online-course-list.plan.md</a></td></tr>
+    <tr><th>온라인 코스 목록 Design</th><td><a href="02-design/features/online-course-list.design.md">online-course-list.design.md</a></td></tr>
+    <tr><th>콘텐츠 라이브러리 Plan</th><td><a href="01-plan/features/library.plan.md">library.plan.md</a></td></tr>
+  </table>
+</section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <strong>온라인 코스 기획설계서</strong><br>
+      <span style="color:#afafaf;">newcourse · 코스v2 그룹 · CONTENT</span>
+    </div>
+    <div>
+      종합 기획서: <a href="newcourse.html" style="color:#fff;">newcourse.html</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

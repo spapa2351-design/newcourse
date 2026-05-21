@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코스 상세 화면 가이드</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+  .screen-img { width: 280px; border-radius: 20px; box-shadow: 0 8px 32px rgba(34,51,84,.18); border: 1px solid #e2e8f0; flex-shrink: 0; }
+  .screen-img-sm { width: 220px; border-radius: 16px; box-shadow: 0 6px 24px rgba(34,51,84,.14); border: 1px solid #e2e8f0; flex-shrink: 0; }
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .flow-line { border-left: 2px dashed #c7d2fe; padding-left: 20px; margin-left: 10px; }
+  .step-dot { width: 22px; height: 22px; border-radius: 50%; background: #4f46e5; color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  /* ══ 768px ══ */
+  @media (max-width: 768px) {
+    .screen-img { width: 240px; }
+    .screen-img-sm { width: 190px; }
+  }
+
+  /* ══ 640px ══ */
+  @media (max-width: 640px) {
+    .screen-img { max-width: 100% !important; width: auto !important; height: auto !important; }
+    .screen-img-sm { max-width: 100% !important; width: auto !important; height: auto !important; }
+    .grid-cols-2 { grid-template-columns: 1fr !important; }
+    .grid-cols-3 { grid-template-columns: 1fr !important; }
+    .flex.gap-8 { flex-direction: column !important; align-items: stretch !important; }
+    .flex.gap-6:has(> .screen-img) { flex-direction: column !important; align-items: stretch !important; }
+  }
+
+  /* ══ 480px ══ */
+  @media (max-width: 480px) {
+    body { font-size: 14px; }
+    .badge { font-size: 10px !important; }
+  }
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- Hero -->
+<div class="bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-500 text-white px-4 py-8 sm:px-10 sm:py-12">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-indigo-200 text-xs font-semibold tracking-widest uppercase mb-2">학습자 앱 · UI 가이드</div>
+    <h1 class="text-3xl font-bold mb-2">코스 상세 화면</h1>
+    <p class="text-indigo-100 text-sm max-w-xl leading-relaxed">
+      수강 신청 3가지 모드(자율 단일 · 자율 다중조합 · 관리자 강제배정)와 날짜선택형 회차 선택 흐름을 화면 단위로 정리합니다.
+    </p>
+    <div class="flex flex-wrap gap-3 mt-6">
+      <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-semibold">📱 course-detail.html</span>
+      <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-semibold">🖼 12개 화면</span>
+      <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-semibold">4가지 수강 모드</span>
+    </div>
+  </div>
+</div>
+
+<!-- Mode Overview -->
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+  <!-- 목차 -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-10 shadow-sm">
+    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">목차</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+      <a href="#s1" class="flex items-center gap-2 text-indigo-600 hover:underline"><span class="text-slate-400">01</span> 수강 모드 비교</a>
+      <a href="#s2" class="flex items-center gap-2 text-indigo-600 hover:underline"><span class="text-slate-400">02</span> 자율 단일 선택 흐름</a>
+      <a href="#s3" class="flex items-center gap-2 text-indigo-600 hover:underline"><span class="text-slate-400">03</span> 자율 다중 조합 흐름</a>
+      <a href="#s4" class="flex items-center gap-2 text-indigo-600 hover:underline"><span class="text-slate-400">04</span> 관리자 강제배정 흐름</a>
+      <a href="#s5" class="flex items-center gap-2 text-indigo-600 hover:underline"><span class="text-slate-400">05</span> 날짜선택형 회차 선택</a>
+      <a href="#s6" class="flex items-center gap-2 text-indigo-600 hover:underline"><span class="text-slate-400">06</span> 내 수강 내역 탭</a>
+    </div>
+  </div>
+
+  <!-- S1: 수강 모드 비교 -->
+  <section id="s1" class="mb-14">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="step-dot">1</div>
+      <h2 class="text-lg font-bold text-slate-800">수강 모드 비교</h2>
+      <span class="badge bg-indigo-100 text-indigo-700">코스 상세</span>
+    </div>
+    <p class="text-sm text-slate-500 mb-6 ml-4 sm:ml-8">코스 상세 화면은 운영자가 설정한 수강 방식에 따라 3가지 형태로 렌더링됩니다. 화면 우하단 배지와 버튼 텍스트가 모드를 구분합니다.</p>
+
+    <div class="flex gap-6 overflow-x-auto pb-4">
+      <!-- single -->
+      <div class="flex flex-col items-center gap-3">
+        <img src="../screenshots/course-detail/01_single_detail.png" class="screen-img" alt="자율 단일 선택">
+        <div class="text-center">
+          <span class="badge bg-blue-100 text-blue-700 mb-1">자율 단일</span>
+          <p class="text-xs text-slate-500 mt-1 max-w-[220px]">학습자가 커리큘럼 1개를 직접 선택. 선택 전까지 신청 버튼 비활성.</p>
+        </div>
+      </div>
+      <!-- multi -->
+      <div class="flex flex-col items-center gap-3">
+        <img src="../screenshots/course-detail/05_multi_detail.png" class="screen-img" alt="자율 다중 조합">
+        <div class="text-center">
+          <span class="badge bg-violet-100 text-violet-700 mb-1">자율 다중 조합</span>
+          <p class="text-xs text-slate-500 mt-1 max-w-[220px]">N개 조합 선택형. 설정 개수를 채워야 신청 버튼 활성화.</p>
+        </div>
+      </div>
+      <!-- assigned -->
+      <div class="flex flex-col items-center gap-3">
+        <img src="../screenshots/course-detail/08_assigned_detail.png" class="screen-img" alt="관리자 강제배정">
+        <div class="text-center">
+          <span class="badge bg-amber-100 text-amber-700 mb-1">관리자 강제배정</span>
+          <p class="text-xs text-slate-500 mt-1 max-w-[220px]">운영자가 지정한 일정이 자동 선택된 상태로 노출. 모달 없이 바로 확인 화면으로 이동.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-slate-200 mb-14">
+
+  <!-- S2: 자율 단일 흐름 -->
+  <section id="s2" class="mb-14">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="step-dot">2</div>
+      <h2 class="text-lg font-bold text-slate-800">자율 단일 선택 흐름</h2>
+      <span class="badge bg-blue-100 text-blue-700">single</span>
+    </div>
+
+    <div class="ml-4 sm:ml-8 space-y-8">
+      <!-- step 1: 모달 -->
+      <div class="flex gap-3 items-start">
+        <div class="w-5 h-5 rounded-full bg-indigo-200 text-indigo-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-1">①</div>
+        <div class="flex-1">
+          <div class="font-semibold text-sm text-slate-700 mb-1">"수강 신청하기" 버튼 → 일정 선택 모달 오픈</div>
+          <p class="text-xs text-slate-400 mb-4">커리큘럼 목록이 바텀시트로 슬라이드 업. 마감·잔여석 상태가 배지로 표시됨.</p>
+          <div class="flex gap-4">
+            <div class="flex flex-col items-center gap-2">
+              <img src="../screenshots/course-detail/02_single_modal.png" class="screen-img-sm" alt="모달 열림">
+              <span class="text-xs text-slate-400">모달 오픈</span>
+            </div>
+            <div class="flex flex-col items-center gap-2">
+              <img src="../screenshots/course-detail/03_single_modal_selected.png" class="screen-img-sm" alt="옵션 선택">
+              <span class="text-xs text-slate-400">일정 선택 후</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- step 2: 확인 -->
+      <div class="flex gap-3 items-start">
+        <div class="w-5 h-5 rounded-full bg-indigo-200 text-indigo-700 text-[10px] font-bold flex items-center justify-content flex-shrink-0 mt-1 flex items-center justify-center">②</div>
+        <div class="flex-1">
+          <div class="font-semibold text-sm text-slate-700 mb-1">"신청 확인" 버튼 → 신청 확인 화면</div>
+          <p class="text-xs text-slate-400 mb-4">선택한 일정 요약 카드 + 개인정보 수집 동의 + 최종 신청 버튼.</p>
+          <img src="../screenshots/course-detail/04_single_confirm.png" class="screen-img" alt="신청 확인 single">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-slate-200 mb-14">
+
+  <!-- S3: 자율 다중 조합 흐름 -->
+  <section id="s3" class="mb-14">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="step-dot">3</div>
+      <h2 class="text-lg font-bold text-slate-800">자율 다중 조합 흐름</h2>
+      <span class="badge bg-violet-100 text-violet-700">multi</span>
+    </div>
+
+    <div class="ml-4 sm:ml-8 space-y-8">
+      <div class="flex gap-3 items-start">
+        <div class="w-5 h-5 rounded-full bg-indigo-200 text-indigo-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-1">①</div>
+        <div class="flex-1">
+          <div class="font-semibold text-sm text-slate-700 mb-1">모달에서 N개 복수 선택</div>
+          <p class="text-xs text-slate-400 mb-4">체크박스 방식. 설정 개수(예: 2개) 충족 시 "신청 확인" 버튼 활성화.</p>
+          <img src="../screenshots/course-detail/06_multi_modal_selected.png" class="screen-img" alt="다중 선택">
+        </div>
+      </div>
+
+      <div class="flex gap-3 items-start">
+        <div class="w-5 h-5 rounded-full bg-indigo-200 text-indigo-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-1">②</div>
+        <div class="flex-1">
+          <div class="font-semibold text-sm text-slate-700 mb-1">신청 확인 화면 — 항목별 상세 카드</div>
+          <p class="text-xs text-slate-400 mb-4">단일 선택과 달리 선택한 각 커리큘럼의 날짜·시간·장소가 개별 카드로 펼쳐짐.</p>
+          <img src="../screenshots/course-detail/07_multi_confirm.png" class="screen-img" alt="신청 확인 multi">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-slate-200 mb-14">
+
+  <!-- S4: 강제배정 흐름 -->
+  <section id="s4" class="mb-14">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="step-dot">4</div>
+      <h2 class="text-lg font-bold text-slate-800">관리자 강제배정 흐름</h2>
+      <span class="badge bg-amber-100 text-amber-700">assigned</span>
+    </div>
+
+    <div class="ml-4 sm:ml-8 space-y-8">
+      <div class="flex gap-4 items-start">
+        <div class="flex flex-col items-center gap-2">
+          <img src="../screenshots/course-detail/08_assigned_detail.png" class="screen-img-sm" alt="강제배정 상세">
+          <span class="text-xs text-slate-400">코스 상세 (배정됨)</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <img src="../screenshots/course-detail/09_assigned_confirm.png" class="screen-img-sm" alt="강제배정 확인">
+          <span class="text-xs text-slate-400">신청 확인</span>
+        </div>
+      </div>
+      <p class="text-xs text-slate-500">운영자가 지정한 일정이 자동 선택된 상태. 학습자는 모달 없이 "수강 신청" 버튼만 누르면 곧바로 신청 확인 화면으로 이동.</p>
+    </div>
+  </section>
+
+  <hr class="border-slate-200 mb-14">
+
+  <!-- S5: sessionSelect 흐름 -->
+  <section id="s5" class="mb-14">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="step-dot">5</div>
+      <h2 class="text-lg font-bold text-slate-800">날짜선택형 회차 선택</h2>
+      <span class="badge bg-green-100 text-green-700">sessionSelect</span>
+    </div>
+    <p class="text-sm text-slate-500 mb-6 ml-4 sm:ml-8">법정의무교육 등 특정 코스에서 적용. 커리큘럼 카드를 선택하면 내부에 회차 날짜 목록이 펼쳐지고, 원하는 날짜를 골라야 신청 확인으로 이동할 수 있음.</p>
+
+    <div class="ml-4 sm:ml-8 flex flex-wrap gap-4 items-start">
+      <div class="flex flex-col items-center gap-2">
+        <img src="../screenshots/course-detail/10_session_date_picker.png" class="screen-img-sm" alt="날짜 선택">
+        <span class="text-xs text-slate-400">회차 날짜 선택 UI</span>
+      </div>
+      <div class="flex flex-col items-center gap-2">
+        <img src="../screenshots/course-detail/11_session_confirm.png" class="screen-img-sm" alt="날짜 선택 후 확인">
+        <span class="text-xs text-slate-400">신청 확인 (선택된 회차 날짜)</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-slate-200 mb-14">
+
+  <!-- S6: 내 수강 내역 -->
+  <section id="s6" class="mb-14">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="step-dot">6</div>
+      <h2 class="text-lg font-bold text-slate-800">내 수강 내역 탭</h2>
+      <span class="badge bg-slate-100 text-slate-600">screen-my</span>
+    </div>
+    <p class="text-sm text-slate-500 mb-6 ml-4 sm:ml-8">신청 완료 후 접근. 수강 신청 상태·출석 현황·취소 버튼을 한 화면에서 확인.</p>
+
+    <div class="ml-4 sm:ml-8">
+      <img src="../screenshots/course-detail/12_my_tab.png" class="screen-img" alt="내 수강 내역">
+    </div>
+  </section>
+
+  <!-- 화면 흐름 요약 -->
+  <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mb-10">
+    <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-4">화면 흐름 요약</div>
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <span class="bg-white border border-indigo-200 px-3 py-1.5 rounded-lg font-medium text-indigo-700">코스 상세</span>
+      <span class="text-slate-400">→</span>
+      <span class="bg-white border border-indigo-200 px-3 py-1.5 rounded-lg font-medium text-indigo-700">일정 선택 모달</span>
+      <span class="text-slate-400 text-xs">(single/multi)</span>
+      <span class="text-slate-400">→</span>
+      <span class="bg-white border border-indigo-200 px-3 py-1.5 rounded-lg font-medium text-indigo-700">신청 확인</span>
+      <span class="text-slate-400">→</span>
+      <span class="bg-white border border-indigo-200 px-3 py-1.5 rounded-lg font-medium text-indigo-700">완료 모달</span>
+      <span class="text-slate-400">→</span>
+      <span class="bg-white border border-indigo-200 px-3 py-1.5 rounded-lg font-medium text-indigo-700">내 수강 내역</span>
+    </div>
+    <div class="mt-3 text-xs text-indigo-400">assigned 모드는 모달 단계를 건너뜁니다.</div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="text-center py-8 text-slate-400 text-xs">
+  코스 상세 화면 가이드 · course-detail.html · v1.1 · 2026-05-21
+</div>
+
+</body>
+</html>

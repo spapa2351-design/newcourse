@@ -1,0 +1,2449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오프라인 LMS 가이드</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; font-size: 14px; }
+
+  /* ── 사이드바 ── */
+  #sidebar { width: 260px; min-width: 260px; }
+  .nav-group-title { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: .08em; text-transform: uppercase; padding: 16px 16px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; border-radius: 8px; font-size: 13px; color: #475569; cursor: pointer; transition: all .12s; user-select: none; }
+  .nav-item:hover { background: #f1f5f9; color: #1e293b; }
+  .nav-item.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+  .nav-item.active .nav-dot { background: #2563eb; }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; transition: background .12s; }
+  .nav-sub { padding: 5px 16px 5px 36px; font-size: 12.5px; color: #64748b; cursor: pointer; border-radius: 8px; transition: all .12s; }
+  .nav-sub:hover { background: #f8fafc; color: #334155; }
+  .nav-sub.active { color: #2563eb; font-weight: 600; background: #eff6ff; }
+  .nav-arrow { margin-left: auto; font-size: 10px; color: #94a3b8; transition: transform .15s; }
+  .nav-arrow.open { transform: rotate(90deg); }
+  .nav-children { overflow: hidden; max-height: 0; transition: max-height .2s ease; }
+  .nav-children.open { max-height: 500px; }
+  .nav-divider { border-top: 1px solid #f1f5f9; margin: 8px 12px; }
+
+  /* ── 콘텐츠 ── */
+  #content { flex: 1; min-width: 0; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-header { border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 32px; }
+  .page-tag { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+  .page-title { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+  .page-desc { font-size: 14px; color: #64748b; line-height: 1.7; max-width: 680px; }
+
+  /* ── 섹션 ── */
+  .guide-section { margin-bottom: 48px; }
+  .section-title { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; }
+  .section-desc { font-size: 13.5px; color: #64748b; line-height: 1.7; margin-bottom: 20px; }
+
+  /* ── 스크린샷 ── */
+  .screen-wrap { display: flex; gap: 20px; flex-wrap: wrap; }
+  .screen-card { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .screen-img { border-radius: 20px; box-shadow: 0 8px 32px rgba(34,51,84,.15), 0 1px 3px rgba(34,51,84,.08); border: 1px solid #e8ecf4; }
+  .screen-label { font-size: 12px; color: #64748b; font-weight: 500; }
+  .screen-caption { font-size: 11.5px; color: #94a3b8; text-align: center; max-width: 220px; line-height: 1.5; }
+
+  /* ── 배지 ── */
+  .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-violet { background: #ede9fe; color: #6d28d9; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-slate { background: #f1f5f9; color: #475569; }
+  .badge-red { background: #fee2e2; color: #b91c1c; }
+  .badge-indigo { background: #eef2ff; color: #4338ca; }
+  .badge-rose   { background: #fff1f2; color: #be123c; }
+
+  /* ── placeholder 이미지 ── */
+  .screen-placeholder { border-radius: 12px; border: 2px dashed #e2e8f0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px; gap: 8px; }
+
+  /* ── callout ── */
+  .callout { border-left: 3px solid; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 13px; line-height: 1.6; }
+  .callout-blue { border-color: #3b82f6; background: #eff6ff; color: #1e40af; }
+  .callout-amber { border-color: #f59e0b; background: #fffbeb; color: #78350f; }
+  .callout-green { border-color: #10b981; background: #ecfdf5; color: #065f46; }
+
+  /* ── 플로우 ── */
+  .flow-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .flow-box { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; font-size: 12.5px; font-weight: 600; color: #334155; white-space: nowrap; }
+  .flow-arrow { color: #94a3b8; font-size: 14px; }
+
+  /* ── mode 카드 비교 ── */
+  .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+  .mode-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; background: white; }
+  .mode-icon { font-size: 20px; margin-bottom: 8px; }
+  .mode-name { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  .mode-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+  /* ── 브레드크럼 ── */
+  .breadcrumb { font-size: 12px; color: #94a3b8; margin-bottom: 20px; display: flex; align-items: center; gap: 6px; }
+  .breadcrumb span { color: #64748b; }
+
+  /* ── prev/next ── */
+  .nav-pn { display: flex; justify-content: space-between; margin-top: 48px; padding-top: 24px; border-top: 1px solid #e2e8f0; gap: 16px; }
+  .nav-pn-btn { flex: 1; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all .12s; background: white; text-align: left; }
+  .nav-pn-btn:hover { border-color: #3b82f6; background: #eff6ff; }
+  .nav-pn-btn.right { text-align: right; }
+  .pn-label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+  .pn-title { font-size: 13px; font-weight: 600; color: #334155; }
+
+  /* ── 모바일 사이드바 ── */
+  #mobile-menu-btn { display: none; }
+  #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 999; }
+  #sidebar-overlay.show { display: block; }
+  @media (max-width: 900px) {
+    #mobile-menu-btn { display: flex; }
+    #sidebar {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      height: 100vh !important;
+      z-index: 1000;
+      width: 260px !important;
+      min-width: 0 !important;
+      background: white !important;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    #sidebar.mobile-open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.25); }
+    .version-badge { display: none; }
+    table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  }
+
+  /* ══ 768px ══ */
+  @media (max-width: 768px) {
+    #content { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+    .grid-cols-3 { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+
+  /* ══ 640px ══ */
+  @media (max-width: 640px) {
+    #content { padding-left: 1rem !important; padding-right: 1rem !important; }
+    .grid-cols-3 { grid-template-columns: 1fr !important; }
+    .grid-cols-2 { grid-template-columns: 1fr !important; }
+    .mode-grid { grid-template-columns: 1fr !important; }
+    .screen-img { max-width: 100% !important; width: auto !important; height: auto !important; }
+    .screen-placeholder { max-width: 100% !important; width: 100% !important; }
+    .page-title { font-size: 20px !important; }
+    .nav-pn { flex-direction: column !important; }
+    .nav-pn-btn { width: 100% !important; }
+  }
+
+  /* ══ 480px ══ */
+  @media (max-width: 480px) {
+    #content { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .section-card { padding: 14px 10px !important; }
+    .section-title { font-size: 17px !important; }
+    .page-title { font-size: 18px !important; }
+  }
+</style>
+</head>
+<body class="bg-white">
+
+<!-- Sidebar overlay -->
+<div id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<!-- Top bar -->
+<header class="sticky top-0 z-50 bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 h-14 gap-3 sm:gap-4">
+  <button id="mobile-menu-btn" onclick="toggleMobileSidebar()" class="items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors" aria-label="메뉴 열기">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="flex items-center gap-2.5">
+    <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center">
+      <span class="text-white text-xs font-bold">OL</span>
+    </div>
+    <span class="font-bold text-slate-800 text-base">오프라인 코스 가이드</span>
+  </div>
+  <div class="flex-1"></div>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v1.3 · 2026-05-21</span>
+</header>
+
+<script>
+function toggleMobileSidebar() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+</script>
+
+<!-- Body -->
+<div class="flex" style="min-height: calc(100vh - 56px);">
+
+<!-- Sidebar -->
+<aside id="sidebar" class="border-r border-slate-200 bg-slate-50/60 overflow-y-auto sticky top-14 self-start" style="height: calc(100vh - 56px);">
+  <div class="py-4">
+
+    <div class="nav-group-title">시작하기</div>
+    <div class="nav-item active" onclick="showPage('intro', this)">
+      <span class="nav-dot"></span> 오프라인 코스란?
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">학습자 가이드</div>
+
+    <div class="nav-item" onclick="showPage('home-page', this)">
+      <span class="nav-dot"></span> 홈 화면
+    </div>
+    <div class="nav-item" onclick="toggleNav('nav-browse', this)">
+      <span class="nav-dot"></span> 코스 탐색
+      <span class="nav-arrow" id="arr-browse">▶</span>
+    </div>
+    <div class="nav-children" id="nav-browse">
+      <div class="nav-sub" onclick="showPage('course-list-page', this)">코스 목록</div>
+      <div class="nav-sub" onclick="showPage('category-page', this)">카테고리</div>
+      <div class="nav-sub" onclick="showPage('course-detail-page', this)">코스 상세</div>
+    </div>
+
+    <div class="nav-item" onclick="toggleNav('nav-enroll', this)">
+      <span class="nav-dot"></span> 수강 신청
+      <span class="nav-arrow" id="arr-enroll">▶</span>
+    </div>
+    <div class="nav-children" id="nav-enroll">
+      <div class="nav-sub" onclick="showPage('enroll-status', this)">신청 기간 &amp; 상태</div>
+      <div class="nav-sub" onclick="showPage('enroll-single', this)">자율 단일 선택</div>
+      <div class="nav-sub" onclick="showPage('enroll-multi', this)">자율 다중 조합</div>
+      <div class="nav-sub" onclick="showPage('enroll-assigned', this)">관리자 배정</div>
+      <div class="nav-sub" onclick="showPage('enroll-session', this)">날짜선택형 회차</div>
+    </div>
+
+    <div class="nav-item" onclick="showPage('enrolled-page', this)">
+      <span class="nav-dot"></span> 수강 중
+    </div>
+    <div class="nav-item" onclick="showPage('completed-page', this)">
+      <span class="nav-dot"></span> 수강 완료
+    </div>
+    <div class="nav-item" onclick="showPage('my-page', this)">
+      <span class="nav-dot"></span> MY 탭
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">관리자 가이드</div>
+    <div class="nav-item" onclick="showPage('admin-overview', this)">
+      <span class="nav-dot"></span> 관리자 화면 개요
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">코스 목록</div>
+    <div class="nav-item" onclick="showPage('admin-list-overview', this)">
+      <span class="nav-dot"></span> 목록 화면
+    </div>
+    <div class="nav-item" onclick="showPage('admin-list-status', this)">
+      <span class="nav-dot"></span> 상태별 필터
+    </div>
+    <div class="nav-item" onclick="showPage('admin-list-expand', this)">
+      <span class="nav-dot"></span> 차수 확장 보기
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">코스 등록 (Builder)</div>
+    <div class="nav-item" onclick="toggleNav('admin-nav-builder', this)">
+      <span class="nav-dot"></span> 오프라인 코스 등록
+      <span class="nav-arrow" id="arr-admin-builder">▶</span>
+    </div>
+    <div class="nav-children" id="admin-nav-builder">
+      <div class="nav-sub" onclick="showPage('admin-builder-basic', this)">기본 정보</div>
+      <div class="nav-sub" onclick="showPage('admin-builder-enroll', this)">수강 신청 설정</div>
+      <div class="nav-sub" onclick="showPage('admin-builder-completion', this)">수료 조건</div>
+      <div class="nav-sub" onclick="showPage('admin-builder-package', this)">차수 관리</div>
+      <div class="nav-sub" onclick="showPage('admin-builder-session', this)">회차 설정</div>
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">코스 운영</div>
+    <div class="nav-item" onclick="toggleNav('admin-nav-view', this)">
+      <span class="nav-dot"></span> 코스 운영 현황
+      <span class="nav-arrow" id="arr-admin-view">▶</span>
+    </div>
+    <div class="nav-children" id="admin-nav-view">
+      <div class="nav-sub" onclick="showPage('admin-view-dashboard', this)">대시보드</div>
+      <div class="nav-sub" onclick="showPage('admin-view-students', this)">수강생 관리</div>
+      <div class="nav-sub" onclick="showPage('admin-view-attendance', this)">출석·수료</div>
+      <div class="nav-sub" onclick="showPage('admin-view-qr', this)">QR 라이브 모드</div>
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-title">수강생 등록</div>
+    <div class="nav-item" onclick="showPage('admin-learners-enroll', this)">
+      <span class="nav-dot"></span> 수강생 등록 화면
+    </div>
+
+  </div>
+</aside>
+
+<!-- Content -->
+<main id="content" class="px-10 py-10 max-w-4xl">
+
+  <!-- newcourse 시스템 안내 -->
+  <div class="page active" id="page-intro">
+    <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span style="color:#059669;font-weight:700;font-size:13px;">NEW</span>
+        <div style="font-size:13.5px;color:#065f46;line-height:1.6;">
+          <strong>2026-05 newcourse 시스템 추가.</strong> 본 가이드는 현재 운영중인 오프라인 LMS(<code>offline-list.html</code> · <code>offline-builder.html</code> · <code>offline-view.html</code>) 기준입니다. 신규 코스 등록 시 어드민 사이드바의 <strong>코스v2</strong> 그룹에서 <strong>온라인 코스</strong> / <strong>오프라인 코스</strong>를 선택할 수도 있습니다. 두 시스템은 영구 공존하며 데이터·기능은 별도입니다. 자세한 내용은 <a href="newcourse.html" style="color:#047857;text-decoration:underline;">newcourse.html</a> 참조.
+        </div>
+      </div>
+    </div>
+
+
+    <div class="breadcrumb">시작하기</div>
+    <div class="page-header">
+      <div class="page-tag">개요</div>
+      <h1 class="page-title">오프라인 코스란?</h1>
+      <p class="page-desc">오프라인 LMS는 강의실 교육을 웹으로 관리하는 시스템입니다. 수강 신청부터 QR 출석, 수료 처리까지 전 과정을 하나의 앱에서 처리할 수 있습니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">시스템 구성</div>
+      <div class="section-desc">오프라인 LMS는 크게 두 영역으로 나뉩니다.</div>
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="border border-indigo-200 bg-indigo-50 rounded-xl p-5">
+          <div class="text-xl mb-3">🏢</div>
+          <div class="font-bold text-indigo-800 mb-2">관리자단</div>
+          <div class="text-sm text-indigo-700 leading-relaxed">코스 개설, 커리큘럼 설정, 수강생 배정, 출석 관리, 수료 처리</div>
+        </div>
+        <div class="border border-violet-200 bg-violet-50 rounded-xl p-5">
+          <div class="text-xl mb-3">📱</div>
+          <div class="font-bold text-violet-800 mb-2">학습자 앱</div>
+          <div class="text-sm text-violet-700 leading-relaxed">코스 탐색, 수강 신청, QR 출석 체크인, 내 수강 현황 확인</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">계층 구조</div>
+      <div class="section-desc">오프라인 코스는 5단계 계층으로 구성됩니다.</div>
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flow-box">📚 코스</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">📖 커리큘럼</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">🗂 슬롯</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">📅 차수</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">🕐 회차</div>
+      </div>
+      <div class="callout callout-blue mt-4">
+        <strong>예시:</strong> "글로벌 비즈니스 매너" 코스 → "필수 이론" 커리큘럼 → 4월 반 / 5월 반(슬롯) → 1차시·2차시 (회차)
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">수강 신청 4가지 방식</div>
+      <div class="mode-grid">
+        <div class="mode-card">
+          <div class="mode-icon">☝️</div>
+          <div class="mode-name">자율 단일 선택</div>
+          <div class="mode-desc">학습자가 커리큘럼 1개를 직접 선택</div>
+          <span class="badge badge-blue mt-2">single</span>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">✌️</div>
+          <div class="mode-name">자율 다중 조합</div>
+          <div class="mode-desc">N개를 자유롭게 조합해 선택</div>
+          <span class="badge badge-violet mt-2">multi</span>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">📌</div>
+          <div class="mode-name">관리자 강제배정</div>
+          <div class="mode-desc">운영자가 지정한 일정이 자동 선택됨</div>
+          <span class="badge badge-amber mt-2">assigned</span>
+        </div>
+        <div class="mode-card">
+          <div class="mode-icon">📆</div>
+          <div class="mode-name">날짜선택형 회차</div>
+          <div class="mode-desc">법정의무교육 등. 특정 회차 날짜를 직접 선택</div>
+          <span class="badge badge-green mt-2">sessionSelect</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div></div>
+      <div class="nav-pn-btn right" onclick="showPage('home-page', document.querySelector('[onclick*=home-page]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">홈 화면</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: home -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-home-page">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 홈 화면</div>
+    <div class="page-header">
+      <div class="page-tag">학습자 앱</div>
+      <h1 class="page-title">홈 화면</h1>
+      <p class="page-desc">앱 실행 시 처음 보이는 화면입니다. 최근 수강 코스 바로가기와 오프라인 코스 목록이 표시됩니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 구성</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/home/01_home_default.png" class="screen-img" style="width:300px" alt="홈 화면">
+          <div class="screen-label">홈 기본 화면</div>
+          <div class="screen-caption">최근 수강 코스 · 오프라인 코스 목록 · 하단 탭바</div>
+        </div>
+        <div class="flex-1 min-w-0 flex flex-col gap-4 pt-2" style="max-width: 300px;">
+          <div class="border border-slate-200 rounded-xl p-4 bg-white">
+            <div class="font-bold text-sm text-slate-700 mb-2">📌 최근 수강 섹션</div>
+            <div class="text-xs text-slate-500 leading-relaxed">수강 신청한 코스가 카드 형태로 노출. 상태(수강중 / 수강예정 / 완료)에 따라 이동하는 페이지가 달라짐.</div>
+          </div>
+          <div class="border border-slate-200 rounded-xl p-4 bg-white">
+            <div class="font-bold text-sm text-slate-700 mb-2">📋 오프라인 코스 목록</div>
+            <div class="text-xs text-slate-500 leading-relaxed">신청 가능한 코스 목록. 카드를 탭하면 코스 상세 화면으로 이동.</div>
+          </div>
+          <div class="border border-slate-200 rounded-xl p-4 bg-white">
+            <div class="font-bold text-sm text-slate-700 mb-2">🗂 하단 탭바</div>
+            <div class="text-xs text-slate-500 leading-relaxed">홈 · 코스목록 · MY 세 가지 탭으로 구성.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('intro', document.querySelector('[onclick*=intro]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">오프라인 코스란?</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('course-list-page', document.querySelector('[onclick*=course-list-page]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">코스 목록</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: course-list -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-course-list-page">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 코스 탐색</div>
+    <div class="page-header">
+      <div class="page-tag">코스 탐색</div>
+      <h1 class="page-title">코스 목록</h1>
+      <p class="page-desc">수강 가능한 모든 오프라인 코스가 카드 형태로 나열됩니다. 카테고리 필터와 검색으로 원하는 코스를 찾을 수 있습니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">코스 목록 화면</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/course-list/01_list_default.png" class="screen-img" style="width:300px" alt="코스 목록">
+          <div class="screen-label">코스 목록 기본</div>
+        </div>
+        <div class="flex-1 min-w-0" style="max-width: 320px;">
+          <table class="w-full text-sm border-collapse">
+            <thead><tr class="border-b border-slate-200"><th class="text-left pb-2 text-slate-500 font-semibold text-xs">상태 배지</th><th class="text-left pb-2 text-slate-500 font-semibold text-xs">의미</th><th class="text-left pb-2 text-slate-500 font-semibold text-xs">이동</th></tr></thead>
+            <tbody class="text-xs text-slate-600">
+              <tr class="border-b border-slate-100"><td class="py-2"><span class="badge badge-blue">수강중</span></td><td class="py-2">진행 중인 코스</td><td class="py-2">수강 중 화면</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-2"><span class="badge badge-amber">수강예정</span></td><td class="py-2">신청 완료, 시작 전</td><td class="py-2">수강 중 화면</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-2"><span class="badge badge-green">수강완료</span></td><td class="py-2">종료된 코스</td><td class="py-2">수강 완료 화면</td></tr>
+              <tr class="border-b border-slate-100"><td class="py-2"><span class="badge badge-red">시작전</span></td><td class="py-2">신청 기간 전, 미오픈</td><td class="py-2">코스 상세 화면</td></tr>
+              <tr><td class="py-2"><span class="badge badge-slate">신청가능</span></td><td class="py-2">미신청 코스</td><td class="py-2">코스 상세 화면</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('home-page', document.querySelector('[onclick*=home-page]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">홈 화면</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('course-detail-page', document.querySelector('[onclick*=course-detail-page]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">코스 상세</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: category -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-category-page">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 코스 탐색</div>
+    <div class="page-header">
+      <div class="page-tag">코스 탐색</div>
+      <h1 class="page-title">카테고리</h1>
+      <p class="page-desc">분야별로 코스를 탐색하는 화면입니다. 상단 필터로 온라인/오프라인을 구분해 볼 수 있으며, 오프라인 카테고리를 선택하면 해당 코스 목록으로 바로 이동합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">① 기본 화면 — 전체 카테고리</div>
+      <div class="section-desc">기본값은 "전체"로, 온라인 코스 카테고리와 오프라인 코스 카테고리가 섹션별로 나뉘어 표시됩니다.</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/category/01_all.png" class="screen-img" style="width:290px" alt="카테고리 전체">
+          <div class="screen-label">전체 카테고리</div>
+          <div class="screen-caption">코스 · PLUS 코스 · 오프라인 코스 섹션으로 구분</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">② "오프라인만" 필터 → 오프라인 카테고리만 표시</div>
+      <div class="section-desc">상단 필터에서 <strong>오프라인만</strong> 버튼을 탭하면 온라인 카테고리가 숨겨지고 오프라인 카테고리 6종만 보입니다.</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/category/02_offline_filter.png" class="screen-img" style="width:290px" alt="오프라인 필터">
+          <div class="screen-label">"오프라인만" 필터 활성</div>
+          <div class="screen-caption">직무교육 · 리더십 · 법정의무교육 · 워크숍 · 신입사원 · 외부연수</div>
+        </div>
+        <div class="flex-1 min-w-0 flex flex-col gap-3 pt-2" style="max-width: 260px;">
+          <div class="border border-indigo-100 bg-indigo-50 rounded-xl p-4">
+            <div class="font-bold text-sm text-indigo-700 mb-2">📌 오프라인 카테고리 6종</div>
+            <div class="space-y-1 text-xs text-indigo-600">
+              <div>📍 직무교육</div>
+              <div>📍 리더십</div>
+              <div>📍 법정의무교육</div>
+              <div>📍 워크숍</div>
+              <div>📍 신입사원</div>
+              <div>📍 외부연수</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">③ 카테고리 버튼 탭 → 코스 목록 이동</div>
+      <div class="section-desc">오프라인 카테고리 버튼을 탭하면 해당 카테고리로 필터된 코스 목록 화면으로 이동합니다.</div>
+      <div class="flow-row">
+        <div class="flow-box">🏷 카테고리 화면</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">오프라인만 필터</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">카테고리 버튼 탭</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">📋 코스 목록</div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('course-list-page', document.querySelector('[onclick*=course-list-page]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">코스 목록</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('course-detail-page', document.querySelector('[onclick*=course-detail-page]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">코스 상세</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: course-detail -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-course-detail-page">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 코스 탐색</div>
+    <div class="page-header">
+      <div class="page-tag">코스 탐색</div>
+      <h1 class="page-title">코스 상세</h1>
+      <p class="page-desc">코스의 목적·일정·장소·커리큘럼 정보를 확인하고 수강을 신청하는 화면입니다. 운영자가 설정한 수강 방식에 따라 3가지 모드로 렌더링됩니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">수강 모드 비교</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/course-detail/01_single_detail.png" class="screen-img" style="width:220px" alt="단일">
+          <span class="badge badge-blue mt-1">자율 단일</span>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/course-detail/05_multi_detail.png" class="screen-img" style="width:220px" alt="다중">
+          <span class="badge badge-violet mt-1">자율 다중</span>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/course-detail/08_assigned_detail.png" class="screen-img" style="width:220px" alt="배정">
+          <span class="badge badge-amber mt-1">강제배정</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      수강 신청 방법은 모드별로 다릅니다. 각 모드의 상세 안내는 <strong>"수강 신청"</strong> 섹션을 참고하세요.
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">차수(반) 선택 → 회차별 일정 확인</div>
+      <div class="section-desc">커리큘럼 목록에서 차수(반)를 탭하면 해당 차수 안의 회차별 날짜·시간·장소가 펼쳐집니다. 모달에서도 동일하게 차수 선택 시 회차 목록이 표시됩니다.</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/course-detail/13_session_expand.png" class="screen-img" style="width:240px" alt="회차 펼침">
+          <div class="screen-label">메인 목록 — 회차 펼침</div>
+          <div class="screen-caption">차수 탭 시 아래로 회차별 일정 인라인 노출</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/course-detail/14_modal_session_list.png" class="screen-img" style="width:240px" alt="모달 회차 목록">
+          <div class="screen-label">신청 모달 — 차수 선택 후 회차 목록</div>
+          <div class="screen-caption">모달에서 차수 선택 시 내부에 회차 날짜·장소 표시</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('course-list-page', document.querySelector('[onclick*=course-list-page]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">코스 목록</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('enroll-status', document.querySelector('[onclick*=enroll-status]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">수강 신청 — 기간 &amp; 상태</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: enroll-status (신청 기간 & 상태) -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-enroll-status">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 수강 신청</div>
+    <div class="page-header">
+      <div class="page-tag">수강 신청</div>
+      <h1 class="page-title">신청 기간 &amp; 나의 수강 상태</h1>
+      <p class="page-desc">수강 신청 기간과 학습자의 수강 상태에 따라 코스 상세 화면이 다르게 표시됩니다. 아래 7가지 케이스를 확인하세요.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">1. 신청 기간별 상태 (미신청자 기준)</div>
+      <div class="section-desc">운영자가 설정한 수강 신청 기간에 따라 버튼과 배지가 달라집니다.</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/A1_detail_single_enrolling.png" class="screen-img" style="width:210px" alt="신청 기간 중">
+          <div class="screen-label">신청 기간 중</div>
+          <div class="screen-caption">커버 배지 "신청 가능"<br>"수강 신청하기" 버튼 활성</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/A2_detail_before_open.png" class="screen-img" style="width:210px" alt="신청 오픈 전">
+          <div class="screen-label">신청 오픈 전</div>
+          <div class="screen-caption">커버 배지 "오픈 예정"<br>오픈 일시 표시, 버튼 비활성</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/A3_detail_closed.png" class="screen-img" style="width:210px" alt="신청 마감">
+          <div class="screen-label">신청 마감</div>
+          <div class="screen-caption">커버 배지 "신청 마감"<br>"신청이 마감되었습니다" 버튼 비활성</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">2. 나의 수강 상태별 화면</div>
+      <div class="section-desc">이미 신청하거나 완료한 학습자에게는 신청 버튼 대신 수강 상태 배너가 표시됩니다.</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/A6_detail_enrolled.png" class="screen-img" style="width:210px" alt="수강중">
+          <div class="screen-label">수강중</div>
+          <div class="screen-caption">초록색 "수강 중" 배너<br>"내 수강 상세 보기" 버튼으로 전환</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/A7_detail_completed.png" class="screen-img" style="width:210px" alt="수강 완료">
+          <div class="screen-label">수강 완료</div>
+          <div class="screen-caption">회색 "수강이 완료된 코스" 배너<br>버튼 비활성 (출석률 표시)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">3. 상태별 요약표</div>
+      <div style="overflow-x:auto; margin-top:8px;">
+        <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+          <thead>
+            <tr style="background:#f8fafc;">
+              <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">상태</th>
+              <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">커버 배지</th>
+              <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">하단 버튼</th>
+              <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">배너</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">신청 오픈 전</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-amber">오픈 예정</span></td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">⏳ 오픈 일시 안내 (비활성)</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">없음</td>
+            </tr>
+            <tr style="background:#f8fafc;">
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">신청 기간 중</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-blue">신청 가능</span></td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#2563eb;">수강 신청하기 → (활성)</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">없음</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">신청 마감</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-slate">신청 마감</span></td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">신청이 마감되었습니다 (비활성)</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">없음</td>
+            </tr>
+            <tr style="background:#f8fafc;">
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강중</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-green">수강중</span></td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#065f46;">내 수강 상세 보기 → (활성)</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#065f46;">초록색 수강중 배너</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 12px; font-weight:600;">수강 완료</td>
+              <td style="padding:10px 12px;"><span class="badge badge-slate">수강 완료</span></td>
+              <td style="padding:10px 12px; color:#94a3b8;">수강 완료 · 출석률 100% (비활성)</td>
+              <td style="padding:10px 12px; color:#475569;">🏆 회색 완료 배너</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('course-detail-page', document.querySelector('[onclick*=course-detail-page]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">코스 상세</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('enroll-single', document.querySelector('[onclick*=enroll-single]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">자율 단일 선택</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: enroll-single -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-enroll-single">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 수강 신청</div>
+    <div class="page-header">
+      <div class="page-tag">수강 신청</div>
+      <h1 class="page-title">자율 단일 선택</h1>
+      <p class="page-desc">학습자가 제공된 커리큘럼 목록에서 원하는 일정 1개를 직접 선택해 수강하는 방식입니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">신청 흐름</div>
+      <div class="flow-row">
+        <div class="flow-box">코스 상세 열기</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">"수강 신청하기" 터치</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">일정 1개 선택</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">신청 확인</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">완료 모달</div>
+      </div>
+      <div class="callout callout-blue">잔여석 배지(여유 / 마감 임박 / 마감)가 각 커리큘럼 카드 우측에 표시됩니다.</div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 단계별 안내</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/B1_modal_single_empty.png" class="screen-img" style="width:210px" alt="모달 오픈">
+          <div class="screen-label">① 일정 선택 모달</div>
+          <div class="screen-caption">커리큘럼 목록 표시<br>선택 전엔 버튼 비활성</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/B2_modal_single_selected.png" class="screen-img" style="width:210px" alt="선택됨">
+          <div class="screen-label">② 일정 선택 완료</div>
+          <div class="screen-caption">선택 카드 하이라이트<br>"신청 확인" 버튼 활성화</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/B3_confirm_single.png" class="screen-img" style="width:210px" alt="확인">
+          <div class="screen-label">③ 신청 확인 화면</div>
+          <div class="screen-caption">선택 일정 요약·장소 표시<br>최종 확인 후 신청</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('enroll-status', document.querySelector('[onclick*=enroll-status]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">신청 기간 &amp; 상태</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('enroll-multi', document.querySelector('[onclick*=enroll-multi]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">자율 다중 조합</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: enroll-multi -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-enroll-multi">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 수강 신청</div>
+    <div class="page-header">
+      <div class="page-tag">수강 신청</div>
+      <h1 class="page-title">자율 다중 조합</h1>
+      <p class="page-desc">운영자가 설정한 개수(N개)만큼 커리큘럼을 자유롭게 조합해 수강하는 방식입니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">신청 흐름</div>
+      <div class="flow-row">
+        <div class="flow-box">코스 상세 열기</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">"수강 신청하기" 터치</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">N개 복수 선택</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">신청 확인</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">완료</div>
+      </div>
+      <div class="callout callout-amber">설정 개수를 모두 채워야 "신청 확인" 버튼이 활성화됩니다.</div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 단계별 안내</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/C1_modal_multi_empty.png" class="screen-img" style="width:210px" alt="다중 모달">
+          <div class="screen-label">① 다중 선택 모달</div>
+          <div class="screen-caption">체크박스 방식. 선택 전<br>상단에 "0 / N개 선택" 카운터</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/C2_modal_multi_selected.png" class="screen-img" style="width:210px" alt="다중 선택">
+          <div class="screen-label">② N개 선택 완료</div>
+          <div class="screen-caption">N개 충족 시 버튼 활성<br>이미 선택한 카드는 체크 표시</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/C3_confirm_multi.png" class="screen-img" style="width:210px" alt="다중 확인">
+          <div class="screen-label">③ 신청 확인 — 항목별 상세</div>
+          <div class="screen-caption">각 커리큘럼 날짜·시간·장소를<br>개별 카드로 나열</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('enroll-single', document.querySelector('[onclick*=enroll-single]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">자율 단일 선택</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('enroll-assigned', document.querySelector('[onclick*=enroll-assigned]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">관리자 배정</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: enroll-assigned -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-enroll-assigned">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 수강 신청</div>
+    <div class="page-header">
+      <div class="page-tag">수강 신청</div>
+      <h1 class="page-title">관리자 배정</h1>
+      <p class="page-desc">운영자가 학습자에게 특정 커리큘럼을 직접 지정한 방식입니다. 학습자는 별도 선택 없이 배정된 일정을 확인하기만 하면 됩니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">신청 흐름</div>
+      <div class="flow-row">
+        <div class="flow-box">코스 상세 열기</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">배정 안내 배너 확인</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">배정 일정 확인</div>
+      </div>
+      <div class="callout callout-amber">관리자 배정 모드에서는 학습자가 일정을 선택할 수 없습니다. 수강 신청 버튼 자체가 비활성 상태입니다.</div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 안내</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/A5_detail_assigned.png" class="screen-img" style="width:210px" alt="배정 상세">
+          <div class="screen-label">코스 상세 (배정됨)</div>
+          <div class="screen-caption">🛡️ 관리자 배정 교육 배너<br>버튼: "배정 일정 확인 완료" (비활성)</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/E1_confirm_assigned.png" class="screen-img" style="width:210px" alt="배정 확인">
+          <div class="screen-label">배정 일정 확인</div>
+          <div class="screen-caption">모달 없이 바로 배정 내역 확인<br>그룹명·날짜·장소 표시</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('enroll-multi', document.querySelector('[onclick*=enroll-multi]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">자율 다중 조합</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('enroll-session', document.querySelector('[onclick*=enroll-session]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">날짜선택형 회차</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: enroll-session -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-enroll-session">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 수강 신청</div>
+    <div class="page-header">
+      <div class="page-tag">수강 신청</div>
+      <h1 class="page-title">날짜선택형 회차</h1>
+      <p class="page-desc">특정 코스에 적용되는 방식입니다. 커리큘럼 선택 후 캘린더에서 원하는 회차 날짜를 추가로 선택해야 신청이 완료됩니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">신청 흐름</div>
+      <div class="flow-row">
+        <div class="flow-box">코스 상세 열기</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">커리큘럼 선택</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">캘린더 날짜 선택</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">회차 선택</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">신청 확인</div>
+      </div>
+      <div class="callout callout-blue">캘린더에 파란 점(●)이 있는 날짜에 수업이 있습니다. 날짜 선택 후 시간대 목록이 펼쳐집니다.</div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 단계별 안내</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/D1_modal_session_calendar.png" class="screen-img" style="width:210px" alt="캘린더">
+          <div class="screen-label">① 커리큘럼 선택 → 캘린더</div>
+          <div class="screen-caption">날짜선택형 카드 선택 시<br>캘린더 UI가 하단에 펼쳐짐</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/D2_modal_session_date_picked.png" class="screen-img" style="width:210px" alt="날짜 선택">
+          <div class="screen-label">② 캘린더 날짜 선택</div>
+          <div class="screen-caption">날짜 선택 시 해당 날의<br>회차 목록이 아래 표시</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/D3_modal_session_time_selected.png" class="screen-img" style="width:210px" alt="회차 선택">
+          <div class="screen-label">③ 회차 선택 완료</div>
+          <div class="screen-caption">시간·장소 확인 후 선택<br>"신청 확인" 버튼 활성</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/D3b_modal_session_list_selected.png" class="screen-img" style="width:210px" alt="날짜 목록 선택">
+          <div class="screen-label">③-b 날짜 목록에서 회차 선택</div>
+          <div class="screen-caption">4개 날짜 중 1개 선택.<br>날짜·시간·장소·회차명 한 번에 확인.<br>"선택 완료 (1개) →" 버튼 활성</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/enroll-cases/D4_confirm_session.png" class="screen-img" style="width:210px" alt="날짜 확인">
+          <div class="screen-label">④ 신청 확인</div>
+          <div class="screen-caption">선택 회차 날짜·시간·장소가<br>확인 화면에 표시</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('enroll-assigned', document.querySelector('[onclick*=enroll-assigned]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">관리자 배정</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('enrolled-page', document.querySelector('[onclick*=enrolled-page]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">수강 중</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: enrolled -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-enrolled-page">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 수강 중</div>
+    <div class="page-header">
+      <div class="page-tag">수강 중</div>
+      <h1 class="page-title">수강 중 화면</h1>
+      <p class="page-desc">수강 신청 완료 후, 수업이 진행되는 기간 동안 보이는 화면입니다. 강의실 정보·출석 현황·QR 체크인 버튼을 확인할 수 있습니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 구성</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/course-enrolled/02_enrolled_course_detail.png" class="screen-img" style="width:240px" alt="코스 상세 수강중">
+          <div class="screen-label">코스 상세 — 수강 중</div>
+          <div class="screen-caption">이미 신청한 코스는 하단에 "내 수강 상세 보기 →" 버튼 표시</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/course-enrolled/01_enrolled_default.png" class="screen-img" style="width:240px" alt="내 수강 상세">
+          <div class="screen-label">내 수강 상세</div>
+          <div class="screen-caption">출석률 · 회차별 출석 현황 · 변경·취소 버튼</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">진입 흐름</div>
+      <div class="flow-row">
+        <div class="flow-box">코스 목록 / 홈</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">코스 상세</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">"내 수강 상세 보기" 탭</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">내 수강 상세 화면</div>
+      </div>
+      <div class="callout callout-blue">수강 중인 코스의 코스 상세 화면에서는 "수강 신청하기" 버튼 대신 <strong>"내 수강 상세 보기 →"</strong> 버튼이 표시됩니다.</div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">일정 변경 방법</div>
+      <div class="section-desc">변경 기한 내에 한해 다른 반(패키지)으로 일정을 변경할 수 있습니다. 내 수강 상세 화면 하단의 "일정 변경" 버튼을 탭하면 바텀시트가 올라옵니다.</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/course-enrolled/03_schedule_change.png" class="screen-img" style="width:260px" alt="일정 변경">
+          <div class="screen-label">일정 변경 바텀시트</div>
+          <div class="screen-caption">현재 수강 중인 반은 "현재 수강중" 표시. 마감된 반은 선택 불가.</div>
+        </div>
+        <div class="flex-1 min-w-0 flex flex-col gap-3 pt-2" style="max-width: 260px;">
+          <div class="border border-slate-200 rounded-xl p-4 bg-white">
+            <div class="font-bold text-sm text-slate-700 mb-2">✅ 변경 가능 조건</div>
+            <div class="text-xs text-slate-500 leading-relaxed">변경 기한이 남아 있어야 하며, 변경하려는 반에 잔여석이 있어야 합니다.</div>
+          </div>
+          <div class="border border-slate-200 rounded-xl p-4 bg-white">
+            <div class="font-bold text-sm text-slate-700 mb-2">🚫 변경 불가 조건</div>
+            <div class="text-xs text-slate-500 leading-relaxed">변경 기한 경과 시 버튼 비활성. 마감된 반은 목록에서 선택 불가.</div>
+          </div>
+          <div class="border border-amber-100 bg-amber-50 rounded-xl p-4">
+            <div class="font-bold text-sm text-amber-700 mb-2">⚠️ 유의사항</div>
+            <div class="text-xs text-amber-600 leading-relaxed">이미 출석한 회차가 있는 경우 변경 전 관리자 확인이 필요할 수 있습니다.</div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-row mt-4">
+        <div class="flow-box">내 수강 상세</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">"일정 변경" 버튼</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">반 선택 바텀시트</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">"변경 확정" 탭</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">변경 완료</div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('enroll-session', document.querySelector('[onclick*=enroll-session]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">날짜선택형 회차</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('completed-page', document.querySelector('[onclick*=completed-page]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">수강 완료</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: completed -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-completed-page">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> 수강 완료</div>
+    <div class="page-header">
+      <div class="page-tag">수강 완료</div>
+      <h1 class="page-title">수강 완료 화면</h1>
+      <p class="page-desc">모든 수업이 종료되고 수료 처리가 완료된 상태입니다. 수료증 확인 및 다음 코스 추천 등을 안내합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 구성</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/course-completed/01_completed_default.png" class="screen-img" style="width:300px" alt="수강 완료">
+          <div class="screen-label">수강 완료 화면</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('enrolled-page', document.querySelector('[onclick*=enrolled-page]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">수강 중</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('my-page', document.querySelector('[onclick*=my-page]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">MY 탭</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: my -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-my-page">
+    <div class="breadcrumb">학습자 가이드 <span>›</span> MY 탭</div>
+    <div class="page-header">
+      <div class="page-tag">MY 탭</div>
+      <h1 class="page-title">MY 탭</h1>
+      <p class="page-desc">내가 신청한 오프라인 코스를 한눈에 확인하는 탭입니다. 다가오는 수업 히어로 카드, 코스 목록, QR 출석 체크인 기능을 제공합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">① 히어로 카드 — 5가지 뷰</div>
+      <div class="section-desc">상단 히어로 카드는 수업 일정에 따라 자동으로 뷰가 바뀝니다.</div>
+      <div class="flex gap-4 overflow-x-auto pb-4">
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/01_has_courses.png" class="screen-img" style="width:190px" alt="D-3">
+          <div class="screen-label">D-3 (일반)</div>
+          <div class="screen-caption">다음 수업까지 3일 이내. QR 버튼 노출</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/02_today.png" class="screen-img" style="width:190px" alt="오늘">
+          <div class="screen-label">오늘 수업</div>
+          <div class="screen-caption">당일 수업. "QR 출석 체크인" 대형 버튼 활성</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/03_no_hero.png" class="screen-img" style="width:190px" alt="D-7 이상">
+          <div class="screen-label">D-7 이상</div>
+          <div class="screen-caption">히어로 카드 없음. 코스 목록만 표시</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/04_busy.png" class="screen-img" style="width:190px" alt="이번주 몰림">
+          <div class="screen-label">이번 주 5건 몰림</div>
+          <div class="screen-caption">주간 일정이 많을 때 컴팩트 리스트 뷰</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/05_empty.png" class="screen-img" style="width:190px" alt="빈 상태">
+          <div class="screen-label">수강 코스 없음</div>
+          <div class="screen-caption">코스 탐색 CTA 노출</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">② QR 출석 결과 5종</div>
+      <div class="section-desc">QR 코드를 스캔하면 서버 검증 후 아래 5가지 결과 중 하나가 표시됩니다.</div>
+      <div class="flex gap-4 overflow-x-auto pb-4">
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/06_qr_success.png" class="screen-img" style="width:180px" alt="출석완료">
+          <div class="screen-label">출석 완료</div>
+          <div class="screen-caption" style="color:#065f46">정상 출석 처리</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/07_qr_late.png" class="screen-img" style="width:180px" alt="지각">
+          <div class="screen-label">지각</div>
+          <div class="screen-caption" style="color:#92400e">입실 시간 경과 후 스캔</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/08_qr_expired.png" class="screen-img" style="width:180px" alt="기간종료">
+          <div class="screen-label">체크인 시간 종료</div>
+          <div class="screen-caption" style="color:#b91c1c">QR 유효시간 만료</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/09_qr_notarget.png" class="screen-img" style="width:180px" alt="대상아님">
+          <div class="screen-label">수강 대상 아님</div>
+          <div class="screen-caption" style="color:#b91c1c">해당 회차 미수강자</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/10_qr_notyet.png" class="screen-img" style="width:180px" alt="시작전">
+          <div class="screen-label">수업 시작 전</div>
+          <div class="screen-caption" style="color:#64748b">체크인 가능 시간 이전</div>
+        </div>
+      </div>
+
+      <table class="mt-4 w-full text-xs border-collapse">
+        <thead><tr class="border-b border-slate-200"><th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">결과</th><th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">출석 처리</th><th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">수료 인정</th></tr></thead>
+        <tbody class="text-slate-600">
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-green">출석완료</span></td><td class="py-2 px-3">출석</td><td class="py-2 px-3">✅ 인정</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-amber">지각</span></td><td class="py-2 px-3">지각 (출석 인정)</td><td class="py-2 px-3">✅ 인정</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-red">체크인 시간 종료</span></td><td class="py-2 px-3">결석</td><td class="py-2 px-3">❌ 미인정</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-red">수강 대상 아님</span></td><td class="py-2 px-3">—</td><td class="py-2 px-3">—</td></tr>
+          <tr><td class="py-2 px-3"><span class="badge badge-slate">시작 전</span></td><td class="py-2 px-3">대기</td><td class="py-2 px-3">체크인 시간 이후 재시도</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('completed-page', document.querySelector('[onclick*=completed-page]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">수강 완료</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-overview', document.querySelector('[onclick*=admin-overview]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">관리자 가이드</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-overview -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-overview">
+    <div class="breadcrumb">관리자 가이드</div>
+    <div class="page-header">
+      <div class="page-tag">개요</div>
+      <h1 class="page-title">관리자 화면 개요</h1>
+      <p class="page-desc">오프라인 LMS 관리자 화면은 코스 개설부터 수강생 관리, 출석·수료 처리까지 전 과정을 운영하는 시스템입니다. 5개 주요 화면으로 구성됩니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 구성 5종</div>
+      <div class="grid grid-cols-1 gap-3 mb-6" style="max-width:600px;">
+        <div class="border border-indigo-200 bg-indigo-50 rounded-xl p-4 flex items-start gap-4">
+          <div class="text-2xl">📋</div>
+          <div>
+            <div class="font-bold text-indigo-800 text-sm mb-1">코스 목록 <span class="text-xs font-normal text-indigo-500">(offline-list.html)</span></div>
+            <div class="text-xs text-indigo-700 leading-relaxed">전체 오프라인 코스 목록. 상태 필터, 분류 사이드바, 차수 확장 보기. 코스 등록/수강관리 진입.</div>
+          </div>
+        </div>
+        <div class="border border-violet-200 bg-violet-50 rounded-xl p-4 flex items-start gap-4">
+          <div class="text-2xl">🛠️</div>
+          <div>
+            <div class="font-bold text-violet-800 text-sm mb-1">코스 등록 빌더 <span class="text-xs font-normal text-violet-500">(offline-builder.html)</span></div>
+            <div class="text-xs text-violet-700 leading-relaxed">코스 기본정보, 수강 신청 설정, 수료 조건을 좌측 폼에서 입력. 우측 사이드바에서 차수·회차 관리.</div>
+          </div>
+        </div>
+        <div class="border border-emerald-200 bg-emerald-50 rounded-xl p-4 flex items-start gap-4">
+          <div class="text-2xl">📊</div>
+          <div>
+            <div class="font-bold text-emerald-800 text-sm mb-1">코스 운영 현황 <span class="text-xs font-normal text-emerald-500">(offline-view.html)</span></div>
+            <div class="text-xs text-emerald-700 leading-relaxed">운영 중 코스의 대시보드, 수강생 관리, 출석·수료 처리, QR 라이브 모드까지 통합 운영 화면.</div>
+          </div>
+        </div>
+        <div class="border border-amber-200 bg-amber-50 rounded-xl p-4 flex items-start gap-4">
+          <div class="text-2xl">👤</div>
+          <div>
+            <div class="font-bold text-amber-800 text-sm mb-1">수강생 등록 <span class="text-xs font-normal text-amber-500">(course-learners.html)</span></div>
+            <div class="text-xs text-amber-700 leading-relaxed">수강생 개별 등록 및 일괄 등록. 차수 배정, 출석 탭 관리.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">운영 흐름</div>
+      <div class="flow-row">
+        <div class="flow-box">📋 코스 목록</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">🛠️ 코스 등록</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">퍼블리싱</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">📊 코스 운영</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">수료 처리</div>
+      </div>
+      <div class="callout callout-blue mt-4">
+        <strong>퍼블리싱 전</strong>에는 수강관리 버튼이 비활성 상태입니다. 코스를 퍼블리싱해야 수강생 등록과 출석 관리가 가능합니다.
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">코스 상태 4종</div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">상태</th>
+            <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">배지</th>
+            <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">의미</th>
+            <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">수강관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">운영중</td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-indigo">● 운영중</span></td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;">퍼블리싱 완료, 운영 중</td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#4338ca;">✅ 활성</td>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">공개예약</td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-violet">● 공개예약</span></td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;">예약된 일시에 자동 공개</td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">❌ 비활성</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">임시저장</td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-slate">● 임시저장</span></td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;">저장됐지만 미공개</td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">❌ 비활성</td>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <td style="padding:10px 12px; font-weight:600;">종료</td>
+            <td style="padding:10px 12px;"><span class="badge badge-slate">● 종료</span></td>
+            <td style="padding:10px 12px;">운영 종료된 코스</td>
+            <td style="padding:10px 12px; color:#4338ca;">✅ 활성 (조회 전용)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('my-page', document.querySelector('[onclick*=my-page]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">MY 탭</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-list-overview', document.querySelector('[onclick*=admin-list-overview]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">코스 목록 화면</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-list-overview -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-list-overview">
+    <div class="breadcrumb">코스 목록</div>
+    <div class="page-header">
+      <div class="page-tag">코스 목록</div>
+      <h1 class="page-title">목록 화면</h1>
+      <p class="page-desc">오프라인 코스 전체 목록을 관리하는 메인 화면입니다. 좌측 분류 사이드바, 상단 상태 탭, 테이블로 구성됩니다.</p>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-list.html</div>
+        <a href="../admin/offline-list.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
+      </div>
+      <a href="../admin/offline-list.html" target="_blank"><img src="../screenshots/admin/offline-list/full.png" alt="오프라인 코스 목록 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 3영역 구조</div>
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">🗂 글로벌 사이드바 (200px)</div>
+          <div class="text-xs text-slate-500 leading-relaxed">로고 · 메뉴 목록(회원/코스/오프라인 코스 등). <strong>오프라인 코스</strong>가 활성 상태.</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">📑 분류 사이드바 (180px)</div>
+          <div class="text-xs text-slate-500 leading-relaxed">전체 / WORK(직무역량·리더십·영업) / 공통온보딩 / IT / DX 카테고리 필터.</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">📋 메인 콘텐츠</div>
+          <div class="text-xs text-slate-500 leading-relaxed">상태 탭 필터 바 + 검색 + 정렬 + 코스 테이블.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">헤더 버튼 3종</div>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-1">코스 순서 관리</div>
+          <div class="text-xs text-slate-500 leading-relaxed">학습자에게 노출되는 코스 순서를 드래그앤드롭으로 변경.</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-1">수강생 등록</div>
+          <div class="text-xs text-slate-500 leading-relaxed"><code>course-learners.html</code>로 이동. 코스 지정 없이 수강생을 먼저 등록.</div>
+        </div>
+        <div class="border border-indigo-100 rounded-xl p-4 bg-indigo-50">
+          <div class="font-bold text-sm text-indigo-700 mb-1">🔵 코스 등록</div>
+          <div class="text-xs text-indigo-600 leading-relaxed"><code>offline-builder.html</code>로 이동. 새 오프라인 코스 개설.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">테이블 컬럼 설명</div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700; width:120px;">컬럼</th>
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">설명</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:12px;">
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">☑ 체크박스</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">다중 선택 후 일괄 삭제 가능</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">▶ 확장</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">클릭 시 차수 상세 행이 인라인 펼쳐짐</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">표지</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스 커버 이미지 썸네일</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">상태</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">운영중 / 공개예약 / 임시저장 / 종료 배지</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스명</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스 제목 + "N개 반" 배지 + 대표 장소. 클릭 시 빌더로 이동</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강관리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">운영중·종료 코스만 활성. <code>offline-view.html</code>로 이동</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">N개 차수 · 총 N회차 버튼. 클릭 시 차수 행 펼치기/접기</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">분류</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">카테고리 배지</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">교육 기간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">차수 전체 기간 범위. D-day 배지(D-Day·D-N) 표시</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강 인원</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">신청/정원. 마감 시 빨간 "마감" 표시</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">등록일</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스가 등록된 일시</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">생성자</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스를 만든 계정 ID</td></tr>
+          <tr><td style="padding:8px 12px; font-weight:600;">관리</td><td style="padding:8px 12px;">링크 복사 · 편집(빌더) · 삭제 아이콘</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-overview', document.querySelector('[onclick*=admin-overview]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">관리자 화면 개요</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-list-status', document.querySelector('[onclick*=admin-list-status]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">상태별 필터</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-list-status -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-list-status">
+    <div class="breadcrumb">코스 목록</div>
+    <div class="page-header">
+      <div class="page-tag">코스 목록</div>
+      <h1 class="page-title">상태별 필터</h1>
+      <p class="page-desc">상단 탭을 클릭하면 코스를 상태별로 필터링할 수 있습니다. 각 탭에 해당 상태의 코스 수가 표시됩니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">상태 탭 5종</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-list/full.png" class="screen-img" style="width:100%" alt="상태 탭" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:500px;height:80px;display:none">📸 캡처 필요 — 상태 탭 필터 바</div>
+          <div class="screen-label">상태 탭 필터 바</div>
+          <div class="screen-caption">전체 / 운영중 / 공개예약 / 임시저장 / 종료 · 선택된 탭은 인디고 배경</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">검색 &amp; 정렬</div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">🔍 검색</div>
+          <div class="text-xs text-slate-500 leading-relaxed">코스명 또는 강사명으로 실시간 검색.</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">정렬 기준</div>
+          <div class="text-xs text-slate-500 leading-relaxed">기본값: 코스 순서 설정순. 우측에 다운로드(엑셀) · 그리드/리스트 뷰 전환 버튼.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-list-overview', document.querySelector('[onclick*=admin-list-overview]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">목록 화면</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-list-expand', document.querySelector('[onclick*=admin-list-expand]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">차수 확장 보기</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-list-expand -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-list-expand">
+    <div class="breadcrumb">코스 목록</div>
+    <div class="page-header">
+      <div class="page-tag">코스 목록</div>
+      <h1 class="page-title">차수 확장 보기</h1>
+      <p class="page-desc">코스 행의 ▶ 버튼 또는 차수 버튼을 클릭하면 해당 코스의 차수 상세 정보가 인라인으로 펼쳐집니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">차수 확장 행</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-list/expand_row.png" class="screen-img" style="width:100%" alt="차수 확장" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:560px;height:200px;display:none">📸 캡처 필요 — 차수 확장 행</div>
+          <div class="screen-label">차수 상세 확장 행</div>
+          <div class="screen-caption">차수명 · 기간 · 장소 · 회차 수 · 정원 · 신청 · 잔여석</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">차수 확장 행 컬럼</div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">컬럼</th>
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">설명</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:12px;">
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수명</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">예) "1기 (4/7~4/11)"</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">기간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">시작일 ~ 종료일 (같은 날이면 단일 날짜)</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">장소</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">📍 아이콘 + 장소명</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">회차</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">차수 내 총 회차 수</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">정원</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">차수 최대 수강 인원</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">신청</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">현재 신청 완료 인원</td></tr>
+          <tr><td style="padding:8px 12px; font-weight:600;">잔여</td><td style="padding:8px 12px;">정원 - 신청. 마감이면 빨간 "마감", 80% 이상이면 주황 "임박"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">확장 행 하단 버튼</div>
+      <div class="flow-row">
+        <div class="flow-box">✏️ 차수 편집</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">offline-builder.html</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-box">👥 수강관리</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">offline-view.html (운영중·종료만 활성)</div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-list-status', document.querySelector('[onclick*=admin-list-status]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">상태별 필터</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-builder-basic', document.querySelector('[onclick*=admin-builder-basic]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">코스 등록 — 기본 정보</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-builder-basic -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-builder-basic">
+    <div class="breadcrumb">코스 등록 <span>›</span> offline-builder</div>
+    <div class="page-header">
+      <div class="page-tag">코스 등록</div>
+      <h1 class="page-title">① 기본 정보</h1>
+      <p class="page-desc">코스의 기본 정보를 입력하는 첫 번째 섹션입니다. 커버 이미지, 카테고리, 강사, 코스 소개 등을 설정합니다.</p>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-builder.html</div>
+        <a href="../admin/offline-builder.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
+      </div>
+      <a href="../admin/offline-builder.html" target="_blank"><img src="../screenshots/admin/offline-builder/full.png" alt="오프라인 코스 빌더 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">빌더 전체 레이아웃</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/full.png" class="screen-img" style="width:100%" alt="빌더 전체" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:560px;height:320px;display:none">📸 캡처 필요 — offline-builder.html 전체 화면</div>
+          <div class="screen-label">코스 등록 빌더 전체 레이아웃</div>
+          <div class="screen-caption">좌측 3개 섹션 폼 + 우측 차수·회차 관리 사이드바</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">기본 정보 입력 항목</div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700; width:160px;">항목</th>
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">설명</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:12px;">
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">커버 이미지</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">720×1200px 권장. 클릭하여 업로드.</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스명 <span style="color:#e11d48">*</span></td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">필수 입력. 빈칸이면 퍼블리싱 체크리스트 미통과</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">카테고리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">직무역량 / 리더십 / 영업 / 공통온보딩 / IT / DX</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">담당 강사</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">강사명 직접 입력 또는 "강사 없음" 체크박스</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">강사 소개</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">강사 약력 또는 소개 텍스트</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스 소개</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">textarea. 학습자 앱 코스 상세 화면에 표시</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스 상세 상단</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">표지(기본) vs 이미지 갤러리(최대 5장) 라디오 선택</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; font-weight:600;">교육 장소</td><td style="padding:8px 12px;">장소명 + 상세 주소 + 지도 보기 + 교통·주차 안내 textarea</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 스크린샷</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/02_basic_info.png" class="screen-img" style="width:100%" alt="기본 정보 섹션" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:360px;height:400px;display:none">📸 캡처 필요<br>섹션1 기본 정보 입력 폼</div>
+          <div class="screen-label">기본 정보 섹션</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-list-expand', document.querySelector('[onclick*=admin-list-expand]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">차수 확장 보기</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-builder-enroll', document.querySelector('[onclick*=admin-builder-enroll]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">수강 신청 설정</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-builder-enroll -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-builder-enroll">
+    <div class="breadcrumb">코스 등록 <span>›</span> offline-builder</div>
+    <div class="page-header">
+      <div class="page-tag">코스 등록</div>
+      <h1 class="page-title">② 수강 신청 설정</h1>
+      <p class="page-desc">수강 신청 기간, 등록 방식(자율/강제), 취소·변경 정책, 학습자 차수 선택 규칙을 설정합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">수강 등록 방식 2종</div>
+      <div class="mode-grid">
+        <div style="border:2px solid #c7d2fe; border-radius:12px; padding:18px; background:#eef2ff;">
+          <div style="font-size:20px; margin-bottom:8px;">🙋</div>
+          <div style="font-size:13px; font-weight:700; color:#3730a3; margin-bottom:6px;">자율 수강</div>
+          <div style="font-size:12px; color:#4338ca; line-height:1.5;">학습자가 직접 코스를 탐색하고 신청. 취소·변경 정책 설정 가능. 차수 선택 규칙(단일/다중) 적용.</div>
+          <span class="badge badge-indigo" style="margin-top:8px; display:inline-block;">self</span>
+        </div>
+        <div style="border:2px solid #fde68a; border-radius:12px; padding:18px; background:#fffbeb;">
+          <div style="font-size:20px; margin-bottom:8px;">📌</div>
+          <div style="font-size:13px; font-weight:700; color:#78350f; margin-bottom:6px;">관리자 강제 할당</div>
+          <div style="font-size:12px; color:#92400e; line-height:1.5;">운영자가 수강생을 특정 차수에 직접 배정. 학습자는 확인만 가능. 취소·변경 불가.</div>
+          <span class="badge badge-amber" style="margin-top:8px; display:inline-block;">assign</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">설정 항목 전체</div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700; width:180px;">항목</th>
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">설명</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:12px;">
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강 신청 기간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">오픈 일시 + 마감 일시. 기간 외엔 학습자 신청 불가</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">취소 정책</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">자율 수강 시만 표시. <strong>기한부</strong>(N일 전까지 취소 가능) / <strong>불가</strong></td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">변경 제한</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">일정 변경 가능 여부 및 기한 설정</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강 신청 권한</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">특정 그룹만 신청 가능하도록 그룹 지정</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수 선택 규칙</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">단일 선택 vs 다중 선택(N개). 다중 시 최대 선택 개수 입력 필드 활성</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 스크린샷</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/03_enroll_setting_self.png" class="screen-img" style="width:100%" alt="자율 수강 설정" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:360px;height:320px;display:none">📸 캡처 필요<br>섹션2 자율 수강 설정 상태</div>
+          <div class="screen-label">자율 수강 모드</div>
+          <div class="screen-caption">취소·변경 정책, 차수 선택 규칙 노출</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/04_enroll_setting_assign.png" class="screen-img" style="width:100%" alt="강제 할당 설정" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:360px;height:320px;display:none">📸 캡처 필요<br>섹션2 강제 할당 설정 상태</div>
+          <div class="screen-label">관리자 강제 할당 모드</div>
+          <div class="screen-caption">취소·변경 정책 비노출<br>차수별 그룹 배정 UI로 전환</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-builder-basic', document.querySelector('[onclick*=admin-builder-basic]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">기본 정보</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-builder-completion', document.querySelector('[onclick*=admin-builder-completion]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">수료 조건</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-builder-completion -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-builder-completion">
+    <div class="breadcrumb">코스 등록 <span>›</span> offline-builder</div>
+    <div class="page-header">
+      <div class="page-tag">코스 등록</div>
+      <h1 class="page-title">③ 수료 조건</h1>
+      <p class="page-desc">수료 처리를 위한 출석 조건을 설정합니다. 전체 회차 출석 또는 최소 N회 출석 중 선택합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">출석 조건 2종</div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">전체 회차 출석</div>
+          <div class="text-xs text-slate-500 leading-relaxed">모든 회차에 출석해야 수료 인정. 기본값.</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">최소 N회 출석</div>
+          <div class="text-xs text-slate-500 leading-relaxed">지정한 횟수 이상 출석 시 수료 인정. 지각도 출석 1회로 인정.</div>
+        </div>
+      </div>
+      <div class="callout callout-amber mt-4">
+        지각(late)은 출석 1회로 인정되며, 조퇴(early_leave)는 관리자가 별도 설정하지 않는 한 출석 미인정입니다.
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 스크린샷</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/05_completion_condition.png" class="screen-img" style="width:100%" alt="수료 조건" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:360px;height:200px;display:none">📸 캡처 필요<br>섹션3 수료 조건 설정</div>
+          <div class="screen-label">수료 조건 섹션</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-builder-enroll', document.querySelector('[onclick*=admin-builder-enroll]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">수강 신청 설정</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-builder-package', document.querySelector('[onclick*=admin-builder-package]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">차수 관리</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-builder-package -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-builder-package">
+    <div class="breadcrumb">코스 등록 <span>›</span> offline-builder</div>
+    <div class="page-header">
+      <div class="page-tag">코스 등록</div>
+      <h1 class="page-title">차수 관리 (우측 사이드바)</h1>
+      <p class="page-desc">빌더 우측 사이드바에서 차수(반)를 추가하고 관리합니다. 각 차수에는 정원, 강사, 장소, 회차가 포함됩니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">차수 사이드바 구성</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/06_package_sidebar.png" class="screen-img" style="width:100%" alt="차수 사이드바" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:280px;height:500px;display:none">📸 캡처 필요<br>우측 차수 사이드바</div>
+          <div class="screen-label">차수 관리 사이드바</div>
+          <div class="screen-caption">차수 카드 목록 + 드래그앤드롭</div>
+        </div>
+        <div class="flex-1 min-w-0 flex flex-col gap-3 pt-2" style="max-width:280px;">
+          <div class="border border-slate-200 rounded-xl p-4 bg-white">
+            <div class="font-bold text-sm text-slate-700 mb-2">차수 카드 정보</div>
+            <div class="text-xs text-slate-500 leading-relaxed space-y-1">
+              <div>• 차수명 (예: A반, 1기)</div>
+              <div>• 정원 입력 필드</div>
+              <div>• 강사명 별도 입력 가능</div>
+              <div>• 날짜선택형 회차 토글</div>
+              <div>• 복제 / 삭제 버튼</div>
+              <div>• ⠿ 드래그 핸들 (순서 변경)</div>
+            </div>
+          </div>
+          <div class="border border-indigo-100 bg-indigo-50 rounded-xl p-4">
+            <div class="font-bold text-sm text-indigo-700 mb-2">+ 차수 추가 버튼</div>
+            <div class="text-xs text-indigo-600 leading-relaxed">사이드바 하단에 위치. 클릭 시 빈 차수 카드 추가.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">차수 유형 2종</div>
+      <div class="section-desc">차수 카드에서 "날짜선택형 회차" 토글로 유형을 전환합니다. 유형에 따라 학습자의 신청 방식이 달라집니다.</div>
+
+      <div class="grid grid-cols-2 gap-6 mb-6">
+        <div class="border border-slate-200 rounded-xl p-5 bg-white">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="badge badge-slate">기본</span>
+            <div class="font-bold text-sm text-slate-700">전체 일정형</div>
+          </div>
+          <div class="text-xs text-slate-500 leading-relaxed mb-3">
+            학습자가 차수(반)를 선택하면 <strong>그 차수의 모든 회차 일정에 자동 등록</strong>됩니다. 날짜를 따로 고를 필요 없이 반 하나를 고르면 전체 수업이 한 번에 묶입니다.
+          </div>
+          <div class="text-xs text-slate-400 leading-relaxed space-y-1">
+            <div>• 연속 교육 코스 (예: 3일 과정, 주 1회 4주 등)</div>
+            <div>• 차수별로 시작일~종료일 기간이 고정된 경우</div>
+            <div>• 빌더에서 "날짜선택형 회차" 토글 OFF 상태</div>
+          </div>
+          <div class="mt-4">
+            <img src="../screenshots/admin/offline-builder/package_type_default.png" class="screen-img w-full" alt="전체 일정형" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="screen-placeholder" style="height:160px;display:none">📸 캡처 필요<br>전체 일정형 차수 카드</div>
+          </div>
+        </div>
+
+        <div class="border-2 border-green-200 rounded-xl p-5 bg-green-50">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="badge badge-green">sessionSelect</span>
+            <div class="font-bold text-sm text-green-700">날짜선택형 회차</div>
+          </div>
+          <div class="text-xs text-green-700 leading-relaxed mb-3">
+            학습자가 차수 신청 시 <strong>회차 날짜를 1개 직접 선택</strong>합니다. 같은 내용의 수업을 여러 날짜에 걸쳐 운영하고, 학습자가 편한 날 하나를 고르는 방식입니다.
+          </div>
+          <div class="text-xs text-green-600 leading-relaxed space-y-1">
+            <div>• 법정의무교육 (안전, 성희롱 예방 등)</div>
+            <div>• 동일 내용 반복 개설 코스</div>
+            <div>• 빌더에서 "날짜선택형 회차" 토글 ON → 회차가 날짜 선택 목록으로 표시</div>
+          </div>
+          <div class="mt-4">
+            <img src="../screenshots/admin/offline-builder/package_type_session.png" class="screen-img w-full" alt="날짜선택형 회차" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="screen-placeholder" style="height:160px;display:none">📸 캡처 필요<br>날짜선택형 회차 카드 (토글 ON)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-blue">
+        <strong>학습자 화면 차이:</strong> 전체 일정형은 차수 선택만으로 완료. 날짜선택형은 차수 선택 후 <strong>캘린더에서 날짜 → 회차 선택</strong> 단계가 추가됩니다.
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">강제 할당 모드의 그룹 배정</div>
+      <div class="section-desc">수강 신청 설정에서 "관리자 강제 할당"을 선택하면 각 차수에 그룹 배정 UI가 활성화됩니다.</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/07_package_assign_group.png" class="screen-img" style="width:100%" alt="그룹 배정" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:280px;height:200px;display:none">📸 캡처 필요<br>강제 할당 시 그룹 배정 UI</div>
+          <div class="screen-label">그룹 배정 (강제 할당 모드)</div>
+          <div class="screen-caption">차수별로 배정할 그룹을 드롭다운에서 선택</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-builder-completion', document.querySelector('[onclick*=admin-builder-completion]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">수료 조건</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-builder-session', document.querySelector('[onclick*=admin-builder-session]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">회차 설정</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-builder-session -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-builder-session">
+    <div class="breadcrumb">코스 등록 <span>›</span> offline-builder</div>
+    <div class="page-header">
+      <div class="page-tag">코스 등록</div>
+      <h1 class="page-title">회차 설정</h1>
+      <p class="page-desc">차수 카드를 펼치면 회차(개별 수업일) 목록이 나타납니다. 날짜, 시간, 장소, 강사를 회차별로 설정합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">회차 입력 항목</div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700; width:140px;">항목</th>
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">설명</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:12px;">
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">회차 일자</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">날짜 피커 (date input)</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">시작 시간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">시간 피커 (time input)</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">종료 시간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">시간 피커 (time input)</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">장소</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">텍스트 입력. 기본 장소와 다른 경우 개별 지정 가능</td></tr>
+          <tr><td style="padding:8px 12px; font-weight:600;">지각 기준</td><td style="padding:8px 12px;">시작 후 N분 이내 입실 → 지각 처리. 차수별 또는 회차별 설정</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">회차 일괄 생성 (마법봉)</div>
+      <div class="section-desc">회차 수가 많을 경우 마법봉(✨) 버튼으로 일괄 생성할 수 있습니다. 반복 패턴(매주 수요일 등)으로 자동 생성.</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/08_session_bulk_create.png" class="screen-img" style="width:100%" alt="회차 일괄 생성" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:280px;height:200px;display:none">📸 캡처 필요<br>회차 일괄 생성 UI</div>
+          <div class="screen-label">회차 일괄 생성</div>
+          <div class="screen-caption">진행 기간 · 반복 요일 · 교육 시간 · 세부 장소 설정</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">퍼블리싱 버튼</div>
+      <div class="callout callout-blue">
+        퍼블리싱 후에는 <strong>코스 운영 현황(offline-view.html)</strong>으로 이동하여 수강생 관리 및 출석 처리를 시작할 수 있습니다.
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-builder-package', document.querySelector('[onclick*=admin-builder-package]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">차수 관리</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-view-dashboard', document.querySelector('[onclick*=admin-view-dashboard]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">코스 운영 — 대시보드</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-view-dashboard -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-view-dashboard">
+    <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
+    <div class="page-header">
+      <div class="page-tag">코스 운영</div>
+      <h1 class="page-title">대시보드</h1>
+      <p class="page-desc">퍼블리싱된 코스의 운영 현황을 한눈에 파악하는 화면입니다. 좌측 코스 정보 패널과 메인 대시보드 탭으로 구성됩니다.</p>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-view.html</div>
+        <a href="../admin/offline-view.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
+      </div>
+      <a href="../admin/offline-view.html" target="_blank"><img src="../screenshots/admin/offline-view/full.png" alt="오프라인 수강관리 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 전체 구성</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-view/full.png" class="screen-img" style="width:100%" alt="대시보드" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:560px;height:340px;display:none">📸 캡처 필요 — offline-view.html 대시보드 탭</div>
+          <div class="screen-label">코스 운영 현황 대시보드</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">좌측 코스 정보 패널</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">코스 기본 정보</div>
+          <div class="text-xs text-slate-500 leading-relaxed space-y-1">
+            <div>• 그라디언트 커버 배경</div>
+            <div>• 코스명 / 강사 / 위치</div>
+            <div>• 운영방식 배지 (자율/강제할당)</div>
+          </div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">수강 통계</div>
+          <div class="text-xs text-slate-500 leading-relaxed space-y-1">
+            <div>• 전체 수강 현황 (진행/완료/미시작)</div>
+            <div>• 수료 현황 (수료/진행/미시작)</div>
+            <div>• 평균 출석률</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">요약 통계 카드 4종</div>
+      <div class="grid grid-cols-4 gap-3">
+        <div class="border border-slate-200 rounded-xl p-3 bg-white text-center">
+          <div class="text-xl font-black text-slate-800">120</div>
+          <div class="text-xs text-slate-500 mt-1">총 신청자</div>
+        </div>
+        <div class="border border-emerald-100 rounded-xl p-3 bg-emerald-50 text-center">
+          <div class="text-xl font-black text-emerald-700">90</div>
+          <div class="text-xs text-emerald-600 mt-1">수료</div>
+        </div>
+        <div class="border border-violet-100 rounded-xl p-3 bg-violet-50 text-center">
+          <div class="text-xl font-black text-violet-700">5</div>
+          <div class="text-xs text-violet-600 mt-1">차수</div>
+        </div>
+        <div class="border border-indigo-100 rounded-xl p-3 bg-indigo-50 text-center">
+          <div class="text-xl font-black text-indigo-700">92%</div>
+          <div class="text-xs text-indigo-600 mt-1">평균 출석률</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">대시보드 탭 주요 요소</div>
+      <div class="grid grid-cols-1 gap-3" style="max-width:500px;">
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">📊 차수 진행 타임라인</div>
+          <div class="text-xs text-slate-500 leading-relaxed">5개 차수를 가로 한 행으로 진행률 표시. 신청 비율 바 그래프 + 출석률.</div>
+        </div>
+        <div class="border border-amber-100 rounded-xl p-4 bg-amber-50">
+          <div class="font-bold text-sm text-amber-700 mb-2">⚠️ 조치 필요 항목</div>
+          <div class="text-xs text-amber-600 leading-relaxed">출석 미확인 / 수료 미처리 / 정원 초과 / 결석 과다 등 즉시 처리가 필요한 항목 목록.</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">🏢 소속별 수료 현황</div>
+          <div class="text-xs text-slate-500 leading-relaxed">부서/소속별 수료율을 가로 막대 그래프로 표시.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-builder-session', document.querySelector('[onclick*=admin-builder-session]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">회차 설정</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-view-students', document.querySelector('[onclick*=admin-view-students]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">수강생 관리</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-view-students -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-view-students">
+    <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
+    <div class="page-header">
+      <div class="page-tag">코스 운영</div>
+      <h1 class="page-title">수강생 관리 탭</h1>
+      <p class="page-desc">코스에 등록된 전체 수강생 목록을 관리하는 탭입니다. 이름/소속 검색, 차수 필터, 수료 처리, 차수 변경이 가능합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">수강생 목록 화면</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-view/tab_roster.png" class="screen-img" style="width:100%" alt="수강생 관리 탭" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:560px;height:320px;display:none">📸 캡처 필요 — 수강생 관리 탭</div>
+          <div class="screen-label">수강생 현황 탭</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">테이블 컬럼</div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700; width:120px;">컬럼</th>
+            <th style="padding:8px 12px; text-align:left; border-bottom:2px solid #e2e8f0; color:#475569; font-weight:700;">설명</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:12px;">
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">이름</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">학습자 이름 (검색 대상)</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">소속</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">부서/소속 (검색 대상)</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">배정된 차수명. 색상 점으로 차수 구분</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수료 상태</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-green">완료</span> <span class="badge badge-indigo">진행중</span> <span class="badge badge-slate">미시작</span></td></tr>
+          <tr><td style="padding:8px 12px; font-weight:600;">액션</td><td style="padding:8px 12px;">수료 처리 버튼 / 차수 변경 버튼</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">필터 &amp; 검색</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">이름·소속 검색</div>
+          <div class="text-xs text-slate-500">텍스트 입력 시 실시간 필터링</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">차수 필터</div>
+          <div class="text-xs text-slate-500">전체 / 특정 차수별 필터링 드롭다운</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-view-dashboard', document.querySelector('[onclick*=admin-view-dashboard]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">대시보드</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-view-attendance', document.querySelector('[onclick*=admin-view-attendance]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">출석·수료</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-view-attendance -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-view-attendance">
+    <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
+    <div class="page-header">
+      <div class="page-tag">코스 운영</div>
+      <h1 class="page-title">출석·수료 탭</h1>
+      <p class="page-desc">차수별 회차 출석 현황을 관리합니다. 미확인 출석 일괄 처리, 수동 상태 변경 기능을 제공합니다. 회차는 <strong>수업 종료 시각에 자동 종료</strong>되고, 미확인 인원은 운영자가 직접 정리합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">출석 상태 5종</div>
+      <div class="grid grid-cols-5 gap-2">
+        <div class="border border-emerald-200 rounded-xl p-3 bg-emerald-50 text-center">
+          <div class="text-lg">✅</div>
+          <div class="text-xs font-bold text-emerald-700 mt-1">출석</div>
+          <div class="text-xs text-emerald-600">attended</div>
+        </div>
+        <div class="border border-amber-200 rounded-xl p-3 bg-amber-50 text-center">
+          <div class="text-lg">⏰</div>
+          <div class="text-xs font-bold text-amber-700 mt-1">지각</div>
+          <div class="text-xs text-amber-600">late</div>
+        </div>
+        <div class="border border-violet-200 rounded-xl p-3 bg-violet-50 text-center">
+          <div class="text-lg">🚪</div>
+          <div class="text-xs font-bold text-violet-700 mt-1">조퇴</div>
+          <div class="text-xs text-violet-600">early_leave</div>
+        </div>
+        <div class="border border-red-200 rounded-xl p-3 bg-red-50 text-center">
+          <div class="text-lg">❌</div>
+          <div class="text-xs font-bold text-red-700 mt-1">결석</div>
+          <div class="text-xs text-red-600">absent</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-3 bg-slate-50 text-center">
+          <div class="text-lg">⬜</div>
+          <div class="text-xs font-bold text-slate-600 mt-1">미확인</div>
+          <div class="text-xs text-slate-400">pending</div>
+        </div>
+      </div>
+      <div class="callout callout-amber mt-4">
+        Phase 1에선 미확인 인원을 <strong>운영자가 직접 처리</strong>합니다. 자동 결석 전환은 Phase 2 이월.
+      </div>
+
+      <!-- ▼▼▼ 회차 종료 정책 ▼▼▼ -->
+      <div class="mt-6 pt-5 border-t border-slate-200">
+        <div class="text-base font-bold text-slate-800 mb-1">회차 종료, 한눈에 이해하기</div>
+        <p class="text-sm text-slate-600 mb-4">학습자가 자주 물어요. <strong>"오늘 못 가면 저 한 회차 까이는 거예요?"</strong> 답을 출석부 비유로 풀어 드릴게요.</p>
+
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-5">
+          <div class="font-bold text-indigo-800 text-sm mb-2">🎯 한 줄로 말하면</div>
+          <div class="text-sm text-indigo-900 leading-relaxed">
+            회차 종료는 <strong>수업 종료 시각이 지나는 시점</strong>이에요.<br>
+            그 시점부터 그 수업은 학습자의 출석 점수에 <strong>한 칸으로 들어갑니다.</strong><br>
+            종료 전엔 점수에 안 들어가요. 별도 "마감 버튼"은 없어요 — 시간이 결정합니다.
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-4 mb-5">
+          <div class="font-bold text-slate-800 text-sm mb-3">🪧 4번 수업 교육 예시</div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-xs text-slate-500 border-b border-slate-200">
+                <th class="text-left py-2">시점</th>
+                <th class="text-left py-2">학습자 화면</th>
+                <th class="text-left py-2">의미</th>
+              </tr>
+            </thead>
+            <tbody class="text-slate-700">
+              <tr class="border-b border-slate-100">
+                <td class="py-2">1·2번째 수업 종료 전</td>
+                <td class="py-2 text-amber-700">"진행 중"</td>
+                <td class="py-2 text-xs text-slate-500">아직 종료 안 됨 → 점수에 안 들어감</td>
+              </tr>
+              <tr class="border-b border-slate-100">
+                <td class="py-2">1번 수업 종료 후</td>
+                <td class="py-2 text-emerald-700">1칸 중 출석한 비율</td>
+                <td class="py-2 text-xs text-slate-500">출석부 1칸 채워짐</td>
+              </tr>
+              <tr class="border-b border-slate-100">
+                <td class="py-2">2번 수업 종료 후</td>
+                <td class="py-2 text-emerald-700">2칸 중 출석한 비율</td>
+                <td class="py-2 text-xs text-slate-500">출석부 2칸 채워짐</td>
+              </tr>
+              <tr>
+                <td class="py-2">4번 수업 모두 종료</td>
+                <td class="py-2 text-indigo-700">최종 출석률 (4칸 기준)</td>
+                <td class="py-2 text-xs text-slate-500">75% 이상이면 수료 대상</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="border border-emerald-200 rounded-xl p-4 bg-emerald-50">
+            <div class="font-bold text-sm text-emerald-800 mb-2">👤 학습자에게 일어나는 일</div>
+            <div class="text-sm text-emerald-900 leading-relaxed space-y-1">
+              <div>① 출석부 칸이 1개 추가돼요</div>
+              <div>② 출석/지각/결석 결과가 바로 보여요</div>
+              <div>③ 미확인이면 "출석 확인 중" 표시</div>
+              <div class="text-xs text-emerald-700 mt-2 pt-2 border-t border-emerald-200">※ Phase 1은 학습자한테 푸시·이메일이 안 나가요. 학습자가 앱·웹에 직접 들어와서 확인. <strong>알림은 Phase 2에서 도입.</strong></div>
+            </div>
+          </div>
+          <div class="border border-blue-200 rounded-xl p-4 bg-blue-50">
+            <div class="font-bold text-sm text-blue-800 mb-2">📊 운영자 화면에서 일어나는 일</div>
+            <div class="text-sm text-blue-900 leading-relaxed space-y-1">
+              <div>① 출석률 계산이 시작돼요</div>
+              <div>② 차수 카드 출석률 막대바 즉시 업데이트</div>
+              <div>③ "출석 확인 중" 인원이 있으면 코스 헤더에 배지 표시</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border border-amber-200 rounded-xl p-4 bg-amber-50 mb-3">
+          <div class="font-bold text-sm text-amber-800 mb-2">⏰ 회차 종료 (시간 기반 자동)</div>
+          <p class="text-sm text-amber-900 leading-relaxed">
+            <strong>회차는 수업 종료 시각에 자동으로 종료</strong>됩니다 (별도 마감 버튼 없음). 미확인 인원은 <strong>운영자가 직접 정리</strong>합니다 — "미확인 일괄 처리" 도구로 빠르게 처리 가능 (전원 출석/전원 결석/개별).
+          </p>
+          <div class="text-xs text-amber-700 mt-3 pt-2 border-t border-amber-200">
+            ※ Phase 1엔 자동 결석 처리·운영자 단계별 알림·시스템 잠금 정책 없음. Phase 2 이월.
+          </div>
+        </div>
+
+        <div class="border border-pink-200 rounded-xl p-4 bg-pink-50 mb-3">
+          <div class="font-bold text-sm text-pink-800 mb-2">📢 학습자 알림은 Phase 2에서 도입 <span class="badge badge-plan2 ml-1">Phase 2</span></div>
+          <p class="text-sm text-pink-900 leading-relaxed mb-2">Phase 1은 학습자한테 푸시·이메일이 <strong>안 나갑니다.</strong> 학습자가 앱·웹에 직접 들어와서 자기 출석 결과 확인.</p>
+          <div class="bg-white border border-pink-200 rounded-lg p-3 text-xs">
+            <div class="font-bold text-pink-800 mb-1.5">Phase 2 알림 5종 분리 (예정)</div>
+            <ul class="text-pink-900 leading-relaxed space-y-1">
+              <li><strong>C1 출석 처리됨</strong> (즉시) — QR 찍자마자 "출석 처리됐어요"</li>
+              <li><strong>C2 출석률 표시</strong> (즉시) — 회차 종료 직후 화면 갱신</li>
+              <li><strong>C3 미확인 처리 중</strong> (즉시·약한 알림) — "운영자 확인 중"</li>
+              <li><strong>C3 결석 확정</strong> — 운영자가 결석 처리 완료 후 발송</li>
+              <li><strong>C4 HR 시스템 연동</strong> — 운영자가 명시한 시점에 발송</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="border border-violet-200 rounded-xl p-4 bg-violet-50 mb-3">
+          <div class="font-bold text-sm text-violet-800 mb-2">✏️ 종료 후에도 출석은 고칠 수 있어요</div>
+          <div class="text-sm text-violet-900 leading-relaxed space-y-1">
+            <div>• 결석 → 출석으로 바꾸는 건 회차 종료 후에도 OK (관리자만)</div>
+            <div>• 바꾸자마자 출석률이 다시 계산돼요</div>
+            <div>• <strong>"마감 사건"은 개념 자체가 없어요.</strong> 수업 종료 시각이 지나면 자동 종료, 그 사실은 변하지 않음</div>
+            <div>• Phase 2부터: 수료 확정까지 받은 학습자는 출석을 고쳐도 수료 상태가 자동으로 안 바뀝니다</div>
+          </div>
+        </div>
+
+        <div class="border border-rose-200 rounded-xl p-4 bg-rose-50 mb-4">
+          <div class="font-bold text-sm text-rose-800 mb-2">👥 운영자 여러 명이 같이 보고 있을 때</div>
+          <div class="text-sm text-rose-900 leading-relaxed space-y-1.5">
+            <div>• <strong>라이브 모드를 여러 PC에 동시에 띄우는 건 OK예요.</strong> 100명 이상 큰 행사에서는 입장 게이트 2개로 나누고 QR 화면 2대 띄우는 게 정식 권장이에요</div>
+            <div>• <strong>마감 버튼이 없어 동시 클릭 충돌 자체가 없어요</strong> (시간 기반 자동 종료)</div>
+            <div>• <strong>실무 팁</strong>: 회차마다 "미확인 인원 정리 책임자 1명"을 정해두세요. 운영팀 내부 약속으로 잡아두면 빠릅니다</div>
+          </div>
+        </div>
+
+        <div class="border-2 border-slate-300 rounded-xl p-4 bg-slate-50 mb-4">
+          <div class="font-bold text-sm text-slate-800 mb-2">🚫 수업이 아예 못 열린 경우 — 휴강 <span class="badge badge-plan2 ml-1">Phase 3</span></div>
+          <p class="text-sm text-slate-700 leading-relaxed mb-3">강사가 갑자기 못 오거나, 강의장 사고나 천재지변으로 수업 자체가 안 열린 경우. Phase 1·2에서는 운영자가 임의 처리(미확인 일괄 → 출석 또는 결석)로 우회.</p>
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div class="bg-white border border-slate-200 rounded-lg p-3">
+              <div class="font-bold text-slate-700 mb-1.5">Phase 3 추가 예정</div>
+              <ul class="text-slate-600 leading-relaxed list-disc list-inside space-y-1 text-xs">
+                <li>회차 상태에 <strong>"휴강"</strong> 추가</li>
+                <li>휴강된 수업은 <strong>출석부에서 그 칸을 빼버림</strong></li>
+                <li>"4번 수업 중 3번으로 점수 계산"이라고 표시</li>
+                <li>관리자만 처리 가능, 사유 입력 필수</li>
+              </ul>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-lg p-3">
+              <div class="font-bold text-slate-700 mb-1.5">"보강 강제" 토글 (Phase 3)</div>
+              <ul class="text-slate-600 leading-relaxed list-disc list-inside space-y-1 text-xs">
+                <li><strong>ON</strong>: 법정의무교육 — 보강 안 잡으면 수료 처리 불가</li>
+                <li><strong>OFF</strong>: 자율 교육 — 휴강은 빼고 그냥 진행</li>
+                <li>날짜선택형은 학습자에게 다른 날짜 자동 안내</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-blue">
+          <strong>용어 안내</strong>: <strong>"회차 종료"</strong>로 통일. 학습자가 "회차 차감"이라고 부르는 건 같은 의미예요 (별도 사건이 아니라 수업 종료 시각이 지나는 것). 수업 자체가 못 열린 건 <strong>"휴강"</strong>입니다 ("회차 취소"는 신청 취소와 헷갈리니 사용 금지).
+        </div>
+      </div>
+      <!-- ▲▲▲ 회차 종료 정책 ▲▲▲ -->
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">출석 탭 화면</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-view/tab_attendance.png" class="screen-img" style="width:100%" alt="출석 관리 탭" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:560px;height:320px;display:none">📸 캡처 필요 — 출석·수료 탭</div>
+          <div class="screen-label">출석 관리 탭</div>
+          <div class="screen-caption">차수별 접기/펴기 + 회차별 출석 현황</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-view-students', document.querySelector('[onclick*=admin-view-students]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">수강생 관리</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-view-qr', document.querySelector('[onclick*=admin-view-qr]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">QR 라이브 모드</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-view-qr -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-view-qr">
+    <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
+    <div class="page-header">
+      <div class="page-tag">코스 운영</div>
+      <h1 class="page-title">QR 라이브 모드</h1>
+      <p class="page-desc">현장 출석 체크를 위한 QR 코드 화면입니다. 강사/운영자가 프로젝터에 띄워두고 수강생이 스캔합니다. 30초마다 QR이 자동 갱신됩니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">QR 라이브 화면 구성</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-view/qr_live.png" class="screen-img" style="width:100%" alt="QR 라이브" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:560px;height:340px;display:none">📸 캡처 필요 — QR 라이브 모드 화면</div>
+          <div class="screen-label">QR 라이브 모드</div>
+          <div class="screen-caption">중앙 QR 코드 + 우측 실시간 출석 현황 패널</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">화면 구성 요소</div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="border border-indigo-100 rounded-xl p-4 bg-indigo-50">
+          <div class="font-bold text-sm text-indigo-700 mb-2">🔲 중앙 QR 코드</div>
+          <div class="text-xs text-indigo-600 leading-relaxed space-y-1">
+            <div>• 280×280px 대형 QR 코드</div>
+            <div>• 30초마다 자동 갱신 (타이머 표시)</div>
+            <div>• 회차명·일시 표시</div>
+            <div>• 수강생이 학습자 앱으로 스캔</div>
+          </div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">📊 우측 실시간 패널</div>
+          <div class="text-xs text-slate-500 leading-relaxed space-y-1">
+            <div>• 실시간 출석률 (%) 표시</div>
+            <div>• 출석 / 지각 / 조퇴 / 결석 / 미확인 카운트</div>
+            <div>• 최근 출석 목록 (이름 + 타임스탬프)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">진입 방법</div>
+      <div class="flow-row">
+        <div class="flow-box">코스 운영 현황</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">헤더 "라이브 출석" 버튼</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">회차 선택</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">QR 라이브 화면</div>
+      </div>
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-view-attendance', document.querySelector('[onclick*=admin-view-attendance]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">출석·수료</div>
+      </div>
+      <div class="nav-pn-btn right" onclick="showPage('admin-learners-enroll', document.querySelector('[onclick*=admin-learners-enroll]'))">
+        <div class="pn-label">다음 →</div>
+        <div class="pn-title">수강생 등록</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- PAGE: admin-learners-enroll -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin-learners-enroll">
+    <div class="breadcrumb">수강생 등록</div>
+    <div class="page-header">
+      <div class="page-tag">수강생 등록</div>
+      <h1 class="page-title">수강생 등록 화면</h1>
+      <p class="page-desc">코스 목록 헤더의 "수강생 등록" 버튼으로 진입합니다. 개별 또는 일괄로 수강생을 코스에 등록하고 차수를 배정합니다.</p>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">수강생 등록 화면 구성</div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/course-learners/01_learners_overview.png" class="screen-img" style="width:100%" alt="수강생 등록" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:560px;height:340px;display:none">📸 캡처 필요 — course-learners.html 기본 화면</div>
+          <div class="screen-label">수강생 등록 화면 (course-learners.html)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">탭 구성 3종</div>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="border border-indigo-100 rounded-xl p-4 bg-indigo-50">
+          <div class="font-bold text-sm text-indigo-700 mb-2">요약 탭</div>
+          <div class="text-xs text-indigo-600 leading-relaxed">차수 진행 현황, 조치 필요 항목, 소속별 수료 현황 차트</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">수강 탭</div>
+          <div class="text-xs text-slate-500 leading-relaxed">수강생 목록 테이블. 이름/소속 검색, 차수 필터, 개별 수료처리·차수변경</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">출석 탭</div>
+          <div class="text-xs text-slate-500 leading-relaxed">차수별 출석 현황. 세션 선택 드롭다운으로 특정 회차 조회</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">수강생 등록 방법</div>
+      <div class="flow-row">
+        <div class="flow-box">+ 수강생 등록 버튼</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">학습자 검색</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">차수 선택</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">등록 확인</div>
+      </div>
+      <div class="screen-wrap mt-4">
+        <div class="screen-card">
+          <img src="../screenshots/admin/course-learners/02_enroll_modal.png" class="screen-img" style="width:100%" alt="등록 모달" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:340px;height:240px;display:none">📸 캡처 필요 — 수강생 등록 모달</div>
+          <div class="screen-label">수강생 등록 모달</div>
+          <div class="screen-caption">학습자 검색 → 차수 선택 → 등록</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-green">
+      <strong>QR 라이브 모드</strong>도 이 화면에서 진입 가능합니다. 우측 상단 "라이브 출석" 버튼을 탭하세요.
+    </div>
+
+    <div class="nav-pn">
+      <div class="nav-pn-btn" onclick="showPage('admin-view-qr', document.querySelector('[onclick*=admin-view-qr]'))">
+        <div class="pn-label">← 이전</div>
+        <div class="pn-title">QR 라이브 모드</div>
+      </div>
+      <div></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  let currentPage = 'intro';
+  let currentNavItem = document.querySelector('.nav-item.active');
+
+  function showPage(pageId, navEl) {
+    // 페이지 전환
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + pageId);
+    if (target) { target.classList.add('active'); window.scrollTo(0, 0); }
+
+    // 네비 활성화
+    document.querySelectorAll('.nav-item, .nav-sub').forEach(el => el.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+
+    currentPage = pageId;
+    closeMobileSidebar();
+  }
+
+  function toggleNav(childId, navEl) {
+    const children = document.getElementById(childId);
+    const arrow = document.getElementById('arr-' + childId.replace('nav-', ''));
+    const isOpen = children.classList.contains('open');
+    children.classList.toggle('open', !isOpen);
+    if (arrow) arrow.classList.toggle('open', !isOpen);
+  }
+
+  // 수강신청 그룹 기본 열어두기
+  document.getElementById('nav-enroll').classList.add('open');
+  document.getElementById('arr-enroll').classList.add('open');
+</script>
+</body>
+</html>
