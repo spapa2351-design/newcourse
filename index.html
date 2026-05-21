@@ -3,106 +3,211 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LMS 프로토타입 — 네비게이션</title>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>newcourse 프로토타입 — 허브</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ── newcourse.html 디자인 토큰 차용 ── */
     :root {
-      --primary: #5569ff;
-      --black: #223354;
-      --body-bg: #e8ecf4;
+      --black: #000000;
       --white: #ffffff;
-      --border: rgba(34,51,84,.10);
-      --r-lg: 16px;
+      --hover-gray: #e2e2e2;
+      --chip-gray: #efefef;
+      --body-gray: #4b4b4b;
+      --muted-gray: #afafaf;
+      --body-bg: #f5f5f5;
+      --shadow-light: rgba(0,0,0,0.04);
+      --shadow-medium: rgba(0,0,0,0.08);
     }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { margin: 0; padding: 0; }
     body {
-      font-family: 'Pretendard','Inter',sans-serif;
+      font-family: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-size: 14px; color: var(--black);
       background: var(--body-bg);
-      min-height: 100vh; padding: 40px 16px;
+      min-height: 100vh; padding: 56px 24px;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
     }
 
-    .container { max-width: 860px; margin: 0 auto; }
+    .container { max-width: 1136px; margin: 0 auto; }
 
     /* Header */
-    .header {
-      text-align: center; margin-bottom: 36px;
+    .header { margin-bottom: 28px; }
+    .header .label { font-size: 12px; font-weight: 500; color: var(--muted-gray); margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .header h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; line-height: 1.2; }
+    .header p { font-size: 15px; color: var(--body-gray); font-weight: 500; }
+
+    /* Hero (newcourse 종합) — newcourse.html cover 패턴 */
+    .hero {
+      display: flex; align-items: center; gap: 24px;
+      padding: 40px 44px;
+      border-radius: 20px;
+      background: var(--black);
+      color: var(--white); text-decoration: none;
+      margin-bottom: 40px;
+      transition: transform .2s, box-shadow .2s;
     }
-    .logo {
-      width: 56px; height: 56px; border-radius: 14px;
-      background: linear-gradient(135deg, #5569ff, #7B8BFF);
+    .hero:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    }
+    .hero-icon {
+      width: 64px; height: 64px; border-radius: 14px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px; font-size: 24px; color: #fff;
+      font-size: 26px; flex-shrink: 0;
     }
-    .header h1 { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px; }
-    .header p { font-size: 13px; color: #6E759F; font-weight: 500; }
+    .hero-text { flex: 1; min-width: 0; }
+    .hero-pill {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--white);
+      padding: 4px 10px; border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .hero-title { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; line-height: 1.25; }
+    .hero-desc { font-size: 14px; color: var(--muted-gray); font-weight: 500; }
+    .hero-arrow { font-size: 20px; color: rgba(255,255,255,0.7); flex-shrink: 0; }
 
     /* Section */
-    .section { margin-bottom: 24px; }
+    .section {
+      background: var(--white);
+      border: 1px solid var(--chip-gray);
+      border-radius: 20px;
+      padding: 40px 36px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px var(--shadow-light);
+    }
     .section-header {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--chip-gray);
     }
-    .section-icon {
-      width: 32px; height: 32px; border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; flex-shrink: 0;
+    .section-num {
+      display: inline-block;
+      background: var(--black); color: var(--white);
+      padding: 5px 12px; border-radius: 8px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
-    .section-title { font-size: 13px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; }
-    .section-line { flex: 1; height: 1px; background: var(--border); }
+    .section-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+    .section-line { flex: 1; }
+    .section-count { font-size: 12px; color: var(--muted-gray); font-weight: 600; }
+
+    .sub-title {
+      font-size: 11px; font-weight: 700; color: var(--muted-gray);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin: 18px 0 10px 2px;
+    }
+    .sub-title:first-child { margin-top: 0; }
+
+    /* 2열 헤더 */
+    .col-header {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      margin-bottom: 10px;
+    }
+    .col-h {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 8px 12px; border-radius: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .col-h-offline { background: #FFF3E0; color: #E65100; }
+    .col-h-online  { background: #E0F2FE; color: #0369A1; }
+    .col-h .wip-tag {
+      margin-left: auto; font-size: 9px; font-weight: 700;
+      background: rgba(255,255,255,0.7);
+      padding: 2px 6px; border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    /* Split 2열 */
+    .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .split-col { display: flex; flex-direction: column; gap: 10px; }
 
     /* Grid */
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
     /* Button */
     .btn {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 14px;
       padding: 16px 18px; border-radius: 12px;
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--chip-gray);
       background: var(--white); cursor: pointer;
-      transition: all .18s; text-align: left;
+      transition: border-color .15s, transform .15s, box-shadow .15s;
+      text-align: left;
       font-family: inherit; text-decoration: none;
       color: var(--black);
     }
     .btn:hover {
-      border-color: var(--primary);
-      box-shadow: 0 4px 16px rgba(85,105,255,.12);
-      transform: translateY(-2px);
+      border-color: var(--black);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px var(--shadow-medium);
     }
-    .btn:active { transform: scale(0.98); }
+    .btn:active { transform: scale(0.99); }
+    .btn.is-wip { opacity: 0.6; }
 
     .btn-icon {
       width: 38px; height: 38px; border-radius: 10px;
+      background: var(--chip-gray); color: var(--black);
       display: flex; align-items: center; justify-content: center;
-      font-size: 15px; flex-shrink: 0;
+      font-size: 14px; flex-shrink: 0;
     }
     .btn-text { flex: 1; min-width: 0; }
-    .btn-title { font-size: 13px; font-weight: 800; color: var(--black); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .btn-desc { font-size: 11px; color: #6E759F; font-weight: 500; }
-    .btn-arrow { font-size: 11px; color: #CBD5E1; flex-shrink: 0; }
+    .btn-title {
+      font-size: 14px; font-weight: 700; color: var(--black);
+      margin-bottom: 2px;
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap; overflow: hidden;
+    }
+    .btn-title .title-text { overflow: hidden; text-overflow: ellipsis; }
+    .btn-desc { font-size: 11.5px; color: var(--muted-gray); font-weight: 500; font-family: ui-monospace,SFMono-Regular,Menlo,monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-arrow { font-size: 11px; color: var(--muted-gray); flex-shrink: 0; }
 
-    /* Colors */
-    .c-admin   { background: #FFF3E0; color: #E65100; }
-    .c-user    { background: #E8F5E9; color: #1A7A4A; }
-    .c-ref     { background: #EEF2FF; color: #4338CA; }
-    .c-doc     { background: #F3E8FF; color: #7C3AED; }
-    .c-online  { background: #E0F2FE; color: #0369A1; }
-
-    .s-admin   { background: #FFF3E0; color: #E65100; }
-    .s-user    { background: #E8F5E9; color: #1A7A4A; }
-    .s-ref     { background: #EEF2FF; color: #4338CA; }
-    .s-doc     { background: #F3E8FF; color: #7C3AED; }
-    .s-online  { background: #E0F2FE; color: #0369A1; }
-
-    .version {
-      text-align: center; margin-top: 32px;
-      font-size: 11px; color: #A0AEC0; font-weight: 500;
+    .wip {
+      display: inline-block; flex-shrink: 0;
+      font-size: 9px; font-weight: 700;
+      background: var(--chip-gray); color: var(--body-gray);
+      padding: 2px 7px; border-radius: 4px;
+      letter-spacing: 0.06em;
     }
 
-    @media (max-width: 600px) {
-      .grid, .grid-3 { grid-template-columns: 1fr; }
+    /* 오프라인 카드 icon — 주황 톤 */
+    .btn-icon.c-offline { background: #FFF3E0; color: #E65100; }
+    /* 온라인 카드 icon — 하늘 톤 */
+    .btn-icon.c-online  { background: #E0F2FE; color: #0369A1; }
+
+    /* WIP placeholder card */
+    .wip-card {
+      border: 1px dashed var(--hover-gray);
+      background: var(--body-bg);
+      border-radius: 12px;
+      padding: 24px 16px;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 6px;
+      color: var(--muted-gray);
+      flex: 1; min-height: 64px;
+    }
+    .wip-card-title { font-size: 13px; font-weight: 700; color: var(--body-gray); }
+    .wip-card-sub { font-size: 11px; color: var(--muted-gray); font-weight: 500; }
+
+    .version {
+      text-align: center; margin-top: 36px;
+      font-size: 11px; color: var(--muted-gray); font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 700px) {
+      .grid, .split-row, .col-header { grid-template-columns: 1fr; }
+      .hero { flex-direction: column; align-items: flex-start; }
+      .header h1 { font-size: 28px; }
     }
   </style>
 </head>
@@ -112,115 +217,308 @@
 
   <!-- Header -->
   <div class="header">
-    <div class="logo"><i class="fa-solid fa-graduation-cap"></i></div>
-    <h1>오프라인코스 프로토타이핑</h1>
+    <div class="label">Prototype Hub · 2026-05-21</div>
+    <h1>newcourse 프로토타입 — 허브</h1>
+    <p>코스v2(newcourse) · 학습자 · 기획·가이드 문서 — 전체 페이지 진입점</p>
   </div>
 
-  <!-- 관리자 페이지 -->
+  <!-- ═══════════ Hero · 종합 스펙 ═══════════ -->
+  <a class="hero" href="docs/newcourse.html">
+    <div class="hero-icon"><i class="fa-solid fa-diagram-project"></i></div>
+    <div class="hero-text">
+      <div class="hero-pill">종합 스펙</div>
+      <div class="hero-title">newcourse 종합</div>
+      <div class="hero-desc">docs/newcourse.html — 코스v2 전체 구조·정책·데이터 모델</div>
+    </div>
+    <i class="fa-solid fa-arrow-right hero-arrow"></i>
+  </a>
+
+  <!-- ═══════════ 01 관리자 / 코스v2 ═══════════ -->
   <div class="section">
     <div class="section-header">
-      <div class="section-icon s-admin"><i class="fa-solid fa-shield-halved"></i></div>
-      <span class="section-title" style="color:#E65100">관리자</span>
+      <span class="section-num">01</span>
+      <span class="section-title">관리자 · 코스v2</span>
       <div class="section-line"></div>
+      <span class="section-count">9</span>
     </div>
+
+    <div class="col-header">
+      <div class="col-h col-h-offline"><i class="fa-solid fa-location-dot"></i> 오프라인</div>
+      <div class="col-h col-h-online"><i class="fa-solid fa-tv"></i> 온라인 <span class="wip-tag">작업중</span></div>
+    </div>
+
+    <div class="sub-title">코스 만들기 모달</div>
     <div class="grid">
-      <a class="btn" href="admin/index.html">
-        <div class="btn-icon c-admin"><i class="fa-solid fa-list"></i></div>
+      <a class="btn" href="admin/offline-create.html">
+        <div class="btn-icon c-offline"><i class="fa-solid fa-location-dot"></i></div>
         <div class="btn-text">
-          <div class="btn-title">코스 목록</div>
-          <div class="btn-desc">전체 코스 관리 · 필터 · 검색</div>
+          <div class="btn-title"><span class="title-text">오프라인 코스 만들기</span></div>
+          <div class="btn-desc">offline-create.html</div>
         </div>
         <i class="fa-solid fa-chevron-right btn-arrow"></i>
       </a>
+      <a class="btn is-wip" href="admin/online-create.html">
+        <div class="btn-icon c-online"><i class="fa-solid fa-tv"></i></div>
+        <div class="btn-text">
+          <div class="btn-title"><span class="title-text">온라인 코스 만들기</span><span class="wip">작업중</span></div>
+          <div class="btn-desc">online-create.html</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+    </div>
+
+    <div class="sub-title">목록</div>
+    <div class="grid">
+      <a class="btn" href="admin/offline-list.html">
+        <div class="btn-icon c-offline"><i class="fa-solid fa-list"></i></div>
+        <div class="btn-text">
+          <div class="btn-title"><span class="title-text">오프라인 — 목록</span></div>
+          <div class="btn-desc">offline-list.html</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn is-wip" href="admin/online-list.html">
+        <div class="btn-icon c-online"><i class="fa-solid fa-list"></i></div>
+        <div class="btn-text">
+          <div class="btn-title"><span class="title-text">온라인 — 목록</span><span class="wip">작업중</span></div>
+          <div class="btn-desc">online-list.html</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+    </div>
+
+    <div class="sub-title">빌더</div>
+    <div class="grid">
       <a class="btn" href="admin/offline-builder.html">
-        <div class="btn-icon c-admin"><i class="fa-solid fa-hammer"></i></div>
+        <div class="btn-icon c-offline"><i class="fa-solid fa-hammer"></i></div>
         <div class="btn-text">
-          <div class="btn-title">오프라인 코스 빌더</div>
-          <div class="btn-desc">코스 개설 · 차수 · 회차 설정</div>
+          <div class="btn-title"><span class="title-text">오프라인 — 빌더</span></div>
+          <div class="btn-desc">offline-builder.html</div>
         </div>
         <i class="fa-solid fa-chevron-right btn-arrow"></i>
       </a>
-      <a class="btn" href="admin/offline-course-view.html">
-        <div class="btn-icon c-admin"><i class="fa-solid fa-clipboard-check"></i></div>
+      <a class="btn is-wip" href="admin/online-builder.html">
+        <div class="btn-icon c-online"><i class="fa-solid fa-hammer"></i></div>
         <div class="btn-text">
-          <div class="btn-title">코스 운영 현황</div>
-          <div class="btn-desc">출석 · 수강생 · QR 체크인</div>
+          <div class="btn-title"><span class="title-text">온라인 — 빌더</span><span class="wip">작업중</span></div>
+          <div class="btn-desc">online-builder.html</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+    </div>
+
+    <div class="sub-title">운영</div>
+    <div class="grid">
+      <a class="btn" href="admin/offline-view.html">
+        <div class="btn-icon c-offline"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div class="btn-text">
+          <div class="btn-title"><span class="title-text">오프라인 — 운영</span></div>
+          <div class="btn-desc">offline-view.html</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+      <a class="btn is-wip" href="admin/online-view.html">
+        <div class="btn-icon c-online"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div class="btn-text">
+          <div class="btn-title"><span class="title-text">온라인 — 운영</span><span class="wip">작업중</span></div>
+          <div class="btn-desc">online-view.html</div>
+        </div>
+        <i class="fa-solid fa-chevron-right btn-arrow"></i>
+      </a>
+    </div>
+
+    <div class="sub-title">콘텐츠</div>
+    <div class="grid">
+      <a class="btn is-wip" href="admin/content-library.html">
+        <div class="btn-icon"><i class="fa-solid fa-folder-open"></i></div>
+        <div class="btn-text">
+          <div class="btn-title"><span class="title-text">콘텐츠 라이브러리</span><span class="wip">작업중</span></div>
+          <div class="btn-desc">content-library.html</div>
         </div>
         <i class="fa-solid fa-chevron-right btn-arrow"></i>
       </a>
     </div>
   </div>
 
-  <!-- 사용자 페이지 -->
+  <!-- ═══════════ 02 기획·가이드 문서 ═══════════ -->
   <div class="section">
     <div class="section-header">
-      <div class="section-icon s-user"><i class="fa-solid fa-user"></i></div>
-      <span class="section-title" style="color:#1A7A4A">사용자</span>
+      <span class="section-num">02</span>
+      <span class="section-title">기획·가이드 문서</span>
       <div class="section-line"></div>
+      <span class="section-count">6</span>
     </div>
-    <div class="grid">
-      <a class="btn" href="user/home.html">
-        <div class="btn-icon c-user"><i class="fa-solid fa-house"></i></div>
-        <div class="btn-text">
-          <div class="btn-title">홈</div>
-          <div class="btn-desc">최근 수강 · 오프라인 영역</div>
+
+    <div class="col-header">
+      <div class="col-h col-h-offline"><i class="fa-solid fa-location-dot"></i> 오프라인</div>
+      <div class="col-h col-h-online"><i class="fa-solid fa-tv"></i> 온라인 <span class="wip-tag">작업중</span></div>
+    </div>
+
+    <div class="split-row">
+      <!-- 좌 : 오프라인 -->
+      <div class="split-col">
+        <a class="btn" href="docs/offline-course.html">
+          <div class="btn-icon c-offline"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">오프라인 코스 스펙</span></div>
+            <div class="btn-desc">docs/offline-course.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="docs/guide-offline-lms.html">
+          <div class="btn-icon"><i class="fa-solid fa-book-open"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">오프라인 LMS 가이드</span></div>
+            <div class="btn-desc">guide-offline-lms.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="docs/guide-admin-offline.html">
+          <div class="btn-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">관리자 오프라인 가이드</span></div>
+            <div class="btn-desc">guide-admin-offline.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="docs/guide-ops-policy.html">
+          <div class="btn-icon"><i class="fa-solid fa-gavel"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">운영 정책 가이드</span></div>
+            <div class="btn-desc">guide-ops-policy.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="docs/guide-course-detail.html">
+          <div class="btn-icon"><i class="fa-solid fa-circle-info"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">코스 상세 가이드</span></div>
+            <div class="btn-desc">guide-course-detail.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+      </div>
+
+      <!-- 우 : 온라인 (작업중) -->
+      <div class="split-col">
+        <a class="btn is-wip" href="docs/online-course.html">
+          <div class="btn-icon c-online"><i class="fa-solid fa-tv"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">온라인 코스 스펙</span><span class="wip">작업중</span></div>
+            <div class="btn-desc">docs/online-course.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <div class="wip-card">
+          <div class="wip-card-title"><i class="fa-solid fa-book-open"></i> &nbsp;온라인 가이드</div>
+          <div class="wip-card-sub">작업중 — 아직 문서 없음</div>
         </div>
-        <i class="fa-solid fa-chevron-right btn-arrow"></i>
-      </a>
-      <a class="btn" href="user/category.html">
-        <div class="btn-icon c-user"><i class="fa-solid fa-tags"></i></div>
-        <div class="btn-text">
-          <div class="btn-title">카테고리</div>
-          <div class="btn-desc">온라인 · 오프라인 · 전체</div>
-        </div>
-        <i class="fa-solid fa-chevron-right btn-arrow"></i>
-      </a>
-      <a class="btn" href="user/course-list.html">
-        <div class="btn-icon c-user"><i class="fa-solid fa-th-large"></i></div>
-        <div class="btn-text">
-          <div class="btn-title">코스 목록</div>
-          <div class="btn-desc">3열 그리드 · 상태 배지</div>
-        </div>
-        <i class="fa-solid fa-chevron-right btn-arrow"></i>
-      </a>
-      <a class="btn" href="user/my.html">
-        <div class="btn-icon c-user"><i class="fa-solid fa-bookmark"></i></div>
-        <div class="btn-text">
-          <div class="btn-title">MY 페이지</div>
-          <div class="btn-desc">수강 내역 · 필터</div>
-        </div>
-        <i class="fa-solid fa-chevron-right btn-arrow"></i>
-      </a>
-      <a class="btn" href="user/course-detail.html">
-        <div class="btn-icon c-user"><i class="fa-solid fa-circle-info"></i></div>
-        <div class="btn-text">
-          <div class="btn-title">코스 상세 (미신청)</div>
-          <div class="btn-desc">신청 전 상태</div>
-        </div>
-        <i class="fa-solid fa-chevron-right btn-arrow"></i>
-      </a>
-      <a class="btn" href="user/course-enrolled.html">
-        <div class="btn-icon c-user"><i class="fa-solid fa-play-circle"></i></div>
-        <div class="btn-text">
-          <div class="btn-title">코스 상세 (수강 중)</div>
-          <div class="btn-desc">출석 현황 · 진도</div>
-        </div>
-        <i class="fa-solid fa-chevron-right btn-arrow"></i>
-      </a>
-      <a class="btn" href="user/course-completed.html">
-        <div class="btn-icon c-user"><i class="fa-solid fa-circle-check"></i></div>
-        <div class="btn-text">
-          <div class="btn-title">코스 상세 (완료)</div>
-          <div class="btn-desc">수료 · 결과 확인</div>
-        </div>
-        <i class="fa-solid fa-chevron-right btn-arrow"></i>
-      </a>
+      </div>
     </div>
   </div>
 
+  <!-- ═══════════ 03 학습자 ═══════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">학습자</span>
+      <div class="section-line"></div>
+      <span class="section-count">9</span>
+    </div>
 
+    <div class="col-header">
+      <div class="col-h col-h-offline"><i class="fa-solid fa-location-dot"></i> 오프라인</div>
+      <div class="col-h col-h-online"><i class="fa-solid fa-tv"></i> 온라인 <span class="wip-tag">작업중</span></div>
+    </div>
 
-  <div class="version">LMS Prototype — Vision 2026 Phase 1 &nbsp;·&nbsp; newcourse v1.1 &nbsp;·&nbsp; 2026-04-28</div>
+    <div class="split-row">
+      <!-- 좌 : 오프라인 학습자 -->
+      <div class="split-col">
+        <a class="btn" href="user/home.html">
+          <div class="btn-icon"><i class="fa-solid fa-house"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">홈</span></div>
+            <div class="btn-desc">home.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="user/category.html">
+          <div class="btn-icon"><i class="fa-solid fa-tags"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">카테고리</span></div>
+            <div class="btn-desc">category.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="user/course-list.html">
+          <div class="btn-icon"><i class="fa-solid fa-th-large"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">코스 목록</span></div>
+            <div class="btn-desc">course-list.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="user/my.html">
+          <div class="btn-icon"><i class="fa-solid fa-bookmark"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">MY 페이지</span></div>
+            <div class="btn-desc">my.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="user/course-detail.html">
+          <div class="btn-icon"><i class="fa-solid fa-circle-info"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">코스 상세 (미신청)</span></div>
+            <div class="btn-desc">course-detail.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="user/course-enrolled.html">
+          <div class="btn-icon"><i class="fa-solid fa-play-circle"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">코스 상세 (수강 중)</span></div>
+            <div class="btn-desc">course-enrolled.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="user/course-completed.html">
+          <div class="btn-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">코스 상세 (완료)</span></div>
+            <div class="btn-desc">course-completed.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="user/course-viewer.html">
+          <div class="btn-icon"><i class="fa-solid fa-video"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">코스 뷰어</span></div>
+            <div class="btn-desc">course-viewer.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+        <a class="btn" href="user/course-detail-newin.html">
+          <div class="btn-icon"><i class="fa-solid fa-palette"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">코스 상세 (newin)</span></div>
+            <div class="btn-desc">course-detail-newin.html</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+      </div>
+
+      <!-- 우 : 온라인 학습자 (작업중) -->
+      <div class="split-col">
+        <div class="wip-card">
+          <div class="wip-card-title"><i class="fa-solid fa-tv"></i> &nbsp;온라인 학습자 화면</div>
+          <div class="wip-card-sub">작업중 — 아직 페이지 없음</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="version">newcourse Prototype Hub · v3.0 · 2026-05-21</div>
 
 </div>
 </body>
