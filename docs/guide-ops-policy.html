@@ -259,6 +259,17 @@ function closeMobileSidebar() {
 <!-- Content -->
 <main id="content" class="px-10 py-9 max-w-4xl">
 
+<!-- newcourse 시스템 안내 -->
+<div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
+  <div style="display:flex;gap:10px;align-items:flex-start;">
+    <span style="color:#059669;font-weight:700;font-size:13px;">NEW</span>
+    <div style="font-size:13.5px;color:#065f46;line-height:1.6;">
+      <strong>2026-05 newcourse 시스템 추가.</strong> 본 가이드의 운영 정책은 현재 운영중인 오프라인 LMS(레거시 v1) 기준입니다. 신규 코스 등록 시 어드민 사이드바의 <strong>코스v2</strong> 그룹에서 <strong>온라인 코스</strong> / <strong>오프라인 코스</strong>(newcourse 패러다임)도 선택 가능합니다. 두 시스템은 데이터·기능 영구 분리. 자세한 내용은 <a href="newcourse.html" style="color:#047857;text-decoration:underline;">newcourse.html</a>.
+    </div>
+  </div>
+</div>
+
+
 
 <!-- ══════════════════════════════════════════
      운영 케이스 — 전체 목록
@@ -307,14 +318,14 @@ function closeMobileSidebar() {
             <td><span class="b b-green">FLOW-04</span></td>
             <td><strong>현장 QR 출석</strong> — 수업 당일 라이브 모드 운영</td>
             <td>강사 / 고객사 담당자</td>
-            <td>offline-course-view</td>
+            <td>offline-view</td>
             <td>4.1~4.3 출석 상태·지각·마감</td>
           </tr>
           <tr>
             <td><span class="b b-blue">FLOW-06</span></td>
             <td><strong>코스 목록 탐색</strong> — 관리자 목록 화면 필터 탐색</td>
             <td>고객사 담당자 / 운영팀</td>
-            <td>index.html</td>
+            <td>offline-list.html</td>
             <td>6.1 코스 목록 기능</td>
           </tr>
           <tr>
@@ -449,6 +460,14 @@ function closeMobileSidebar() {
   <div class="page-tag">운영 케이스 FLOW-01</div>
   <div class="page-title">코스 개설</div>
   <div class="page-desc">고객사 담당자가 신규 오프라인 코스를 등록하고 공개하는 전체 흐름입니다. 총 소요 시간: 약 10~15분.</div>
+
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin:20px 0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-builder.html</div>
+      <a href="../admin/offline-builder.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
+    </div>
+    <a href="../admin/offline-builder.html" target="_blank"><img src="../screenshots/admin/offline-builder/full.png" alt="오프라인 코스 빌더 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
+  </div>
 
   <div class="guide-section">
     <div class="section-title">코스 개설 단계별 흐름 <span class="section-tag">FLOW-01</span></div>
@@ -706,13 +725,21 @@ function closeMobileSidebar() {
   <div class="page-title">현장 QR 출석 운영</div>
   <div class="page-desc">수업 당일 강사 또는 고객사 담당자가 라이브 모드로 QR 출석을 운영하고 회차를 마감하는 전체 흐름입니다.</div>
 
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin:20px 0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-view.html</div>
+      <a href="../admin/offline-view.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
+    </div>
+    <a href="../admin/offline-view.html" target="_blank"><img src="../screenshots/admin/offline-view/full.png" alt="오프라인 수강관리 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
+  </div>
+
   <div class="guide-section">
     <div class="section-title">수업 당일 출석 운영 흐름 <span class="section-tag">FLOW-04</span></div>
     <div class="mt-3 space-y-0">
       <div class="step-row">
         <div class="step-num" style="background:#16a34a">1</div>
         <div class="step-body">
-          <div class="step-action">수강관리 화면(offline-course-view) → 출석 탭 → 해당 회차 선택</div>
+          <div class="step-action">수강관리 화면(offline-view) → 출석 탭 → 해당 회차 선택</div>
           <div class="step-note">수업 당일 수업 시작 전에 미리 화면을 열어둡니다</div>
         </div>
       </div>
@@ -782,13 +809,21 @@ function closeMobileSidebar() {
   <div class="page-title">코스 목록 탐색</div>
   <div class="page-desc">관리자 메인 화면에서 코스를 필터링하고, 차수 현황을 확인하고, 수강관리 화면으로 이동하는 흐름입니다.</div>
 
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin:20px 0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-list.html</div>
+      <a href="../admin/offline-list.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
+    </div>
+    <a href="../admin/offline-list.html" target="_blank"><img src="../screenshots/admin/offline-list/full.png" alt="오프라인 코스 목록 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
+  </div>
+
   <div class="guide-section">
     <div class="section-title">코스 목록 탐색 흐름 <span class="section-tag">FLOW-06</span></div>
     <div class="mt-3 space-y-0">
       <div class="step-row">
         <div class="step-num" style="background:#2563eb">1</div>
         <div class="step-body">
-          <div class="step-action">관리자 메인 (index.html) 접속</div>
+          <div class="step-action">관리자 메인 (offline-list.html) 접속</div>
           <div class="step-note">상단 상태 탭(전체/준비중/모집중/진행중/완료) + 좌측 카테고리 트리 표시</div>
         </div>
       </div>
@@ -810,7 +845,7 @@ function closeMobileSidebar() {
         <div class="step-num" style="background:#2563eb">4</div>
         <div class="step-body">
           <div class="step-action">"수강관리" 버튼 클릭</div>
-          <div class="step-note">offline-course-view.html로 이동. 수강생·출석·통계 관리 화면</div>
+          <div class="step-note">offline-view.html로 이동. 수강생·출석·통계 관리 화면</div>
         </div>
       </div>
     </div>

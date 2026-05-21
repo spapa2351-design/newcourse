@@ -280,10 +280,18 @@ function closeMobileSidebar() {
 <!-- Content -->
 <main id="content" class="px-10 py-10 max-w-4xl">
 
-  <!-- ══════════════════════════════════════════════════════ -->
-  <!-- PAGE: intro -->
-  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- newcourse 시스템 안내 -->
   <div class="page active" id="page-intro">
+    <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span style="color:#059669;font-weight:700;font-size:13px;">NEW</span>
+        <div style="font-size:13.5px;color:#065f46;line-height:1.6;">
+          <strong>2026-05 newcourse 시스템 추가.</strong> 본 가이드는 현재 운영중인 오프라인 LMS(<code>offline-list.html</code> · <code>offline-builder.html</code> · <code>offline-view.html</code>) 기준입니다. 신규 코스 등록 시 어드민 사이드바의 <strong>코스v2</strong> 그룹에서 <strong>온라인 코스</strong> / <strong>오프라인 코스</strong>를 선택할 수도 있습니다. 두 시스템은 영구 공존하며 데이터·기능은 별도입니다. 자세한 내용은 <a href="newcourse.html" style="color:#047857;text-decoration:underline;">newcourse.html</a> 참조.
+        </div>
+      </div>
+    </div>
+
+
     <div class="breadcrumb">시작하기</div>
     <div class="page-header">
       <div class="page-tag">개요</div>
@@ -1184,7 +1192,7 @@ function closeMobileSidebar() {
         <div class="border border-indigo-200 bg-indigo-50 rounded-xl p-4 flex items-start gap-4">
           <div class="text-2xl">📋</div>
           <div>
-            <div class="font-bold text-indigo-800 text-sm mb-1">코스 목록 <span class="text-xs font-normal text-indigo-500">(index.html)</span></div>
+            <div class="font-bold text-indigo-800 text-sm mb-1">코스 목록 <span class="text-xs font-normal text-indigo-500">(offline-list.html)</span></div>
             <div class="text-xs text-indigo-700 leading-relaxed">전체 오프라인 코스 목록. 상태 필터, 분류 사이드바, 차수 확장 보기. 코스 등록/수강관리 진입.</div>
           </div>
         </div>
@@ -1198,7 +1206,7 @@ function closeMobileSidebar() {
         <div class="border border-emerald-200 bg-emerald-50 rounded-xl p-4 flex items-start gap-4">
           <div class="text-2xl">📊</div>
           <div>
-            <div class="font-bold text-emerald-800 text-sm mb-1">코스 운영 현황 <span class="text-xs font-normal text-emerald-500">(offline-course-view.html)</span></div>
+            <div class="font-bold text-emerald-800 text-sm mb-1">코스 운영 현황 <span class="text-xs font-normal text-emerald-500">(offline-view.html)</span></div>
             <div class="text-xs text-emerald-700 leading-relaxed">운영 중 코스의 대시보드, 수강생 관리, 출석·수료 처리, QR 라이브 모드까지 통합 운영 화면.</div>
           </div>
         </div>
@@ -1293,15 +1301,12 @@ function closeMobileSidebar() {
       <p class="page-desc">오프라인 코스 전체 목록을 관리하는 메인 화면입니다. 좌측 분류 사이드바, 상단 상태 탭, 테이블로 구성됩니다.</p>
     </div>
 
-    <div class="guide-section">
-      <div class="section-title">화면 구성</div>
-      <div class="screen-wrap">
-        <div class="screen-card">
-          <img src="../screenshots/admin/course-list/01_list_default.png" class="screen-img" style="width:100%" alt="코스 목록 기본" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="screen-placeholder" style="width:560px;height:320px;display:none">📸 캡처 필요<br>index.html 기본 화면</div>
-          <div class="screen-label">코스 목록 기본 화면</div>
-        </div>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-list.html</div>
+        <a href="../admin/offline-list.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
       </div>
+      <a href="../admin/offline-list.html" target="_blank"><img src="../screenshots/admin/offline-list/full.png" alt="오프라인 코스 목록 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
     </div>
 
     <div class="guide-section">
@@ -1355,7 +1360,7 @@ function closeMobileSidebar() {
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">표지</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스 커버 이미지 썸네일</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">상태</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">운영중 / 공개예약 / 임시저장 / 종료 배지</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스명</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스 제목 + "N개 반" 배지 + 대표 장소. 클릭 시 빌더로 이동</td></tr>
-          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강관리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">운영중·종료 코스만 활성. <code>offline-course-view.html</code>로 이동</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강관리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">운영중·종료 코스만 활성. <code>offline-view.html</code>로 이동</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">N개 차수 · 총 N회차 버튼. 클릭 시 차수 행 펼치기/접기</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">분류</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">카테고리 배지</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">교육 기간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">차수 전체 기간 범위. D-day 배지(D-Day·D-N) 표시</td></tr>
@@ -1482,7 +1487,7 @@ function closeMobileSidebar() {
       <div class="flow-row">
         <div class="flow-box">👥 수강관리</div>
         <span class="flow-arrow">→</span>
-        <div class="flow-box">offline-course-view.html (운영중·종료만 활성)</div>
+        <div class="flow-box">offline-view.html (운영중·종료만 활성)</div>
       </div>
     </div>
 
@@ -1507,6 +1512,14 @@ function closeMobileSidebar() {
       <div class="page-tag">코스 등록</div>
       <h1 class="page-title">① 기본 정보</h1>
       <p class="page-desc">코스의 기본 정보를 입력하는 첫 번째 섹션입니다. 커버 이미지, 카테고리, 강사, 코스 소개 등을 설정합니다.</p>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-builder.html</div>
+        <a href="../admin/offline-builder.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
+      </div>
+      <a href="../admin/offline-builder.html" target="_blank"><img src="../screenshots/admin/offline-builder/full.png" alt="오프라인 코스 빌더 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
     </div>
 
     <div class="guide-section">
@@ -1855,7 +1868,7 @@ function closeMobileSidebar() {
     <div class="guide-section">
       <div class="section-title">퍼블리싱 버튼</div>
       <div class="callout callout-blue">
-        퍼블리싱 후에는 <strong>코스 운영 현황(offline-course-view.html)</strong>으로 이동하여 수강생 관리 및 출석 처리를 시작할 수 있습니다.
+        퍼블리싱 후에는 <strong>코스 운영 현황(offline-view.html)</strong>으로 이동하여 수강생 관리 및 출석 처리를 시작할 수 있습니다.
       </div>
     </div>
 
@@ -1875,11 +1888,19 @@ function closeMobileSidebar() {
   <!-- PAGE: admin-view-dashboard -->
   <!-- ══════════════════════════════════════════════════════ -->
   <div class="page" id="page-admin-view-dashboard">
-    <div class="breadcrumb">코스 운영 <span>›</span> offline-course-view</div>
+    <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
     <div class="page-header">
       <div class="page-tag">코스 운영</div>
       <h1 class="page-title">대시보드</h1>
       <p class="page-desc">퍼블리싱된 코스의 운영 현황을 한눈에 파악하는 화면입니다. 좌측 코스 정보 패널과 메인 대시보드 탭으로 구성됩니다.</p>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:800;color:#0f172a;">현 어드민 화면 — offline-view.html</div>
+        <a href="../admin/offline-view.html" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:underline;">화면 열기 ↗</a>
+      </div>
+      <a href="../admin/offline-view.html" target="_blank"><img src="../screenshots/admin/offline-view/full.png" alt="오프라인 수강관리 풀스크린" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block;"/></a>
     </div>
 
     <div class="guide-section">
@@ -1887,7 +1908,7 @@ function closeMobileSidebar() {
       <div class="screen-wrap">
         <div class="screen-card">
           <img src="../screenshots/admin/course-view/01_dashboard_overview.png" class="screen-img" style="width:100%" alt="대시보드" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="screen-placeholder" style="width:560px;height:340px;display:none">📸 캡처 필요 — offline-course-view.html 대시보드 탭</div>
+          <div class="screen-placeholder" style="width:560px;height:340px;display:none">📸 캡처 필요 — offline-view.html 대시보드 탭</div>
           <div class="screen-label">코스 운영 현황 대시보드</div>
         </div>
       </div>
@@ -1971,7 +1992,7 @@ function closeMobileSidebar() {
   <!-- PAGE: admin-view-students -->
   <!-- ══════════════════════════════════════════════════════ -->
   <div class="page" id="page-admin-view-students">
-    <div class="breadcrumb">코스 운영 <span>›</span> offline-course-view</div>
+    <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
     <div class="page-header">
       <div class="page-tag">코스 운영</div>
       <h1 class="page-title">수강생 관리 탭</h1>
@@ -2038,7 +2059,7 @@ function closeMobileSidebar() {
   <!-- PAGE: admin-view-attendance -->
   <!-- ══════════════════════════════════════════════════════ -->
   <div class="page" id="page-admin-view-attendance">
-    <div class="breadcrumb">코스 운영 <span>›</span> offline-course-view</div>
+    <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
     <div class="page-header">
       <div class="page-tag">코스 운영</div>
       <h1 class="page-title">출석·수료 탭</h1>
@@ -2250,7 +2271,7 @@ function closeMobileSidebar() {
   <!-- PAGE: admin-view-qr -->
   <!-- ══════════════════════════════════════════════════════ -->
   <div class="page" id="page-admin-view-qr">
-    <div class="breadcrumb">코스 운영 <span>›</span> offline-course-view</div>
+    <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
     <div class="page-header">
       <div class="page-tag">코스 운영</div>
       <h1 class="page-title">QR 라이브 모드</h1>
