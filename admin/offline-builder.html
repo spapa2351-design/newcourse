@@ -795,6 +795,9 @@
         showToast(`"${sess?.name || '회차'}"가 삭제됐습니다`, '🗑');
       };
       const handleSessionChange = (sid, field, val, optId) => setOptions(options.map(opt => opt.id === optId ? { ...opt, sessions: opt.sessions.map(s => s.id === sid ? { ...s, [field]: val } : s) } : opt));
+      // 학습 시간: startTime~endTime 자동 계산(분). studyMinOverride 있으면 그 값 우선.
+      const sessMin = (s) => { if(!s.startTime||!s.endTime) return 0; const [a,b]=s.startTime.split(':').map(Number),[c,d]=s.endTime.split(':').map(Number); return Math.max(0,(c*60+d)-(a*60+b)); };
+      const fmtDurB = (m) => { if(!m) return '-'; const h=Math.floor(m/60),mm=m%60; return (h&&mm)?`${h}시간 ${mm}분`:h?`${h}시간`:`${mm}분`; };
       const handleAddTimeSlot = (optId, refSess) => {
         setOptions(options.map(opt => {
           if (opt.id !== optId) return opt;
@@ -1893,6 +1896,30 @@
                                     <input type="time" value={sess.startTime} onChange={e => handleSessionChange(sess.id, 'startTime', e.target.value, opt.id)} className="flex-1 border border-slate-300 rounded p-1.5 text-[12px] outline-none focus:border-indigo-500 bg-white"/>
                                     <span className="text-slate-400 text-[12px]">~</span>
                                     <input type="time" value={sess.endTime} onChange={e => handleSessionChange(sess.id, 'endTime', e.target.value, opt.id)} className="flex-1 border border-slate-300 rounded p-1.5 text-[12px] outline-none focus:border-indigo-500 bg-white"/>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-12 text-[11px] font-bold text-slate-500 shrink-0">학습</div>
+                                    {sess.studyMinOverride != null ? (
+                                      <div className="flex-1 flex items-center gap-1.5">
+                                        <input type="number" min="0" value={Math.floor(sess.studyMinOverride/60)}
+                                          onChange={e => handleSessionChange(sess.id, 'studyMinOverride', Math.max(0,parseInt(e.target.value)||0)*60 + (sess.studyMinOverride%60), opt.id)}
+                                          className="w-14 border border-indigo-300 rounded p-1.5 text-[12px] text-center outline-none focus:border-indigo-500 bg-indigo-50"/>
+                                        <span className="text-[12px] text-slate-500">시간</span>
+                                        <input type="number" min="0" max="59" value={sess.studyMinOverride%60}
+                                          onChange={e => handleSessionChange(sess.id, 'studyMinOverride', Math.floor(sess.studyMinOverride/60)*60 + Math.min(59,Math.max(0,parseInt(e.target.value)||0)), opt.id)}
+                                          className="w-14 border border-indigo-300 rounded p-1.5 text-[12px] text-center outline-none focus:border-indigo-500 bg-indigo-50"/>
+                                        <span className="text-[12px] text-slate-500">분</span>
+                                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded ml-auto shrink-0">수정됨</span>
+                                      </div>
+                                    ) : (
+                                      <div className="flex-1 text-[12px] text-slate-500">자동 <strong className="text-slate-700">{fmtDurB(sessMin(sess))}</strong> <span className="text-slate-400 text-[11px]">(시작~종료)</span></div>
+                                    )}
+                                    <label className="flex items-center gap-1 text-[11px] font-bold text-slate-500 cursor-pointer shrink-0">
+                                      <input type="checkbox" checked={sess.studyMinOverride != null}
+                                        onChange={e => handleSessionChange(sess.id, 'studyMinOverride', e.target.checked ? sessMin(sess) : null, opt.id)}
+                                        className="w-3.5 h-3.5 accent-indigo-500"/>
+                                      직접 입력
+                                    </label>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <div className="w-12 text-[11px] font-bold text-slate-500 shrink-0 flex items-center gap-0.5"><MapPin size={9}/> 장소</div>

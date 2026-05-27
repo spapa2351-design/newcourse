@@ -166,7 +166,7 @@
             sessions:[
               {id:'s1',name:'1회차',date:'2026-04-07',start:'09:00',end:'12:00',att:9,late:1,abs:0,pending:0},
               {id:'s2',name:'2회차',date:'2026-04-08',start:'09:00',end:'12:00',att:8,late:1,abs:1,pending:0},
-              {id:'s3',name:'3회차',date:'2026-04-09',start:'13:00',end:'17:00',att:7,late:2,abs:1,pending:0},
+              {id:'s3',name:'3회차',date:'2026-04-09',start:'13:00',end:'17:00',studyMinOverride:180,att:7,late:2,abs:1,pending:0},
               {id:'s4',name:'4회차',date:'2026-04-10',start:'13:00',end:'17:00',att:7,late:1,abs:2,pending:0},
               {id:'s5',name:'5회차',date:'2026-04-11',start:'09:00',end:'12:00',att:6,late:2,abs:2,pending:0},
             ]},
@@ -354,6 +354,18 @@
   const LEARNERS_RAW = _cdata.learners;
   const COMPLETION = _cdata.completion;
 
+  /* ── 코스 상태별 뷰 모드 (오프라인: active·published·scheduled·draft·closed) ──
+     오프라인은 온라인의 4-액션 종료 모달이 없는 단순 모델. 운영중/예정/종료 구분만. */
+  const OFF_STATUS = {
+    active:    { badge: '운영중', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+    published: { badge: '운영중', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+    scheduled: { badge: '예정',   bg: 'bg-sky-50',     text: 'text-sky-700',     border: 'border-sky-200' },
+    draft:     { badge: '작성 중', bg: 'bg-slate-100',  text: 'text-slate-500',   border: 'border-slate-200' },
+    closed:    { badge: '종료',   bg: 'bg-slate-100',  text: 'text-slate-500',   border: 'border-slate-200' },
+  };
+  const cmode = OFF_STATUS[COURSE.status] || OFF_STATUS.active;
+  const isClosedCourse = COURSE.status === 'closed';
+
   /* ── 수강생 등록 모달용 풀 ── */
   const STUDENT_POOL = [
     {id:'u1',name:'이승주',group:'비서실'},{id:'u2',name:'김하은',group:'개발팀'},
@@ -385,12 +397,35 @@
   const fmtDate = d => d ? d.replace(/-/g,'.').slice(2) : '-';
   const fmtShort = d => d ? d.slice(5).replace('-','/') : '-';
   const fmtRange = (s,e) => e&&e!==s ? `${fmtDate(s)} ~ ${fmtDate(e)}` : fmtDate(s);
-  const attRate = s => s.att+s.late+s.abs > 0 ? Math.round((s.att+s.late)/(s.att+s.late+s.abs)*100) : null;
+  /* 조퇴(early_leave) — 공용 기본정책 (2026-05-27, attendance-rate-policy)
+     조퇴도 출석으로 인정(분자 포함) + 사유 기록. 모든 오프라인 코스 동일.
+     법정의무 코스의 시수 strict(조퇴=미인정)는 코스 유형 필드 생기는 Phase 2에 분기.
+     집계 데이터에 early 버킷 없으면 0으로 안전 처리. */
+  const presentOf = s => s.att + s.late + (s.early || 0);          // 분자: 출석+지각+조퇴
+  const denomOf   = s => s.att + s.late + (s.early || 0) + s.abs;  // 분모: +결석
+
+  /* 학습 시간 — 회차 수업시간(end-start) 합산. (국비교육 시수 strict 기준은 Phase 3) */
+  const durationMin = (start, end) => {
+    if (!start || !end) return 0;
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    return Math.max(0, (eh*60+em) - (sh*60+sm));
+  };
+  const fmtDuration = (m) => {
+    if (!m) return '-';
+    const h = Math.floor(m/60), mm = m%60;
+    if (h && mm) return `${h}시간 ${mm}분`;
+    if (h) return `${h}시간`;
+    return `${mm}분`;
+  };
+  const sessionStudyMin = s => (s.studyMinOverride != null ? s.studyMinOverride : durationMin(s.start, s.end));  // 관리자 직접 입력(override) 우선, 없으면 자동
+  const pkgStudyMin = pkg => pkg.sessions.reduce((b,s)=>b + sessionStudyMin(s), 0);  // 차수당 학습시간(회차 합)
+  const attRate = s => denomOf(s) > 0 ? Math.round(presentOf(s) / denomOf(s) * 100) : null;
   const pkgAttRate = pkg => {
-    const done = pkg.sessions.filter(s => s.att+s.late+s.abs > 0);
+    const done = pkg.sessions.filter(s => denomOf(s) > 0);
     if(!done.length) return null;
-    const total = done.reduce((a,s)=>a+s.att+s.late+s.abs,0);
-    const present = done.reduce((a,s)=>a+s.att+s.late,0);
+    const total   = done.reduce((a,s)=>a + denomOf(s), 0);
+    const present = done.reduce((a,s)=>a + presentOf(s), 0);
     return Math.round(present/total*100);
   };
 
@@ -505,6 +540,7 @@
     const [expandedSession, setExpandedSession] = useState(null);
     // 관리자 수동 인정 시간 맵 — key: `${learnerId}_${sessId}`
     const [tsMap, setTsMap] = useState({});
+    const [reasonMap, setReasonMap] = useState({});   // 조퇴·결석 사유 {learnerId_sessId: reason}
     // QR 스캔 시간 맵 — 학습자가 실제 QR 찍은 시간 (모의 데이터: 기존 att/late 학습자에 시뮬 시간 부여)
     const [scanTimeMap, setScanTimeMap] = useState(() => {
       const map = {};
@@ -620,9 +656,23 @@
 
     const overallRate = useMemo(() => {
       let present=0, total=0;
-      COURSE.packages.forEach(p=>p.sessions.forEach(s=>{if(s.att+s.late+s.abs>0){present+=s.att+s.late;total+=s.att+s.late+s.abs;}}));
+      COURSE.packages.forEach(p=>p.sessions.forEach(s=>{if(denomOf(s)>0){present+=presentOf(s);total+=denomOf(s);}}));
       return total>0?Math.round(present/total*100):0;
     },[]);
+
+    // 평균 학습시간 (수강생 1인 평균 — 출석/지각/조퇴 회차 시간 합)
+    const avgStudyMin = useMemo(() => {
+      if (!LEARNERS_RAW.length) return 0;
+      const sum = LEARNERS_RAW.reduce((acc,l)=>{
+        const pkg = COURSE.packages.find(p=>p.id===l.pkgId);
+        if (!pkg) return acc;
+        return acc + pkg.sessions.reduce((a,s)=>{
+          const st = attendanceMap[`${l.id}_${s.id}`]||'pending';
+          return a + ((st==='attended'||st==='late'||st==='early_leave')?sessionStudyMin(s):0);
+        },0);
+      },0);
+      return Math.round(sum / LEARNERS_RAW.length);
+    },[attendanceMap]);
 
     const downloadStudentExcel = () => {
       const bom = '﻿';
@@ -691,6 +741,13 @@
       setAttendanceMap(prev => ({...prev, [`${learnerId}_${sessId}`]: status}));
     };
 
+    // 조퇴·결석 사유 기록 (정당 사유 예외 — 관리자 임의 아님, audit 근거)
+    const REASON_PRESETS = ['병가', '경조사', '공무·업무', '기타'];
+    const setAttReason = (learnerId, sessId, reason) => {
+      const key = `${learnerId}_${sessId}`;
+      setReasonMap(prev => { const n = {...prev}; if (reason) n[key] = reason; else delete n[key]; return n; });
+    };
+
     // 타임스탬프 포맷: 2026/04/28 19:50:47
     const fmtTs = () => {
       const d = new Date();
@@ -703,6 +760,10 @@
     const recordAttendance = (learnerId, sessId, status, pkgId, learnerName, isQrScan = false) => {
       changeAttendance(learnerId, sessId, status);
       const key = `${learnerId}_${sessId}`;
+      // 사유는 조퇴·결석에서만 의미 — 그 외 상태로 바뀌면 사유 제거
+      if (status !== 'early_leave' && status !== 'absent') {
+        setReasonMap(prev => { const n = {...prev}; delete n[key]; return n; });
+      }
       if (status === 'attended' || status === 'late' || status === 'early_leave') {
         if (isQrScan) {
           setScanTimeMap(prev => ({...prev, [key]: prev[key] || fmtTs()}));
@@ -951,7 +1012,7 @@
               </div>
               <h1 className="text-[20px] font-black text-slate-900 leading-tight truncate">{COURSE.title}</h1>
             </div>
-            <span className="ml-2 px-2.5 py-1 rounded-full text-[12px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200 shrink-0">운영중</span>
+            <span className={`ml-2 px-2.5 py-1 rounded-full text-[12px] font-bold border shrink-0 ${cmode.bg} ${cmode.text} ${cmode.border}`}>{cmode.badge}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button onClick={()=>setCalOpen(o=>!o)}
@@ -968,6 +1029,17 @@
           </div>
         </header>
 
+        {/* ── 종료 코스 배너 (조회 전용 안내) ── */}
+        {isClosedCourse && (
+          <div className="mx-8 mb-3 px-4 py-3 rounded-xl border bg-slate-50 border-slate-200 flex items-start gap-3 shrink-0">
+            <Power size={18} className="text-slate-400 mt-0.5 shrink-0"/>
+            <div className="flex-1 min-w-0">
+              <span className="text-[14px] font-black text-slate-700">종료된 코스</span>
+              <p className="text-[12.5px] font-medium text-slate-500 leading-relaxed mt-0.5">운영이 종료되어 신규 수강 등록과 출석 처리는 할 수 없습니다. 출석·수료 이력은 조회할 수 있습니다.</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-1 overflow-hidden gap-3 px-4 pb-4 pt-0 items-start">
 
           {/* ══ 왼쪽 사이드바 ══ */}
@@ -977,7 +1049,7 @@
               {/* 배지 블록 */}
               <div className="w-full flex gap-1">
                 <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">{COURSE.category}</span>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">운영중</span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${cmode.bg} ${cmode.text} ${cmode.border}`}>{cmode.badge}</span>
               </div>
               {/* 커버 이미지 블록 9:16 */}
               {coverImage ? (
@@ -1000,6 +1072,7 @@
                   {label:'강사', value: COURSE.instructor},
                   {label:'차수', value:`${COURSE.packages.length}개 차수`},
                   {label:'총 회차', value:`${totalSessions}회차`},
+                  {label:'학습 시간', value:`${fmtDuration(pkgStudyMin(COURSE.packages[0]))} (차수 기준)`},
                   {label:'기간', value:`${fmtShort(COURSE.packages[0].startDate)} ~ ${fmtShort(COURSE.packages[COURSE.packages.length-1].endDate)}`},
                   {label:'장소', value:'한샘 HQ 외 2곳'},
                 ].map(({label,value}) => (
@@ -1053,20 +1126,33 @@
 
             {/* 액션 버튼 */}
             <div className="p-4 border-t border-slate-100 space-y-2 shrink-0">
-              <button data-feature-id="A3-03" onClick={()=>setShowEnrollModal(true)}
-                className="w-full flex items-center justify-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[14px] py-2 rounded-xl transition-colors border border-indigo-200">
-                <UserCheck size={13}/> 수강생 등록
-              </button>
-              {todaySess && (
+              {isClosedCourse ? (
+                <span title="종료된 코스에는 새 수강생을 등록할 수 없습니다"
+                  className="w-full flex items-center justify-center gap-1.5 bg-slate-50 text-slate-400 border border-slate-200 font-bold text-[14px] py-2 rounded-xl cursor-not-allowed">
+                  <UserCheck size={13}/> 수강생 등록
+                </span>
+              ) : (
+                <button data-feature-id="A3-03" onClick={()=>setShowEnrollModal(true)}
+                  className="w-full flex items-center justify-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[14px] py-2 rounded-xl transition-colors border border-indigo-200">
+                  <UserCheck size={13}/> 수강생 등록
+                </button>
+              )}
+              {!isClosedCourse && todaySess && (
                 <button data-feature-id="A3-04" onClick={()=>setLiveMode(true)}
                   className="w-full flex items-center justify-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-[14px] py-2 rounded-xl transition-colors shadow-sm">
                   <QrCode size={13}/> 라이브 출석
                 </button>
               )}
-              <button onClick={()=>setOperationConfirm(true)}
-                className="w-full flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[13px] py-2 rounded-xl transition-colors">
-                <Power size={12}/> 운영 종료
-              </button>
+              {isClosedCourse ? (
+                <div className="w-full flex items-center justify-center gap-1.5 bg-slate-50 text-slate-400 border border-slate-200 font-bold text-[12px] py-2 rounded-xl">
+                  <Power size={12}/> 종료됨 · 조회 전용
+                </div>
+              ) : (
+                <button onClick={()=>setOperationConfirm(true)}
+                  className="w-full flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[13px] py-2 rounded-xl transition-colors">
+                  <Power size={12}/> 운영 종료
+                </button>
+              )}
             </div>
           </aside>
 
@@ -1092,12 +1178,13 @@
             )}
 
             {/* 요약 통계 카드 */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-5 gap-3">
               {[
                 {label:'총 신청자', value:`${totalEnrolled}/${totalCapacity}명`, sub:`정원 대비 ${Math.round(totalEnrolled/totalCapacity*100)}%`, color:'text-indigo-600', bg:'bg-indigo-50', icon:Users},
                 {label:'수료 완료', value:`${completedCount}명`, sub:`전체의 ${Math.round(completedCount/totalEnrolled*100)}%`, color:'text-emerald-600', bg:'bg-emerald-50', icon:Award},
                 {label:'차수', value:`${COURSE.packages.length}개`, sub:`총 ${totalSessions}회차`, color:'text-violet-600', bg:'bg-violet-50', icon:Calendar},
                 {label:'평균 출석률', value:`${overallRate}%`, sub:'완료 회차 기준', color:'text-amber-600', bg:'bg-amber-50', icon:TrendingUp},
+                {label:'평균 학습시간', value:fmtDuration(avgStudyMin), sub:'1인 평균', color:'text-cyan-600', bg:'bg-cyan-50', icon:Clock},
               ].map((s,i)=>(
                 <div key={i} className="bg-white rounded-xl px-4 py-3.5 shadow-sm flex items-center gap-3">
                   <div className={`w-9 h-9 ${s.bg} rounded-xl flex items-center justify-center shrink-0`}>
@@ -1282,13 +1369,14 @@
                       const sessData=pkg.sessions.map(s=>{
                         const c=getSessionCounts(s.id,pkg.id);
                         const doneTotal=c.att+c.late+c.el+c.abs;
-                        const rate=doneTotal>0?Math.round((c.att+c.late)/doneTotal*100):null;
+                        // 조퇴 = 출석 인정 (공용 기본정책)
+                        const rate=doneTotal>0?Math.round((c.att+c.late+c.el)/doneTotal*100):null;
                         return {...s,...c,rate};
                       });
                       const livePkgRate=(()=>{
                         const done=sessData.filter(s=>s.rate!==null);
                         if(!done.length) return null;
-                        const present=done.reduce((a,s)=>a+s.att+s.late,0);
+                        const present=done.reduce((a,s)=>a+s.att+s.late+s.el,0);
                         const total=done.reduce((a,s)=>a+s.att+s.late+s.el+s.abs,0);
                         return total>0?Math.round(present/total*100):null;
                       })();
@@ -1311,6 +1399,7 @@
                                 <span>{fmtRange(pkg.startDate,pkg.endDate)}</span>
                                 <span>·</span><span>{pkg.place}</span>
                                 <span>·</span><span>신청 {pkg.enrolled}/{pkg.capacity}명</span>
+                                <span>·</span><span>학습 {fmtDuration(pkgStudyMin(pkg))}</span>
                                 {livePkgRate!==null && <><span>·</span><span className="font-bold text-indigo-600">출석률 {livePkgRate}%</span></>}
                               </div>
                             </div>
@@ -1334,6 +1423,7 @@
                                     <th className="px-5 py-2.5 text-left font-bold">회차</th>
                                     <th className="px-4 py-2.5 text-left font-bold">날짜</th>
                                     <th className="px-4 py-2.5 text-left font-bold">시간</th>
+                                    <th className="px-4 py-2.5 text-left font-bold">학습 시간</th>
                                     <th className="px-4 py-2.5 text-center font-bold text-emerald-600">출석</th>
                                     <th className="px-4 py-2.5 text-center font-bold text-amber-500">지각</th>
                                     <th className="px-4 py-2.5 text-center font-bold text-orange-500">조퇴</th>
@@ -1353,6 +1443,7 @@
                                           <td className="px-5 py-2.5 font-bold text-slate-700">{s.name}{isToday&&<span className="text-[10px] bg-indigo-500 text-white px-1.5 py-0.5 rounded-full ml-1">오늘</span>}</td>
                                           <td className="px-4 py-2.5 text-slate-500">{fmtDate(s.date)}</td>
                                           <td className="px-4 py-2.5 text-slate-500">{s.start}~{s.end}</td>
+                                          <td className="px-4 py-2.5 text-slate-600 font-medium whitespace-nowrap">{fmtDuration(sessionStudyMin(s))}{s.studyMinOverride!=null && <span className="ml-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1 py-0.5 rounded">수정됨</span>}</td>
                                           <td className="px-4 py-2.5 text-center font-bold text-emerald-600">{s.att}</td>
                                           <td className="px-4 py-2.5 text-center font-bold text-amber-500">{s.late}</td>
                                           <td className="px-4 py-2.5 text-center font-bold text-orange-500">{s.el}</td>
@@ -1486,6 +1577,8 @@
                                           const isQr=!!scanTs;
                                           const ddKey=`${l.id}_${s.id}`;
                                           const isDDOpen=openDropdown===ddKey;
+                                          const reason=reasonMap[ddKey];
+                                          const canReason=st==='early_leave'||st==='absent';
                                           return (
                                             <td key={s.id} className="px-2 py-2.5 text-center">
                                               <div className="inline-block relative">
@@ -1499,12 +1592,17 @@
                                                     {isQr?<QrCode size={8} className="text-indigo-400"/>:<Pencil size={8}/>}{timeStr}
                                                   </div>
                                                 )}
+                                                {reason && (
+                                                  <div className="flex items-center justify-center gap-0.5 mt-0.5 text-[11px] text-orange-600 font-medium" title={`사유: ${reason}`}>
+                                                    <span className="max-w-[52px] truncate">사유: {reason}</span>
+                                                  </div>
+                                                )}
                                                 {isDDOpen && (
-                                                  <div className="absolute left-0 top-full mt-1 z-[200] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden w-[120px] animate-fadeIn"
+                                                  <div className="absolute left-0 top-full mt-1 z-[200] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden w-[210px] animate-fadeIn"
                                                     onClick={e=>e.stopPropagation()}>
                                                     {['attended','late','early_leave','absent'].map(opt=>(
                                                       <button key={opt}
-                                                        onClick={()=>{recordAttendance(l.id,s.id,opt,pkg.id,l.name);setOpenDropdown(null);}}
+                                                        onClick={()=>{recordAttendance(l.id,s.id,opt,pkg.id,l.name); if(opt!=='early_leave'&&opt!=='absent') setOpenDropdown(null);}}
                                                         className={`w-full flex items-center gap-2 px-3 py-2 text-[13px] font-bold text-left transition-colors ${st===opt?`${ATT_CFG[opt].bg} ${ATT_CFG[opt].color}`:'text-slate-600 hover:bg-slate-50'}`}>
                                                         {st===opt?<CheckCircle size={11} className="shrink-0"/>:<span className="w-[11px] shrink-0 inline-block"/>}
                                                         {ATT_CFG[opt].label}
@@ -1515,6 +1613,27 @@
                                                       className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-slate-400 hover:bg-slate-50 text-left transition-colors">
                                                       <span className="w-[11px] shrink-0 inline-block"/>미확인으로
                                                     </button>
+                                                    {/* 조퇴·결석 사유 (인라인) — 정당 사유 예외 기록 */}
+                                                    {canReason && (
+                                                      <div className="border-t border-slate-100 px-3 py-2.5 bg-orange-50/40">
+                                                        <div className="text-[11px] font-bold text-orange-700 mb-1.5 flex items-center gap-1">
+                                                          사유 (선택)
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-1 mb-1.5">
+                                                          {REASON_PRESETS.map(r=>(
+                                                            <button key={r} onClick={()=>setAttReason(l.id,s.id,r)}
+                                                              className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-colors ${reason===r?'bg-orange-500 text-white border-orange-500':'bg-white text-slate-600 border-slate-200 hover:border-orange-300'}`}>
+                                                              {r}
+                                                            </button>
+                                                          ))}
+                                                        </div>
+                                                        <input type="text" value={reason||''} onChange={e=>setAttReason(l.id,s.id,e.target.value)}
+                                                          placeholder="사유 직접 입력"
+                                                          className="w-full border border-slate-200 rounded-md px-2 py-1 text-[12px] focus:border-orange-400 outline-none"/>
+                                                        <button onClick={()=>setOpenDropdown(null)}
+                                                          className="w-full mt-1.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-md text-[11px] font-bold">완료</button>
+                                                      </div>
+                                                    )}
                                                   </div>
                                                 )}
                                               </div>
@@ -1993,6 +2112,8 @@
                             const scanTs=scanTimeMap[key];
                             const manTs=tsMap[key];
                             const isDDOpen=openDropdown===`modal_${key}`;
+                            const reason=reasonMap[key];
+                            const canReason=st==='early_leave'||st==='absent';
                             return (
                               <tr key={l.id} className={`border-t border-slate-100 hover:bg-slate-50 transition-colors ${li%2===0?'bg-white':'bg-slate-50/30'}`}>
                                 <td className="px-4 py-2.5 font-bold text-slate-700">{l.name}</td>
@@ -2000,6 +2121,11 @@
                                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold ${cfg.bg} ${cfg.color} ${cfg.border} border`}>
                                     {cfg.label}
                                   </span>
+                                  {reason && (
+                                    <div className="mt-0.5 text-[11px] text-orange-600 font-medium flex items-center justify-center gap-0.5" title={`사유: ${reason}`}>
+                                      사유: {reason}
+                                    </div>
+                                  )}
                                 </td>
                                 <td className="px-4 py-2.5 text-center text-[12px] font-mono text-slate-500">
                                   {scanTs?<span className="flex items-center justify-center gap-1"><QrCode size={9} className="text-indigo-400"/>{scanTs.slice(11,16)}</span>:<span className="text-slate-200">—</span>}
@@ -2014,12 +2140,12 @@
                                       변경 <ChevronDown size={9} className="inline"/>
                                     </button>
                                     {isDDOpen && (
-                                      <div className="fixed z-[400] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden w-[130px] animate-fadeIn"
+                                      <div className="fixed z-[400] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden w-[210px] animate-fadeIn"
                                         onClick={e=>e.stopPropagation()}
                                         style={{left:dropdownPos.x,top:dropdownPos.y}}>
                                         {['attended','late','early_leave','absent'].map(opt=>(
                                           <button key={opt}
-                                            onClick={()=>{recordAttendance(l.id,ms.id,opt,mp.id,l.name);setOpenDropdown(null);}}
+                                            onClick={()=>{recordAttendance(l.id,ms.id,opt,mp.id,l.name); if(opt!=='early_leave'&&opt!=='absent') setOpenDropdown(null);}}
                                             className={`w-full flex items-center gap-2 px-3 py-2 text-[13px] font-bold text-left transition-colors ${st===opt?`${ATT_CFG[opt].bg} ${ATT_CFG[opt].color}`:'text-slate-600 hover:bg-slate-50'}`}>
                                             {st===opt?<CheckCircle size={11} className="shrink-0"/>:<span className="w-[11px] shrink-0 inline-block"/>}
                                             {ATT_CFG[opt].label}
@@ -2030,6 +2156,26 @@
                                           className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-slate-400 hover:bg-slate-50 text-left transition-colors">
                                           <span className="w-[11px] shrink-0 inline-block"/>미확인으로
                                         </button>
+                                        {canReason && (
+                                          <div className="border-t border-slate-100 px-3 py-2.5 bg-orange-50/40">
+                                            <div className="text-[11px] font-bold text-orange-700 mb-1.5 flex items-center gap-1">
+                                              사유 (선택)
+                                            </div>
+                                            <div className="flex flex-wrap gap-1 mb-1.5">
+                                              {REASON_PRESETS.map(r=>(
+                                                <button key={r} onClick={()=>setAttReason(l.id,ms.id,r)}
+                                                  className={`px-2 py-0.5 rounded-md text-[11px] font-bold border transition-colors ${reason===r?'bg-orange-500 text-white border-orange-500':'bg-white text-slate-600 border-slate-200 hover:border-orange-300'}`}>
+                                                  {r}
+                                                </button>
+                                              ))}
+                                            </div>
+                                            <input type="text" value={reason||''} onChange={e=>setAttReason(l.id,ms.id,e.target.value)}
+                                              placeholder="사유 직접 입력"
+                                              className="w-full border border-slate-200 rounded-md px-2 py-1 text-[12px] focus:border-orange-400 outline-none"/>
+                                            <button onClick={()=>setOpenDropdown(null)}
+                                              className="w-full mt-1.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-md text-[11px] font-bold">완료</button>
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </div>
