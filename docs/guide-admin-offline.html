@@ -739,7 +739,7 @@ function closeMobileSidebar() {
         </div>
       </div>
       <div class="callout callout-amber mt-4">
-        지각(late)은 출석 1회로 인정되며, 조퇴(early_leave)는 관리자가 별도 설정하지 않는 한 출석 미인정입니다.
+        지각(late)과 조퇴(early_leave)는 모두 출석 1회로 인정됩니다(코스 유형 무관 공용 기본정책). 결석·미확인만 불인정. 조퇴·결석엔 사유를 기록합니다. 법정의무교육의 시수 strict(조퇴=미인정)는 Phase 2 분기 예정입니다.
       </div>
     </div>
 
@@ -1133,6 +1133,16 @@ function closeMobileSidebar() {
       </div>
       <div class="callout callout-amber mt-4">
         Phase 1에선 미확인(pending) 인원을 <strong>운영자가 직접 정리</strong>합니다 ("미확인 일괄 처리" 도구 사용). 자동 결석 전환은 Phase 2 이월.
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">학습 시간</div>
+      <div class="callout callout-amber mt-2">
+        <strong>학습 시간 = 출석한 회차의 수업 시간(종료−시작) 합산</strong>. 조퇴·지각도 그 회차 전체 시간 인정, 결석·미확인은 0. 표시 위치: 회차 테이블 "학습 시간" 칸 · 차수 헤더 합계 · 좌측 코스 정보 · 상단 "평균 학습시간" 카드.
+      </div>
+      <div class="callout callout-amber mt-2">
+        회차 설정에서 <strong>자동 계산이 기본</strong>, 관리자가 <strong>"직접 입력" 체크</strong> 시 회차별 수정 가능(수정 시 "수정됨" 배지). Phase 1은 표시 전용 — 수료 기준은 출석률 75% 그대로, 국비교육 시수 기준은 Phase 3 분리. 개인별 학습시간은 출석률과 중복이라 명단에선 생략.
       </div>
     </div>
 

@@ -503,6 +503,10 @@
       <strong>조퇴 공용 기본정책</strong>: 코스 유형과 무관하게 <strong>조퇴 = 출석 인정</strong>(결석 처리 아님)으로 통일합니다. 단, 조퇴·결석 선택 시 <strong>사유를 인라인으로 기록</strong>합니다 — 프리셋(병가·경조사·공무·업무·기타) 또는 직접 입력 → 출석 셀에 "사유: ○○○" 표시. 법정의무교육의 시수 strict(조퇴=미인정)는 코스 유형 필드가 생기는 <strong>Phase 2</strong>에 분기 예정입니다.
     </div>
 
+    <div class="callout callout-blue mt-1 mb-4">
+      <strong>학습 시간 정책</strong>: 학습 시간 = <strong>출석한 회차의 수업 시간(종료−시작) 합산</strong>입니다. 조퇴·지각도 그 회차 <strong>전체 시간 인정</strong>(조퇴=출석 인정과 일관), 결석·미확인은 0. 회차 테이블·차수 헤더·좌측 코스 정보·평균 학습시간으로 표시합니다(개인별 학습시간은 출석률과 중복이라 Phase 1 명단에선 생략, 국비 시수 Phase 3에 부활). <br><strong>회차 설정에서 자동 계산이 기본</strong>이고, 관리자가 <strong>"직접 입력"을 체크하면 회차별 학습 시간을 수정</strong>할 수 있습니다(수업이 예정보다 길거나 짧을 때, 인정 시수가 다를 때). 수정한 회차에는 <strong>"수정됨" 배지</strong>가 붙어 자동값과 구분됩니다. <strong>Phase 1은 표시 전용</strong>이며 수료 기준은 출석률 75% 그대로입니다. 국비교육(법정) "이수 N시간 이상 = 수료" 시수 기준은 <strong>Phase 3</strong>로 분리합니다.
+    </div>
+
     <div class="subsection-title text-xs mt-4">상태 변경 가능 여부 — 어떤 상태에서 어디로 바꿀 수 있나요?</div>
     <div class="overflow-x-auto">
       <table class="mt-2">

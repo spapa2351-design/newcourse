@@ -2845,6 +2845,22 @@ function closeMobileSidebar() {
   </div>
 
   <div class="guide-section">
+    <div class="section-title">학습 시간 <span class="section-tag">표시</span></div>
+    <p class="text-sm text-slate-600 mt-2 mb-3">출석률과 별개로, 수강생이 실제 채운 학습 시간도 함께 봅니다.</p>
+    <div class="callout callout-blue">
+      <strong>학습 시간 = 출석한 회차의 수업 시간(종료−시작) 합산</strong><br>
+      <span class="text-xs text-slate-600">조퇴·지각도 그 회차 전체 시간 인정(조퇴=출석 인정과 일관), 결석·미확인은 0. 예: 09:00~12:30 회차 = 3시간 30분.</span>
+    </div>
+    <div class="mt-3 text-sm text-slate-600">표시 위치: 회차 테이블의 "학습 시간" 칸 · 차수 헤더 합계 · 좌측 코스 정보 · 상단 "평균 학습시간" 카드. (수강생 개인별 학습시간은 출석률과 중복이라 Phase 1 명단에선 생략 — 국비 시수 Phase 3에 부활)</div>
+    <div class="callout callout-blue mt-2">
+      <strong>회차별 직접 입력(override)</strong>: 회차 설정에서 시간을 넣으면 학습 시간이 <strong>자동 계산</strong>되고, 관리자가 <strong>"직접 입력" 체크</strong> 시 회차별로 수정할 수 있어요(수업이 예정보다 길거나 짧을 때, 인정 시수가 다를 때). 수정한 회차엔 <strong>"수정됨" 배지</strong>가 붙어 자동값과 구분됩니다.
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>Phase 1은 표시 전용</strong>입니다. 수료 기준은 출석률 75% 그대로예요. 국비교육(법정) "이수 N시간 이상 = 수료" 시수 기준은 <strong>Phase 3</strong>로 분리합니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
     <div class="section-title">계산할 때 어떤 수업이 들어가나요</div>
     <p class="text-sm text-slate-600 mt-2 mb-3">출석부에 칸이 있다고 생각해보세요. 출석률을 낼 때 어떤 칸을 가져다 쓸까요?</p>
     <div class="overflow-x-auto mt-3">
@@ -3376,7 +3392,7 @@ function closeMobileSidebar() {
     { id:'att-late',           label:'지각 기준',               cat:'1. 출석 처리', kw:'지각 10분 QR 출석' },
     { id:'att-change',         label:'상태 변경 규칙',          cat:'1. 출석 처리', kw:'조퇴 결석 사유 정정 상태변경 사유기록' },
     { id:'close-flow',         label:'회차 종료 정책',          cat:'2. 회차 종료' },
-    { id:'att-rate-policy',    label:'출석률 계산 정책',        cat:'1. 출석 처리', kw:'조퇴 출석률 분자 분모 결석 지각 출석 75' },
+    { id:'att-rate-policy',    label:'출석률 계산 정책',        cat:'1. 출석 처리', kw:'조퇴 출석률 분자 분모 결석 지각 출석 75 학습시간 학습 시간 수업시간 이수시간' },
     { id:'close-rules',        label:'정정 가능 범위',          cat:'2. 회차 종료' },
     { id:'close-deduction',    label:'회차 종료 Q&A',           cat:'2. 회차 종료' },
     { id:'close-change',       label:'차수·회차 변경 정책',     cat:'2. 회차 종료' },
