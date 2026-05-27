@@ -151,8 +151,8 @@
     <div class="text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-1">Offline LMS</div>
     <div class="text-white font-bold text-base leading-tight">기획설계서</div>
     <div class="flex items-center gap-2 mt-2">
-      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.3</span>
-      <span class="text-slate-500 text-xs">2026-05-21</span>
+      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.4</span>
+      <span class="text-slate-500 text-xs">2026-05-27</span>
     </div>
     <div class="flex mt-3 rounded-lg overflow-hidden border border-slate-700">
       <button id="tab-btn-admin" class="tab-btn flex-1 py-1.5 text-xs font-semibold transition-colors bg-indigo-600 text-white" data-tab="admin" onclick="switchTab('admin')">관리자단</button>
@@ -499,6 +499,10 @@
       </div>
     </div>
 
+    <div class="callout callout-amber mt-1 mb-4">
+      <strong>조퇴 공용 기본정책</strong>: 코스 유형과 무관하게 <strong>조퇴 = 출석 인정</strong>(결석 처리 아님)으로 통일합니다. 단, 조퇴·결석 선택 시 <strong>사유를 인라인으로 기록</strong>합니다 — 프리셋(병가·경조사·공무·업무·기타) 또는 직접 입력 → 출석 셀에 "사유: ○○○" 표시. 법정의무교육의 시수 strict(조퇴=미인정)는 코스 유형 필드가 생기는 <strong>Phase 2</strong>에 분기 예정입니다.
+    </div>
+
     <div class="subsection-title text-xs mt-4">상태 변경 가능 여부 — 어떤 상태에서 어디로 바꿀 수 있나요?</div>
     <div class="overflow-x-auto">
       <table class="mt-2">
@@ -522,7 +526,7 @@
       </table>
     </div>
     <div class="callout callout-blue mt-3">
-      <strong>관리자 무제한 정정 정책</strong>: 관리자는 어떤 상태에서든 제한 없이 수동 변경할 수 있습니다. 조퇴 → 출석·지각 소급 수정도 허용됩니다. 기업 교육에서는 이의 제기 후 정정 요청이 빈번하므로, 출석 상태 변경 권한은 관리자 재량에 전적으로 맡깁니다.<br><span class="text-xs mt-1 block opacity-70">Phase 2 예정: 정정 사유 입력 필드 + 감사 로그(Audit Log) + 일괄 정정</span>
+      <strong>관리자 무제한 정정 정책</strong>: 관리자는 어떤 상태에서든 제한 없이 수동 변경할 수 있습니다. 조퇴 → 출석·지각 소급 수정도 허용됩니다. 기업 교육에서는 이의 제기 후 정정 요청이 빈번하므로, 출석 상태 변경 권한은 관리자 재량에 전적으로 맡깁니다.<br><span class="text-xs mt-1 block opacity-70">Phase 1: 조퇴·결석 사유 인라인 입력 있음(화면 반영). Phase 2 예정: 사유 감사 로그(Audit Log) 영구 저장 + 일괄 정정</span>
     </div>
   </div>
 

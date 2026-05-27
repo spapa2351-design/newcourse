@@ -172,7 +172,7 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v1.3 · 2026-05-21</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v1.4 · 2026-05-27</span>
   <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
@@ -1841,6 +1841,9 @@ function closeMobileSidebar() {
     <div class="callout callout-blue mt-2">
       <strong>핵심 요약</strong>: 출석·지각·조퇴는 모두 수료 계산에서 <strong>출석 1회로 동일하게 인정</strong>됩니다. 결석과 미확인만 불인정입니다.
     </div>
+    <div class="callout callout-amber mt-2">
+      <strong>조퇴 공용 기본정책</strong>: 코스 유형과 무관하게 모든 오프라인 코스에서 <strong>조퇴 = 출석 인정</strong>으로 동일하게 처리합니다("관리자 마음" 아님). 단, 조퇴·결석에는 <strong>사유를 기록</strong>합니다(「상태 변경 규칙」 참고). 법정의무교육의 시수 strict(조퇴=미인정) 분기는 코스 유형 필드가 생기는 <strong>Phase 2</strong> 예정입니다.
+    </div>
   </div>
 </div>
 
@@ -2003,6 +2006,37 @@ function closeMobileSidebar() {
           <tr><td>조퇴 → 출석으로 다시 바꾸려면</td><td>동일. 관리자 드롭다운 → 출석 선택</td><td>—</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">조퇴·결석 사유 기록 (UI) <span class="section-tag">신규</span></div>
+    <div class="page-desc mt-1 mb-3">조퇴·결석은 "관리자 마음"이 아니라 사유를 함께 남깁니다. 출석 상태를 조퇴 또는 결석으로 바꾸면 드롭다운 안에 사유 입력칸이 바로 펼쳐집니다.</div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-action">출석 관리 → 수강생 출석 셀 클릭 → <strong>조퇴</strong>(또는 결석) 선택</div>
+          <div class="step-note">선택해도 드롭다운이 닫히지 않고, 아래에 사유 섹션이 열립니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-action">사유 선택 — 프리셋 칩(병가 · 경조사 · 공무·업무 · 기타) 또는 직접 입력</div>
+          <div class="step-note">정당 사유(병원·상 등)는 여기에 기록 → "사유 기반 기록"으로 남아 관리자 임의 판단과 구분됩니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-action">완료 → 출석 셀에 "사유: ○○○" 텍스트가 표시</div>
+          <div class="step-note">사유가 있으면 셀에 사유 텍스트가 보이고, 마우스를 올리면 전체 사유가 툴팁으로 뜹니다. 조퇴·결석 외 상태로 바꾸면 사유는 자동 삭제됩니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>저장 범위</strong>: 사유 입력은 화면에 즉시 반영됩니다(Phase 1). 사유의 <strong>audit 로그 영구 저장</strong>은 백엔드 연동 시(Phase 2) 추가됩니다.
     </div>
   </div>
 </div>
@@ -2517,7 +2551,7 @@ function closeMobileSidebar() {
           <tr>
             <td>회차 종료 <strong>후</strong> 출석 상태 수정</td>
             <td><span class="b b-green">✅ 가능</span></td>
-            <td>회차 종료 후에도 관리자 수동 변경 가능. Phase 2에서 사유 입력 + 감사 로그 추가 예정</td>
+            <td>회차 종료 후에도 관리자 수동 변경 가능. 조퇴·결석 사유 입력은 화면에 있음(Phase 1). 감사 로그 영구 저장은 Phase 2</td>
           </tr>
           <tr>
             <td>회차 종료 자체 취소</td>
@@ -2787,6 +2821,26 @@ function closeMobileSidebar() {
     <div class="callout callout-blue">
       <strong>출석률 = 학습자가 등록된 차수의 "이미 마감된 수업" 중 출석한 비율</strong><br>
       <span class="text-xs text-slate-600">계산할 때 쓰는 칸은 "이미 끝난 수업"만이에요. 아직 안 한 미래 수업이나 다른 차수의 수업은 들어가지 않아요.</span>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">어떤 상태가 "출석"으로 들어가나요 <span class="section-tag">조퇴 포함</span></div>
+    <p class="text-sm text-slate-600 mt-2 mb-3">분모(마감된 수업 칸)가 정해졌으면, 그중 무엇을 "출석한 칸"으로 셀까요?</p>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:120px">상태</th><th style="width:130px">출석률 반영</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td><span class="b b-green">출석</span></td><td><span class="b b-green">분자에 포함</span></td><td>정상 출석</td></tr>
+          <tr><td><span class="b b-orange">지각</span></td><td><span class="b b-green">분자에 포함</span></td><td>늦게 왔어도 출석 인정</td></tr>
+          <tr><td><span class="b b-yellow">조퇴</span></td><td><span class="b b-green">분자에 포함</span></td><td><strong>일찍 나가도 출석 인정 (결석 아님).</strong> 코스 유형 무관 공용 기본정책</td></tr>
+          <tr><td><span class="b b-red">결석</span></td><td><span class="b b-red">분자 제외</span></td><td>분모에는 포함되지만 분자에서 빠짐</td></tr>
+          <tr><td><span class="b b-slate">미확인</span></td><td><span class="b b-red">분자 제외</span></td><td>마감 전 처리 필요한 임시 상태</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>조퇴 = 출석 인정</strong>(결석 처리 아님). 조퇴·결석에는 사유를 기록합니다(「출석 상태 5종」·「상태 변경 규칙」 참고). 법정의무교육의 시수 strict(조퇴=미인정)는 코스 유형 필드가 생기는 <strong>Phase 2</strong>에 분기 예정입니다.
     </div>
   </div>
 
@@ -3318,15 +3372,15 @@ function closeMobileSidebar() {
     { id:'case-enroll-assign', label:'FLOW-03 강제 할당',      cat:'운영 케이스' },
     { id:'case-attendance',    label:'FLOW-04 현장 QR 출석',   cat:'운영 케이스' },
     { id:'case-browse',        label:'FLOW-06 코스 목록 탐색', cat:'운영 케이스' },
-    { id:'att-status',         label:'출석 상태 5종',          cat:'1. 출석 처리' },
-    { id:'att-late',           label:'지각 기준',               cat:'1. 출석 처리' },
-    { id:'att-change',         label:'상태 변경 규칙',          cat:'1. 출석 처리' },
+    { id:'att-status',         label:'출석 상태 5종',          cat:'1. 출석 처리', kw:'조퇴 결석 지각 출석 미확인 사유 출석인정' },
+    { id:'att-late',           label:'지각 기준',               cat:'1. 출석 처리', kw:'지각 10분 QR 출석' },
+    { id:'att-change',         label:'상태 변경 규칙',          cat:'1. 출석 처리', kw:'조퇴 결석 사유 정정 상태변경 사유기록' },
     { id:'close-flow',         label:'회차 종료 정책',          cat:'2. 회차 종료' },
-    { id:'att-rate-policy',    label:'출석률 계산 정책',        cat:'1. 출석 처리' },
+    { id:'att-rate-policy',    label:'출석률 계산 정책',        cat:'1. 출석 처리', kw:'조퇴 출석률 분자 분모 결석 지각 출석 75' },
     { id:'close-rules',        label:'정정 가능 범위',          cat:'2. 회차 종료' },
     { id:'close-deduction',    label:'회차 종료 Q&A',           cat:'2. 회차 종료' },
     { id:'close-change',       label:'차수·회차 변경 정책',     cat:'2. 회차 종료' },
-    { id:'cert-cond',          label:'수료 기준',               cat:'3. 수료 처리' },
+    { id:'cert-cond',          label:'수료 기준',               cat:'3. 수료 처리', kw:'조퇴 출석 인정 수료 출석률 75' },
     { id:'cert-cases',         label:'케이스별 판정',           cat:'3. 수료 처리' },
     { id:'enroll-types',       label:'신청 방식 2종',           cat:'4. 수강신청' },
     { id:'enroll-cases',       label:'상황별 처리',             cat:'4. 수강신청' },
@@ -3344,7 +3398,7 @@ function closeMobileSidebar() {
     if (!q) { drop.classList.remove('show'); drop.innerHTML = ''; return; }
 
     const results = SEARCH_INDEX.filter(item =>
-      item.label.includes(q) || item.cat.includes(q)
+      item.label.includes(q) || item.cat.includes(q) || (item.kw && item.kw.includes(q))
     );
 
     if (!results.length) {
