@@ -111,7 +111,7 @@
     { id:'A2-16', screen:'A2', screenName:'코스 빌더', group:'미리보기', feature:'모바일 미리보기', desc:'340×720 폰 프레임 모달. 코스헤더/신청기간/패키지목록 렌더. 자율=카드리스트, 강제=관리자배정블록', input:'미리보기 버튼', output:'isPreviewOpen=true', note:'', pri:'P2', phase:1, status:'todo' },
 
     /* ── A3. 수강관리 — offline-view.html ── */
-    { id:'A3-01', screen:'A3', screenName:'수강관리', group:'사이드바', feature:'코스 정보 사이드바', desc:'인디고 그라디언트 커버, 강사/차수/회차/기간/장소 정보 표시', input:'-', output:'COURSE 데이터 렌더', note:'230px 고정', pri:'P1', phase:1, status:'todo' },
+    { id:'A3-01', screen:'A3', screenName:'수강관리', group:'사이드바', feature:'코스 정보 사이드바', desc:'인디고 그라디언트 커버, 강사/차수/회차/학습시간(차수 기준)/기간/장소 정보 표시', input:'-', output:'COURSE 데이터 렌더', note:'230px 고정', pri:'P1', phase:1, status:'todo' },
     { id:'A3-02', screen:'A3', screenName:'수강관리', group:'사이드바', feature:'수강/수료/출석률 현황', desc:'수강(enrollment 프로그레스바), 수료(completion 바), 평균 출석률 수치 표시', input:'-', output:'LEARNERS_RAW + COMPLETION 계산', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A3-03', screen:'A3', screenName:'수강관리', group:'사이드바', feature:'수강생 등록 버튼', desc:'사이드바 하단 "수강생 등록" → 등록 모달 open', input:'버튼 클릭', output:'showEnrollModal=true', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A3-04', screen:'A3', screenName:'수강관리', group:'사이드바', feature:'라이브 출석 버튼', desc:'오늘 회차 있을 때만 활성화. 클릭 시 라이브 QR 모드 진입', input:'버튼 클릭', output:'liveMode=true', note:'todaySess 있을 때만 표시', pri:'P1', phase:1, status:'todo' },
@@ -124,7 +124,7 @@
     { id:'A3-11', screen:'A3', screenName:'수강관리', group:'수강생관리탭', feature:'수료 처리', desc:'미수료 행에 "수료 처리" 버튼 표시. 클릭 시 completion→completed', input:'버튼 클릭', output:'COMPLETION 상태 변경', note:'Phase 1: 프론트만', pri:'P1', phase:1, status:'todo' },
     { id:'A3-12', screen:'A3', screenName:'수강관리', group:'수강생관리탭', feature:'수강생 등록 모달', desc:'차수 선택(잔여석 표시) + 검색 + STUDENT_POOL 리스트 + 등록 버튼. animate-slideUp', input:'[+ 등록] 또는 사이드바 버튼', output:'showEnrollModal=true', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A3-13', screen:'A3', screenName:'수강관리', group:'출석수료탭', feature:'차수별 아코디언', desc:'차수 헤더(ChevronDown 토글) — 기간/장소/출석률. 오늘 차수 indigo ring 강조 + "오늘" 뱃지', input:'헤더 클릭', output:'openPkgs Set 토글', note:'', pri:'P1', phase:1, status:'todo' },
-    { id:'A3-14', screen:'A3', screenName:'수강관리', group:'출석수료탭', feature:'회차별 출석 통계', desc:'아코디언 내부 테이블: 회차명/날짜/시간/출석/지각/결석/미확인/출석률. 출석률 색상 분기(90↑emerald)', input:'-', output:'sessions[] 렌더', note:'', pri:'P1', phase:1, status:'todo' },
+    { id:'A3-14', screen:'A3', screenName:'수강관리', group:'출석수료탭', feature:'회차별 출석 통계', desc:'아코디언 내부 테이블: 회차명/날짜/시간/학습시간/출석/지각/조퇴/결석/미확인/출석률. 학습시간=회차 수업시간(override 시 "수정됨" 배지). 출석률 색상 분기(90↑emerald)', input:'-', output:'sessions[] 렌더', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A3-15', screen:'A3', screenName:'수강관리', group:'출석수료탭', feature:'QR 출석 버튼', desc:'오늘 차수 헤더에 "QR 출석" 버튼 → liveMode=true 진입', input:'버튼 클릭', output:'liveMode=true', note:'e.stopPropagation() 처리', pri:'P1', phase:1, status:'todo' },
     { id:'A3-16', screen:'A3', screenName:'수강관리', group:'라이브QR', feature:'라이브 QR 모드', desc:'전체화면 early-return. 좌70% QR코드+30초 카운트다운 / 우30% 다크 실시간 출석 대시보드', input:'liveMode=true', output:'early return UI', note:'slate-900 배경', pri:'P1', phase:1, status:'todo' },
     { id:'A3-17', screen:'A3', screenName:'수강관리', group:'라이브QR', feature:'QR 30초 자동갱신', desc:'useEffect + setInterval로 30초 카운트다운. 5초 이하 시 amber+animate-spin 표시', input:'liveMode=true', output:'qrCountdown state', note:'clearInterval on unmount', pri:'P1', phase:1, status:'todo' },
@@ -136,11 +136,15 @@
     { id:'A4-01', screen:'A4', screenName:'출석상태', group:'정책', feature:'출석 상태 5종', desc:'미확인(pending)/출석(attended)/지각(late)/조퇴(early_leave)/결석(absent). 출석인정 제거', input:'-', output:'-', note:'미확인=임시, 최종상태 아님', pri:'P1', phase:1, status:'todo' },
     { id:'A4-02', screen:'A4', screenName:'출석상태', group:'정책', feature:'회차 자동 종료 (시간 기반)', desc:'2026-05-06 정책 변경 — "마감" 개념 제거. 수업 종료 시각이 지나면 회차 자동 종료. 수업 종료 후 7일째 미확인→결석 자동 처리. 30일 시스템 잠금 (회계 마감)', input:'시간 트리거 (수업 종료 시각, +7일, +30일)', output:'pending→absent 자동 (+7일), 잠금(+30일)', note:'마감 버튼 제거. 운영자는 정정만 수행', pri:'P1', phase:1, status:'todo' },
     { id:'A4-03', screen:'A4', screenName:'출석상태', group:'정책', feature:'수료 처리', desc:'완료 회차 75%+ 출석자 대상. completionCandidates → completedStudents Set', input:'수료 처리 버튼', output:'completedStudents Set 업데이트', note:'2026-04-28 Phase 2 이월 결정', pri:'P1', phase:2, status:'phase2' },
+    { id:'A4-05', screen:'A4', screenName:'출석상태', group:'정책', feature:'조퇴 처리 공용 기본정책 + 사유 기록', desc:'조퇴=출석 인정(결석 아님). 코스 유형 무관 공용 단일 규칙. 조퇴·결석 선택 시 드롭다운 인라인 사유(병가·경조사·공무·업무·기타 또는 직접 입력) → 출석 셀에 "사유: ○○○" 표시. 관리자 임의 금지', input:'상태 선택 + 사유 칩/입력', output:'reasonMap{learnerId_sessId}', note:'2026-05-27 확정. 법정의무 시수 strict(조퇴=미인정)는 Phase 2(A2-19). 사유 audit 로그 영구저장은 Phase 2', pri:'P1', phase:1, status:'todo' },
+    { id:'A4-06', screen:'A4', screenName:'출석상태', group:'정책', feature:'학습 시간 집계·표시', desc:'학습시간=출석/지각/조퇴 회차 수업시간 합. 회차 테이블 칸·차수 헤더 합계·좌측 코스정보·평균 학습시간 KPI로 표시. 개인별 명단 컬럼은 출석률과 중복이라 생략', input:'-', output:'sessionStudyMin/pkgStudyMin/avgStudyMin', note:'2026-05-27. Phase 1 표시 전용(수료 기준은 출석률 75%). 국비 시수 수료 연동은 Phase 3', pri:'P2', phase:1, status:'todo' },
 
     /* ── A2 Phase 2: 코스 빌더 추가 기능 ── */
     { id:'A2-18', screen:'A2', screenName:'코스 빌더', group:'출석정책', feature:'지각 환산 설정', desc:'지각 N회 = 결석 1회. 차수별 ON/OFF. 기본값: 환산 없음(지각=출석). 업계 관행 3회 권장. 고객사 요청 시 활성화', input:'숫자 input + 토글', output:'lateConversion state', note:'기본값: OFF', pri:'P2', phase:2, status:'phase2' },
     { id:'A2-19', screen:'A2', screenName:'코스 빌더', group:'출석정책', feature:'조퇴 환산 설정', desc:'조퇴 N회 = 결석 1회. 차수별 ON/OFF. 기본값: 환산 없음(조퇴=출석). 법정의무교육 이수 시간 부족 시 연계', input:'숫자 input + 토글', output:'earlyLeaveConversion state', note:'기본값: OFF', pri:'P2', phase:2, status:'phase2' },
     { id:'A2-20', screen:'A2', screenName:'코스 빌더', group:'알림', feature:'알림 채널 설정', desc:'이메일 vs 앱 푸시 선택. 수강 확정·D-day 리마인더·수료 완료 알림 자동 발송 채널 설정', input:'라디오 선택', output:'notifyChannel state', note:'채널 미결정 시 오픈 불가', pri:'P1', phase:2, status:'phase2' },
+    { id:'A2-21', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차별 학습 시간', desc:'회차 시간(종료−시작)으로 학습시간 자동 계산. "직접 입력" 체크 시 회차별 시간/분 수정(override) → "수정됨" 배지. studyMinOverride(null=자동)', input:'체크박스 + 시간/분 input', output:'sessions[].studyMinOverride', note:'2026-05-27 브레인스토밍 확정. 자동 기본, override 예외', pri:'P2', phase:1, status:'todo' },
+    { id:'A2-22', screen:'A2', screenName:'코스 빌더', group:'수강신청', feature:'회차선택형 ↔ 다중조합 상호배타 가드', desc:'회차선택형(sessionSelect)은 "회원이 차수 1개 선택"(single) 전용. "회원이 여러 차수 선택"(multiple)로 전환 시 회차선택형 차수를 전체일정으로 자동 전환 + 토스트 안내, 다중 상태에선 수강유형 모달의 "회차 선택형" 카드 잠금(Lock·사용 불가). 다중에서 회차 분기가 필요하면 차수를 분리해 표현', input:'신청 방식 라디오 변경', output:'sessionSelect 강제 false + 모달 카드 disabled', note:'2026-06-01 기획팀 합의(A안) + 빌더 코드 반영. 학습자단 아닌 빌더 입구에서 차단', pri:'P1', phase:1, status:'todo' },
 
     /* ── A3 Phase 2: 수강·출석 관리 추가 기능 ── */
     { id:'A3-21', screen:'A3', screenName:'수강관리', group:'수료', feature:'수료 처리 버튼', desc:'전 회차 종료 후 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성. 취소 불가', input:'"수료 처리" 버튼 클릭', output:'completedStudents Set 확정', note:'2026-04-28 Phase 2 이월. 회차 종료는 수업 종료 시각 자동', pri:'P1', phase:2, status:'phase2' },
@@ -162,7 +166,7 @@
     { id:'A2-32', screen:'A2', screenName:'코스 빌더', group:'수료 조건', feature:'영상/시험/설문 슬롯 추가', desc:'completionRules에 video/exam/survey 타입 추가. 복합 수료 조건', input:'슬롯 타입 선택', output:'completionRules 확장', note:'Phase 1 스키마 예약 활용', pri:'P1', phase:3, status:'phase2' },
     { id:'A3-32', screen:'A3', screenName:'수강관리', group:'본인 인증', feature:'본인 인증 (카메라/지문)', desc:'시험 응시 시 본인 확인 모달. 카메라 캡처 또는 지문 인증', input:'생체 인증', output:'auth 토큰', note:'시험 부정 방지', pri:'P2', phase:3, status:'phase2' },
     { id:'A3-33', screen:'A3', screenName:'수강관리', group:'외부 연동', feature:'외부 LMS 연동 (SCORM/xAPI)', desc:'외부 LMS 콘텐츠 임포트 + 학습 기록 송수신 (SCORM 1.2/xAPI)', input:'SCORM 패키지 업로드', output:'외부 콘텐츠 통합', note:'대형 고객사 요청 시', pri:'P3', phase:3, status:'phase2' },
-    { id:'A4-04', screen:'A4', screenName:'출석상태', group:'휴강', feature:'회차 휴강 처리', desc:'4번째 회차 상태 "휴강" 추가. 휴강 회차는 출석률 분모에서 제외. "보강 강제" 코스 토글 + 사유 입력 + audit log + 자동 재배정 (날짜선택형)', input:'운영자 휴강 처리 + 사유', output:'session.status="cancelled" + 분모 제외', note:'2026-05-07 결정 — 부수 기능 묶음(보강 강제·자동 알림·재배정·audit log) 공수 부담으로 Phase 3 이월', pri:'P2', phase:3, status:'phase2' },
+    { id:'A4-04', screen:'A4', screenName:'출석상태', group:'휴강', feature:'회차 휴강 처리', desc:'4번째 회차 상태 "휴강" 추가. 휴강 회차는 출석률 분모에서 제외. "보강 강제" 코스 토글 + 사유 입력 + audit log + 자동 재배정 (회차선택형)', input:'운영자 휴강 처리 + 사유', output:'session.status="cancelled" + 분모 제외', note:'2026-05-07 결정 — 부수 기능 묶음(보강 강제·자동 알림·재배정·audit log) 공수 부담으로 Phase 3 이월', pri:'P2', phase:3, status:'phase2' },
 
     /* ── Phase 4: 데이터·분석·인텔리전스 ── */
     { id:'A3-40', screen:'A3', screenName:'수강관리', group:'분석', feature:'출석률·수료율 예측 모델', desc:'머신러닝 기반 학습자별 수료 가능성 예측 — 조기 경보. 12개월 누적 데이터 후 가능', input:'학습 이력 데이터', output:'risk score', note:'데이터팀 1명 추가 필요', pri:'P3', phase:4, status:'phase2' },
@@ -433,11 +437,11 @@
               <div className="flex items-center gap-2">
                 <FileSpreadsheet size={18} className="text-indigo-500"/>
                 <h1 className="text-[16px] font-black text-slate-900">기능명세서</h1>
-                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.2</span>
+                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.5</span>
                 <span className="text-[10px] font-black text-violet-700 bg-violet-100 border border-violet-300 px-2 py-0.5 rounded-full ml-1">📍 기능 라인 SSOT</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-05-07</span>
+                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-06-01</span>
               </div>
             </header>
           )}
