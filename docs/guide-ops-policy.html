@@ -172,7 +172,7 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v1.4 · 2026-05-27</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v1.6 · 2026-06-01</span>
   <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
@@ -209,7 +209,7 @@ function closeMobileSidebar() {
       <div class="nav-sub" onclick="showPage('case-publish',this)">퍼블리싱 체크리스트</div>
       <div class="nav-sub" onclick="showPage('case-open',this)">FLOW-01 코스 개설</div>
       <div class="nav-sub" onclick="showPage('case-enroll-self',this)">FLOW-02 자율 수강신청</div>
-      <div class="nav-sub" onclick="showPage('case-enroll-assign',this)">FLOW-03 강제 할당</div>
+      <div class="nav-sub" onclick="showPage('case-enroll-assign',this)">FLOW-03 지정 등록</div>
       <div class="nav-sub" onclick="showPage('case-attendance',this)">FLOW-04 현장 QR 출석</div>
       <div class="nav-sub" onclick="showPage('case-browse',this)">FLOW-06 코스 목록 탐색</div>
     </div>
@@ -309,7 +309,7 @@ function closeMobileSidebar() {
           </tr>
           <tr>
             <td><span class="b b-violet">FLOW-03</span></td>
-            <td><strong>강제 할당</strong> — HRD가 부서·직급 단위 배정</td>
+            <td><strong>지정 등록</strong> — HRD가 부서·직급 단위 배정</td>
             <td>고객사 담당자</td>
             <td>offline-builder</td>
             <td>4.5 수강신청 (강제)</td>
@@ -357,7 +357,7 @@ function closeMobileSidebar() {
         <tbody>
           <tr>
             <td><span class="b b-blue">고객사 담당자</span></td>
-            <td>코스 개설(FLOW-01) · 강제 할당(FLOW-03) · 퍼블리싱 체크리스트 · 회차 종료 (시간 기반 자동) · 수강신청 취소 처리</td>
+            <td>코스 개설(FLOW-01) · 지정 등록(FLOW-03) · 퍼블리싱 체크리스트 · 회차 종료 (시간 기반 자동) · 수강신청 취소 처리</td>
             <td>운영 케이스 + 2장 회차 종료 + 4장 수강신청</td>
           </tr>
           <tr>
@@ -497,7 +497,7 @@ function closeMobileSidebar() {
         <div class="step-num">4</div>
         <div class="step-body">
           <div class="step-action">차수 생성 (약 3분)</div>
-          <div class="step-note">차수명 · 정원 · 담당 강사 · 그룹 배정(강제 할당 시). 우측 사이드바에서 편집</div>
+          <div class="step-note">차수명 · 정원 · 담당 강사 · 그룹 배정(지정 등록 시). 우측 사이드바에서 편집</div>
         </div>
       </div>
       <div class="step-row">
@@ -538,8 +538,8 @@ function closeMobileSidebar() {
         <tbody>
           <tr>
             <td><strong>수강 방식</strong></td>
-            <td>자율 수강 / 강제 할당</td>
-            <td>학습자가 직접 고르는 교육 → 자율. 법정의무교육·전사 필수교육 → 강제 할당</td>
+            <td>자율 수강 / 지정 등록</td>
+            <td>학습자가 직접 고르는 교육 → 자율. 법정의무교육·전사 필수교육 → 지정 등록</td>
           </tr>
           <tr>
             <td><strong>재수강 허용</strong></td>
@@ -553,11 +553,17 @@ function closeMobileSidebar() {
           </tr>
           <tr>
             <td><strong>수강 유형 (차수별)</strong></td>
-            <td>전체수강 / 날짜선택형</td>
-            <td>모든 회차 참석 → 전체수강. 날짜 중 1개만 선택 → 날짜선택형</td>
+            <td>전체수강 / 회차선택형</td>
+            <td>모든 회차 참석 → 전체수강. 차수 1개 안에서 날짜 중 1개만 선택 → 회차선택형(토글). 날짜마다 차수를 따로 만들 필요 없음. <strong>단, "여러 차수 선택"(다중 조합)에선 회차선택형을 쓸 수 없음</strong></td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="callout callout-amber mt-3">
+      <strong>회차선택형은 "차수 1개 선택"(단일)에서만 쓸 수 있습니다.</strong> (v1.6, 2026-06-01)<br>
+      신청 방식을 "여러 차수 선택"(다중 조합)으로 바꾸면, 회차선택형이던 차수는 자동으로 전체수강으로 전환되고 안내가 뜹니다. 다중 상태에선 빌더의 "회차 선택형" 카드가 잠겨 선택할 수 없습니다.<br>
+      <span class="text-xs">날짜별로 나눠 받아야 하면 회차선택형 대신 <strong>차수를 날짜별로 분리</strong>(예: "평일반"/"주말반")해서 다중 조합으로 운영하세요. 잘못된 조합은 코스 개설(빌더) 단계에서 막힙니다.</span>
     </div>
   </div>
 </div>
@@ -653,20 +659,20 @@ function closeMobileSidebar() {
 
 
 <!-- ══════════════════════════════════════════
-     운영 케이스 — FLOW-03 강제 할당
+     운영 케이스 — FLOW-03 지정 등록
 ══════════════════════════════════════════ -->
 <div id="page-case-enroll-assign" class="page">
   <div class="page-tag">운영 케이스 FLOW-03</div>
-  <div class="page-title">강제 할당</div>
+  <div class="page-title">지정 등록</div>
   <div class="page-desc">고객사 담당자가 부서·직급 단위로 수강생을 직접 배정하는 흐름입니다. 법정의무교육, 전사 필수교육에 주로 사용합니다.</div>
 
   <div class="guide-section">
-    <div class="section-title">강제 할당 흐름 <span class="section-tag">FLOW-03</span></div>
+    <div class="section-title">지정 등록 흐름 <span class="section-tag">FLOW-03</span></div>
     <div class="mt-3 space-y-0">
       <div class="step-row">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-action">코스 등록 빌더 → 섹션 2 수강 신청 설정 → "관리자가 강제 할당" 선택</div>
+          <div class="step-action">코스 등록 빌더 → 섹션 2 수강 신청 설정 → "관리자가 지정 등록" 선택</div>
           <div class="step-note">이 선택을 해야 차수 편집 사이드바에서 그룹 배정 UI가 활성화됨</div>
         </div>
       </div>
@@ -695,7 +701,7 @@ function closeMobileSidebar() {
   </div>
 
   <div class="guide-section">
-    <div class="section-title">강제 할당 주요 규칙</div>
+    <div class="section-title">지정 등록 주요 규칙</div>
     <div class="overflow-x-auto mt-3">
       <table class="xl-table">
         <thead>
@@ -1502,7 +1508,7 @@ function closeMobileSidebar() {
           <tr>
             <td class="text-center font-bold">①</td>
             <td><strong>법정의무교육</strong><br><span class="text-slate-500 text-xs">성희롱 예방·산업안전·개인정보</span></td>
-            <td>강제 할당<br>+ 재수강 ON</td>
+            <td>지정 등록<br>+ 재수강 ON</td>
             <td><span class="b b-green">✅ 정식 가능</span></td>
             <td>부서별 차수 분리(1차수 영업·2차수 개발) → 그룹 칩으로 전직원 자동 배정 → QR 출석 → 회차 자동 종료 → 출석률 75% 기준 자동 통계</td>
             <td>FLOW-01 + FLOW-03 + FLOW-04</td>
@@ -1518,7 +1524,7 @@ function closeMobileSidebar() {
           <tr>
             <td class="text-center font-bold">③</td>
             <td><strong>신입사원 OT</strong><br><span class="text-slate-500 text-xs">입사자 100명 단위 일괄</span></td>
-            <td>강제 할당<br>(1차수 통합)</td>
+            <td>지정 등록<br>(1차수 통합)</td>
             <td><span class="b b-green">✅ 정식 가능</span></td>
             <td>"신입사원 2026" 그룹 1개 잡고 1차수 통합 → 다회차 운영 → QR 출석 → 출석률 통계</td>
             <td>FLOW-01 + FLOW-03 + FLOW-04</td>
@@ -1534,7 +1540,7 @@ function closeMobileSidebar() {
           <tr>
             <td class="text-center font-bold">⑤</td>
             <td><strong>부서 워크숍</strong><br><span class="text-slate-500 text-xs">1~2회차 부서 단위</span></td>
-            <td>강제 할당<br>(차수별 부서)</td>
+            <td>지정 등록<br>(차수별 부서)</td>
             <td><span class="b b-green">✅ 정식 가능</span></td>
             <td>차수마다 다른 부서 그룹 배정 → 출석률 기준 50%로 낮춰 운영 가능 → QR 출석</td>
             <td>FLOW-01 + FLOW-03 + FLOW-04</td>
@@ -1613,7 +1619,7 @@ function closeMobileSidebar() {
       <div class="step-row">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-action">첫 사이클 코스 개설 — 강제 할당 + 재수강 ON + 출석률 75%</div>
+          <div class="step-action">첫 사이클 코스 개설 — 지정 등록 + 재수강 ON + 출석률 75%</div>
           <div class="step-note">부서별 차수 분리. 전직원 그룹 칩으로 일괄 배정. QR 출석 운영</div>
         </div>
       </div>
@@ -2341,7 +2347,7 @@ function closeMobileSidebar() {
           <tr><td>처리 권한</td><td>관리자만, 사유 입력 필수</td></tr>
           <tr><td>법정의무교육 (보강 강제 ON)</td><td>휴강 시 <strong>보강 수업 추가 필수</strong>. 보강 전엔 수료 처리 불가</td></tr>
           <tr><td>자율 교육 (보강 강제 OFF)</td><td>출석부에서 빼고 그냥 진행. 보강 없이 수료 가능</td></tr>
-          <tr><td>날짜선택형 학습자</td><td>같은 차수 다른 날짜로 자동 안내. 정원 없으면 환불 또는 다음 차수 이월</td></tr>
+          <tr><td>회차선택형 학습자</td><td>같은 차수 다른 날짜로 자동 안내. 정원 없으면 환불 또는 다음 차수 이월</td></tr>
         </tbody>
       </table>
     </div>
@@ -2459,17 +2465,17 @@ function closeMobileSidebar() {
 <div id="page-enroll-types" class="page">
   <div class="page-tag">4. 수강신청 관리</div>
   <div class="page-title">신청 방식 2종</div>
-  <div class="page-desc">코스별로 "자율 수강"과 "강제 할당" 중 하나를 선택합니다. 코스 개설 시 고객사 담당자가 결정합니다.</div>
+  <div class="page-desc">코스별로 "자율 수강"과 "지정 등록" 중 하나를 선택합니다. 코스 개설 시 고객사 담당자가 결정합니다.</div>
 
   <div class="guide-section">
-    <div class="section-title">자율 수강 vs 강제 할당 비교 <span class="section-tag">핵심</span></div>
+    <div class="section-title">자율 수강 vs 지정 등록 비교 <span class="section-tag">핵심</span></div>
     <div class="overflow-x-auto mt-3">
       <table class="xl-table">
         <thead>
           <tr>
             <th style="width:130px">항목</th>
             <th>🙋 자율 수강</th>
-            <th>👤 강제 할당</th>
+            <th>👤 지정 등록</th>
           </tr>
         </thead>
         <tbody>
@@ -2512,7 +2518,7 @@ function closeMobileSidebar() {
           <tr><td>재수강 신청 (같은 코스 또 듣기)</td><td>코스에 "재수강 허용" 토글이 켜져 있어야 가능. 꺼져 있으면 신청 차단됨</td><td>코스 설정에 따름</td></tr>
           <tr><td>같은 코스 여러 차수 동시 신청</td><td>같은 코스 내 중복 신청 자동 차단됨</td><td>시스템 자동 처리</td></tr>
           <tr><td>법정의무교육 매년 재이수</td><td>코스에 "재수강 허용" 토글을 켜야 함. 반드시 확인 필요</td><td>고객사 담당자 설정</td></tr>
-          <tr><td>강제 할당된 수강생이 취소 요청</td><td>학습자 직접 취소 불가. 고객사 담당자가 수강생 관리 화면에서 직접 제거</td><td>고객사 담당자</td></tr>
+          <tr><td>지정 등록된 수강생이 취소 요청</td><td>학습자 직접 취소 불가. 고객사 담당자가 수강생 관리 화면에서 직접 제거</td><td>고객사 담당자</td></tr>
         </tbody>
       </table>
     </div>
@@ -3385,7 +3391,7 @@ function closeMobileSidebar() {
     { id:'case-publish',       label:'퍼블리싱 체크리스트',    cat:'운영 케이스' },
     { id:'case-open',          label:'FLOW-01 코스 개설',      cat:'운영 케이스' },
     { id:'case-enroll-self',   label:'FLOW-02 자율 수강신청',  cat:'운영 케이스' },
-    { id:'case-enroll-assign', label:'FLOW-03 강제 할당',      cat:'운영 케이스' },
+    { id:'case-enroll-assign', label:'FLOW-03 지정 등록',      cat:'운영 케이스' },
     { id:'case-attendance',    label:'FLOW-04 현장 QR 출석',   cat:'운영 케이스' },
     { id:'case-browse',        label:'FLOW-06 코스 목록 탐색', cat:'운영 케이스' },
     { id:'att-status',         label:'출석 상태 5종',          cat:'1. 출석 처리', kw:'조퇴 결석 지각 출석 미확인 사유 출석인정' },

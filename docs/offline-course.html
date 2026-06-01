@@ -151,8 +151,8 @@
     <div class="text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-1">Offline LMS</div>
     <div class="text-white font-bold text-base leading-tight">기획설계서</div>
     <div class="flex items-center gap-2 mt-2">
-      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.4</span>
-      <span class="text-slate-500 text-xs">2026-05-27</span>
+      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.6</span>
+      <span class="text-slate-500 text-xs">2026-06-01</span>
     </div>
     <div class="flex mt-3 rounded-lg overflow-hidden border border-slate-700">
       <button id="tab-btn-admin" class="tab-btn flex-1 py-1.5 text-xs font-semibold transition-colors bg-indigo-600 text-white" data-tab="admin" onclick="switchTab('admin')">관리자단</button>
@@ -207,7 +207,7 @@
       <a class="nav-link" onclick="navTo('s15')">수강신청 3모드</a>
       <a class="nav-sub nav-link" onclick="navTo('s15-single')">단일선택</a>
       <a class="nav-sub nav-link" onclick="navTo('s15-multi')">다중조합</a>
-      <a class="nav-sub nav-link" onclick="navTo('s15-assigned')">강제배정</a>
+      <a class="nav-sub nav-link" onclick="navTo('s15-assigned')">지정 등록</a>
       <a class="nav-sub nav-link" onclick="navTo('s15-session')">회차선택형</a>
       <a class="nav-link" onclick="navTo('s16')">변경·취소 정책 UI</a>
       <a class="nav-link" onclick="navTo('s17')">MY탭 & QR출석</a>
@@ -737,7 +737,7 @@
             <ul class="text-slate-600 leading-relaxed list-disc list-inside space-y-1 text-xs">
               <li><strong>ON</strong>: 법정의무교육 — 보강 안 하면 수료 처리 불가</li>
               <li><strong>OFF</strong>: 자율 교육 — 휴강은 출석부에서 빼고 진행</li>
-              <li>날짜선택형은 학습자에게 다른 날짜 자동 안내</li>
+              <li>회차선택형은 학습자에게 다른 날짜(회차) 자동 안내</li>
             </ul>
           </div>
         </div>
@@ -835,7 +835,7 @@
   <!-- 4.5 수강 신청 -->
   <div id="p-enroll" class="policy-box">
     <div class="policy-title">4.5 수강 신청</div>
-    <p class="text-sm text-slate-500 mb-4">학습자가 직접 신청하는 <strong>자율 수강</strong>과 HRD 담당자가 부서·직급 단위로 배정하는 <strong>강제 할당</strong>, 두 가지 방식을 코스별로 선택합니다.</p>
+    <p class="text-sm text-slate-500 mb-4">학습자가 직접 신청하는 <strong>자율 수강</strong>과 HRD 담당자가 부서·직급 단위로 배정하는 <strong>지정 등록</strong>, 두 가지 방식을 코스별로 선택합니다.</p>
 
     <div class="grid grid-cols-2 gap-4 mb-5">
       <div class="border-2 border-indigo-200 bg-indigo-50 rounded-xl p-4">
@@ -848,7 +848,7 @@
         </div>
       </div>
       <div class="border-2 border-violet-200 bg-violet-50 rounded-xl p-4">
-        <div class="font-bold text-violet-800 mb-2">👤 강제 할당</div>
+        <div class="font-bold text-violet-800 mb-2">👤 지정 등록</div>
         <div class="text-sm text-violet-700 mb-3">HRD 담당자가 부서/직급 단위로 직접 배정</div>
         <div class="space-y-1 text-xs text-violet-600">
           <div>• 법정의무교육 등에 주로 사용</div>
@@ -1027,7 +1027,7 @@
   </div>
 
   <div class="mt-4 bg-slate-50 rounded-xl p-4 text-sm text-slate-600">
-    <strong>추가 흐름</strong>: FLOW-03 (강제 할당) — 코스 등록 > 수강 등록 방식 "강제 할당" 선택 → 그룹 배정 UI → 대상 그룹 선택 → 정원 자동 계산 → 퍼블리싱 시 대상자 앱 노출 <br>
+    <strong>추가 흐름</strong>: FLOW-03 (지정 등록) — 코스 등록 > 수강 등록 방식 "지정 등록" 선택 → 그룹 배정 UI → 대상 그룹 선택 → 정원 자동 계산 → 퍼블리싱 시 대상자 앱 노출 <br>
     <strong>FLOW-06</strong> (코스 목록 탐색) — 관리자 메인 → 상태 탭 필터 → 카테고리 → 검색 → 행 클릭 차수 확장 → "수강관리" 클릭
   </div>
 </section>
@@ -1102,7 +1102,7 @@
         <tr><td>E04</td><td>동일 차수 중복</td><td>이미 신청 완료 → 재신청</td><td>"이미 신청됨"</td><td>4.6</td></tr>
         <tr><td>E05</td><td>재수강 비허용 + 기수료</td><td>재수강 OFF + 기수료 → 신청</td><td>"이미 수료한 교육"</td><td>4.6</td></tr>
         <tr><td>E06</td><td>재수강 허용 + 기수료</td><td>재수강 ON + 기수료 → 신청</td><td>다른 차수 신청 가능</td><td>4.6</td></tr>
-        <tr><td>E07</td><td>강제 할당</td><td>HRD 담당자 그룹 선택 배정</td><td>대상 그룹 전원 자동 배정</td><td>FLOW-03</td></tr>
+        <tr><td>E07</td><td>지정 등록</td><td>HRD 담당자 그룹 선택 배정</td><td>대상 그룹 전원 자동 배정</td><td>FLOW-03</td></tr>
         <tr><td>E08</td><td>신청 취소 (기한 내)</td><td>취소 클릭</td><td>취소 완료. 잔여석 +1</td><td>4.6</td></tr>
         <tr><td>E09</td><td>신청 취소 (기한 초과)</td><td>기한 경과 후 취소 시도</td><td>학습자 취소 불가. 관리자만</td><td>4.6</td></tr>
       </tbody>
@@ -1487,7 +1487,7 @@
       <thead><tr><th>ID</th><th>갭</th><th>영역</th><th>심각도</th><th>비고</th></tr></thead>
       <tbody>
         <tr><td><strong>GAP-01</strong></td><td>정원 마감 후 대기자 플로우 없음</td><td>수강 신청</td><td><span class="badge badge-critical">🔴 Critical</span></td><td>법정의무교육에서 치명적</td></tr>
-        <tr><td><strong>GAP-02</strong></td><td>강제 할당 후 학습자 앱 노출 시점 미정</td><td>할당 플로우</td><td><span class="badge badge-critical">🔴 Critical</span></td><td>즉시 노출 vs 퍼블리싱 시 노출</td></tr>
+        <tr><td><strong>GAP-02</strong></td><td>지정 등록 후 학습자 앱 노출 시점 미정</td><td>할당 플로우</td><td><span class="badge badge-critical">🔴 Critical</span></td><td>즉시 노출 vs 퍼블리싱 시 노출</td></tr>
         <tr><td><strong>GAP-03</strong></td><td>알림 채널·타이밍 설정 없음</td><td>알림</td><td><span class="badge badge-critical">🔴 Critical</span></td><td>앱 푸시 / 이메일 / SMS 결정 필요</td></tr>
         <tr><td><strong>GAP-04</strong></td><td>지각 인정 기준 차수별 설정 없음</td><td>출석</td><td><span class="badge badge-important">🟠 Important</span></td><td>Phase 1에서 기본값 10분으로 처리</td></tr>
         <tr><td><strong>GAP-05</strong></td><td>공결(사전 결석) 처리 플로우 없음</td><td>출석</td><td><span class="badge badge-important">🟠 Important</span></td><td>출장·병가 등 사전 사유 제출 필요</td></tr>
@@ -1509,7 +1509,7 @@
         <strong>① GAP-01 대기자 플로우</strong>: 정원 마감 시 대기 신청을 받을 것인가? 옵션: (A) 선착순 자동 전환 (B) 관리자 수동 전환 (C) 대기 없음 + 다른 차수 유도
       </div>
       <div class="callout callout-red">
-        <strong>② GAP-02 강제 할당 노출 시점</strong>: 퍼블리싱 전에 할당된 학습자 앱에 코스가 보여야 하는가? 이 결정 없이는 할당 플로우 구현 불가.
+        <strong>② GAP-02 지정 등록 노출 시점</strong>: 퍼블리싱 전에 할당된 학습자 앱에 코스가 보여야 하는가? 이 결정 없이는 할당 플로우 구현 불가.
       </div>
       <div class="callout callout-red">
         <strong>③ GAP-03 알림 채널</strong>: 어떤 채널(앱 푸시/이메일/SMS)로 어떤 알림을 보낼 것인가? 코스 빌더에 알림 설정 섹션 추가 여부 결정 필요.
@@ -1630,7 +1630,7 @@
         <tr><td>신청완료</td><td>in-progress</td><td><span class="badge badge-qa">course-enrolled.html</span></td><td>QR CTA 노출</td></tr>
         <tr><td>신청완료</td><td>ended</td><td><span class="badge badge-ops">course-completed.html</span></td><td>수료/미수료 분기</td></tr>
         <tr><td>신청완료</td><td>completed</td><td><span class="badge badge-ops">course-completed.html</span></td><td>수료증 다운로드 활성</td></tr>
-        <tr><td>강제배정</td><td>모든 상태</td><td>동일 규칙 적용</td><td>취소 버튼 정책 별도 적용</td></tr>
+        <tr><td>지정 등록</td><td>모든 상태</td><td>동일 규칙 적용</td><td>취소 버튼 정책 별도 적용</td></tr>
       </tbody>
     </table>
   </div>
@@ -1661,12 +1661,21 @@
     <table>
       <thead><tr><th>모드</th><th>enrollMode 값</th><th>설명</th></tr></thead>
       <tbody>
-        <tr><td>자율 단일선택</td><td><code class="bg-slate-100 px-1 rounded text-xs">single</code></td><td>커리큘럼 1개 → 차수 1개 선택</td></tr>
-        <tr><td>자율 다중조합</td><td><code class="bg-slate-100 px-1 rounded text-xs">multi</code></td><td>커리큘럼 N개 → 각 1개 차수 선택, 최대 2개 조합</td></tr>
-        <tr><td>관리자 강제배정</td><td><code class="bg-slate-100 px-1 rounded text-xs">assigned</code></td><td>학습자가 선택 불가, 관리자가 배정</td></tr>
-        <tr><td>회차 선택형</td><td><code class="bg-slate-100 px-1 rounded text-xs">sessionSelect</code></td><td>차수 내 회차를 학습자가 선택 (법정의무교육)</td></tr>
+        <tr><td>회원이 차수 1개 선택</td><td><code class="bg-slate-100 px-1 rounded text-xs">single</code></td><td>등록된 차수 중 1개만 선택. 차수를 "회차 선택형"으로 두면 회차(날짜) 1개 선택</td></tr>
+        <tr><td>회원이 여러 차수 선택</td><td><code class="bg-slate-100 px-1 rounded text-xs">multi</code></td><td>여러 차수를 함께 선택(최대 2개). 일정이 겹치는 차수는 함께 선택 불가 — 빌더 발행 단계에서 보장</td></tr>
+        <tr><td>관리자 지정 등록</td><td><code class="bg-slate-100 px-1 rounded text-xs">assigned</code></td><td>학습자가 선택 불가, 관리자가 배정</td></tr>
+        <tr><td>회차 선택형</td><td><code class="bg-slate-100 px-1 rounded text-xs">sessionSelect</code></td><td>차수 내 회차(날짜)를 학습자가 선택 — <strong>단일 선택형의 하위 옵션(토글)</strong>. 법정의무교육 등 같은 내용을 여러 날짜에 열 때: 차수 1개 + 회차 여러 개로 운영(날짜마다 차수를 따로 안 만들어도 됨). <strong>단, 다중조합(multi)과 함께 쓸 수 없음</strong> — 아래 상호배타 규칙 참고</td></tr>
       </tbody>
     </table>
+    <div class="callout callout-blue mt-3">
+      <strong>회차 선택형 ↔ 다중조합 상호배타 규칙</strong> (v1.6, 2026-06-01)<br>
+      회차 선택형(sessionSelect)은 <strong>단일 선택형(single) 전용</strong>입니다. "회원이 여러 차수 선택"(multi)과는 동시에 쓸 수 없습니다.
+      <ul class="list-disc ml-5 mt-2 text-sm text-slate-600">
+        <li><strong>이유</strong>: 다중에서 차수별 회차 분기가 필요하면 차수를 쪼개서 표현하면 됨(기능 중복). 공존 시 학습자가 "여러 차수 + 차수마다 회차"를 2중 선택해야 해 혼란.</li>
+        <li><strong>빌더 동작</strong>: 다중으로 전환하면 회차 선택형이던 차수는 자동으로 전체일정으로 바뀌고 안내(토스트)가 뜸. 다중 상태에선 수강유형 모달의 "회차 선택형" 카드가 잠김(사용 불가).</li>
+        <li><strong>차단 위치</strong>: 학습자 화면이 아니라 관리자 빌더 입구에서 차단(잘못된 설정을 애초에 못 만들게).</li>
+      </ul>
+    </div>
   </div>
 
   <div class="subsection" id="s15-single">
@@ -1690,7 +1699,7 @@
   </div>
 
   <div class="subsection" id="s15-assigned">
-    <div class="subsection-title">15.4 강제배정 흐름 (assigned)</div>
+    <div class="subsection-title">15.4 지정 등록 흐름 (assigned)</div>
     <div class="callout callout-amber">관리자가 배정한 코스. 학습자에게 선택권 없음. 신청 버튼 없이 배정 안내 문구와 배정된 차수 정보만 표시. 취소 버튼은 관리자 설정값 우선.</div>
     <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="flow-action">코스 상세: 배정 안내 배너 노출</div><div class="flow-result">"🛡️ 관리자 배정 교육" + 배정 그룹명 표시</div></div></div>
     <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="flow-action">하단 버튼: "배정 일정 확인 완료" (비활성)</div><div class="flow-result">수강신청 버튼 없음</div></div></div>
@@ -1698,9 +1707,9 @@
 
   <div class="subsection" id="s15-session">
     <div class="subsection-title">15.5 회차선택형 흐름 (sessionSelect)</div>
-    <div class="callout callout-blue">법정의무교육 등 동일 내용을 여러 날짜에 개설하고 학습자가 원하는 날짜의 회차를 선택하는 방식.</div>
-    <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="flow-action">바텀시트: 회차 목록 (날짜선택형 피커)</div><div class="flow-result">날짜·시간·장소·잔여석 표시. 1개 선택 필수.</div></div></div>
-    <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="flow-action">회차 선택 → [선택 완료] 활성</div><div class="flow-result">미선택 시 "날짜를 선택하세요 ↑" 버튼 표시</div></div></div>
+    <div class="callout callout-blue">법정의무교육 등 동일 내용을 여러 날짜에 개설하고 학습자가 원하는 날짜의 회차를 선택하는 방식. <strong>차수 1개 안에 회차(날짜)를 여러 개 두고 토글 1개로 운영</strong> — 날짜마다 차수를 따로 만들 필요가 없어 운영 입력·정원 관리가 가볍습니다.</div>
+    <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="flow-action">바텀시트: 회차 목록 (회차선택형 피커)</div><div class="flow-result">날짜·시간·장소·잔여석 표시. 1개 선택 필수.</div></div></div>
+    <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="flow-action">회차 선택 → [선택 완료] 활성</div><div class="flow-result">미선택 시 "날짜를 선택하세요" 버튼 표시</div></div></div>
     <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="flow-action">screen-confirm: 선택한 회차 날짜·시간 표시</div><div class="flow-result">전체 회차 목록이 아닌, 선택한 1개 회차 정보만 표시 <span class="badge badge-done">GAP-U07 완료</span></div></div></div>
   </div>
 </section>
@@ -1718,7 +1727,7 @@
         <tr><td>기한 내</td><td>✅ 활성</td><td>✅ 활성</td><td>없음</td></tr>
         <tr><td>변경기한 경과</td><td>❌ 비활성</td><td>✅ 활성</td><td>"일정 변경 기한이 지났어요" <span class="badge badge-done">GAP-U06 완료</span></td></tr>
         <tr><td>모든 기한 경과</td><td>❌ 비활성</td><td>❌ 비활성</td><td>"취소 기한이 지났어요" 양쪽 표시 <span class="badge badge-done">GAP-U06 완료</span></td></tr>
-        <tr><td>강제배정 코스</td><td>관리자 설정</td><td>관리자 설정</td><td>관리자 문의 안내</td></tr>
+        <tr><td>지정 등록 코스</td><td>관리자 설정</td><td>관리자 설정</td><td>관리자 문의 안내</td></tr>
       </tbody>
     </table>
   </div>
@@ -1852,7 +1861,7 @@
     <table>
       <thead><tr><th>항목</th><th>범위</th><th>이유</th></tr></thead>
       <tbody>
-        <tr><td>수강신청 3모드 + sessionSelect</td><td><span class="badge badge-done">Phase 1</span></td><td>현재 프로토타입에 구현됨</td></tr>
+        <tr><td>수강신청 3모드 + sessionSelect</td><td><span class="badge badge-done">Phase 1</span></td><td>현재 프로토타입에 구현됨 (sessionSelect = 단일 선택형 하위 토글)</td></tr>
         <tr><td>QR 결과 5종 모달</td><td><span class="badge badge-done">Phase 1</span></td><td>문구·색상 확정 후 반영</td></tr>
         <tr><td>라이브 모드 (BroadcastChannel)</td><td><span class="badge badge-done">Phase 1</span></td><td>데모 환경 전제로 구현</td></tr>
         <tr><td>지도 버튼</td><td><span class="badge badge-done">Phase 1</span></td><td>버튼 노출만 (실제 연동 없음)</td></tr>

@@ -159,7 +159,7 @@
     <span class="font-bold text-slate-800 text-base">오프라인 코스 가이드</span>
   </div>
   <div class="flex-1"></div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v1.4 · 2026-05-27</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v1.6 · 2026-06-01</span>
 </header>
 
 <script>
@@ -210,7 +210,7 @@ function closeMobileSidebar() {
       <div class="nav-sub" onclick="showPage('enroll-single', this)">자율 단일 선택</div>
       <div class="nav-sub" onclick="showPage('enroll-multi', this)">자율 다중 조합</div>
       <div class="nav-sub" onclick="showPage('enroll-assigned', this)">관리자 배정</div>
-      <div class="nav-sub" onclick="showPage('enroll-session', this)">날짜선택형 회차</div>
+      <div class="nav-sub" onclick="showPage('enroll-session', this)">회차선택형 회차</div>
     </div>
 
     <div class="nav-item" onclick="showPage('enrolled-page', this)">
@@ -352,14 +352,14 @@ function closeMobileSidebar() {
         </div>
         <div class="mode-card">
           <div class="mode-icon">📌</div>
-          <div class="mode-name">관리자 강제배정</div>
+          <div class="mode-name">관리자 지정 등록</div>
           <div class="mode-desc">운영자가 지정한 일정이 자동 선택됨</div>
           <span class="badge badge-amber mt-2">assigned</span>
         </div>
         <div class="mode-card">
           <div class="mode-icon">📆</div>
-          <div class="mode-name">날짜선택형 회차</div>
-          <div class="mode-desc">법정의무교육 등. 특정 회차 날짜를 직접 선택</div>
+          <div class="mode-name">회차선택형 회차</div>
+          <div class="mode-desc">법정의무교육 등. 차수 1개 안에서 원하는 날짜(회차)를 직접 선택</div>
           <span class="badge badge-green mt-2">sessionSelect</span>
         </div>
       </div>
@@ -565,7 +565,7 @@ function closeMobileSidebar() {
         </div>
         <div class="screen-card">
           <img src="../screenshots/course-detail/08_assigned_detail.png" class="screen-img" style="width:220px" alt="배정">
-          <span class="badge badge-amber mt-1">강제배정</span>
+          <span class="badge badge-amber mt-1">지정 등록</span>
         </div>
       </div>
     </div>
@@ -879,7 +879,7 @@ function closeMobileSidebar() {
       </div>
       <div class="nav-pn-btn right" onclick="showPage('enroll-session', document.querySelector('[onclick*=enroll-session]'))">
         <div class="pn-label">다음 →</div>
-        <div class="pn-title">날짜선택형 회차</div>
+        <div class="pn-title">회차선택형 회차</div>
       </div>
     </div>
   </div>
@@ -891,8 +891,8 @@ function closeMobileSidebar() {
     <div class="breadcrumb">학습자 가이드 <span>›</span> 수강 신청</div>
     <div class="page-header">
       <div class="page-tag">수강 신청</div>
-      <h1 class="page-title">날짜선택형 회차</h1>
-      <p class="page-desc">특정 코스에 적용되는 방식입니다. 커리큘럼 선택 후 캘린더에서 원하는 회차 날짜를 추가로 선택해야 신청이 완료됩니다.</p>
+      <h1 class="page-title">회차선택형 회차</h1>
+      <p class="page-desc">특정 코스(법정의무교육 등)에 적용되는 방식입니다. 차수 1개 안에 여러 날짜(회차)를 두고, 학습자가 원하는 날짜를 골라야 신청이 완료됩니다. 관리자는 차수를 날짜마다 따로 만들 필요 없이 토글 1개로 운영합니다.</p>
     </div>
 
     <div class="guide-section">
@@ -917,7 +917,7 @@ function closeMobileSidebar() {
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/D1_modal_session_calendar.png" class="screen-img" style="width:210px" alt="캘린더">
           <div class="screen-label">① 커리큘럼 선택 → 캘린더</div>
-          <div class="screen-caption">날짜선택형 카드 선택 시<br>캘린더 UI가 하단에 펼쳐짐</div>
+          <div class="screen-caption">회차선택형 카드 선택 시<br>캘린더 UI가 하단에 펼쳐짐</div>
         </div>
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/D2_modal_session_date_picked.png" class="screen-img" style="width:210px" alt="날짜 선택">
@@ -1035,7 +1035,7 @@ function closeMobileSidebar() {
     <div class="nav-pn">
       <div class="nav-pn-btn" onclick="showPage('enroll-session', document.querySelector('[onclick*=enroll-session]'))">
         <div class="pn-label">← 이전</div>
-        <div class="pn-title">날짜선택형 회차</div>
+        <div class="pn-title">회차선택형 회차</div>
       </div>
       <div class="nav-pn-btn right" onclick="showPage('completed-page', document.querySelector('[onclick*=completed-page]'))">
         <div class="pn-label">다음 →</div>
@@ -1735,7 +1735,7 @@ function closeMobileSidebar() {
               <div>• 차수명 (예: A반, 1기)</div>
               <div>• 정원 입력 필드</div>
               <div>• 강사명 별도 입력 가능</div>
-              <div>• 날짜선택형 회차 토글</div>
+              <div>• 회차선택형 회차 토글</div>
               <div>• 복제 / 삭제 버튼</div>
               <div>• ⠿ 드래그 핸들 (순서 변경)</div>
             </div>
@@ -1750,7 +1750,7 @@ function closeMobileSidebar() {
 
     <div class="guide-section">
       <div class="section-title">차수 유형 2종</div>
-      <div class="section-desc">차수 카드에서 "날짜선택형 회차" 토글로 유형을 전환합니다. 유형에 따라 학습자의 신청 방식이 달라집니다.</div>
+      <div class="section-desc">차수 카드에서 "회차선택형 회차" 토글로 유형을 전환합니다. 유형에 따라 학습자의 신청 방식이 달라집니다.</div>
 
       <div class="grid grid-cols-2 gap-6 mb-6">
         <div class="border border-slate-200 rounded-xl p-5 bg-white">
@@ -1764,7 +1764,7 @@ function closeMobileSidebar() {
           <div class="text-xs text-slate-400 leading-relaxed space-y-1">
             <div>• 연속 교육 코스 (예: 3일 과정, 주 1회 4주 등)</div>
             <div>• 차수별로 시작일~종료일 기간이 고정된 경우</div>
-            <div>• 빌더에서 "날짜선택형 회차" 토글 OFF 상태</div>
+            <div>• 빌더에서 "회차선택형 회차" 토글 OFF 상태</div>
           </div>
           <div class="mt-4">
             <img src="../screenshots/admin/offline-builder/package_type_default.png" class="screen-img w-full" alt="전체 일정형" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
@@ -1775,7 +1775,7 @@ function closeMobileSidebar() {
         <div class="border-2 border-green-200 rounded-xl p-5 bg-green-50">
           <div class="flex items-center gap-2 mb-3">
             <span class="badge badge-green">sessionSelect</span>
-            <div class="font-bold text-sm text-green-700">날짜선택형 회차</div>
+            <div class="font-bold text-sm text-green-700">회차선택형 회차</div>
           </div>
           <div class="text-xs text-green-700 leading-relaxed mb-3">
             학습자가 차수 신청 시 <strong>회차 날짜를 1개 직접 선택</strong>합니다. 같은 내용의 수업을 여러 날짜에 걸쳐 운영하고, 학습자가 편한 날 하나를 고르는 방식입니다.
@@ -1783,17 +1783,23 @@ function closeMobileSidebar() {
           <div class="text-xs text-green-600 leading-relaxed space-y-1">
             <div>• 법정의무교육 (안전, 성희롱 예방 등)</div>
             <div>• 동일 내용 반복 개설 코스</div>
-            <div>• 빌더에서 "날짜선택형 회차" 토글 ON → 회차가 날짜 선택 목록으로 표시</div>
+            <div>• 빌더에서 "회차선택형 회차" 토글 ON → 회차가 날짜 선택 목록으로 표시</div>
           </div>
           <div class="mt-4">
-            <img src="../screenshots/admin/offline-builder/package_type_session.png" class="screen-img w-full" alt="날짜선택형 회차" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="screen-placeholder" style="height:160px;display:none">📸 캡처 필요<br>날짜선택형 회차 카드 (토글 ON)</div>
+            <img src="../screenshots/admin/offline-builder/package_type_session.png" class="screen-img w-full" alt="회차선택형 회차" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="screen-placeholder" style="height:160px;display:none">📸 캡처 필요<br>회차선택형 회차 카드 (토글 ON)</div>
           </div>
         </div>
       </div>
 
       <div class="callout callout-blue">
-        <strong>학습자 화면 차이:</strong> 전체 일정형은 차수 선택만으로 완료. 날짜선택형은 차수 선택 후 <strong>캘린더에서 날짜 → 회차 선택</strong> 단계가 추가됩니다.
+        <strong>학습자 화면 차이:</strong> 전체 일정형은 차수 선택만으로 완료. 회차선택형은 차수 선택 후 <strong>캘린더에서 날짜 → 회차 선택</strong> 단계가 추가됩니다.
+      </div>
+
+      <div class="callout callout-amber mt-4">
+        <strong>"회원이 여러 차수 선택"(다중 조합형)에선 회차선택형을 쓸 수 없습니다.</strong> (v1.6, 2026-06-01)<br>
+        회차선택형은 <strong>"회원이 차수 1개 선택"(단일) 전용</strong>입니다. 신청 방식을 다중으로 바꾸면, 회차선택형이던 차수는 자동으로 전체 일정형으로 전환되고 안내 메시지가 뜹니다. 다중 상태에서는 차수 설정 화면의 "회차 선택형" 카드가 잠겨 선택할 수 없습니다.<br>
+        <span class="text-xs">날짜별로 나눠 받고 싶다면 회차선택형 대신 <strong>차수를 날짜별로 분리</strong>(예: "평일반"/"주말반")해서 다중 조합으로 운영하세요.</span>
       </div>
     </div>
 
@@ -2240,7 +2246,7 @@ function closeMobileSidebar() {
               <ul class="text-slate-600 leading-relaxed list-disc list-inside space-y-1 text-xs">
                 <li><strong>ON</strong>: 법정의무교육 — 보강 안 잡으면 수료 처리 불가</li>
                 <li><strong>OFF</strong>: 자율 교육 — 휴강은 빼고 그냥 진행</li>
-                <li>날짜선택형은 학습자에게 다른 날짜 자동 안내</li>
+                <li>회차선택형은 학습자에게 다른 날짜 자동 안내</li>
               </ul>
             </div>
           </div>
