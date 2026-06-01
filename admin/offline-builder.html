@@ -63,7 +63,7 @@
       Wand2, ChevronLeft, ChevronRight, ChevronUp, User, Users, MousePointerClick, ChevronDown, GripVertical,
       Save, Send, Clock, Check, AlertTriangle, Eye, FileText, CircleDot, ImageIcon, Upload,
       BookOpen, Monitor, Star, List, Archive, AlertCircle, Grid3X3, CheckCircle, Filter, Layers, Info, ArrowRight,
-      Settings2, CalendarDays, CalendarCheck,
+      Settings2, CalendarDays, CalendarCheck, Lock,
       MessageSquare, Play, BarChart2, Settings, ArrowLeft, UserCheck
     } = Lucide;
 
@@ -580,6 +580,7 @@
         { label: '최소 1개 차수 생성', ok: options.length > 0 },
         { label: '모든 차수에 회차 존재', ok: options.every(o => o.sessions.length > 0) },
         { label: '모든 회차 날짜/시간 설정', ok: options.every(o => o.sessions.every(s => s.date && s.startTime && s.endTime)) },
+        { label: '다중 조합형 차수 일정 미겹침', ok: selectionRule !== 'multiple' || !hasOptionOverlap },
         { label: '수료 조건 최소 1개 설정', ok: completionRules.length > 0 },
       ];
 
@@ -683,6 +684,22 @@
           sessions: [{ id: 101, name: '1회차', date: todayStr, startTime: '09:00', endTime: '18:00', place: '', capacity: null, groups: null }] },
       ]);
 
+      /* ── 회차 집계 & 차수 간 일정 겹침 검사 (다중 조합형 가드 + 수료 출석 기준) ── */
+      // 출석/수료 판정 단위는 항상 '회차(session)'. 차수는 등록 단위일 뿐 판정 단위가 아니다.
+      const totalSessionCount = options.reduce((sum, o) => sum + o.sessions.length, 0);
+      const _toMin = (t) => { const [h, m] = (t || '0:0').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+      const _sessConflict = (a, b) => a.date && b.date && a.date === b.date
+        && _toMin(a.startTime) < _toMin(b.endTime) && _toMin(b.startTime) < _toMin(a.endTime);
+      const _optConflict = (o1, o2) => o1.sessions.some(s1 => o2.sessions.some(s2 => _sessConflict(s1, s2)));
+      const overlapPairs = (() => {
+        const pairs = [];
+        for (let i = 0; i < options.length; i++)
+          for (let j = i + 1; j < options.length; j++)
+            if (_optConflict(options[i], options[j])) pairs.push([options[i].name, options[j].name]);
+        return pairs;
+      })();
+      const hasOptionOverlap = overlapPairs.length > 0;
+
       /* ── 출석 정책 ── */
       const [lateMinutes, setLateMinutes] = useState(10);
       const [lateEnabled, setLateEnabled] = useState(true);
@@ -690,16 +707,33 @@
       /* ── 수료 조건 ── */
       const [completionRules, setCompletionRules] = useState([
         { id: 'attendance', slot_type: 'attendance', label: '오프라인 출석', required: true, fixed: true,
-          condition: { type: 'any_status', minType: 'all', minCount: 1 } }
+          condition: { type: 'attendance_rate', minRate: 75 } }
       ]);
-      const updateAttendanceCond = (minType, minCount) => {
-        const maxCount = options.length || 1;
-        const clamped = Math.min(maxCount, Math.max(1, minCount));
+      // 수료 = 출석률 % (학습자가 등록한 차수의 회차 기준). 지각=출석 인정. 공식 offline-course.html 4.4
+      const updateAttendanceRate = (minRate) => {
+        const clamped = Math.min(100, Math.max(1, minRate || 1));
         setCompletionRules(prev => prev.map(r => r.id === 'attendance'
-          ? { ...r, condition: { ...r.condition, minType, minCount: clamped } } : r));
-        const label = minType === 'all' ? '모든 차수 출석' : `${clamped}개 차수 이상 출석`;
-        showToast(`수료 조건 변경 — ${label}`, '✅');
+          ? { ...r, condition: { type: 'attendance_rate', minRate: clamped } } : r));
+        showToast(`수료 조건 변경 — 출석률 ${clamped}% 이상`, '✅');
       };
+
+      // 차수 일정이 겹치면 다중 조합형은 성립 불가 → 단일 선택형으로 자동 복귀
+      useEffect(() => {
+        if (hasOptionOverlap && selectionRule === 'multiple') {
+          setSelectionRule('single');
+          setSelectedMobileOptions([]);
+        }
+      }, [hasOptionOverlap]);
+
+      // A안: 다중 조합형에선 회차선택형 사용 불가(회차 분기는 차수 분리로 표현).
+      // 다중 전환 시 회차선택형 차수를 전체일정으로 자동 전환 + 안내(조용히 바꾸지 않음).
+      useEffect(() => {
+        if (selectionRule !== 'multiple') return;
+        const converted = options.filter(o => o.sessionSelect);
+        if (converted.length === 0) return;
+        setOptions(prev => prev.map(o => o.sessionSelect ? { ...o, sessionSelect: false } : o));
+        showToast(`다중 선택 방식에선 회차선택형을 쓸 수 없어 ${converted.length}개 차수를 전체일정으로 변경했습니다`, '📅');
+      }, [selectionRule]);
 
       const [activeOptionId, setActiveOptionId] = useState(1);
       const [showBatchForm, setShowBatchForm] = useState(null); // null | optId
@@ -1417,24 +1451,34 @@
                         </div>
                         <div className="pt-6 border-t border-slate-100">
                           <label className="block text-[14px] font-bold text-slate-800 mb-3 flex items-center gap-2">
-                            <CheckSquare size={16} className="text-emerald-500"/> 학습자 옵션(차수) 선택 규칙
+                            <CheckSquare size={16} className="text-emerald-500"/> 수강 신청 방식
                           </label>
                           <div className="grid grid-cols-2 gap-4">
                             <label className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all ${selectionRule === 'single' ? 'border-indigo-500 bg-indigo-50/50 ring-1 ring-indigo-500' : 'border-slate-200 hover:border-indigo-200'}`}>
                               <input type="radio" name="rule" className="mt-1" checked={selectionRule === 'single'} onChange={() => { setSelectionRule('single'); setSelectedMobileOptions([]); }}/>
                               <div>
-                                <div className="font-bold text-[14px] text-slate-800 mb-1">단일 선택형 (택 1)</div>
-                                <div className="text-[12px] text-slate-500">학습자는 전체 옵션 중 오직 1개만 선택할 수 있습니다.</div>
+                                <div className="font-bold text-[14px] text-slate-800 mb-1">회원이 차수 1개 선택</div>
+                                <div className="text-[12px] text-slate-500">등록된 차수 중 1개만 골라 신청합니다. 차수를 "회차 선택형"으로 두면 학습자가 회차(날짜) 1개를 직접 고릅니다.</div>
                               </div>
                             </label>
-                            <label className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all ${selectionRule === 'multiple' ? 'border-indigo-500 bg-indigo-50/50 ring-1 ring-indigo-500' : 'border-slate-200 hover:border-indigo-200'}`}>
-                              <input type="radio" name="rule" className="mt-1" checked={selectionRule === 'multiple'} onChange={() => { setSelectionRule('multiple'); setSelectedMobileOptions([]); }}/>
+                            <label className={`flex items-start gap-3 p-4 border rounded-xl transition-all ${hasOptionOverlap ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-80' : selectionRule === 'multiple' ? 'border-indigo-500 bg-indigo-50/50 ring-1 ring-indigo-500 cursor-pointer' : 'border-slate-200 hover:border-indigo-200 cursor-pointer'}`}>
+                              <input type="radio" name="rule" className="mt-1" disabled={hasOptionOverlap} checked={selectionRule === 'multiple'} onChange={() => { if (hasOptionOverlap) return; setSelectionRule('multiple'); setSelectedMobileOptions([]); }}/>
                               <div>
-                                <div className="font-bold text-[14px] text-slate-800 mb-1">다중 조합형 (N개 선택)</div>
-                                <div className="text-[12px] text-slate-500 mb-3">학습자가 자율적으로 N개의 옵션을 복수 선택합니다.</div>
-                                {selectionRule === 'multiple' && (
+                                <div className="font-bold text-[14px] text-slate-800 mb-1">회원이 여러 차수 선택</div>
+                                <div className="text-[12px] text-slate-500 mb-3">여러 차수를 골라 담습니다. 일정이 겹치는 차수는 함께 선택할 수 없습니다.</div>
+                                {hasOptionOverlap && (
+                                  <div className="flex items-start gap-2 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2 text-[12px] text-rose-700">
+                                    <AlertTriangle size={14} className="mt-0.5 shrink-0"/>
+                                    <div>
+                                      <div className="font-bold">차수 일정이 겹쳐 사용할 수 없습니다.</div>
+                                      <div className="mt-0.5 text-rose-600">겹치는 차수: {overlapPairs.map(p => `${p[0]} ↔ ${p[1]}`).join(', ')}</div>
+                                      <div className="mt-0.5 text-rose-500">날짜·시간을 조정하면 자동으로 사용할 수 있습니다.</div>
+                                    </div>
+                                  </div>
+                                )}
+                                {!hasOptionOverlap && selectionRule === 'multiple' && (
                                   <div className="flex items-center gap-2 bg-white p-2 rounded border border-slate-200 text-[13px] font-bold text-slate-700 w-max shadow-sm" onClick={e => e.preventDefault()}>
-                                    최대 <input type="number" min="1" value={maxSelect} onChange={e => setMaxSelect(parseInt(e.target.value))} className="w-12 border border-slate-200 rounded text-center outline-none focus:border-indigo-500 py-1"/> 개까지 선택 가능
+                                    최대 <input type="number" min="1" max={options.length} value={maxSelect} onChange={e => setMaxSelect(Math.max(1, Math.min(options.length || 1, parseInt(e.target.value) || 1)))} className="w-12 border border-slate-200 rounded text-center outline-none focus:border-indigo-500 py-1"/> 개까지 선택 가능
                                   </div>
                                 )}
                               </div>
@@ -1445,7 +1489,7 @@
                     )}
                     <div className={`p-4 bg-slate-50 flex justify-between items-center cursor-pointer hover:bg-slate-100 transition-colors ${isSelfEnroll ? 'border-t border-slate-200' : ''}`} onClick={() => setIsSelfEnroll(false)}>
                       <div>
-                        <div className="font-bold text-[15px] text-slate-800">관리자가 강제 할당 (기수/반 단위)</div>
+                        <div className="font-bold text-[15px] text-slate-800">관리자 지정 등록</div>
                         <div className="text-[13px] text-slate-500 mt-0.5">수강 신청 절차 없이, 관리자가 명단을 엑셀/조직도로 일괄 등록합니다.</div>
                       </div>
                       <Toggle active={!isSelfEnroll} onClick={e => { e.stopPropagation(); setIsSelfEnroll(!isSelfEnroll); }}/>
@@ -1478,7 +1522,7 @@
                     {completionRules.map(rule => {
                       const isAtt = rule.id === 'attendance';
                       const condSummary = isAtt
-                        ? (rule.condition.minType === 'all' ? '전체 회차 출석 필수' : `최소 ${rule.condition.minCount}회 이상 출석`)
+                        ? `출석률 ${rule.condition.minRate}% 이상 시 수료`
                         : '';
                       return (
                         <div key={rule.id} className="border border-slate-200 rounded-xl overflow-hidden">
@@ -1496,43 +1540,20 @@
                             )}
                           </div>
 
-                          {/* 조건 선택 — 칩(pill) 방식 */}
+                          {/* 출석률 % 기준 (공식 offline-course.html 4.4) */}
                           {isAtt && (
-                            <div className="px-4 pb-4 pt-3 bg-slate-50/80 border-t border-slate-100 space-y-3">
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => updateAttendanceCond('all', 1)}
-                                  className={`px-4 py-2 rounded-xl text-[13px] font-bold border transition-all ${
-                                    rule.condition.minType === 'all'
-                                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                      : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600'
-                                  }`}>
-                                  전체 회차 출석
-                                </button>
-                                <button
-                                  onClick={() => updateAttendanceCond('count', rule.condition.minCount)}
-                                  className={`px-4 py-2 rounded-xl text-[13px] font-bold border transition-all ${
-                                    rule.condition.minType === 'count'
-                                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                      : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600'
-                                  }`}>
-                                  N회 이상 출석
-                                </button>
+                            <div className="px-4 pb-4 pt-3 bg-slate-50/80 border-t border-slate-100 space-y-2">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[13px] text-slate-600 font-medium">출석률</span>
+                                <input
+                                  type="number" min="1" max="100"
+                                  value={rule.condition.minRate}
+                                  onChange={e => updateAttendanceRate(Math.min(100, Math.max(1, parseInt(e.target.value)||1)))}
+                                  className="w-16 text-center text-[15px] font-black border-2 border-indigo-400 rounded-xl px-2 py-1.5 outline-none bg-white text-indigo-700 focus:ring-2 focus:ring-indigo-200"
+                                />
+                                <span className="text-[13px] text-slate-600 font-medium">% 이상이면 수료</span>
                               </div>
-
-                              {rule.condition.minType === 'count' && (
-                                <div className="flex items-center gap-2 animate-fadeIn">
-                                  <span className="text-[13px] text-slate-600 font-medium">최소</span>
-                                  <input
-                                    type="number" min="1" max={options.length || 1}
-                                    value={rule.condition.minCount}
-                                    onChange={e => updateAttendanceCond('count', Math.min(options.length || 1, Math.max(1, parseInt(e.target.value)||1)))}
-                                    className="w-16 text-center text-[15px] font-black border-2 border-indigo-400 rounded-xl px-2 py-1.5 outline-none bg-white text-indigo-700 focus:ring-2 focus:ring-indigo-200"
-                                  />
-                                  <span className="text-[13px] text-slate-600 font-medium">회 이상 출석</span>
-                                  <span className="text-[11px] text-slate-400 ml-1">/ 총 {options.length}차수</span>
-                                </div>
-                              )}
+                              <p className="text-[11px] text-slate-400">예: 4회차 교육에서 3회 출석 = 75% · 지각도 출석으로 인정</p>
                             </div>
                           )}
                         </div>
@@ -1625,7 +1646,7 @@
 
                 {/* ── 커리큘럼 인덱스: 전체 차수 + 회차 나열 ── */}
                 <div className="px-5 pt-4 pb-6 space-y-4">
-                  {options.map((opt) => {
+                  {options.map((opt, optIdx) => {
                     const isActiveOpt = activeOptionId === opt.id;
                     const isBatchOpen = showBatchForm === opt.id;
                     const isCollapsed = !!collapsedOpts[opt.id];
@@ -1653,6 +1674,7 @@
                           {/* 1행: 차수명 (주요 식별자) */}
                           <div className="px-4 py-2.5 flex items-center gap-3 cursor-grab active:cursor-grabbing">
                             <GripVertical size={14} className="text-slate-600 shrink-0"/>
+                            <span className="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-500 text-white text-[12px] font-extrabold tabular-nums">{optIdx + 1}차수</span>
                             <input
                               value={opt.name}
                               onChange={e => handleOptionChange(opt.id, 'name', e.target.value)}
@@ -1660,6 +1682,7 @@
                               onClick={e => e.stopPropagation()}
                               className="flex-1 text-[14px] font-bold text-white bg-transparent border-b border-transparent hover:border-slate-600 focus:border-indigo-400 outline-none cursor-text placeholder-slate-600"
                             />
+                            <span className="shrink-0 text-[11px] font-bold text-slate-400 tabular-nums">회차 {opt.sessions.length}</span>
                             <button onClick={e => { e.stopPropagation(); toggleCollapse(opt.id); }} className="p-1 rounded text-slate-500 hover:text-white hover:bg-slate-700 transition-colors shrink-0">
                               {isCollapsed ? <ChevronDown size={14}/> : <ChevronUp size={14}/>}
                             </button>
@@ -1697,7 +1720,7 @@
                                 ${opt.sessionSelect ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white'}`}
                             >
                               {opt.sessionSelect ? <CalendarCheck size={10}/> : <CalendarDays size={10}/>}
-                              {opt.sessionSelect ? '날짜선택형' : '전체일정'}
+                              {opt.sessionSelect ? '회차선택형' : '전체일정'}
                             </button>
 
                             {/* 스페이서 */}
@@ -1816,12 +1839,12 @@
                           </div>
                         )}
 
-                        {/* 날짜선택형 안내 배너 */}
+                        {/* 회차선택형 안내 배너 */}
                         {!isCollapsed && opt.sessionSelect && (
                           <div className="mx-3 mt-2 mb-0 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-lg flex items-start gap-2">
                             <CalendarCheck size={13} className="text-indigo-500 mt-0.5 shrink-0"/>
                             <p className="text-[11px] text-indigo-700 leading-relaxed">
-                              <strong>날짜선택형</strong> — 학습자가 아래 회차 중 <strong>1개</strong>를 직접 선택해 신청합니다.
+                              <strong>회차선택형</strong> — 학습자가 아래 회차 중 <strong>1개</strong>를 직접 선택해 신청합니다.
                             </p>
                           </div>
                         )}
@@ -2306,9 +2329,26 @@
                         <p className="text-[12px] text-slate-500 leading-relaxed">신청 시 모든 회차에 자동 등록됩니다.<br/><span className="text-slate-400">예: 5일 연속 교육, 격주 심화 과정</span></p>
                       </div>
                     </button>
-                    {/* 날짜 선택형 */}
+                    {/* 회차 선택형 — 다중 조합형에선 사용 불가(A안) */}
+                    {selectionRule === 'multiple' ? (
+                      <div
+                        className="w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-slate-50 flex gap-4 items-start opacity-70 cursor-not-allowed"
+                        title="다중 선택 방식에선 회차선택형을 쓸 수 없습니다"
+                      >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-slate-100">
+                          <CalendarCheck size={18} className="text-slate-300"/>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[14px] font-bold text-slate-400">회차 선택형</span>
+                            <span className="text-[10px] font-bold text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded-full flex items-center gap-1"><Lock size={9}/> 사용 불가</span>
+                          </div>
+                          <p className="text-[12px] text-slate-400 leading-relaxed">"회원이 여러 차수 선택" 방식에선 쓸 수 없습니다.<br/><span className="text-slate-400">회차별로 나누려면 차수를 분리해 주세요.</span></p>
+                        </div>
+                      </div>
+                    ) : (
                     <button
-                      onClick={() => { handleOptionChange(tOpt.id, 'sessionSelect', true); setOptionSettingsId(null); showToast(`[${tOpt.name}] 날짜선택형으로 변경 — 학습자가 회차를 직접 선택합니다`, '📅'); }}
+                      onClick={() => { handleOptionChange(tOpt.id, 'sessionSelect', true); setOptionSettingsId(null); showToast(`[${tOpt.name}] 회차선택형으로 변경 — 학습자가 회차를 직접 선택합니다`, '📅'); }}
                       className={`w-full text-left p-4 rounded-xl border-2 transition-all flex gap-4 items-start
                         ${tOpt.sessionSelect ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'}`}
                     >
@@ -2317,12 +2357,13 @@
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[14px] font-bold text-slate-800">날짜 선택형</span>
+                          <span className="text-[14px] font-bold text-slate-800">회차 선택형</span>
                           {tOpt.sessionSelect && <span className="text-[10px] font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded-full">선택됨</span>}
                         </div>
                         <p className="text-[12px] text-slate-500 leading-relaxed">신청 시 회차 목록에서 1개를 직접 선택합니다.<br/><span className="text-slate-400">예: 법정의무교육, 연간 여러 날짜 중 선택</span></p>
                       </div>
                     </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2357,7 +2398,7 @@
                         <div className="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">{oi+1}</div>
                         <div className="flex-1 min-w-0">
                           <span className="text-[14px] font-bold text-slate-800">{opt.name || '이름 없음'}</span>
-                          {opt.sessionSelect && <span className="ml-2 text-[10px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full">(회차선택)</span>}
+                          {opt.sessionSelect && <span className="ml-2 text-[10px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full">(회차선택형)</span>}
                           {opt.place && <span className="ml-2 text-[11px] text-slate-400"><MapPin size={9} className="inline mb-0.5"/> {opt.place}</span>}
                         </div>
                         <div className="flex items-center gap-2 shrink-0 text-[11px] text-slate-500">
