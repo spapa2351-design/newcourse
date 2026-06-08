@@ -54,7 +54,7 @@
       Calendar, Users, Trash2, Copy, Edit3, Star, Download, Grid3X3, List,
       Link2, MoreHorizontal, X, CheckCircle, Clock, Archive, AlertCircle,
       BookOpen, QrCode, Eye, GripVertical, Settings, Filter, ImageIcon, FileText,
-      MessageSquare, Play, BarChart2,
+      MessageSquare, Play, BarChart2, User,
     } = Lucide;
 
     /* ══════════════════════════════════════
@@ -79,7 +79,7 @@
         packages: [
           { name: '3월 15일 교육', startDate: '2026-03-15', endDate: '2026-03-15', place: '한샘 HQ 대교육장', capacity: 30, enrolled: 30, sessions: 2 },
         ]},
-      { id: 10, title: '안전보건 법정의무교육 (4월)', status: 'active', thumb: '', instructor: '강태훈', creator: 'jiyoungkim', category: '공통/온보딩', registeredAt: '2026/03/25 09:00', enrollMethod: 'assign',
+      { id: 10, title: '안전보건 법정의무교육 (4월)', status: 'active', thumb: '', instructor: '강태훈', otherInstructors: ['이응급','박현장','박서준'], creator: 'jiyoungkim', category: '공통/온보딩', registeredAt: '2026/03/25 09:00', enrollMethod: 'assign',
         totalEnrolled: 120, totalCapacity: 150,
         packages: [
           { name: '1기 (4/7~4/11)', startDate: '2026-04-07', endDate: '2026-04-11', place: '한샘 HQ 대교육장', capacity: 30, enrolled: 30, sessions: 5 },
@@ -88,7 +88,7 @@
           { name: '4기 (4/28~4/30)', startDate: '2026-04-28', endDate: '2026-04-30', place: '판교 연수원', capacity: 30, enrolled: 20, sessions: 3 },
           { name: '5기 (5/7~5/9)', startDate: '2026-05-07', endDate: '2026-05-09', place: '강남 교육장', capacity: 30, enrolled: 10, sessions: 3 },
         ]},
-      { id: 11, title: '신임 팀장 리더십 캠프', status: 'active', thumb: '', instructor: '최예진', creator: 'jaewan.na', category: '리더십', registeredAt: '2026/04/05 11:20', enrollMethod: 'self',
+      { id: 11, title: '신임 팀장 리더십 캠프', status: 'active', thumb: '', instructor: '최예진', otherInstructors: ['정현우','한지민'], creator: 'jaewan.na', category: '리더십', registeredAt: '2026/04/05 11:20', enrollMethod: 'self',
         totalEnrolled: 38, totalCapacity: 50,
         packages: [
           { name: '1차 워크숍', startDate: '2026-05-20', endDate: '2026-05-20', place: '한샘 HQ 세미나룸', capacity: 25, enrolled: 20, sessions: 2 },
@@ -818,6 +818,12 @@
                                     <MapPin size={9}/> {getPlaceSummary(course)}
                                   </div>
                                 )}
+                                <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                  <User size={9} className="text-slate-300"/> {course.instructor}
+                                  {course.otherInstructors && course.otherInstructors.length > 0 && (
+                                    <span className="text-slate-500 font-semibold" title={course.otherInstructors.join(', ')}>외 {course.otherInstructors.length}명</span>
+                                  )}
+                                </div>
                               </td>
                               {/* 수강관리 */}
                               <td className="px-3 py-3 text-center" data-feature-id="A1-08">

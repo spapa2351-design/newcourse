@@ -41,7 +41,7 @@
   import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
 
   const {
-    ArrowLeft, Edit3, Download, QrCode, Users, Calendar, MapPin,
+    ArrowLeft, Edit3, Download, QrCode, Users, User, Calendar, MapPin,
     CheckCircle, Clock, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
     Search, BarChart2, TrendingUp, Award, RefreshCw,
     CheckSquare, UserCheck, Zap, Minimize2, Power, Plus, Pencil,
@@ -165,13 +165,13 @@
             place:'한샘 HQ 대교육장', capacity:15, enrolled:10,
             sessions:[
               {id:'s1',name:'1회차',date:'2026-04-07',start:'09:00',end:'12:00',att:9,late:1,abs:0,pending:0},
-              {id:'s2',name:'2회차',date:'2026-04-08',start:'09:00',end:'12:00',att:8,late:1,abs:1,pending:0},
-              {id:'s3',name:'3회차',date:'2026-04-09',start:'13:00',end:'17:00',studyMinOverride:180,att:7,late:2,abs:1,pending:0},
+              {id:'s2',name:'2회차',date:'2026-04-08',start:'09:00',end:'12:00',instructor:'이응급',att:8,late:1,abs:1,pending:0},
+              {id:'s3',name:'3회차',date:'2026-04-09',start:'13:00',end:'17:00',instructor:'박현장',studyMinOverride:180,att:7,late:2,abs:1,pending:0},
               {id:'s4',name:'4회차',date:'2026-04-10',start:'13:00',end:'17:00',att:7,late:1,abs:2,pending:0},
               {id:'s5',name:'5회차',date:'2026-04-11',start:'09:00',end:'12:00',att:6,late:2,abs:2,pending:0},
             ]},
           { id:'p2', name:'2기 (4/14~4/18)', startDate:'2026-04-14', endDate:'2026-04-18',
-            place:'한샘 HQ 대교육장', capacity:15, enrolled:10,
+            place:'한샘 HQ 대교육장', capacity:15, enrolled:10, instructor:'박서준',
             sessions:[
               {id:'s6',name:'1회차',date:'2026-04-14',start:'09:00',end:'12:00',att:10,late:0,abs:0,pending:0},
               {id:'s7',name:'2회차',date:'2026-04-15',start:'09:00',end:'12:00',att:9,late:1,abs:0,pending:0},
@@ -249,13 +249,13 @@
         status:'active', instructor:'최예진', category:'리더십', enrollMethod:'self',
         packages:[
           { id:'pp1', name:'1차 워크숍 (5/20)', startDate:'2026-05-20', endDate:'2026-05-20',
-            place:'한샘 HQ 세미나룸', capacity:25, enrolled:20,
+            place:'한샘 HQ 세미나룸', capacity:25, enrolled:20, instructor:'정현우',
             sessions:[
               {id:'s1',name:'오전 세션',date:'2026-05-20',start:'09:00',end:'12:30',att:0,late:0,abs:0,pending:20},
               {id:'s2',name:'오후 세션',date:'2026-05-20',start:'13:30',end:'18:00',att:0,late:0,abs:0,pending:0},
             ]},
           { id:'pp2', name:'2차 워크숍 (6/10)', startDate:'2026-06-10', endDate:'2026-06-10',
-            place:'한샘 HQ 세미나룸', capacity:25, enrolled:18,
+            place:'한샘 HQ 세미나룸', capacity:25, enrolled:18, instructor:'한지민',
             sessions:[
               {id:'s3',name:'오전 세션',date:'2026-06-10',start:'09:00',end:'12:30',att:0,late:0,abs:0,pending:0},
               {id:'s4',name:'오후 세션',date:'2026-06-10',start:'13:30',end:'18:00',att:0,late:0,abs:0,pending:0},
@@ -420,6 +420,14 @@
   };
   const sessionStudyMin = s => (s.studyMinOverride != null ? s.studyMinOverride : durationMin(s.start, s.end));  // 관리자 직접 입력(override) 우선, 없으면 자동
   const pkgStudyMin = pkg => pkg.sessions.reduce((b,s)=>b + sessionStudyMin(s), 0);  // 차수당 학습시간(회차 합)
+  /* 강사 = 회차 → 차수(pkg.instructor) → 대표(COURSE.instructor) 3단 상속. 읽기 전용 표시 */
+  const effInstructor = (pkg, s) => (s.instructor && s.instructor.trim()) || (pkg && pkg.instructor && pkg.instructor.trim()) || COURSE.instructor || '';
+  const isMixedInstructor = pkg => new Set((pkg.sessions||[]).map(s => effInstructor(pkg, s)).filter(Boolean)).size > 1;
+  // 이 코스가 차수/회차 강사를 쓰는가(차수 또는 회차에 강사 지정) → 쓰면 모든 차수의 회차 테이블에 '강사' 열을 일관 노출
+  const courseHasSessInstr = COURSE.packages.some(p => (p.instructor && p.instructor.trim()) || (p.sessions||[]).some(s => s.instructor && s.instructor.trim()));
+  // 코스 전체 강사 요약 = 대표 + (대표 외 distinct 강사 수). 목록 카드의 "외 N명"과 동일하게 맞춤.
+  const otherInstrList = [...new Set(COURSE.packages.flatMap(p => [p.instructor, ...(p.sessions||[]).map(s => s.instructor)]).map(x => (x||'').trim()).filter(Boolean))].filter(n => n !== (COURSE.instructor||'').trim());
+  const instrSummary = (COURSE.instructor || '') + (otherInstrList.length ? ` 외 ${otherInstrList.length}명` : '');
   const attRate = s => denomOf(s) > 0 ? Math.round(presentOf(s) / denomOf(s) * 100) : null;
   const pkgAttRate = pkg => {
     const done = pkg.sessions.filter(s => denomOf(s) > 0);
@@ -1069,7 +1077,7 @@
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-0">
               <div className="space-y-2 pb-4 border-b border-slate-100">
                 {[
-                  {label:'강사', value: COURSE.instructor},
+                  {label:'강사', value: instrSummary},
                   {label:'차수', value:`${COURSE.packages.length}개 차수`},
                   {label:'총 회차', value:`${totalSessions}회차`},
                   {label:'학습 시간', value:`${fmtDuration(pkgStudyMin(COURSE.packages[0]))} (차수 기준)`},
@@ -1423,6 +1431,7 @@
                                     <th className="px-5 py-2.5 text-left font-bold">회차</th>
                                     <th className="px-4 py-2.5 text-left font-bold">날짜</th>
                                     <th className="px-4 py-2.5 text-left font-bold">시간</th>
+                                    {courseHasSessInstr && <th className="px-4 py-2.5 text-left font-bold">강사</th>}
                                     <th className="px-4 py-2.5 text-left font-bold">학습 시간</th>
                                     <th className="px-4 py-2.5 text-center font-bold text-emerald-600">출석</th>
                                     <th className="px-4 py-2.5 text-center font-bold text-amber-500">지각</th>
@@ -1443,6 +1452,7 @@
                                           <td className="px-5 py-2.5 font-bold text-slate-700">{s.name}{isToday&&<span className="text-[10px] bg-indigo-500 text-white px-1.5 py-0.5 rounded-full ml-1">오늘</span>}</td>
                                           <td className="px-4 py-2.5 text-slate-500">{fmtDate(s.date)}</td>
                                           <td className="px-4 py-2.5 text-slate-500">{s.start}~{s.end}</td>
+                                          {courseHasSessInstr && <td className="px-4 py-2.5 text-slate-600 font-medium"><span className="inline-flex items-center gap-1"><User size={12} className="text-slate-400"/>{effInstructor(pkg, s)}</span></td>}
                                           <td className="px-4 py-2.5 text-slate-600 font-medium whitespace-nowrap">{fmtDuration(sessionStudyMin(s))}{s.studyMinOverride!=null && <span className="ml-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1 py-0.5 rounded">수정됨</span>}</td>
                                           <td className="px-4 py-2.5 text-center font-bold text-emerald-600">{s.att}</td>
                                           <td className="px-4 py-2.5 text-center font-bold text-amber-500">{s.late}</td>
