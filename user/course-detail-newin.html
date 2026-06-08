@@ -803,7 +803,7 @@
         <div class="instructor-card">
           <div class="instructor-avatar"><i class="fa-solid fa-user"></i></div>
           <div>
-            <div class="instructor-name">김민준</div>
+            <div class="instructor-name">김민준 <span id="mixed-instr-chip" style="display:none; font-size:10px; padding:2px 7px; border-radius:20px; background:#F1F3F5; color:var(--grey600); font-weight:700; vertical-align:middle;">회차별 강사 상이</span></div>
             <div class="instructor-sub">프로젝트 관리 전문가 · A등급 강사</div>
           </div>
         </div>
@@ -1013,10 +1013,10 @@ const mockData = {
     { id: 's1', name: 'A반 (5월 평일반)', remnant: 20,
       sessions: [
         { title: '1회차 (OT)',  date: '2026-05-06', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장' },
-        { title: '2회차 (실무)', date: '2026-05-13', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장' }
+        { title: '2회차 (실무)', date: '2026-05-13', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장', instructor: '이서연' }
       ]
     },
-    { id: 's2', name: 'B반 (5월 주말반)', remnant: 5,
+    { id: 's2', name: 'B반 (5월 주말반)', remnant: 5, instructor: '박서준',
       sessions: [
         { title: '1회차 (OT)',  date: '2026-05-10', dayStr: '(토)', time: '09:00–18:00', loc: '방배 실습실' },
         { title: '2회차 (실무)', date: '2026-05-17', dayStr: '(토)', time: '09:00–18:00', loc: '방배 실습실' }
@@ -1057,6 +1057,11 @@ const mockData = {
     }
   ]
 };
+
+/* ── 강사 = 회차 → 차수(opt.instructor) → 대표(REP_INSTRUCTOR) 3단 상속 ── */
+const REP_INSTRUCTOR = '김민준';
+const effInstructor = (opt, s) => (s.instructor && s.instructor.trim()) || (opt && opt.instructor && opt.instructor.trim()) || REP_INSTRUCTOR;
+const isMixedInstructor = (opt) => new Set(((opt && opt.sessions) || []).map(s => effInstructor(opt, s)).filter(Boolean)).size > 1;
 
 /* ── State ── */
 let currentMode = 'single';
@@ -1237,6 +1242,13 @@ function renderCurriculumPreview() {
   const data = mockData[currentMode];
   const isAssigned = currentMode === 'assigned';
 
+  // 현재 모드에 강사가 갈리는 차수가 있으면 대표강사 카드에 칩
+  const chipEl = document.getElementById('mixed-instr-chip');
+  if (chipEl) chipEl.style.display = data.some(o => isMixedInstructor(o)) ? '' : 'none';
+
+  // 차수(반)마다 강사가 갈리면 각 차수 카드에 그 차수 강사를 표시
+  const cohortInstrMixed = new Set(data.map(o => ((o.instructor || '').trim()) || REP_INSTRUCTOR)).size > 1;
+
   data.forEach(opt => {
     const isFull = !isAssigned && opt.remnant === 0;
     const isFew  = !isAssigned && !isFull && opt.remnant < 5;
@@ -1259,6 +1271,9 @@ function renderCurriculumPreview() {
     } else {
       subText = `<span style="font-weight:600; color:var(--grey900);" class="num-tab">${firstSess.date.replace(/-/g, '.')} ${firstSess.dayStr} ${firstSess.time}</span>
                  <div style="font-size:12px; margin-top:4px; color:var(--grey600);"><i class="fa-solid fa-location-dot" style="margin-right:4px;"></i>${firstSess.loc}</div>`;
+    }
+    if (cohortInstrMixed) {
+      subText += `<div style="margin-top:6px; font-size:12px; color:var(--grey900); font-weight:600;"><i class="fa-solid fa-user" style="margin-right:4px; color:var(--grey600);"></i>강사 ${((opt.instructor || '').trim()) || REP_INSTRUCTOR}</div>`;
     }
     if (isAssigned && opt.group) {
       subText += `<div style="margin-top:6px;"><span class="chip chip-purple" style="font-size:10px; padding:2px 8px;"><i class="fa-solid fa-users"></i> ${opt.group}</span></div>`;
@@ -1293,8 +1308,14 @@ function renderCurriculumPreview() {
     `;
 
     if (isExpandable && isActive) {
+      const optInstrList = [...new Set((opt.sessions || []).map(s => effInstructor(opt, s)).filter(Boolean))];
+      const optMixed = optInstrList.length > 1;
+      const optSoleInstr = optInstrList.length === 1 ? optInstrList[0] : null;
       let detailHtml = '<div class="sess-preview-box">';
-      detailHtml += '<div class="sess-preview-title"><i class="fa-solid fa-list-check"></i> 상세 커리큘럼</div>';
+      detailHtml += `<div class="sess-preview-title"><i class="fa-solid fa-list-check"></i> 상세 커리큘럼${optMixed ? ' <span style="font-size:10px; padding:2px 7px; border-radius:20px; background:#F1F3F5; color:var(--grey600); font-weight:700;">회차별 강사 상이</span>' : ''}</div>`;
+      if (!optMixed && optSoleInstr && optSoleInstr !== REP_INSTRUCTOR) {
+        detailHtml += `<div style="margin:-4px 0 10px; color:var(--grey900); font-weight:600; font-size:13px;"><i class="fa-solid fa-user" style="margin-right:5px; color:var(--grey600);"></i>강사 ${optSoleInstr}</div>`;
+      }
       opt.sessions.forEach((s, idx) => {
         const [, sm, sd] = s.date.split('-');
         detailHtml += `
@@ -1306,6 +1327,7 @@ function renderCurriculumPreview() {
             <div class="sess-info">
               <div style="font-weight:600; color:var(--grey900); font-size:13px;">${s.title || (opt.name + ' - ' + (idx + 1) + '회차')}</div>
               <div style="margin-top:3px;" class="num-tab"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>${s.time} <span style="margin:0 6px; color:var(--grey300);">|</span> <i class="fa-solid fa-location-dot" style="margin-right:4px;"></i>${s.loc}</div>
+              ${optMixed ? `<div style="margin-top:4px; color:var(--grey900); font-weight:600; font-size:12px;"><i class="fa-solid fa-user" style="margin-right:4px; color:var(--grey600);"></i>${effInstructor(opt, s)}</div>` : ''}
             </div>
           </div>
         `;

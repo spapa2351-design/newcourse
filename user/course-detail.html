@@ -393,7 +393,7 @@
         <div class="instructor-card">
           <div class="instructor-avatar"><span class="mi" style="font-size:24px;">person</span></div>
           <div>
-            <div class="instructor-name">김민준</div>
+            <div class="instructor-name">김민준 <span id="mixed-instr-chip" style="display:none; font-size:10px; padding:2px 7px; border-radius:20px; background:#F1F3F5; color:var(--secondary); font-weight:700; vertical-align:middle;">회차별 강사 상이</span></div>
             <div class="instructor-sub">프로젝트 관리 전문가 · A등급 강사</div>
           </div>
         </div>
@@ -599,11 +599,11 @@ const mockData = {
       id: 's1', name: 'A반 (5월 평일반)', remnant: 20,
       sessions: [
         { title: '1회차 (OT)', date: '2026-05-06', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장' },
-        { title: '2회차 (실무)', date: '2026-05-13', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장' }
+        { title: '2회차 (실무)', date: '2026-05-13', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장', instructor: '이서연' }
       ]
     },
     {
-      id: 's2', name: 'B반 (5월 주말반)', remnant: 5,
+      id: 's2', name: 'B반 (5월 주말반)', remnant: 5, instructor: '박서준',
       sessions: [
         { title: '1회차 (OT)', date: '2026-05-10', dayStr: '(토)', time: '09:00–18:00', loc: '방배 실습실' },
         { title: '2회차 (실무)', date: '2026-05-17', dayStr: '(토)', time: '09:00–18:00', loc: '방배 실습실' }
@@ -634,8 +634,8 @@ const mockData = {
   ],
   multi: [
     { id: 'm1', name: '[특강] 리더십의 이해', remnant: 20, req: false, sessions: [
-      { name: '1회차 (이론)', date: '2026-05-08', dayStr: '(금)', time: '13:00–17:00', loc: '본사 대교육장' },
-      { name: '2회차 (실습)', date: '2026-05-09', dayStr: '(토)', time: '10:00–13:00', loc: '외부 연수원' }
+      { name: '1회차 (이론)', date: '2026-05-08', dayStr: '(금)', time: '13:00–17:00', loc: '본사 대교육장', instructor: '정현우' },
+      { name: '2회차 (실습)', date: '2026-05-09', dayStr: '(토)', time: '10:00–13:00', loc: '외부 연수원', instructor: '한지민' }
     ] },
     { id: 'm2', name: '[특강] 소통과 갈등 관리', remnant: 15, req: false, sessions: [{ date: '2026-05-15', dayStr: '(금)', time: '13:00–17:00', loc: '본사 대교육장' }] },
     { id: 'm3', name: '[특강] 성과 창출 코칭', remnant: 10, req: false, sessions: [{ date: '2026-05-22', dayStr: '(금)', time: '13:00–17:00', loc: '본사 대교육장' }] },
@@ -646,10 +646,19 @@ const mockData = {
       id: 'a1', name: 'A반 (5월 평일반)', group: '기획팀',
       sessions: [
         { title: '1회차 (OT)', date: '2026-05-06', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장' },
-        { title: '2회차 (실무)', date: '2026-05-13', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장' }
+        { title: '2회차 (실무)', date: '2026-05-13', dayStr: '(수)', time: '09:00–18:00', loc: '본사 대교육장', instructor: '이서연' }
       ]
     }
   ]
+};
+
+/* ── 회차별 강사 (설계 §4 판정식 — 문구 일치) ── */
+const REP_INSTRUCTOR = '김민준';  // 대표 강사 (상단 강사 카드)
+// 강사 = 회차 → 차수(opt.instructor) → 대표(REP_INSTRUCTOR) 3단 상속
+const effInstructor = (opt, s) => (s.instructor && s.instructor.trim()) || (opt && opt.instructor && opt.instructor.trim()) || REP_INSTRUCTOR || '';
+const isMixedInstructor = (opt) => {
+  const names = ((opt && opt.sessions) || []).map(s => effInstructor(opt, s));
+  return new Set(names.filter(Boolean)).size > 1;
 };
 
 /* ── State ── */
@@ -840,6 +849,13 @@ function renderCurriculumPreview() {
   const data = mockData[currentMode];
   const isAssigned = currentMode === 'assigned';
 
+  // 회차별 강사 상이 — 현재 모드에 강사가 갈리는 옵션이 있으면 대표강사 카드에 칩 표시
+  const chipEl = document.getElementById('mixed-instr-chip');
+  if (chipEl) chipEl.style.display = data.some(o => isMixedInstructor(o)) ? '' : 'none';
+
+  // 차수(반)마다 강사가 갈리면 각 차수 카드에 그 차수 강사를 표시 (차수강사 vs 대표강사)
+  const cohortInstrMixed = new Set(data.map(o => ((o.instructor || '').trim()) || REP_INSTRUCTOR)).size > 1;
+
   data.forEach(opt => {
     const isFull = !isAssigned && opt.remnant === 0;
     const isFew = !isAssigned && !isFull && opt.remnant < 5;
@@ -864,6 +880,10 @@ function renderCurriculumPreview() {
     }
     if (isAssigned && opt.group) {
       subText += `<div style="margin-top:6px;"><span class="chip" style="font-size:10px; padding:2px 8px; background:#E8EAF6; color:#3949AB;"><span class="mi i14">group</span> ${opt.group}</span></div>`;
+    }
+    // 차수마다 강사가 다른 코스: 차수 카드에 그 차수 강사 표시 (펼치지 않아도 어느 반이 누구 강사인지 보임)
+    if (cohortInstrMixed) {
+      subText += `<div style="margin-top:6px; font-size:12px; color:var(--black); font-weight:600;"><span class="mi i14">person</span> 강사 ${((opt.instructor || '').trim()) || REP_INSTRUCTOR}</div>`;
     }
 
     const itemWrapper = document.createElement('div');
@@ -895,8 +915,15 @@ function renderCurriculumPreview() {
     `;
 
     if (isExpandable && isActive) {
+      const optInstrList = [...new Set((opt.sessions || []).map(s => effInstructor(opt, s)).filter(Boolean))];
+      const optMixed = optInstrList.length > 1;
+      const optSoleInstr = optInstrList.length === 1 ? optInstrList[0] : null;
       let detailHtml = '<div class="sess-preview-box">';
-      detailHtml += '<div style="font-weight:800; margin-bottom:12px; font-size:13px; color:var(--black);"><span class="mi i14">checklist</span> 상세 커리큘럼 안내</div>';
+      detailHtml += `<div style="font-weight:800; margin-bottom:12px; font-size:13px; color:var(--black); display:flex; align-items:center; gap:6px;"><span class="mi i14">checklist</span> 상세 커리큘럼 안내${optMixed ? ' <span style="font-size:10px; padding:2px 7px; border-radius:20px; background:#F1F3F5; color:var(--secondary); font-weight:700;">회차별 강사 상이</span>' : ''}</div>`;
+      // 차수 전체가 대표강사가 아닌 단일 강사(차수강사)면 차수 단위로 한 줄 노출
+      if (!optMixed && optSoleInstr && optSoleInstr !== REP_INSTRUCTOR) {
+        detailHtml += `<div style="margin-bottom:10px; color:var(--black); font-weight:600; font-size:13px;"><span class="mi i14">person</span> 강사 ${optSoleInstr}</div>`;
+      }
       opt.sessions.forEach((s, idx) => {
         const [, sm, sd] = s.date.split('-');
         detailHtml += `
@@ -907,6 +934,7 @@ function renderCurriculumPreview() {
             <div class="sess-info">
               <div style="font-weight:700; color:var(--black); font-size:13px;">${s.title || (opt.name + ' - ' + (idx + 1) + '회차')}</div>
               <div style="margin-top:4px;"><span class="mi i14">schedule</span> ${s.time} &nbsp;|&nbsp; <span class="mi i14">location_on</span> ${s.loc}</div>
+              ${optMixed ? `<div style="margin-top:4px; color:var(--black); font-weight:600;"><span class="mi i14">person</span> ${effInstructor(opt, s)}</div>` : ''}
             </div>
           </div>
         `;

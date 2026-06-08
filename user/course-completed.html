@@ -209,7 +209,7 @@
 
     <!-- ══ 회차별 출석 결과 ══ -->
     <div class="section">
-      <div class="section-title"><i class="fa-solid fa-list-check"></i> 회차별 출석 결과</div>
+      <div class="section-title"><i class="fa-solid fa-list-check"></i> 회차별 출석 결과 <span id="mixed-instr-badge" style="display:none; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:#F1F3F5; color:var(--secondary); margin-left:4px;">회차별 강사 상이</span></div>
       <div id="sess-list">
         <!-- JS로 동적 렌더링 -->
       </div>
@@ -261,7 +261,7 @@ const results = {
       { num: 1, name: '1회차 · 리더십 기초와 자기 인식', date: '10/5(토) 09:00–18:00 · 본사 대교육장', status: 'attended', label: '출석', time: '08:52 출석' },
       { num: 2, name: '2회차 · 갈등 관리와 소통 기법', date: '10/12(토) 09:00–18:00 · 본사 대교육장', status: 'attended', label: '출석', time: '08:58 출석' },
       { num: 3, name: '3회차 · 성과 코칭 실습', date: '10/19(토) 09:00–18:00 · 본사 대교육장', status: 'attended', label: '출석', time: '08:55 출석' },
-      { num: 4, name: '4회차 · 팀 빌딩 워크숍', date: '10/26(토) 09:00–17:00 · 외부 연수원', status: 'attended', label: '출석', time: '09:00 출석' },
+      { num: 4, name: '4회차 · 팀 빌딩 워크숍', date: '10/26(토) 09:00–17:00 · 외부 연수원', instructor: '한지민',status: 'attended', label: '출석', time: '09:00 출석' },
     ]
   },
   'pass-late': {
@@ -273,7 +273,7 @@ const results = {
       { num: 1, name: '1회차 · 리더십 기초와 자기 인식', date: '10/5(토) 09:00–18:00 · 본사 대교육장', status: 'attended', label: '출석', time: '08:52 출석' },
       { num: 2, name: '2회차 · 갈등 관리와 소통 기법', date: '10/12(토) 09:00–18:00 · 본사 대교육장', status: 'late', label: '지각', time: '09:23 지각' },
       { num: 3, name: '3회차 · 성과 코칭 실습', date: '10/19(토) 09:00–18:00 · 본사 대교육장', status: 'attended', label: '출석', time: '08:55 출석' },
-      { num: 4, name: '4회차 · 팀 빌딩 워크숍', date: '10/26(토) 09:00–17:00 · 외부 연수원', status: 'attended', label: '출석', time: '09:01 출석' },
+      { num: 4, name: '4회차 · 팀 빌딩 워크숍', date: '10/26(토) 09:00–17:00 · 외부 연수원', instructor: '한지민',status: 'attended', label: '출석', time: '09:01 출석' },
     ]
   },
   fail: {
@@ -285,14 +285,14 @@ const results = {
       { num: 1, name: '1회차 · 리더십 기초와 자기 인식', date: '10/5(토) 09:00–18:00 · 본사 대교육장', status: 'attended', label: '출석', time: '08:52 출석' },
       { num: 2, name: '2회차 · 갈등 관리와 소통 기법', date: '10/12(토) 09:00–18:00 · 본사 대교육장', status: 'absent', label: '결석', time: '결석 처리' },
       { num: 3, name: '3회차 · 성과 코칭 실습', date: '10/19(토) 09:00–18:00 · 본사 대교육장', status: 'attended', label: '출석', time: '08:55 출석' },
-      { num: 4, name: '4회차 · 팀 빌딩 워크숍', date: '10/26(토) 09:00–17:00 · 외부 연수원', status: 'absent', label: '결석', time: '결석 처리' },
+      { num: 4, name: '4회차 · 팀 빌딩 워크숍', date: '10/26(토) 09:00–17:00 · 외부 연수원', instructor: '한지민',status: 'absent', label: '결석', time: '결석 처리' },
     ]
   }
 };
 
 function setResult(type) {
   document.querySelectorAll('.proto-chip').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
+  if (typeof event !== 'undefined' && event && event.target) event.target.classList.add('active');
 
   const r = results[type];
 
@@ -337,19 +337,28 @@ function setResult(type) {
   renderSessions(r.sessions);
 }
 
+// 강사 = 회차 → 대표(REP_INSTRUCTOR) 상속. 차수강사가 따로면 회차 instructor로 들어온다(이 화면은 학습자 본인의 단일 차수).
+const REP_INSTRUCTOR = '박지원';
+const effInstructor = s => (s.instructor && s.instructor.trim()) || REP_INSTRUCTOR;
+const isMixedInstr = sessions => new Set((sessions || []).map(effInstructor)).size > 1;
+
 function renderSessions(sessions) {
   const list = document.getElementById('sess-list');
+  const mixed = isMixedInstr(sessions);
+  const badgeEl = document.getElementById('mixed-instr-badge');
+  if (badgeEl) badgeEl.style.display = mixed ? '' : 'none';
   list.innerHTML = sessions.map(s => {
     const timeClass = s.status === 'attended' ? 'ok' : (s.status === 'late' ? 'late-t' : 'absent-t');
     const icon = s.status === 'attended' ? '<i class="fa-solid fa-check" style="font-size:10px;margin-right:3px;"></i>' :
                  (s.status === 'late' ? '<i class="fa-solid fa-clock" style="font-size:10px;margin-right:3px;"></i>' :
                  '<i class="fa-solid fa-xmark" style="font-size:10px;margin-right:3px;"></i>');
+    const instrTag = mixed ? `<span style="color:var(--secondary);margin-left:6px;"><i class="fa-solid fa-user" style="font-size:10px;margin-right:3px;"></i>${effInstructor(s)}</span>` : '';
     return `
       <div class="sess-item">
         <div class="sess-num ${s.status}">${s.num}</div>
         <div class="sess-info">
           <div class="sess-name">${s.name}</div>
-          <div class="sess-meta">${s.date}</div>
+          <div class="sess-meta">${s.date}${instrTag}</div>
           <div class="sess-time ${timeClass}">${icon} ${s.time}</div>
         </div>
         <span class="sess-badge ${s.status}">${s.label}</span>
