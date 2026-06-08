@@ -151,8 +151,8 @@
     <div class="text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-1">Offline LMS</div>
     <div class="text-white font-bold text-base leading-tight">기획설계서</div>
     <div class="flex items-center gap-2 mt-2">
-      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.6</span>
-      <span class="text-slate-500 text-xs">2026-06-01</span>
+      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.7</span>
+      <span class="text-slate-500 text-xs">2026-06-08</span>
     </div>
     <div class="flex mt-3 rounded-lg overflow-hidden border border-slate-700">
       <button id="tab-btn-admin" class="tab-btn flex-1 py-1.5 text-xs font-semibold transition-colors bg-indigo-600 text-white" data-tab="admin" onclick="switchTab('admin')">관리자단</button>
@@ -1331,7 +1331,7 @@
     <div class="space-y-2 text-sm text-slate-600">
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">• 인사 시스템 연동 (학점/고과 반영)</div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">• 블렌디드 통합 (오프라인 + 온라인 혼합 코스)</div>
-      <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">• 차수별 강사 설정 + 강사 권한 관리</div>
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">• 강사 권한 관리 (강사 계정·출석 체크 권한) <span class="text-slate-400">— 차수·회차 강사 설정은 Phase 1 반영됨</span></div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">• 대기자 플로우 (자동/수동 전환)</div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">• 차수 일정 변경 시 수강생 알림·처리</div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">• 온라인 에셋 라이브러리</div>
@@ -1493,7 +1493,7 @@
         <tr><td><strong>GAP-05</strong></td><td>공결(사전 결석) 처리 플로우 없음</td><td>출석</td><td><span class="badge badge-important">🟠 Important</span></td><td>출장·병가 등 사전 사유 제출 필요</td></tr>
         <tr><td><strong>GAP-06</strong></td><td>재수강·중복 신청 규칙 미구현</td><td>수강 신청</td><td><span class="badge badge-important">🟠 Important</span></td><td>Phase 1 토글만 존재</td></tr>
         <tr><td><strong>GAP-07</strong></td><td>차수 일정 변경 시 기존 수강생 처리 미정</td><td>운영</td><td><span class="badge badge-important">🟠 Important</span></td><td>동의/거부/자동취소 플로우 필요</td></tr>
-        <tr><td><strong>GAP-08</strong></td><td>차수별 강사 설정 없음·강사 권한 미정</td><td>강사 관리</td><td><span class="badge badge-important">🟠 Important</span></td><td>전국 권역별 강사 운영 케이스</td></tr>
+        <tr><td><strong>GAP-08</strong></td><td>강사 권한(강사 계정·출석 체크) 미정 — <span style="color:#16a34a;font-weight:600;">차수·회차 강사 설정은 해소(Phase 1, 3단 상속)</span></td><td>강사 관리</td><td><span class="badge badge-minor">🟡 Minor</span></td><td>전국 권역별 강사 = 차수 강사로 커버. 강사 계정·권한만 Phase 2+ 잔여</td></tr>
         <tr><td><strong>GAP-09</strong></td><td>수료 후 연계 트리거 미정</td><td>수료</td><td><span class="badge badge-minor">🟡 Minor</span></td><td>수료증 발급, 인사 연동, 알림</td></tr>
         <tr><td><strong>GAP-10</strong></td><td>신청 완료 학습자 경험 미설계</td><td>학습자 UX</td><td><span class="badge badge-minor">🟡 Minor</span></td><td>확인 알림, 캘린더 추가</td></tr>
         <tr><td><strong>GAP-11</strong></td><td>"차수" 용어 일부 고객사와 충돌</td><td>용어/UX</td><td><span class="badge badge-minor">🟡 Minor</span></td><td>C사는 "차수"를 "회차" 의미로 사용</td></tr>

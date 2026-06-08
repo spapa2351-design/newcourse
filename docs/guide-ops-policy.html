@@ -172,7 +172,7 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v1.6 · 2026-06-01</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v1.7 · 2026-06-08</span>
   <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
@@ -483,7 +483,7 @@ function closeMobileSidebar() {
         <div class="step-num">2</div>
         <div class="step-body">
           <div class="step-action">섹션 1: 기본정보 입력 (약 3분)</div>
-          <div class="step-note">코스명 · 카테고리 · 강사 · 교육 장소(장소명/주소/교통안내) · 코스 표지 이미지</div>
+          <div class="step-note">코스명 · 카테고리 · 대표 강사 · 교육 장소(장소명/주소/교통안내) · 코스 표지 이미지. <strong>강사는 대표 1명이 기본</strong>이고, 차수·회차마다 다르면 "차수·회차별 강사 다름" 토글로 3단 상속(대표 → 차수 → 회차)</div>
         </div>
       </div>
       <div class="step-row">
@@ -497,14 +497,14 @@ function closeMobileSidebar() {
         <div class="step-num">4</div>
         <div class="step-body">
           <div class="step-action">차수 생성 (약 3분)</div>
-          <div class="step-note">차수명 · 정원 · 담당 강사 · 그룹 배정(지정 등록 시). 우측 사이드바에서 편집</div>
+          <div class="step-note">차수명 · 정원 · 차수 강사(선택, 토글 ON·차수 2개 이상일 때) · 그룹 배정(지정 등록 시). 우측 사이드바에서 편집</div>
         </div>
       </div>
       <div class="step-row">
         <div class="step-num">5</div>
         <div class="step-body">
           <div class="step-action">회차 생성 (약 2~5분)</div>
-          <div class="step-note">수동 입력 또는 일괄 생성(🪄 버튼 → 요일·시간 선택 → 자동 생성). 각 회차에 날짜·시작·종료 시간 필요</div>
+          <div class="step-note">수동 입력 또는 일괄 생성(🪄 버튼 → 요일·시간 선택 → 자동 생성). 각 회차에 날짜·시작·종료 시간 필요. 토글 ON 시 회차 강사도 입력(비우면 차수 → 대표 상속)</div>
         </div>
       </div>
       <div class="step-row">

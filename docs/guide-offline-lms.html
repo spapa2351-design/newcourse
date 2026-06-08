@@ -159,7 +159,7 @@
     <span class="font-bold text-slate-800 text-base">오프라인 코스 가이드</span>
   </div>
   <div class="flex-1"></div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v1.6 · 2026-06-01</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v1.7 · 2026-06-08</span>
 </header>
 
 <script>
@@ -1547,13 +1547,26 @@ function closeMobileSidebar() {
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">커버 이미지</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">720×1200px 권장. 클릭하여 업로드.</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스명 <span style="color:#e11d48">*</span></td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">필수 입력. 빈칸이면 퍼블리싱 체크리스트 미통과</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">카테고리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">직무역량 / 리더십 / 영업 / 공통온보딩 / IT / DX</td></tr>
-          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">담당 강사</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">강사명 직접 입력 또는 "강사 없음" 체크박스</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">담당 강사 <span style="color:#e11d48">*</span></td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">대표 강사명 직접 입력(필수). 차수·회차마다 강사가 다르면 "차수·회차별 강사 다름" 토글 → 강사 3단 상속(아래 콜아웃 참조)</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">강사 소개</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">강사 약력 또는 소개 텍스트</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스 소개</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">textarea. 학습자 앱 코스 상세 화면에 표시</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스 상세 상단</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">표지(기본) vs 이미지 갤러리(최대 5장) 라디오 선택</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; font-weight:600;">교육 장소</td><td style="padding:8px 12px;">장소명 + 상세 주소 + 지도 보기 + 교통·주차 안내 textarea</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">강사 3단 상속</div>
+      <div style="background:#EEF0FF; border:1px solid #C7CDFF; border-radius:12px; padding:14px 16px; font-size:13px; color:#334155; line-height:1.7;">
+        강사는 <strong>코스 대표 강사(필수) → 차수 강사(선택) → 회차 강사(선택)</strong> 3단으로 둡니다. 아래 레벨을 비우면 윗 레벨을 상속합니다(회차 → 차수 → 대표).
+        <ul style="margin:8px 0 0; padding-left:18px;">
+          <li><strong>"차수·회차별 강사 다름" 토글</strong> ON일 때만 차수·회차 강사 입력칸이 나타납니다(평소엔 대표 강사 1명, 입력 부담 0).</li>
+          <li><strong>차수 강사 칸은 차수가 2개 이상일 때만</strong> 차수 헤더에 노출됩니다(차수 1개면 대표 → 회차 2단으로 동작).</li>
+          <li>세 레벨 모두 <strong>텍스트 직접 입력</strong>입니다(강사 풀·드롭다운 없음).</li>
+          <li>학습자 화면: 차수마다 강사가 다르면 차수 카드에 강사가, 회차마다 갈리면 "회차별 강사 상이"가 표시됩니다. 강사는 출석·수료 판정과 무관한 표시 정보입니다.</li>
+        </ul>
+      </div>
     </div>
 
     <div class="guide-section">

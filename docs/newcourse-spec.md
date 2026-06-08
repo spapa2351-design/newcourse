@@ -3,6 +3,8 @@
 > 본 문서는 터치클래스 브랜드 우산 아래의 신규 코스 시스템(newcourse)에 대한 기획설계서다.
 > 레거시 시스템은 별도로 운영되며, 본 문서는 newcourse에 한정한다.
 >
+> **v0.3.2 (2026-06-08)**: 오프라인 강사는 **3단 상속**(코스 대표 / 차수 / 회차, 회차→차수→대표)으로 Phase 1 반영됨 — 상세는 `offline-course-builder.md`·`02-design/features/offline-session-instructor.design.md`. 아래 §9.4의 "회차별 강사 배정 = Phase 2+"는 **콘텐츠/온라인 Cohort 맥락 한정**이며 오프라인과 무관.
+> **v0.3.1 (2026-06-05)**: §9.4에 교차참조 노트 추가 — "회차별 강사 배정 = Phase 2+"는 콘텐츠/온라인 Cohort 맥락 한정. 오프라인 코스의 회차별 강사 표시·지정은 별개 Phase 1(`offline-course-builder.md` 참조)
 > **v0.3 (2026-05-18) 주요 변경**: 차수(Cohort) Phase 1 제거 · EnrollmentPolicy 신설 · 등록 채널 3종(A/B/C) · 코스 유형 6종 → 3종 · 4영역 분리는 데이터 모델만 (UI는 빌더 v1 단일 화면 유지)
 
 ---
@@ -393,6 +395,8 @@ progress(enrollment) =
 - 회차별 정원 제한
 - 회차별 강사 배정
 - 정기 갱신 추적 (의무교육 만료·이월)
+
+> **주의 — 콘텐츠/온라인 모델 한정.** 위 "회차별 강사 배정"은 이 문서가 다루는 **콘텐츠 모델(Course→Curriculum→Slot, Cohort 없음)**에서 차수(Cohort) 객체와 함께 묶이는 Phase 2+ 항목이다. **오프라인 코스 모델(코스→차수→회차)은 별개 패러다임**으로, 차수·회차별 강사 **표시·지정은 이미 Phase 1 지원**한다(코스=대표 / 차수=차수강사 / 회차=회차강사 3단 상속, 표시 메타). 오프라인 빌더 `docs/offline-course-builder.md`, 설계 `docs/02-design/features/offline-session-instructor.design.md` 참조.
 
 ---
 
