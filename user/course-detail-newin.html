@@ -1018,16 +1018,6 @@
       <button class="btn-close-modal" onclick="closeModal()" aria-label="닫기"><span class="mi i18">close</span></button>
     </div>
     <div class="sheet-body">
-      <!-- 캘린더 -->
-      <div class="ucal-wrap">
-        <div class="ucal-hdr">
-          <button class="ucal-nav" onclick="ucalPrev()" aria-label="이전 달"><span class="mi i16">chevron_left</span></button>
-          <div class="ucal-title num-tab" id="userCalTitle">2026년 5월</div>
-          <button class="ucal-nav" onclick="ucalNext()" aria-label="다음 달"><span class="mi i16">chevron_right</span></button>
-        </div>
-        <div class="ucal-grid" id="cal-grid"></div>
-      </div>
-
       <div style="font-size:13px; font-weight:600; margin-bottom:10px; color:var(--grey700); letter-spacing:-0.1px;" id="modal-list-title">
         수강할 일정을 1개 선택하세요.
       </div>
@@ -1101,6 +1091,10 @@ const mockData = {
 const REP_INSTRUCTOR = '김민준';
 const effInstructor = (opt, s) => (s.instructor && s.instructor.trim()) || (opt && opt.instructor && opt.instructor.trim()) || REP_INSTRUCTOR;
 const isMixedInstructor = (opt) => new Set(((opt && opt.sessions) || []).map(s => effInstructor(opt, s)).filter(Boolean)).size > 1;
+
+/* 요일은 날짜에서 파생 — 하드코딩 dayStr와 실제 날짜 불일치(예: 5.8을 (금)/(수) 혼선) 방지 */
+const _WD = ['일','월','화','수','목','금','토'];
+function dow(iso){ const d = new Date(iso + 'T00:00:00'); return isNaN(d.getTime()) ? '' : '(' + _WD[d.getDay()] + ')'; }
 
 /* ── State ── */
 let currentMode = 'single';
@@ -1297,6 +1291,11 @@ function renderCurriculumPreview() {
 
     const firstSess = opt.sessions[0];
     const [, m, d] = firstSess.date.split('-');
+    const isMulti = opt.sessions.length > 1;
+    const lastSess = opt.sessions[opt.sessions.length - 1];
+    const [, lm, ld] = lastSess.date.split('-');
+    const rangeStr = `${parseInt(m)}.${parseInt(d)}${dow(firstSess.date)} ~ ${parseInt(lm)}.${parseInt(ld)}${dow(lastSess.date)}`;
+    const multiLoc = new Set(opt.sessions.map(s => s.loc)).size > 1;
 
     let badge = opt.req ? '<span class="chip chip-orange" style="font-size:10px; padding:2px 7px;">필수</span>' : '';
     if (isAssigned) badge = '<span class="chip chip-orange" style="font-size:10px; padding:2px 7px;">내 배정</span>';
@@ -1304,11 +1303,11 @@ function renderCurriculumPreview() {
     const typeTagP = isDateSelectP ? '<span class="chip chip-blue" style="font-size:10px; padding:2px 7px; white-space:nowrap;">회차선택형</span>' : '';
 
     let subText = '';
-    if (opt.sessions.length > 1) {
-      subText = `<div style="font-weight:600; color:var(--grey900); margin-bottom:2px;">총 ${opt.sessions.length}회 일정</div>
-                 <div style="font-size:12px; color:var(--grey600);"><span class="mi i14" style="margin-right:4px; vertical-align:-2px;">location_on</span>${firstSess.loc} 외</div>`;
+    if (isMulti) {
+      subText = `<div style="font-weight:600; color:var(--grey900); margin-bottom:2px;"><span style="color:var(--grey600); font-weight:600; margin-right:6px;">총 ${opt.sessions.length}회</span><span class="num-tab">${rangeStr}</span></div>
+                 <div style="font-size:12px; color:var(--grey600);"><span class="mi i14" style="margin-right:4px; vertical-align:-2px;">location_on</span>${firstSess.loc}${multiLoc ? ' 외' : ''}</div>`;
     } else {
-      subText = `<span style="font-weight:600; color:var(--grey900);" class="num-tab">${firstSess.date.replace(/-/g, '.')} ${firstSess.dayStr} ${firstSess.time}</span>
+      subText = `<span style="font-weight:600; color:var(--grey900);" class="num-tab">${firstSess.date.replace(/-/g, '.')} ${dow(firstSess.date)} ${firstSess.time}</span>
                  <div style="font-size:12px; margin-top:4px; color:var(--grey600);"><span class="mi i14" style="margin-right:4px; vertical-align:-2px;">location_on</span>${firstSess.loc}</div>`;
     }
     if (cohortInstrMixed) {
@@ -1332,11 +1331,6 @@ function renderCurriculumPreview() {
 
     itemWrapper.innerHTML = `
       <div class="list-item ${isExpandable ? '' : 'static'} ${isExpandable && isActive ? 'selected' : ''}" ${isExpandable ? `onclick="handleDetailClick('${opt.id}')"` : ''}>
-        <div class="sess-date-box ${opt.req ? 'req' : ''} ${isAssigned ? 'active' : ''} ${isActive ? 'sel' : ''}">
-          <span class="sess-month">${parseInt(m)}월</span>
-          <span class="sess-day">${parseInt(d)}</span>
-          ${firstSess.dayStr ? `<span class="sess-dow">${firstSess.dayStr.replace(/[()]/g,'')}</span>` : ''}
-        </div>
         <div class="item-content">
           ${(typeTagP || badge) ? `<div class="opt-tags">${typeTagP}${badge}</div>` : ''}
           <div class="item-title">${opt.name}</div>
@@ -1407,6 +1401,10 @@ function renderModalOptions() {
     const selectorIcon = `<div class="selector-icon ${currentMode === 'multi' ? 'check' : ''}"></div>`;
     const firstSess = opt.sessions[0];
     const [, m, d] = firstSess.date.split('-');
+    const isMulti = opt.sessions.length > 1;
+    const lastSess = opt.sessions[opt.sessions.length - 1];
+    const rangeStr = `${parseInt(firstSess.date.split('-')[1])}.${parseInt(firstSess.date.split('-')[2])}${dow(firstSess.date)} ~ ${parseInt(lastSess.date.split('-')[1])}.${parseInt(lastSess.date.split('-')[2])}${dow(lastSess.date)}`;
+    const multiLoc = new Set(opt.sessions.map(s => s.loc)).size > 1;
 
     let badge = opt.req ? '<span class="chip chip-orange" style="font-size:10px; padding:2px 7px;">필수</span>' : '';
     let typeTag = isDateSelect ? '<span class="chip chip-blue" style="font-size:10px; padding:2px 7px; white-space:nowrap;">회차선택형</span>' : '';
@@ -1414,12 +1412,12 @@ function renderModalOptions() {
     let subText;
     if (isDateSelect) {
       subText = `<div style="font-weight:600; color:var(--grey900); margin-bottom:2px;">${opt.sessions.length}개 회차 중 선택</div>
-                 <div style="font-size:11px; color:var(--grey600);" class="num-tab">${opt.sessions[0].date.replace(/-/g,'.')} ~ ${opt.sessions[opt.sessions.length-1].date.replace(/-/g,'.')}</div>`;
-    } else if (opt.sessions.length > 1) {
-      subText = `<div style="font-weight:600; color:var(--grey900); margin-bottom:2px;">총 ${opt.sessions.length}회 일정</div>
-                 <div style="font-size:11px; color:var(--grey600);"><span class="mi i14" style="margin-right:3px; vertical-align:-2px;">location_on</span>${firstSess.loc} 외</div>`;
+                 <div style="font-size:11px; color:var(--grey600);" class="num-tab">${rangeStr} 중</div>`;
+    } else if (isMulti) {
+      subText = `<div style="font-weight:600; color:var(--grey900); margin-bottom:2px;"><span style="color:var(--grey600); font-weight:600; margin-right:6px;">총 ${opt.sessions.length}회</span><span class="num-tab">${rangeStr}</span></div>
+                 <div style="font-size:11px; color:var(--grey600);"><span class="mi i14" style="margin-right:3px; vertical-align:-2px;">location_on</span>${firstSess.loc}${multiLoc ? ' 외' : ''}</div>`;
     } else {
-      subText = `<span style="font-weight:600; color:var(--grey900);" class="num-tab">${firstSess.date.replace(/-/g, '.')} ${firstSess.dayStr} ${firstSess.time}</span>
+      subText = `<span style="font-weight:600; color:var(--grey900);" class="num-tab">${firstSess.date.replace(/-/g, '.')} ${dow(firstSess.date)} ${firstSess.time}</span>
                  <div style="font-size:11px; margin-top:3px; color:var(--grey600);"><span class="mi i14" style="margin-right:3px; vertical-align:-2px;">location_on</span>${firstSess.loc}</div>`;
     }
 
@@ -1431,7 +1429,7 @@ function renderModalOptions() {
         return `
           <div class="sess-pick-item ${isActive ? 'active' : ''}" onclick="event.stopPropagation(); selectSession('${opt.id}','${s.id}')">
             <div class="sess-pick-radio"></div>
-            <div class="sess-pick-date">${parseInt(sm)}/${parseInt(sd)}<span style="font-size:10px; font-weight:500; color:var(--grey500);"> ${s.dayStr}</span></div>
+            <div class="sess-pick-date">${parseInt(sm)}/${parseInt(sd)}<span style="font-size:10px; font-weight:500; color:var(--grey500);"> ${dow(s.date)}</span></div>
             <div class="sess-pick-info">
               <div class="sess-pick-title">${s.title}</div>
               <div class="sess-pick-sub num-tab"><span class="mi i14" style="vertical-align:-2px;">schedule</span> ${s.time} &nbsp;<span class="mi i14" style="vertical-align:-2px;">location_on</span> ${s.loc}</div>
@@ -1445,11 +1443,6 @@ function renderModalOptions() {
       <div class="modal-opt-card ${isFull ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" style="flex-direction:column; align-items:stretch;" onclick="if(!${isFull}) handleModalSelect('${opt.id}')">
         <div style="display:flex; align-items:center; gap:12px;">
           ${selectorIcon}
-          <div class="modal-date-box ${opt.req ? 'req' : ''}">
-            <span class="month">${parseInt(m)}월</span>
-            <span class="day">${parseInt(d)}</span>
-            ${firstSess.dayStr ? `<span class="dow">${firstSess.dayStr.replace(/[()]/g,'')}</span>` : ''}
-          </div>
           <div class="modal-opt-info">
             ${(typeTag || badge) ? `<div class="opt-tags">${typeTag}${badge}</div>` : ''}
             <div class="modal-opt-title">${opt.name}</div>
@@ -1524,7 +1517,9 @@ let ucalYear = 2026;
 let ucalMonth = 4;
 
 function renderUserCalendar() {
-  document.getElementById('userCalTitle').textContent = `${ucalYear}년 ${ucalMonth + 1}월`;
+  const _t = document.getElementById('userCalTitle');
+  if (!_t) return;  // 신청 시트 캘린더 제거됨 — 잔여 호출 무해화
+  _t.textContent = `${ucalYear}년 ${ucalMonth + 1}월`;
   const grid = document.getElementById('cal-grid');
   if (!grid) return;
   grid.innerHTML = '';

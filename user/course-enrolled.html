@@ -4,20 +4,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>내 오프라인 코스 상세</title>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --primary: #5569ff; --primary-lighter: #EEF0FF; --primary-dark: #4454CC;
-      --secondary: #6E759F; --error: #FF1943; --success: #1A7A4A; --success-bg: #E6F4EA;
-      --warning: #E65100; --warning-bg: #FFF3E0;
-      --black: #223354; --body-bg: #f2f5f9; --white: #fff;
-      --border: rgba(34,51,84,.12);
-      --r-sm: 6px; --r: 10px; --r-lg: 16px;
+    /* Material Symbols Rounded — 단일 아이콘 라이브러리 (이모지/아이콘폰트 통일) */
+    .mi{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+    .mi.fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
+    .mi.i9{font-size:9px}.mi.i10{font-size:10px}.mi.i14{font-size:14px}.mi.i16{font-size:16px}.mi.i18{font-size:18px}.mi.i48{font-size:48px}
+    :root{
+      /* ===== TouchClass tokens (design/touchclass_design.md) ===== */
+      /* Brand Blue */
+      --brand-01:#ebf3ff; --brand-02:#dbeaff; --brand-05:#61a2ff;
+      --brand-06:#2e84ff; --brand-08:#0052c7;
+      /* Neutral (ink scale) */
+      --n-00:#ffffff; --n-01:#f2f2f2; --n-02:#e5e5e5; --n-04:#bababa;
+      --n-05:#a1a1a1; --n-06:#878787; --n-07:#6e6e6e; --n-08:#545454;
+      --n-09:#3b3b3b; --n-10:#222222;
+      /* Feedback & accent */
+      --red:#d00c0c; --red-bg:#ffeded; --orange:#ff603e; --orange-bg:#fff1ed;
+      --green:#2f9e31; --green-bg:#edf8ed; --live:#ff3b3b;
+      --gold:#ffc700; --silver:#bababa; --bronze:#b07c5a;
+
+      /* ----- legacy alias (기존 변수명 → 터치클래스 값) ----- */
+      --primary:#2e84ff; --primary-hover:#0052c7; --primary-dark:#0052c7;
+      --primary-lighter:#ebf3ff; --mint:#ebf3ff; --mint-tint:#ebf3ff;
+      --secondary:#878787; --muted:#bababa;
+      --error:#d00c0c; --error-bg:#ffeded;
+      --success:#2f9e31; --success-dark:#2f9e31; --success-bg:#edf8ed;
+      --warning:#ff603e; --warning-dark:#ff603e; --warning-bg:#fff1ed;
+      --black:#222222; --white:#ffffff;
+      --body-bg:#f2f2f2; --border:#e5e5e5;
+      --card-shadow:0 2px 8px rgba(0,0,0,.1);
+
+      /* Radius (터치클래스: 버튼8~12 / 카드·시트16 / pill300 / 썸네일12) */
+      --r-sm:8px; --r:12px; --r-lg:16px; --r-xl:20px; --r-pill:300px;
     }
     html, body { height: 100%; }
-    body { font-family: 'Pretendard','Inter',sans-serif; font-size: 14px; color: var(--black); background: var(--body-bg); }
+    body {
+      font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+      letter-spacing:-0.6px;
+      font-size: 14px; color: var(--black); background: var(--body-bg);
+    }
 
     .app {
       max-width: 390px; margin: 0 auto; min-height: 100vh;
@@ -25,8 +53,8 @@
       box-shadow: 0 0 0 1px var(--border); display: flex; flex-direction: column;
     }
     @media (min-width: 768px) {
-      body { background: #e8ecf4; display: flex; align-items: center; justify-content: center; padding: 32px 16px; min-height: 100vh; }
-      .app { border-radius: var(--r-lg); box-shadow: 0 20px 60px rgba(34,51,84,.18); overflow: hidden; width: 390px; height: 860px; min-height: auto; }
+      body { background: #ededed; display: flex; align-items: center; justify-content: center; padding: 32px 16px; min-height: 100vh; }
+      .app { border-radius: var(--r-lg); box-shadow: 0 20px 60px rgba(0,0,0,.12); overflow: hidden; width: 390px; height: 860px; min-height: auto; }
     }
 
     /* ── Nav ── */
@@ -42,7 +70,7 @@
     }
     .nav-title { font-size: 15px; font-weight: 700; flex: 1; }
     .nav-badge {
-      font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: var(--r-pill);
     }
 
     .scroll-area { flex: 1; overflow-y: auto; }
@@ -50,17 +78,17 @@
     /* ── 내 수강 정보 카드 ── */
     .enroll-card {
       margin: 16px; padding: 20px; border-radius: var(--r-lg);
-      background: linear-gradient(135deg, #5569ff 0%, #7B8BFF 100%);
+      background: linear-gradient(135deg, #2e84ff 0%, #61a2ff 100%);
       color: #fff; position: relative;
     }
     .enroll-status {
       display: inline-flex; align-items: center; gap: 5px;
       padding: 4px 12px; border-radius: 20px;
-      background: rgba(255,255,255,.2); font-size: 11px; font-weight: 700;
+      background: rgba(255,255,255,.2); font-size: 11px; font-weight: 600;
       margin-bottom: 12px;
     }
     .enroll-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ADE80; }
-    .enroll-course-name { font-size: 18px; font-weight: 800; margin-bottom: 4px; line-height: 1.3; }
+    .enroll-course-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
     .enroll-package { font-size: 13px; font-weight: 600; opacity: .85; margin-bottom: 16px; }
     .enroll-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .enroll-item {
@@ -68,45 +96,45 @@
       backdrop-filter: blur(4px);
     }
     .enroll-item-label { font-size: 11px; font-weight: 600; opacity: .7; margin-bottom: 2px; }
-    .enroll-item-val { font-size: 14px; font-weight: 800; }
+    .enroll-item-val { font-size: 14px; font-weight: 700; }
 
     /* ── 섹션 ── */
     .section { padding: 20px 16px; border-bottom: 8px solid var(--body-bg); }
     .section:last-child { border-bottom: none; }
     .section-title {
-      font-size: 15px; font-weight: 800; color: var(--black); margin-bottom: 14px;
+      font-size: 15px; font-weight: 700; color: var(--black); margin-bottom: 14px;
       display: flex; align-items: center; gap: 8px;
     }
-    .section-title i { font-size: 14px; color: var(--secondary); }
+    .section-title .mi { font-size: 14px; color: var(--secondary); }
 
     /* ── 회차 리스트 ── */
     .sess-list { display: flex; flex-direction: column; gap: 0; }
     .sess-item {
       display: flex; align-items: center; gap: 12px;
-      padding: 14px 0; border-bottom: 1px solid rgba(34,51,84,.05);
+      padding: 14px 0; border-bottom: 1px solid var(--border);
     }
     .sess-item:last-child { border-bottom: none; }
     .sess-num {
       width: 36px; height: 36px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 800; flex-shrink: 0;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
     }
-    .sess-num.attended { background: #DBEAFE; color: #1D4ED8; }
-    .sess-num.late { background: #FFF3E0; color: #E65100; }
-    .sess-num.absent { background: #FEF2F2; color: var(--error); }
-    .sess-num.pending { background: var(--body-bg); color: var(--secondary); }
-    .sess-num.current { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(85,105,255,.3); }
+    .sess-num.attended { background: var(--green-bg); color: var(--green); }
+    .sess-num.late { background: var(--orange-bg); color: var(--orange); }
+    .sess-num.absent { background: var(--error-bg); color: var(--error); }
+    .sess-num.pending { background: var(--n-01); color: var(--n-07); }
+    .sess-num.current { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(46,132,255,.3); }
     .sess-info { flex: 1; min-width: 0; }
     .sess-name { font-size: 14px; font-weight: 700; color: var(--black); margin-bottom: 2px; }
     .sess-meta { font-size: 12px; color: var(--secondary); font-weight: 500; display: flex; flex-wrap: wrap; gap: 4px; }
     .sess-badge {
-      font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; flex-shrink: 0;
+      font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: var(--r-sm); flex-shrink: 0;
     }
-    .sess-badge.attended { background: #DBEAFE; color: #1D4ED8; }
-    .sess-badge.late { background: #FFF3E0; color: #E65100; }
-    .sess-badge.absent { background: #FEF2F2; color: var(--error); }
-    .sess-badge.pending { background: var(--body-bg); color: var(--secondary); }
-    .sess-badge.current { background: var(--primary); color: #fff; }
+    .sess-badge.attended { background: var(--green-bg); color: var(--green); }
+    .sess-badge.late { background: var(--orange-bg); color: var(--orange); }
+    .sess-badge.absent { background: var(--error-bg); color: var(--error); }
+    .sess-badge.pending { background: var(--n-01); color: var(--n-07); }
+    .sess-badge.current { background: var(--brand-01); color: var(--brand-06); }
     .sess-time {
       font-size: 11px; color: var(--secondary); margin-top: 2px;
     }
@@ -117,9 +145,9 @@
       display: flex; align-items: center; justify-content: space-between;
       cursor: pointer; padding: 16px 0;
     }
-    .collapse-header h4 { font-size: 14px; font-weight: 800; }
-    .collapse-header i { font-size: 12px; color: var(--secondary); transition: transform .2s; }
-    .collapse-header.open i { transform: rotate(180deg); }
+    .collapse-header h4 { font-size: 14px; font-weight: 700; }
+    .collapse-header .chev { font-size: 18px; color: var(--secondary); transition: transform .2s; }
+    .collapse-header.open .chev { transform: rotate(180deg); }
     .collapse-body { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
     .collapse-body.open { max-height: 500px; }
 
@@ -133,22 +161,22 @@
     .action-section { padding: 20px 16px 16px; }
     .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .action-btn {
-      height: 48px; border-radius: var(--r); border: 1.5px solid var(--border);
-      background: var(--white); font-size: 14px; font-weight: 700;
+      height: 48px; border-radius: var(--r); border: 1px solid var(--border);
+      background: var(--white); font-size: 14px; font-weight: 600;
       cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
       transition: all .15s;
     }
     .action-btn:hover { background: var(--body-bg); }
     .action-btn:active { transform: scale(.98); }
     .action-btn.change { color: var(--black); }
-    .action-btn.cancel { color: var(--error); border-color: rgba(255,25,67,.2); }
+    .action-btn.cancel { color: var(--error); border-color: var(--error-bg); }
     .action-btn:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
     .action-notice {
-      margin-top: 10px; padding: 10px 14px; border-radius: 8px;
+      margin-top: 10px; padding: 10px 14px; border-radius: var(--r-sm);
       font-size: 12px; font-weight: 600; line-height: 1.5;
     }
     .action-notice.info { background: var(--primary-lighter); color: var(--primary-dark); }
-    .action-notice.warn { background: #FEF2F2; color: var(--error); }
+    .action-notice.warn { background: var(--error-bg); color: var(--error); }
     .action-notice.amber { background: var(--warning-bg); color: var(--warning); }
 
     /* ── 하단 CTA ── */
@@ -158,13 +186,13 @@
     }
     .btn-primary {
       width: 100%; height: 54px; border-radius: var(--r);
-      border: none; font-size: 16px; font-weight: 800; cursor: pointer;
+      border: none; font-size: 16px; font-weight: 700; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px;
       transition: all .15s;
     }
     .btn-primary:active { transform: scale(.98); }
-    .btn-primary.qr { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(85,105,255,.3); }
-    .btn-primary.qr i { font-size: 20px; }
+    .btn-primary.qr { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(46,132,255,.3); }
+    .btn-primary.qr .mi { font-size: 20px; }
 
     /* ── 모달 공통 ── */
     .modal-overlay {
@@ -180,10 +208,10 @@
       animation: popIn .2s ease-out;
     }
     @keyframes popIn { from { opacity:0; transform:scale(.93); } to { opacity:1; transform:scale(1); } }
-    .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
     .modal-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
     .modal-btn {
-      height: 48px; border-radius: 8px; border: none; font-size: 14px; font-weight: 700;
+      height: 48px; border-radius: var(--r-sm); border: none; font-size: 14px; font-weight: 600;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
     .modal-btn.outline { background: var(--body-bg); color: var(--black); border: 1px solid var(--border); }
@@ -215,7 +243,7 @@
     .sheet-hdr {
       padding: 0 20px 16px; border-bottom: 1px solid var(--border);
     }
-    .sheet-title { font-size: 17px; font-weight: 800; }
+    .sheet-title { font-size: 17px; font-weight: 700; }
     .sheet-sub { font-size: 13px; color: var(--secondary); margin-top: 4px; }
     .sheet-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
     .sheet-footer { padding: 12px 20px 24px; border-top: 1px solid var(--border); }
@@ -223,15 +251,15 @@
     /* 패키지 옵션 카드 */
     .pkg-option {
       display: flex; align-items: center; gap: 12px; padding: 14px;
-      border: 1.5px solid var(--border); border-radius: var(--r);
+      border: 1px solid var(--border); border-radius: var(--r);
       margin-bottom: 10px; cursor: pointer; transition: all .15s;
     }
-    .pkg-option:hover { border-color: #CBD5E1; }
+    .pkg-option:hover { border-color: var(--n-04); }
     .pkg-option.selected { border-color: var(--primary); background: var(--primary-lighter); }
     .pkg-option.disabled { opacity: .5; pointer-events: none; background: var(--body-bg); }
-    .pkg-option.current { border-color: #CBD5E1; background: var(--body-bg); }
+    .pkg-option.current { border-color: var(--n-04); background: var(--body-bg); }
     .pkg-radio {
-      width: 20px; height: 20px; border-radius: 50%; border: 2px solid #CBD5E1;
+      width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--n-04);
       flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     }
     .pkg-option.selected .pkg-radio { border-color: var(--primary); background: var(--primary); }
@@ -239,9 +267,9 @@
     .pkg-info { flex: 1; }
     .pkg-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
     .pkg-detail { font-size: 12px; color: var(--secondary); }
-    .pkg-status { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; }
+    .pkg-status { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: var(--r-sm); flex-shrink: 0; }
     .pkg-status.avail { background: var(--primary-lighter); color: var(--primary); }
-    .pkg-status.full { background: #F1F5F9; color: #94A3B8; }
+    .pkg-status.full { background: var(--n-01); color: var(--n-05); }
     .pkg-status.mine { background: var(--body-bg); color: var(--secondary); }
 
     /* ── 출석률 바 (75% 기준선) ── */
@@ -286,16 +314,18 @@
       text-align: center; padding: 60px 24px;
     }
     .result-icon { font-size: 56px; margin-bottom: 16px; }
-    .result-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .result-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
     .result-desc { font-size: 14px; color: var(--secondary); line-height: 1.6; }
 
     /* Proto 사이드 */
-    .proto-bar { position: fixed; top: 50%; right: 24px; transform: translateY(-50%); z-index: 500; }
+    .proto-bar { position: fixed; top: 50%; right: 24px; transform: translateY(-50%); z-index: 500; max-height: 92vh; overflow-y: auto; padding-right: 4px; }
+    .proto-bar::-webkit-scrollbar { width: 4px; }
+    .proto-bar::-webkit-scrollbar-thumb { background: var(--n-04); border-radius: 2px; }
     .proto-chips { display: flex; flex-direction: column; gap: 6px; }
     .proto-chip {
-      padding: 9px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      padding: 9px 14px; border-radius: var(--r-sm); font-size: 12px; font-weight: 600;
       cursor: pointer; border: none; background: #fff; color: var(--secondary);
-      box-shadow: 0 2px 8px rgba(34,51,84,.08); transition: all .15s; text-align: left;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: all .15s; text-align: left;
     }
     .proto-chip:hover { transform: translateX(-3px); color: var(--black); }
     .proto-chip.active { background: var(--primary); color: #fff; }
@@ -306,7 +336,7 @@
 
 <!-- Proto 사이드바 -->
 <div class="proto-bar">
-  <div style="font-size:10px;font-weight:800;color:var(--secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">취소·변경 정책</div>
+  <div style="font-size:10px;font-weight:700;color:var(--secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">취소·변경 정책</div>
   <div class="proto-chips">
     <button class="proto-chip active" onclick="setPolicy('open')">기한 내 (변경·취소 가능)</button>
     <button class="proto-chip" onclick="setPolicy('change-expired')">변경 기한 경과</button>
@@ -318,7 +348,7 @@
 
   <!-- ══ Nav ══ -->
   <div class="nav">
-    <button class="nav-back" onclick="history.back()">←</button>
+    <button class="nav-back" onclick="history.back()"><span class="mi">chevron_left</span></button>
     <span class="nav-title">내 코스 상세</span>
     <span class="nav-badge" style="background:var(--success-bg); color:var(--success);">수강중</span>
   </div>
@@ -366,15 +396,15 @@
 
     <!-- ══ 회차별 커리큘럼 + 출석 ══ -->
     <div class="section">
-      <div class="section-title"><i class="fa-solid fa-list-check"></i> 회차별 커리큘럼 <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:#F1F3F5; color:var(--secondary); margin-left:4px;">회차별 강사 상이</span></div>
+      <div class="section-title"><span class="mi">checklist</span> 회차별 커리큘럼 <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:var(--r-pill); background:var(--n-01); color:var(--secondary); margin-left:4px;">회차별 강사 상이</span></div>
       <div class="sess-list">
 
         <div class="sess-item">
           <div class="sess-num attended">1</div>
           <div class="sess-info">
             <div class="sess-name">1회차 · PM 기초와 프레임워크</div>
-            <div class="sess-meta">3/29(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--secondary);"><i class="fa-solid fa-user" style="font-size:10px;margin-right:3px;"></i>김민준</span></div>
-            <div class="sess-time stamp"><i class="fa-solid fa-check" style="font-size:10px;margin-right:3px;"></i> 08:55 출석</div>
+            <div class="sess-meta">3/29(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--secondary);"><span class="mi" style="font-size:10px;margin-right:3px;">person</span>김민준</span></div>
+            <div class="sess-time stamp"><span class="mi" style="font-size:10px;margin-right:3px;">check</span> 08:55 출석</div>
           </div>
           <span class="sess-badge attended">출석</span>
         </div>
@@ -383,8 +413,8 @@
           <div class="sess-num attended">2</div>
           <div class="sess-info">
             <div class="sess-name">2회차 · WBS와 일정 관리</div>
-            <div class="sess-meta">4/5(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--secondary);"><i class="fa-solid fa-user" style="font-size:10px;margin-right:3px;"></i>김민준</span></div>
-            <div class="sess-time stamp"><i class="fa-solid fa-check" style="font-size:10px;margin-right:3px;"></i> 08:58 출석</div>
+            <div class="sess-meta">4/5(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--secondary);"><span class="mi" style="font-size:10px;margin-right:3px;">person</span>김민준</span></div>
+            <div class="sess-time stamp"><span class="mi" style="font-size:10px;margin-right:3px;">check</span> 08:58 출석</div>
           </div>
           <span class="sess-badge attended">출석</span>
         </div>
@@ -393,7 +423,7 @@
           <div class="sess-num current">3</div>
           <div class="sess-info">
             <div class="sess-name">3회차 · 리스크 관리 실습</div>
-            <div class="sess-meta">4/12(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--primary);font-weight:600;"><i class="fa-solid fa-user" style="font-size:10px;margin-right:3px;"></i>이서연</span></div>
+            <div class="sess-meta">4/12(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--primary);font-weight:600;"><span class="mi" style="font-size:10px;margin-right:3px;">person</span>이서연</span></div>
           </div>
           <span class="sess-badge current">D-3</span>
         </div>
@@ -402,7 +432,7 @@
           <div class="sess-num pending">4</div>
           <div class="sess-info">
             <div class="sess-name">4회차 · 이해관계자 커뮤니케이션</div>
-            <div class="sess-meta">4/19(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--secondary);"><i class="fa-solid fa-user" style="font-size:10px;margin-right:3px;"></i>김민준</span></div>
+            <div class="sess-meta">4/19(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--secondary);"><span class="mi" style="font-size:10px;margin-right:3px;">person</span>김민준</span></div>
           </div>
           <span class="sess-badge pending">D-10</span>
         </div>
@@ -411,7 +441,7 @@
           <div class="sess-num pending">5</div>
           <div class="sess-info">
             <div class="sess-name">5회차 · 종합 케이스 스터디</div>
-            <div class="sess-meta">4/26(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--secondary);"><i class="fa-solid fa-user" style="font-size:10px;margin-right:3px;"></i>김민준</span></div>
+            <div class="sess-meta">4/26(토) 09:00–18:00 · 본사 대교육장<span style="color:var(--secondary);"><span class="mi" style="font-size:10px;margin-right:3px;">person</span>김민준</span></div>
           </div>
           <span class="sess-badge pending">D-17</span>
         </div>
@@ -422,20 +452,20 @@
     <!-- ══ 코스 안내 (접기/펴기) ══ -->
     <div class="section" style="padding-bottom: 8px;">
       <div class="collapse-header" id="collapse-toggle" onclick="toggleCollapse()">
-        <h4><i class="fa-solid fa-circle-info" style="color:var(--secondary);margin-right:6px;font-size:13px;"></i> 코스 안내</h4>
-        <i class="fa-solid fa-chevron-down"></i>
+        <h4><span class="mi" style="color:var(--secondary);margin-right:6px;font-size:14px;">info</span> 코스 안내</h4>
+        <span class="mi chev">expand_more</span>
       </div>
       <div class="collapse-body" id="collapse-body">
         <div class="info-row">
-          <div class="info-icon">👨‍🏫</div>
+          <div class="info-icon"><span class="mi" style="font-size:18px;color:var(--secondary);">person</span></div>
           <div><div class="info-label">강사</div><div class="info-val">김민준 · 프로젝트 관리 전문가</div></div>
         </div>
         <div class="info-row">
-          <div class="info-icon">🏢</div>
+          <div class="info-icon"><span class="mi" style="font-size:18px;color:var(--secondary);">location_on</span></div>
           <div><div class="info-label">장소</div><div class="info-val">한샘 HQ 대교육장 B동 3층</div></div>
         </div>
         <div class="info-row">
-          <div class="info-icon">📝</div>
+          <div class="info-icon"><span class="mi" style="font-size:18px;color:var(--secondary);">description</span></div>
           <div><div class="info-label">코스 소개</div><div class="info-val">PM 직무에서 실제 활용 가능한 프로젝트 관리 방법론과 케이스 스터디를 통해 실전 역량을 강화합니다.</div></div>
         </div>
         <div style="height: 12px;"></div>
@@ -447,13 +477,13 @@
       <div class="action-btns">
         <div style="display:flex;flex-direction:column;align-items:center;">
           <button class="action-btn change" id="btn-change" onclick="openChangeSheet()">
-            <i class="fa-solid fa-arrow-right-arrow-left" style="font-size:13px;"></i> 일정 변경
+            <span class="mi" style="font-size:16px;">swap_horiz</span> 일정 변경
           </button>
           <div class="btn-hint amber" id="hint-change">일정 변경 기한이 지났어요</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;">
           <button class="action-btn cancel" id="btn-cancel" onclick="openCancelModal()">
-            <i class="fa-solid fa-xmark" style="font-size:14px;"></i> 수강 취소
+            <span class="mi" style="font-size:16px;">close</span> 수강 취소
           </button>
           <div class="btn-hint warn" id="hint-cancel">취소 기한이 지났어요</div>
         </div>
@@ -468,7 +498,7 @@
 
   <!-- ══ 하단 CTA ══ -->
   <div class="bottom-cta">
-    <button class="btn-primary qr"><i class="fa-solid fa-qrcode"></i> QR 출석 체크인</button>
+    <button class="btn-primary qr" onclick="openQrModal()"><span class="mi">qr_code_scanner</span> QR 출석 체크인</button>
   </div>
 
 </div>
@@ -476,12 +506,12 @@
 <!-- ══ 취소 확인 ══ -->
 <div class="app" id="app-cancelled" style="display:none;">
   <div class="nav">
-    <button class="nav-back" onclick="location.href='my.html'">✕</button>
+    <button class="nav-back" onclick="location.href='my.html'"><span class="mi">close</span></button>
     <span class="nav-title">취소 완료</span>
   </div>
   <div class="scroll-area" style="display:flex; flex-direction:column; justify-content:center;">
     <div class="result-center">
-      <div class="result-icon" style="filter:grayscale(1);">📭</div>
+      <div class="result-icon"><span class="mi" style="font-size:56px;color:var(--n-05);">mark_email_unread</span></div>
       <div class="result-title">수강이 취소되었습니다</div>
       <div class="result-desc">신청하신 코스 일정이 정상적으로 취소되었습니다.<br>다시 수강하시려면 코스 상세에서 재신청해 주세요.</div>
     </div>
@@ -501,7 +531,7 @@
   </div>
   <div class="sheet-body">
     <div class="pkg-option current">
-      <div class="pkg-radio" style="border-color:#CBD5E1;background:#CBD5E1;"></div>
+      <div class="pkg-radio" style="border-color:var(--n-04);background:var(--n-04);"></div>
       <div class="pkg-info">
         <div class="pkg-name">A반 (5월 평일반)</div>
         <div class="pkg-detail">5/1–5/29 · 매주 토 · 5회차</div>
@@ -544,7 +574,7 @@
 <!-- ══ 수강 취소 모달 ══ -->
 <div class="modal-overlay" id="modal-cancel" onclick="if(event.target===this)closeCancelModal()">
   <div class="modal-box">
-    <div style="text-align:center;font-size:40px;margin-bottom:12px;">⚠️</div>
+    <div style="text-align:center;margin-bottom:12px;"><span class="mi" style="font-size:40px;color:var(--error);">error</span></div>
     <div class="modal-title" style="text-align:center;">수강을 취소하시겠습니까?</div>
     <div style="font-size:13px;color:var(--secondary);text-align:center;line-height:1.5;margin-bottom:12px;">
       취소 후 재신청은 잔여석이 있는 경우에만 가능합니다.
@@ -559,13 +589,41 @@
 <!-- ══ 일정 변경 완료 모달 ══ -->
 <div class="modal-overlay" id="modal-change-done" onclick="if(event.target===this)closeChangeDone()">
   <div class="modal-box" style="text-align:center;">
-    <div style="font-size:40px;margin-bottom:12px;">✅</div>
+    <div style="margin-bottom:12px;"><span class="mi" style="font-size:40px;color:var(--green);">check_circle</span></div>
     <div class="modal-title">일정이 변경되었습니다</div>
     <div style="font-size:14px;color:var(--primary);font-weight:700;margin-bottom:8px;" id="change-result-text"></div>
     <div style="font-size:13px;color:var(--secondary);margin-bottom:20px;">새로운 일정에 맞춰 출석해 주세요.</div>
     <button class="modal-btn primary" style="width:100%;" onclick="closeChangeDone()">확인</button>
   </div>
 </div>
+
+<!-- ══ QR 출석 체크인 모달 ══ -->
+<div class="modal-overlay" id="modal-qr" onclick="if(event.target===this)closeQrModal()">
+  <div class="modal-box" style="text-align:center;">
+    <div id="qr-scan-view">
+      <div class="modal-title">현장 QR 출석 체크인</div>
+      <div style="font-size:13px;color:var(--secondary);margin-bottom:16px;line-height:1.5;">교육장에서 강사가 띄운 QR을<br>카메라로 비추면 출석이 기록됩니다.</div>
+      <div style="width:170px;height:170px;margin:0 auto 18px;border:2px dashed var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;background:var(--body-bg);">
+        <span class="mi" style="font-size:80px;color:var(--secondary);">qr_code_scanner</span>
+      </div>
+      <div class="modal-btn-row">
+        <button class="modal-btn outline" onclick="closeQrModal()">닫기</button>
+        <button class="modal-btn primary" onclick="simulateQrScan()">QR 스캔</button>
+      </div>
+    </div>
+    <div id="qr-done-view" style="display:none;">
+      <div style="margin:8px 0 12px;"><span class="mi" style="font-size:48px;color:var(--green);">check_circle</span></div>
+      <div class="modal-title">출석이 기록되었습니다</div>
+      <div style="font-size:13px;color:var(--secondary);margin-bottom:20px;" id="qr-done-time"></div>
+      <button class="modal-btn primary" style="width:100%;" onclick="closeQrModal()">확인</button>
+    </div>
+  </div>
+</div>
+<script>
+function openQrModal(){ document.getElementById('qr-scan-view').style.display='block'; document.getElementById('qr-done-view').style.display='none'; document.getElementById('modal-qr').classList.add('open'); }
+function closeQrModal(){ document.getElementById('modal-qr').classList.remove('open'); }
+function simulateQrScan(){ const n=new Date(); const t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); document.getElementById('qr-done-time').textContent='오늘 회차 · '+t+' 출석 처리'; document.getElementById('qr-scan-view').style.display='none'; document.getElementById('qr-done-view').style.display='block'; }
+</script>
 
 <script>
 let currentPolicy = 'open';
