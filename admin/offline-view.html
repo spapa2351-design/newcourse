@@ -61,8 +61,8 @@
           { id:'pa1', name:'A반 (4/14)', startDate:'2026-04-14', endDate:'2026-04-14',
             place:'한샘 HQ B동 3층', capacity:30, enrolled:28,
             sessions:[
-              {id:'s1',name:'1회차',date:'2026-04-14',start:'09:00',end:'12:30',att:26,late:2,abs:0,pending:0},
-              {id:'s2',name:'2회차',date:'2026-04-14',start:'13:30',end:'18:00',att:24,late:1,abs:3,pending:0},
+              {id:'s1',name:'1회차',date:'2026-04-14',start:'09:00',end:'12:30',capacity:30,att:26,late:2,abs:0,pending:0},
+              {id:'s2',name:'2회차 (오후 실습)',date:'2026-04-14',start:'13:30',end:'18:00',capacity:20,att:24,late:1,abs:3,pending:0},
             ]},
           { id:'pa2', name:'B반 (5/12)', startDate:'2026-05-12', endDate:'2026-05-12',
             place:'한샘 HQ B동 3층', capacity:30, enrolled:27,
@@ -164,9 +164,9 @@
           { id:'p1', name:'1기 (4/7~4/11)', startDate:'2026-04-07', endDate:'2026-04-11',
             place:'한샘 HQ 대교육장', capacity:15, enrolled:10,
             sessions:[
-              {id:'s1',name:'1회차',date:'2026-04-07',start:'09:00',end:'12:00',att:9,late:1,abs:0,pending:0},
+              {id:'s1',name:'1회차',date:'2026-04-07',start:'09:00',end:'12:00',capacity:15,att:9,late:1,abs:0,pending:0},
               {id:'s2',name:'2회차',date:'2026-04-08',start:'09:00',end:'12:00',instructor:'이응급',att:8,late:1,abs:1,pending:0},
-              {id:'s3',name:'3회차',date:'2026-04-09',start:'13:00',end:'17:00',instructor:'박현장',studyMinOverride:180,att:7,late:2,abs:1,pending:0},
+              {id:'s3',name:'3회차 (소실습실)',date:'2026-04-09',start:'13:00',end:'17:00',instructor:'박현장',studyMinOverride:180,capacity:8,att:7,late:2,abs:1,pending:0},
               {id:'s4',name:'4회차',date:'2026-04-10',start:'13:00',end:'17:00',att:7,late:1,abs:2,pending:0},
               {id:'s5',name:'5회차',date:'2026-04-11',start:'09:00',end:'12:00',att:6,late:2,abs:2,pending:0},
             ]},
@@ -353,6 +353,8 @@
   const COURSE = _cdata.course;
   const LEARNERS_RAW = _cdata.learners;
   const COMPLETION = _cdata.completion;
+  // 수료 출석률 기준 — 빌더 수료조건(attendance_rate minRate) 연동값. 데이터 미지정 시 표준 75%.
+  const COMPLETION_MIN_RATE = (COURSE.completionMinRate != null) ? COURSE.completionMinRate : 75;
 
   /* ── 코스 상태별 뷰 모드 (오프라인: active·published·scheduled·draft·closed) ──
      오프라인은 온라인의 4-액션 종료 모달이 없는 단순 모델. 운영중/예정/종료 구분만. */
@@ -439,6 +441,7 @@
 
   const COMPL_CFG = {
     completed:{label:'수료',bg:'bg-emerald-50',text:'text-emerald-700',dot:'bg-emerald-500'},
+    incomplete:{label:'미수료',bg:'bg-rose-50',text:'text-rose-700',dot:'bg-rose-500'},
     in_progress:{label:'진행중',bg:'bg-indigo-50',text:'text-indigo-600',dot:'bg-indigo-400'},
     not_started:{label:'미시작',bg:'bg-slate-100',text:'text-slate-500',dot:'bg-slate-300'},
   };
@@ -785,12 +788,35 @@
       bcRef.current?.postMessage({type:'ATTENDANCE_CHANGE',learnerId,name:learnerName,sessionId:sessId,pkgId,status,ts:Date.now()});
     };
 
-    // C-2: process package completion — mark qualifying learners as completed
+    // 학습자별 출석률(차수 내 회차 기준): (출석+지각+조퇴) / (확정 회차). 조퇴=출석 인정 공용정책. 미확정(pending)은 분모 제외.
+    const learnerPkgRate = (learnerId, pkg) => {
+      let present = 0, denom = 0;
+      pkg.sessions.forEach(s => {
+        const st = attendanceMap[`${learnerId}_${s.id}`] || 'pending';
+        if (st === 'pending') return;
+        denom++;
+        if (st === 'attended' || st === 'late' || st === 'early_leave') present++;
+      });
+      return denom > 0 ? Math.round(present / denom * 100) : null;
+    };
+    // 모든 회차 종료된 차수에서 수료 기준(출석률) 미달 인원 수. 미종료/판정불가면 null.
+    const pkgBelowCount = pkg => {
+      const allClosed = pkg.sessions.length > 0 && pkg.sessions.every(s => closedSessions.has(s.id));
+      if (!allClosed) return null;
+      return LEARNERS_RAW.filter(l => l.pkgId === pkg.id)
+        .filter(l => { const r = learnerPkgRate(l.id, pkg); return r !== null && r < COMPLETION_MIN_RATE; }).length;
+    };
+    // C-2: 수료 처리 — 출석률 기준 충족자만 '수료', 미달자는 '미수료'. (전원 일괄 수료 금지 — 컴플라이언스)
     const processPkgCompletion = pkgId => {
+      const pkg = COURSE.packages.find(p => p.id === pkgId);
+      if (!pkg) return;
       const pkgL = LEARNERS_RAW.filter(l => l.pkgId === pkgId);
       setCompletionMap(prev => {
         const next = {...prev};
-        pkgL.forEach(l => { next[l.id] = 'completed'; });
+        pkgL.forEach(l => {
+          const r = learnerPkgRate(l.id, pkg);
+          next[l.id] = (r !== null && r >= COMPLETION_MIN_RATE) ? 'completed' : 'incomplete';
+        });
         return next;
       });
     };
@@ -822,6 +848,7 @@
               <div className="text-[18px] font-bold text-indigo-400 mb-1">{todayPkg?.name}</div>
               <div className="text-[32px] font-black text-white">{todaySess?.name}</div>
               <div className="text-[18px] text-slate-400 mt-2">{fmtShort(todaySess?.date)} · {todaySess?.start}~{todaySess?.end} · {todayPkg?.place}</div>
+              {todaySess?.capacity!=null && <div className="text-[16px] text-violet-300 font-bold mt-1">이 회차 정원 {todaySess.capacity}석</div>}
             </div>
             <div className="bg-white rounded-3xl p-8 shadow-2xl relative">
               <div className="w-[340px] h-[340px] bg-slate-50 rounded-2xl flex items-center justify-center border-4 border-slate-100">
@@ -1115,6 +1142,7 @@
                   <div className="h-full bg-emerald-400 rounded-full" style={{width:`${Math.round(completedCount/totalEnrolled*100)}%`}}/>
                 </div>
                 <div className="text-[11px] text-emerald-600 font-semibold mt-1">수료율 {Math.round(completedCount/totalEnrolled*100)}%</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">수료 기준: 출석률 {COMPLETION_MIN_RATE}% 이상</div>
               </div>
 
               {/* 출석률 */}
@@ -1409,6 +1437,7 @@
                                 <span>·</span><span>신청 {pkg.enrolled}/{pkg.capacity}명</span>
                                 <span>·</span><span>학습 {fmtDuration(pkgStudyMin(pkg))}</span>
                                 {livePkgRate!==null && <><span>·</span><span className="font-bold text-indigo-600">출석률 {livePkgRate}%</span></>}
+                                {(() => { const bc = pkgBelowCount(pkg); return (bc !== null && bc > 0) ? <><span>·</span><span className="font-bold text-rose-600">수료 미달 {bc}명 (출석률 {COMPLETION_MIN_RATE}% 미만)</span></> : null; })()}
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
@@ -1416,6 +1445,12 @@
                                 <button onClick={e=>{e.stopPropagation();setLiveMode(true);}}
                                   className="flex items-center gap-1 text-[12px] font-bold text-white bg-indigo-500 hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition-colors">
                                   <QrCode size={12}/> QR 출석
+                                </button>
+                              )}
+                              {allClosed && !isClosedCourse && (
+                                <button onClick={e=>{e.stopPropagation();processPkgCompletion(pkg.id);}}
+                                  className="flex items-center gap-1 text-[12px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-lg transition-colors">
+                                  <Award size={12}/> 수료 처리 · 출석률 {COMPLETION_MIN_RATE}% 기준
                                 </button>
                               )}
                               {isOpen?<ChevronUp size={15} className="text-slate-400"/>:<ChevronDown size={15} className="text-slate-400"/>}
@@ -1449,7 +1484,7 @@
                                     return (
                                       <React.Fragment key={s.id}>
                                         <tr className={`border-t border-slate-100 ${isToday?'bg-indigo-50/40':i%2===0?'bg-white':'bg-slate-50/30'}`}>
-                                          <td className="px-5 py-2.5 font-bold text-slate-700">{s.name}{isToday&&<span className="text-[10px] bg-indigo-500 text-white px-1.5 py-0.5 rounded-full ml-1">오늘</span>}</td>
+                                          <td className="px-5 py-2.5 font-bold text-slate-700">{s.name}{isToday&&<span className="text-[10px] bg-indigo-500 text-white px-1.5 py-0.5 rounded-full ml-1">오늘</span>}{s.capacity!=null&&(()=>{const assigned=s.att+s.late+s.el+s.abs+s.pending;const over=assigned-s.capacity;if(over<=0&&s.capacity===pkg.capacity)return null;const isOver=over>0;return <span title="이 회차의 방 좌석 수(날짜·장소별로 다를 때). 신청 정원은 차수 단위이고, 이 숫자는 명부 인원 기준 방 수용량입니다 — 출석·수료 판정과는 무관합니다." className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded border ${isOver?'bg-red-50 text-red-600 border-red-200':'bg-violet-50 text-violet-700 border-violet-200'}`}>{isOver?`회차 정원 ${s.capacity}석 · ${over}명 초과`:`회차 정원 ${s.capacity}석`}</span>;})()}</td>
                                           <td className="px-4 py-2.5 text-slate-500">{fmtDate(s.date)}</td>
                                           <td className="px-4 py-2.5 text-slate-500">{s.start}~{s.end}</td>
                                           {courseHasSessInstr && <td className="px-4 py-2.5 text-slate-600 font-medium"><span className="inline-flex items-center gap-1"><User size={12} className="text-slate-400"/>{effInstructor(pkg, s)}</span></td>}

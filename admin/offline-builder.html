@@ -1894,6 +1894,8 @@
                             const isDragOver = dragOverSess === sess.id && draggingSess !== sess.id;
                             const sameDateCount = sess.date ? opt.sessions.filter(s => s.date === sess.date).length : 0;
                             const hasIndividual = sess.groups !== null && sess.groups !== undefined;
+                            // 차수 내 회차 시간 겹침 — 같은 시간대 회차는 QR 출석 코드(차수당 1개)로 구분 불가
+                            const sessOverlap = opt.sessions.some(o => o.id !== sess.id && _sessConflict(o, sess));
                             return (
                               <div
                                 key={sess.id}
@@ -1926,6 +1928,11 @@
                                     {sameDateCount > 1 && (
                                       <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0">
                                         {sameDateCount}개 시간대
+                                      </span>
+                                    )}
+                                    {sessOverlap && (
+                                      <span title="같은 시간대에 겹치는 회차가 있습니다. 출석 QR 코드는 차수당 1개라 같은 시간 회차는 출석이 구분되지 않습니다. 시간대를 분리하세요." className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0 flex items-center gap-0.5">
+                                        <AlertTriangle size={9}/> 시간 겹침
                                       </span>
                                     )}
                                     {sess.date && (
