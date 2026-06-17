@@ -151,8 +151,8 @@
     <div class="text-indigo-400 text-xs font-semibold tracking-widest uppercase mb-1">Offline LMS</div>
     <div class="text-white font-bold text-base leading-tight">기획설계서</div>
     <div class="flex items-center gap-2 mt-2">
-      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.7</span>
-      <span class="text-slate-500 text-xs">2026-06-08</span>
+      <span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">v1.9</span>
+      <span class="text-slate-500 text-xs">2026-06-17</span>
     </div>
     <div class="flex mt-3 rounded-lg overflow-hidden border border-slate-700">
       <button id="tab-btn-admin" class="tab-btn flex-1 py-1.5 text-xs font-semibold transition-colors bg-indigo-600 text-white" data-tab="admin" onclick="switchTab('admin')">관리자단</button>
@@ -246,6 +246,25 @@
     <span class="bg-emerald-400/30 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-bold shrink-0 border border-emerald-300/40">📍 정책 SSOT</span>
   </div>
   <div class="mt-2 text-xs text-white/70">이 문서는 <strong>운영 정책의 단일 진실 원천(SSOT)</strong> · 기능 라인 아이템은 <a href="../admin/feature-spec.html" target="_blank" class="underline">admin/feature-spec.html</a> · 일정은 <a href="00-standard/phase-roadmap.html" target="_blank" class="underline">phase-roadmap.html</a> · 운영 가이드는 <a href="guide-ops-policy.html" target="_blank" class="underline">guide-ops-policy.html</a></div>
+</div>
+
+<!-- Change summary -->
+<div data-tab="admin" class="bg-white border-b border-slate-200 px-12 py-5">
+  <div class="max-w-4xl">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">변경 요약</span>
+      <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">v1.9</span>
+      <span class="text-slate-400 text-xs">2026-06-17</span>
+    </div>
+    <ul class="text-sm text-slate-600 space-y-1.5 list-disc pl-5">
+      <li>운영 종료: 오프라인은 <strong>종료 버튼을 두지 않음</strong> — 회차 종료·신청 기간 만료로 자연 종료(이미 종료된 코스는 "조회 전용" 표시). 서버 부하 대비 "문 닫기" 종료는 온라인 전용 개념(2026-06-17).</li>
+      <li>회차 정원: 수강관리 화면에 회차별 개별 정원 표시 복원(빌더 구현 정원이 수강관리에 반영).</li>
+      <li>빌더: 회차 시간이 겹칠 때 경고 표시.</li>
+      <li>수료: 출석률 75% 기준과 연동, 미수료 상태 구분.</li>
+      <li>학습자 앱: 수료증, QR 체크인 동작.</li>
+      <li>신청: 캘린더를 제거하고 카드 단일 선택으로 정리, 카드에 다회차 기간 표시.</li>
+    </ul>
+  </div>
 </div>
 
 <!-- Team Guide -->
