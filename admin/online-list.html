@@ -31,7 +31,7 @@
       },
     }
   </script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
   <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fadeIn { animation: fadeIn 0.25s ease-out forwards; }
@@ -860,7 +860,6 @@
                         const periodLabel = course.studyPeriod.type === 'unlimited' ? '제한 없음'
                           : course.studyPeriod.type === 'days' ? `등록 후 ${course.studyPeriod.days}일`
                           : `${course.studyPeriod.start} ~ ${course.studyPeriod.end}`;
-                        const isRunning = course.status === 'running';
 
                         return (
                           <tr key={course.id} className={`border-b border-slate-100 transition-colors group
@@ -896,16 +895,20 @@
                                 {enrollCfg.label}
                               </div>
                             </td>
-                            {/* 수강관리 */}
+                            {/* 수강관리 — draft만 비활성(등록 학습자 없음), 나머지는 전부 진입 가능 */}
                             <td className="px-3 py-3 text-center">
-                              {isRunning ? (
-                                <a href={`online-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
+                              {course.status === 'draft' ? (
+                                <span className="inline-flex items-center gap-1 bg-slate-50 text-slate-300 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold cursor-not-allowed whitespace-nowrap" title="작성 중 — 등록된 수강생이 없습니다">
+                                  <Users size={10}/> 수강관리
+                                </span>
+                              ) : (course.status === 'running' || course.status === 'closed_apply') ? (
+                                <a href={`online-view.html?id=${course.id}&status=${course.status}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
                                   <Users size={10}/> 수강관리
                                 </a>
                               ) : (
-                                <span className="inline-flex items-center gap-1 bg-slate-50 text-slate-300 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold cursor-not-allowed whitespace-nowrap" title="운영중일 때만 이용 가능">
+                                <a href={`online-view.html?id=${course.id}&status=${course.status}`} className="inline-flex items-center gap-1 bg-white text-slate-500 border border-slate-300 px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-slate-50 hover:text-slate-700 transition-colors whitespace-nowrap" title="종료된 코스 — 학습 이력 조회">
                                   <Users size={10}/> 수강관리
-                                </span>
+                                </a>
                               )}
                             </td>
                             {/* 커리큘럼 */}

@@ -18,7 +18,7 @@
       }
     }
   </script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
   <style>
     body { font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
     .custom-scrollbar::-webkit-scrollbar { width:5px; height:5px; }
@@ -103,6 +103,7 @@
     { id:'A2-09', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차 추가/편집', desc:'우측 사이드바에서 회차명, 날짜, 시간, 장소 입력. 카드 형태. 토글 ON 시 회차 강사 텍스트 입력(비우면 차수→대표 상속)', input:'폼 입력', output:'sessions[] state (+ session.instructor)', note:'섹션 3 우측 사이드바', pri:'P1', phase:1, status:'todo' },
     { id:'A2-10', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차 일괄 생성', desc:'기간+요일+시간 설정으로 회차 자동 생성', input:'bulk-generate 폼', output:'sessions[] 자동 추가', note:'', pri:'P2', phase:1, status:'todo' },
     { id:'A2-11', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'패키지/회차 DnD', desc:'GripVertical 핸들로 패키지 간, 패키지 내 회차 드래그 순서 변경', input:'draggable', output:'배열 순서 업데이트', note:'', pri:'P2', phase:1, status:'todo' },
+    { id:'A2-11a', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차 시간 겹침 경고', desc:'같은 차수 안에서 시간대가 겹치는 회차를 감지해 경고 표시. 차수당 QR이 1개라 같은 시간 회차는 출석 식별이 불가능하므로 운영자에게 알림. 병렬 분반(같은 시간 다른 강의실) + 회차별 QR 분리는 Phase 2', input:'회차 시작/종료 시간 입력', output:'겹침 회차 경고 배지', note:'2026-06-16 추가. 차수=QR 1개 전제. 병렬 분반은 A2-33(Phase 2)', pri:'P2', phase:1, status:'todo' },
     { id:'A2-12', screen:'A2', screenName:'코스 빌더', group:'수료조건', feature:'수료 조건 설정', desc:'섹션 3(수료 조건 설정): 오프라인 출석 슬롯 — 전체 회차 필수 or 최소 N회 이상 출석 라디오 선택', input:'라디오 선택 + 숫자 입력', output:'completionRules[] minType/minCount 업데이트', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A2-17', screen:'A2', screenName:'코스 빌더', group:'수료조건', feature:'출석 정책 — 지각기준 글로벌 설정', desc:'섹션 3 하단 "출석 정책" 블록. 코스 전체에 적용되는 글로벌 지각기준. "지각: N분 이내 출석 → 지각 처리". 기본값 10분, 0~60 범위', input:'숫자 input (0~60)', output:'lateMinutes useState (글로벌) 업데이트', note:'차수별 개별 설정이 아닌 코스 레벨 단일 값. 2026-04-28 추가', pri:'P1', phase:1, status:'todo' },
     { id:'A2-13', screen:'A2', screenName:'코스 빌더', group:'퍼블리싱', feature:'임시저장', desc:'언제든 클릭 가능. courseStatus → saved 전환', input:'임시저장 버튼', output:'courseStatus=saved', note:'', pri:'P1', phase:1, status:'todo' },
@@ -122,11 +123,12 @@
     { id:'A3-08', screen:'A3', screenName:'수강관리', group:'캘린더', feature:'월 세션 목록', desc:'캘린더 아래 해당 월 회차 목록. 오늘 회차 강조(indigo border + 오늘 뱃지)', input:'-', output:'sessByDate useMemo', note:'', pri:'P2', phase:1, status:'todo' },
     { id:'A3-09', screen:'A3', screenName:'수강관리', group:'수강생관리탭', feature:'수강생 테이블', desc:'이름(아바타)+소속+차수+수료상태(3종)+액션(수료처리·차수변경) 테이블', input:'-', output:'filtered useMemo', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A3-10', screen:'A3', screenName:'수강관리', group:'수강생관리탭', feature:'수강생 검색/필터', desc:'이름·소속 검색 + 차수 셀렉트 필터. 결과 인원수 표시', input:'텍스트 입력, 셀렉트 변경', output:'filtered 배열 변경', note:'', pri:'P1', phase:1, status:'todo' },
-    { id:'A3-11', screen:'A3', screenName:'수강관리', group:'수강생관리탭', feature:'수료 처리', desc:'미수료 행에 "수료 처리" 버튼 표시. 클릭 시 completion→completed', input:'버튼 클릭', output:'COMPLETION 상태 변경', note:'Phase 1: 프론트만', pri:'P1', phase:1, status:'todo' },
+    { id:'A3-11', screen:'A3', screenName:'수강관리', group:'수강생관리탭', feature:'수료 판정 (출석률 기준 연동)', desc:'수료 조건(기본 출석률 75%) 미달 학습자는 "미수료" 상태로 표시. 기준 충족 학습자만 행별 "수료 처리" 버튼 노출 → completion→completed. 전원 일괄 수료 버튼은 제거(개별 판정만)', input:'행별 수료 처리 버튼', output:'COMPLETION 상태 변경 (completed | not_completed)', note:'2026-06-16 출석률 기준 연동 + 미수료 상태 추가. 일괄 수료 제거. Phase 1: 프론트만', pri:'P1', phase:1, status:'todo' },
     { id:'A3-12', screen:'A3', screenName:'수강관리', group:'수강생관리탭', feature:'수강생 등록 모달', desc:'차수 선택(잔여석 표시) + 검색 + STUDENT_POOL 리스트 + 등록 버튼. animate-slideUp', input:'[+ 등록] 또는 사이드바 버튼', output:'showEnrollModal=true', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A3-13', screen:'A3', screenName:'수강관리', group:'출석수료탭', feature:'차수별 아코디언', desc:'차수 헤더(ChevronDown 토글) — 기간/장소/출석률. 오늘 차수 indigo ring 강조 + "오늘" 뱃지', input:'헤더 클릭', output:'openPkgs Set 토글', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A3-14', screen:'A3', screenName:'수강관리', group:'출석수료탭', feature:'회차별 출석 통계', desc:'아코디언 내부 테이블: 회차명/날짜/시간/강사/학습시간/출석/지각/조퇴/결석/미확인/출석률. 강사 열은 코스가 차수·회차 강사를 쓸 때만 노출(빈 회차=차수→대표 상속, 읽기전용). 학습시간=회차 수업시간(override 시 "수정됨" 배지). 출석률 색상 분기(90↑emerald)', input:'-', output:'sessions[] 렌더 (effInstructor)', note:'강사 열 2026-06-08 추가', pri:'P1', phase:1, status:'todo' },
     { id:'A3-15', screen:'A3', screenName:'수강관리', group:'출석수료탭', feature:'QR 출석 버튼', desc:'오늘 차수 헤더에 "QR 출석" 버튼 → liveMode=true 진입', input:'버튼 클릭', output:'liveMode=true', note:'e.stopPropagation() 처리', pri:'P1', phase:1, status:'todo' },
+    { id:'A3-15a', screen:'A3', screenName:'수강관리', group:'출석수료탭', feature:'회차별 정원 표시', desc:'회차 행에 정원 배지 + 실질(effective) 잔여 좌석 표시. 정원·잔여는 출석·수료와 무관한 물리 좌석 수치(공간 수용 인원). 잔여 0=만석 강조', input:'-', output:'session.capacity / effectiveRemaining 렌더', note:'2026-06-16 추가. 출석률·수료 집계와 분리된 좌석 표시', pri:'P2', phase:1, status:'todo' },
     { id:'A3-16', screen:'A3', screenName:'수강관리', group:'라이브QR', feature:'라이브 QR 모드', desc:'전체화면 early-return. 좌70% QR코드+30초 카운트다운 / 우30% 다크 실시간 출석 대시보드', input:'liveMode=true', output:'early return UI', note:'slate-900 배경', pri:'P1', phase:1, status:'todo' },
     { id:'A3-17', screen:'A3', screenName:'수강관리', group:'라이브QR', feature:'QR 30초 자동갱신', desc:'useEffect + setInterval로 30초 카운트다운. 5초 이하 시 amber+animate-spin 표시', input:'liveMode=true', output:'qrCountdown state', note:'clearInterval on unmount', pri:'P1', phase:1, status:'todo' },
     { id:'A3-18', screen:'A3', screenName:'수강관리', group:'통계탭', feature:'차수별 출석률 차트', desc:'차수별 바 차트. 출석률 색상 분기: 90↑emerald / 70↑amber / rose. 미시작=회색', input:'-', output:'pkgAttRate() per package', note:'', pri:'P2', phase:1, status:'todo' },
@@ -146,6 +148,7 @@
     { id:'A2-20', screen:'A2', screenName:'코스 빌더', group:'알림', feature:'알림 채널 설정', desc:'이메일 vs 앱 푸시 선택. 수강 확정·D-day 리마인더·수료 완료 알림 자동 발송 채널 설정', input:'라디오 선택', output:'notifyChannel state', note:'채널 미결정 시 오픈 불가', pri:'P1', phase:2, status:'phase2' },
     { id:'A2-21', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차별 학습 시간', desc:'회차 시간(종료−시작)으로 학습시간 자동 계산. "직접 입력" 체크 시 회차별 시간/분 수정(override) → "수정됨" 배지. studyMinOverride(null=자동)', input:'체크박스 + 시간/분 input', output:'sessions[].studyMinOverride', note:'2026-05-27 브레인스토밍 확정. 자동 기본, override 예외', pri:'P2', phase:1, status:'todo' },
     { id:'A2-22', screen:'A2', screenName:'코스 빌더', group:'수강신청', feature:'회차선택형 ↔ 다중조합 상호배타 가드', desc:'회차선택형(sessionSelect)은 "회원이 차수 1개 선택"(single) 전용. "회원이 여러 차수 선택"(multiple)로 전환 시 회차선택형 차수를 전체일정으로 자동 전환 + 토스트 안내, 다중 상태에선 수강유형 모달의 "회차 선택형" 카드 잠금(Lock·사용 불가). 다중에서 회차 분기가 필요하면 차수를 분리해 표현', input:'신청 방식 라디오 변경', output:'sessionSelect 강제 false + 모달 카드 disabled', note:'2026-06-01 기획팀 합의(A안) + 빌더 코드 반영. 학습자단 아닌 빌더 입구에서 차단', pri:'P1', phase:1, status:'todo' },
+    { id:'A2-33', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'병렬 분반 + 회차별 QR', desc:'같은 시간대에 강의실을 나눠 동시 진행하는 병렬 분반 지원. 분반/회차마다 QR을 따로 발급해 출석을 분리 식별. 회차 시간 겹침 경고(A2-11a)의 정식 해소책', input:'분반 설정 + 회차별 QR 발급', output:'session.qrCode 개별 생성', note:'2026-06-16 정의. 현재는 차수당 QR 1개라 겹침 경고로만 안내', pri:'P2', phase:2, status:'phase2' },
 
     /* ── A3 Phase 2: 수강·출석 관리 추가 기능 ── */
     { id:'A3-21', screen:'A3', screenName:'수강관리', group:'수료', feature:'수료 처리 버튼', desc:'전 회차 종료 후 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성. 취소 불가', input:'"수료 처리" 버튼 클릭', output:'completedStudents Set 확정', note:'2026-04-28 Phase 2 이월. 회차 종료는 수업 종료 시각 자동', pri:'P1', phase:2, status:'phase2' },
@@ -190,11 +193,11 @@
     { id:'U2-01', screen:'U2', screenName:'코스 목록', group:'필터', feature:'카테고리 필터', desc:'상단 탭 또는 사이드 필터로 직무역량/공통/IT 등 카테고리 전환', input:'탭/버튼 클릭', output:'카테고리 필터 적용', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'U2-02', screen:'U2', screenName:'코스 목록', group:'필터', feature:'코스 타입 필터', desc:'오프라인/온라인/블렌디드 탭 전환', input:'탭 클릭', output:'type 필터 적용', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'U2-03', screen:'U2', screenName:'코스 목록', group:'검색', feature:'코스 검색', desc:'코스명/강사명 키워드 검색', input:'검색어 입력', output:'검색 결과 렌더', note:'', pri:'P1', phase:1, status:'todo' },
-    { id:'U2-04', screen:'U2', screenName:'코스 목록', group:'카드', feature:'코스 카드', desc:'썸네일, 코스명, 차수 수, 교육 기간, 잔여석, D-day 뱃지, 신청 버튼', input:'-', output:'코스 카드 렌더', note:'잔여석 0=마감(rose). 강사명은 목록 생략 — 상세에서 확인(2026-06-08 결정)', pri:'P1', phase:1, status:'todo' },
+    { id:'U2-04', screen:'U2', screenName:'코스 목록', group:'카드', feature:'코스 카드', desc:'썸네일, 코스명, 차수 수, 교육 기간, 잔여석, D-day 뱃지, 신청 버튼. 회차가 여러 개인 코스는 날짜를 잎처럼 나열하지 않고 "총 N회 + 기간(시작~종료)"으로 요약 표시. 요일은 날짜에서 파생해 표기', input:'-', output:'코스 카드 렌더 (총 N회 + 기간)', note:'2026-06-16 다회차 날짜=총 N회+기간 요약, 날짜 나열 제거, 요일 파생. 잔여석 0=마감(rose). 강사명은 목록 생략 — 상세에서 확인(2026-06-08 결정)', pri:'P1', phase:1, status:'todo' },
 
     /* ── U3. 코스 상세 (오프라인) ── */
     { id:'U3-01', screen:'U3', screenName:'코스 상세', group:'헤더', feature:'코스 헤더', desc:'코스명, 대표 강사(강사 갈리면 "회차별 강사 상이" 칩), 카테고리, 교육 기간, 장소, 코스 상단 이미지/표지', input:'-', output:'COURSE 데이터 렌더', note:'', pri:'P1', phase:1, status:'todo' },
-    { id:'U3-02', screen:'U3', screenName:'코스 상세', group:'신청', feature:'자율 수강 신청', desc:'단일선택형: 패키지 카드 택1 → 신청 확정. 다중조합형: 체크박스 최대 N개 선택', input:'카드 선택 + 신청 버튼', output:'신청 확정 처리', note:'isSelfEnroll=true', pri:'P1', phase:1, status:'todo' },
+    { id:'U3-02', screen:'U3', screenName:'코스 상세', group:'신청', feature:'자율 수강 신청', desc:'단일선택형: 차수 카드 택1 → 신청 확정. 다중조합형: 체크박스 최대 N개 선택. 신청 화면의 캘린더(날짜 선택) 제거 — 마감된 차수가 선택되는 문제 해소를 위해 차수 카드 직접 선택으로 단일화(마감 차수는 카드 비활성)', input:'차수 카드 선택 + 신청 버튼', output:'신청 확정 처리', note:'2026-06-16 캘린더 제거 → 차수 카드 단일 선택. isSelfEnroll=true', pri:'P1', phase:1, status:'todo' },
     { id:'U3-03', screen:'U3', screenName:'코스 상세', group:'신청', feature:'관리자 배정 안내', desc:'강제할당 코스: "관리자가 배정한 교육입니다" 안내 + 배정된 차수 정보만 표시', input:'-', output:'enrollMethod=assign 분기', note:'신청 버튼 없음', pri:'P1', phase:1, status:'todo' },
     { id:'U3-04', screen:'U3', screenName:'코스 상세', group:'신청', feature:'신청 기간 표시', desc:'신청 오픈/마감일시 표시. 기간 외 접근 시 신청 버튼 비활성', input:'-', output:'enrollStart/End 계산', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'U3-05', screen:'U3', screenName:'코스 상세', group:'콘텐츠', feature:'커리큘럼 목록', desc:'차수별 회차 목록: 회차명, 날짜, 시간, 장소. 차수마다 강사 다르면 차수 카드에 강사 표기, 회차마다 갈리면 회차별 강사 + "회차별 강사 상이" 칩(상속 적용). 수강신청 전/후 표시 분기', input:'-', output:'packages[].sessions 렌더 (effInstructor)', note:'회차별/차수별 강사 2026-06-08 추가', pri:'P1', phase:1, status:'todo' },
@@ -205,12 +208,12 @@
     { id:'U4-01', screen:'U4', screenName:'MY학습', group:'탭', feature:'진행중/완료/신청내역 탭', desc:'학습 상태별 탭 전환. 각 탭에 코스 카드 목록', input:'탭 클릭', output:'myTab 변경', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'U4-02', screen:'U4', screenName:'MY학습', group:'카드', feature:'MY 코스 카드', desc:'코스명, 차수/회차, 다음 교육일, 출석률 미니 바. 오늘 교육 뱃지', input:'-', output:'MY 코스 렌더', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'U4-03', screen:'U4', screenName:'MY학습', group:'출석', feature:'출석 내역 확인', desc:'MY 코스에서 회차별 본인 출석 상태 확인 (출석/지각/결석/미확인)', input:'-', output:'attendance 데이터 렌더', note:'', pri:'P1', phase:1, status:'todo' },
-    { id:'U4-04', screen:'U4', screenName:'MY학습', group:'수료', feature:'수료증 확인', desc:'수료 처리된 코스에서 수료증 조회 및 다운로드', input:'수료증 버튼', output:'수료증 뷰/다운로드', note:'Phase 2 상세 구현', pri:'P2', phase:2, status:'phase2' },
+    { id:'U4-04', screen:'U4', screenName:'MY학습', group:'수료', feature:'수료증 발급 (미리보기·인쇄)', desc:'수료 처리된 코스에서 "수료증" 버튼 → 수료증 미리보기 모달. 코스명·이름·수료일 렌더 + 인쇄 동작(window.print). PDF 자동 발급·이메일 송부는 Phase 2(A3-26)', input:'수료증 버튼', output:'수료증 미리보기 모달 + 인쇄', note:'2026-06-16 미리보기·인쇄 동작 추가(Phase 1). 자동 PDF/이메일은 Phase 2', pri:'P2', phase:1, status:'todo' },
     { id:'U4-05', screen:'U4', screenName:'MY학습', group:'신청', feature:'신청 취소', desc:'자율 수강 코스, 취소 정책 범위 내에서 신청 취소. 강제할당은 취소 불가. 확인 모달 → 취소 확정', input:'취소 버튼', output:'신청 취소 처리', note:'취소 정책(cancelPolicy) 연동', pri:'P1', phase:1, status:'todo' },
     { id:'U4-06', screen:'U4', screenName:'MY학습', group:'신청', feature:'취소 사유 입력', desc:'수강 취소 모달에서 사유 텍스트 입력 (선택 항목). 입력값 서버 저장 및 관리자 조회', input:'textarea 입력', output:'취소 사유 저장 API', note:'Phase 1 프로토에서 제거 완료 — textarea 없이 취소 확정만', pri:'P2', phase:2, status:'phase2' },
 
     /* ── U5. 학습자 QR 출석 ── */
-    { id:'U5-01', screen:'U5', screenName:'QR출석', group:'QR', feature:'학습자 앱 QR 스캔', desc:'라이브 QR 화면의 QR을 학습자 앱 카메라로 스캔 → 출석 처리', input:'QR 스캔', output:'출석(attended) or 지각(late) 상태 변경', note:'타임스탬프+회차ID 포함', pri:'P1', phase:1, status:'todo' },
+    { id:'U5-01', screen:'U5', screenName:'QR출석', group:'QR', feature:'현장 QR 출석 체크인', desc:'라이브 QR 화면의 QR을 학습자 앱 카메라로 스캔 → 현장 체크인. 스캔 시각이 회차 시작 시간 기준 정시면 출석(attended), 지각기준 내면 지각(late)으로 출석 처리', input:'QR 스캔', output:'출석(attended) or 지각(late) 상태 변경', note:'2026-06-16 현장 체크인 동작 정리. 타임스탬프+회차ID 포함', pri:'P1', phase:1, status:'todo' },
     { id:'U5-02', screen:'U5', screenName:'QR출석', group:'QR', feature:'QR 스캔 결과 피드백', desc:'스캔 성공: 출석/지각 안내 토스트. 이미 스캔: 중복 처리 안내. 오류: 재시도 안내', input:'스캔 결과', output:'토스트 UI', note:'', pri:'P1', phase:1, status:'todo' },
 
     /* ── U7. 카테고리 (category.html) — 2026-05-07 추가 ── */
@@ -438,11 +441,11 @@
               <div className="flex items-center gap-2">
                 <FileSpreadsheet size={18} className="text-indigo-500"/>
                 <h1 className="text-[16px] font-black text-slate-900">기능명세서</h1>
-                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.5</span>
+                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.6</span>
                 <span className="text-[10px] font-black text-violet-700 bg-violet-100 border border-violet-300 px-2 py-0.5 rounded-full ml-1">📍 기능 라인 SSOT</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-06-01</span>
+                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-06-16</span>
               </div>
             </header>
           )}

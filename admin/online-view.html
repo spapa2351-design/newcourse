@@ -11,7 +11,7 @@
       fontFamily: { sans: ['"Pretendard"', '-apple-system', '"Segoe UI"', 'sans-serif'] },
     }}}
   </script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
   <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
     body { font-family: 'Pretendard', sans-serif; font-size: 14px; line-height: 1.5; }
@@ -140,8 +140,72 @@
       period: '2026-01-15 ~ 무제한',
       progress: [100, 100, 90, 75, 60, 100, 50, 30, 100, 80, 45, 100, 95, 70, 25, 100, 55, 0][i],
       studyTime: ['1h 42m', '2h 10m', '58m', '45m', '32m', '1h 55m', '24m', '12m', '2h 02m', '47m', '20m', '1h 28m', '1h 12m', '34m', '8m', '1h 36m', '22m', '0m'][i],
+      studyMin: [102, 130, 58, 45, 32, 115, 24, 12, 122, 47, 20, 88, 72, 34, 8, 96, 22, 0][i],
       completed: [true, true, true, false, false, true, false, false, true, false, false, true, true, false, false, true, false, false][i],
+      endDate:  ['2026-12-31','2026-08-15','2026-06-02','2026-06-10','2026-05-31','2026-12-31','2026-06-05','2026-12-31','2026-12-31','2026-06-08','2026-06-04','2026-12-31','2026-12-31','2026-12-31','2026-06-01','2026-12-31','2026-12-31','2026-12-31'][i],
     }));
+
+    // ─── 헬퍼: 초 → "1h 42m" / "32m" 변환 ───
+    const formatDuration = (sec) => {
+      if (!sec) return '0m';
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      return h > 0 ? `${h}h ${m.toString().padStart(2,'0')}m` : `${m}m`;
+    };
+    const formatHMS = (sec) => {
+      const h = Math.floor(sec / 3600).toString().padStart(2,'0');
+      const m = Math.floor((sec % 3600) / 60).toString().padStart(2,'0');
+      const s = (sec % 60).toString().padStart(2,'0');
+      return `${h}:${m}:${s}`;
+    };
+
+    // ─── 개인별 수강 로그 (M1 시트 - 로그 세그먼트) ───
+    const STUDY_LOG = [
+      { enrolleeId: 1000, chapter: '오리엔테이션', item: '코스 소개 영상',        startedAt: '2026-05-20 10:25:07', endedAt: '2026-05-20 10:40:11', durationSec: 904 },
+      { enrolleeId: 1000, chapter: '오리엔테이션', item: '핵심가치 가이드북',     startedAt: '2026-05-20 10:41:00', endedAt: '2026-05-20 10:58:32', durationSec: 1052 },
+      { enrolleeId: 1000, chapter: '핵심 개념 이해', item: '1강. 핵심 개념',      startedAt: '2026-05-21 14:02:36', endedAt: '2026-05-21 14:25:00', durationSec: 1344 },
+      { enrolleeId: 1000, chapter: '핵심 개념 이해', item: '중간 점검 퀴즈',      startedAt: '2026-05-22 09:10:00', endedAt: '2026-05-22 09:18:42', durationSec: 522 },
+      { enrolleeId: 1000, chapter: '마무리',         item: '만족도 설문',         startedAt: '2026-05-23 18:05:00', endedAt: '2026-05-23 18:09:11', durationSec: 251 },
+      { enrolleeId: 1001, chapter: '오리엔테이션', item: '코스 소개 영상',        startedAt: '2026-05-19 09:11:00', endedAt: '2026-05-19 09:25:55', durationSec: 895 },
+      { enrolleeId: 1001, chapter: '오리엔테이션', item: '핵심가치 가이드북',     startedAt: '2026-05-19 09:27:00', endedAt: '2026-05-19 09:50:14', durationSec: 1394 },
+      { enrolleeId: 1002, chapter: '오리엔테이션', item: '코스 소개 영상',        startedAt: '2026-05-20 16:00:00', endedAt: '2026-05-20 16:13:42', durationSec: 822 },
+    ];
+
+    // ─── 개인별 영상 재생 (M1 시트 - 영상 세그먼트) ───
+    const VIDEO_PLAY = [
+      { enrolleeId: 1000, itemId: 11, fileName: '01.코스소개_핵심가치.mp4',    durationSec: 900,  playedSec: 900,  rate: 100 },
+      { enrolleeId: 1000, itemId: 21, fileName: '02.1강_핵심개념.mp4',         durationSec: 1350, playedSec: 1350, rate: 100 },
+      { enrolleeId: 1001, itemId: 11, fileName: '01.코스소개_핵심가치.mp4',    durationSec: 900,  playedSec: 895,  rate: 99 },
+      { enrolleeId: 1001, itemId: 21, fileName: '02.1강_핵심개념.mp4',         durationSec: 1350, playedSec: 1350, rate: 100 },
+      { enrolleeId: 1002, itemId: 11, fileName: '01.코스소개_핵심가치.mp4',    durationSec: 900,  playedSec: 822,  rate: 91 },
+      { enrolleeId: 1002, itemId: 21, fileName: '02.1강_핵심개념.mp4',         durationSec: 1350, playedSec: 1100, rate: 81 },
+      { enrolleeId: 1003, itemId: 11, fileName: '01.코스소개_핵심가치.mp4',    durationSec: 900,  playedSec: 540,  rate: 60 },
+      { enrolleeId: 1004, itemId: 11, fileName: '01.코스소개_핵심가치.mp4',    durationSec: 900,  playedSec: 270,  rate: 30 },
+    ];
+
+    // ─── 시험·퀴즈 결과 (M4 4지표 + M6 매트릭스) ───
+    const EXAM_RESULTS = [
+      { enrolleeId: 1000, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 85, passed: true,  submittedAt: '2026-05-22 09:18' },
+      { enrolleeId: 1001, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 92, passed: true,  submittedAt: '2026-05-21 11:30' },
+      { enrolleeId: 1002, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 78, passed: true,  submittedAt: '2026-05-22 14:15' },
+      { enrolleeId: 1003, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 55, passed: false, submittedAt: '2026-05-23 10:02' },
+      { enrolleeId: 1005, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 95, passed: true,  submittedAt: '2026-05-20 16:40' },
+      { enrolleeId: 1008, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 88, passed: true,  submittedAt: '2026-05-21 09:05' },
+      { enrolleeId: 1011, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 70, passed: true,  submittedAt: '2026-05-22 17:30' },
+      { enrolleeId: 1012, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 48, passed: false, submittedAt: '2026-05-23 13:11' },
+      { enrolleeId: 1015, itemId: 22, type: 'exam', title: '중간 점검 퀴즈', score: 82, passed: true,  submittedAt: '2026-05-20 11:20' },
+    ];
+
+    // ─── 그룹별 학습량 (M5 모달) ───
+    const GROUP_STUDY = [
+      { group: '개발팀',   avgProgress: 64, avgStudyMin: 47, totalStudyMin: 236, count: 5 },
+      { group: '기획팀',   avgProgress: 89, avgStudyMin: 76, totalStudyMin: 304, count: 4 },
+      { group: '디자인팀', avgProgress: 47, avgStudyMin: 51, totalStudyMin: 153, count: 3 },
+      { group: '영업팀',   avgProgress: 45, avgStudyMin: 24, totalStudyMin: 72,  count: 3 },
+      { group: '인사팀',   avgProgress: 22, avgStudyMin: 16, totalStudyMin: 32,  count: 2 },
+      { group: '재무팀',   avgProgress: 100, avgStudyMin: 96, totalStudyMin: 96, count: 1 },
+      { group: '마케팅팀', avgProgress: 73, avgStudyMin: 39, totalStudyMin: 117, count: 3 },
+    ];
 
     /* ─── 메인 App ─── */
     const App = () => {
@@ -165,7 +229,58 @@
       const [progressFilter, setProgressFilter] = useState('all'); // 진도 구간 필터 (대시보드 막대 클릭 → 수강생 탭 점프)
       const [contentCat, setContentCat] = useState('all');         // 콘텐츠 탭 카테고리 필터
 
+      // ── 2차 보강 신규 state (online-view.design.md §3) ──
+      const [sheetSeg, setSheetSeg]             = useState('progress'); // 'progress' | 'log' | 'video'
+      const [periodTarget, setPeriodTarget]     = useState(null);       // null | enrollee 객체
+      const [showAlarmModal, setShowAlarmModal] = useState(false);
+      const [showGroupStudy, setShowGroupStudy] = useState(false);
+      const [showEndModal,   setShowEndModal]   = useState(false);
+      const [matrixOpen,     setMatrixOpen]     = useState(false);
+
       const allItems = useMemo(() => COURSE.chapters.flatMap(c => c.items), []);
+
+      // ── 코스 상태별 뷰 모드 (online-list에서 ?status= 로 전달, 없으면 COURSE.status) ──
+      //    [[project_newcourse_status_definitions]]: running·closed_apply·paused·ended·admin_ended
+      const viewStatus = useMemo(() => {
+        const p = new URLSearchParams(window.location.search).get('status');
+        return p || COURSE.status;
+      }, []);
+      const VIEW_MODE = {
+        running: {
+          badge: '운영중', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500',
+          canEnroll: true, readOnly: false, action: 'end', banner: null,
+        },
+        closed_apply: {
+          badge: '수강중', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500',
+          canEnroll: false, readOnly: false, action: 'end',
+          banner: { tone: 'amber', icon: 'how_to_reg', title: '신규 신청 마감',
+            desc: '새 수강생은 받지 않지만, 기존 학습자는 수강 기간 안에서 학습을 계속합니다.' },
+        },
+        paused: {
+          badge: '휴면', bg: 'bg-slate-100', text: 'text-slate-500', border: 'border-slate-200', dot: 'bg-slate-400',
+          canEnroll: false, readOnly: true, action: 'resume',
+          banner: { tone: 'slate', icon: 'pause_circle', title: '휴면 중',
+            desc: '신규 등록과 학습이 일시 중단된 상태입니다. 언제든 운영을 재개할 수 있습니다.' },
+        },
+        ended: {
+          badge: '종료', bg: 'bg-slate-100', text: 'text-slate-500', border: 'border-slate-200', dot: 'bg-slate-400',
+          canEnroll: false, readOnly: true, action: 'none',
+          banner: { tone: 'slate', icon: 'event_busy', title: '정상 종료됨',
+            desc: '신규 등록은 마감됐고, 기존 학습자는 수강 기간 안에서 학습을 마칠 수 있습니다. 운영자는 학습 이력을 조회할 수 있습니다.' },
+        },
+        admin_ended: {
+          badge: '관리자 종료', bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-200', dot: 'bg-rose-500',
+          canEnroll: false, readOnly: true, action: 'none',
+          banner: { tone: 'rose', icon: 'block', title: '긴급 차단됨',
+            desc: '관리자가 운영을 즉시 중단했습니다. 학습은 재개되지 않으며, 이 화면은 학습 이력 조회 전용입니다.' },
+        },
+      };
+      const mode = VIEW_MODE[viewStatus] || VIEW_MODE.running;
+      const BANNER_TONE = {
+        amber: { bg: 'bg-amber-50', border: 'border-amber-200', icon: 'text-amber-500', title: 'text-amber-800', desc: 'text-amber-700', meta: 'bg-amber-100 text-amber-700' },
+        slate: { bg: 'bg-slate-50', border: 'border-slate-200', icon: 'text-slate-400', title: 'text-slate-700', desc: 'text-slate-500', meta: 'bg-slate-200 text-slate-600' },
+        rose:  { bg: 'bg-rose-50',  border: 'border-rose-200',  icon: 'text-rose-500',  title: 'text-rose-700',  desc: 'text-rose-600',  meta: 'bg-rose-100 text-rose-700' },
+      };
 
       // ── offline-view 패턴 차용: 탭 4개 (대시보드/수강생/콘텐츠/통계) ──
       const TABS = [
@@ -329,15 +444,41 @@
                   </div>
                   <h1 className="text-[20px] font-black text-slate-900 leading-tight truncate">{COURSE.title}</h1>
                 </div>
-                <span className="ml-2 px-2.5 py-1 rounded-full text-[12px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200 shrink-0">
-                  운영중
+                <span className={`ml-2 px-2.5 py-1 rounded-full text-[12px] font-bold border shrink-0 ${mode.bg} ${mode.text} ${mode.border}`}>
+                  {mode.badge}
                 </span>
               </div>
-              <button onClick={() => setShowEnrollModal(true)}
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-sm shrink-0">
-                <Plus size={15}/> 수강생 등록
-              </button>
+              {mode.canEnroll ? (
+                <button onClick={() => setShowEnrollModal(true)}
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-sm shrink-0">
+                  <Plus size={15}/> 수강생 등록
+                </button>
+              ) : (
+                <span title={mode.action === 'resume' ? '휴면 상태에서는 신규 등록이 중단됩니다' : '종료된 코스에는 새 수강생을 등록할 수 없습니다'}
+                  className="px-4 py-2.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-[14px] font-bold flex items-center gap-1.5 cursor-not-allowed shrink-0">
+                  <Plus size={15}/> 수강생 등록
+                </span>
+              )}
             </div>
+
+            {/* ── 상태 배너 (운영중 외 — 조회 전용·신청 마감·휴면 안내) ── */}
+            {mode.banner && (() => {
+              const bt = BANNER_TONE[mode.banner.tone];
+              return (
+                <div className={`mx-8 mb-3 px-4 py-3 rounded-xl border flex items-start gap-3 shrink-0 ${bt.bg} ${bt.border}`}>
+                  <MS name={mode.banner.icon} size={20} className={`${bt.icon} mt-0.5 shrink-0`}/>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-[14px] font-black ${bt.title}`}>{mode.banner.title}</span>
+                      {mode.banner.meta && (
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded tabular-nums ${bt.meta}`}>{mode.banner.meta}</span>
+                      )}
+                    </div>
+                    <p className={`text-[12.5px] font-medium leading-relaxed mt-0.5 ${bt.desc}`}>{mode.banner.desc}</p>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* ── 본문 (좌측 메타 + 메인 — offline-view 톤 차용) ── */}
             <div className="flex flex-1 overflow-hidden gap-3 px-4 pb-4 pt-0 items-start">
@@ -349,7 +490,7 @@
                   {/* 배지 블록 */}
                   <div className="w-full flex gap-1">
                     <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">의무 교육</span>
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">운영중</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${mode.bg} ${mode.text} ${mode.border}`}>{mode.badge}</span>
                   </div>
                   {/* 표지 9:16 (offline 톤) */}
                   <div className="w-[100px] rounded-md bg-gradient-to-br from-indigo-100 to-violet-100 border border-slate-200 flex items-center justify-center" style={{ aspectRatio: '9/16' }}>
@@ -425,10 +566,25 @@
                     className="w-full flex items-center justify-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[14px] py-2 rounded-xl transition-colors border border-indigo-200">
                     <MS name="info" size={13}/> 코스 정보
                   </a>
-                  <button
-                    className="w-full flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[13px] py-2 rounded-xl transition-colors">
-                    <MS name="stop_circle" size={12}/> 운영 종료
-                  </button>
+                  {mode.action === 'end' && (
+                    <button
+                      onClick={() => setShowEndModal(true)}
+                      className="w-full flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[13px] py-2 rounded-xl transition-colors">
+                      <MS name="stop_circle" size={12}/> 운영 종료
+                    </button>
+                  )}
+                  {mode.action === 'resume' && (
+                    <button
+                      onClick={() => setShowEndModal(true)}
+                      className="w-full flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 font-bold text-[13px] py-2 rounded-xl transition-colors">
+                      <MS name="play_circle" size={12}/> 운영 재개
+                    </button>
+                  )}
+                  {mode.action === 'none' && (
+                    <div className="w-full flex items-center justify-center gap-1.5 bg-slate-50 text-slate-400 border border-slate-200 font-bold text-[12px] py-2 rounded-xl">
+                      <MS name="inventory_2" size={12}/> {viewStatus === 'admin_ended' ? '차단됨 · 조회 전용' : '종료됨 · 조회 전용'}
+                    </div>
+                  )}
                 </div>
               </aside>
 
@@ -576,7 +732,13 @@
 
                         {/* [기획] 소속별 수료 (offline 패턴 그대로) */}
                         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                          <div className="text-[14px] font-bold text-slate-700 mb-3">소속별 수료 현황</div>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="text-[14px] font-bold text-slate-700">소속별 수료 현황</div>
+                            <button onClick={() => setShowGroupStudy(true)}
+                              className="text-[12px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                              <MS name="bar_chart" size={13}/> 학습량 보기
+                            </button>
+                          </div>
                           <div className="space-y-3">
                             {DEPT_STATS.map((d, i) => {
                               const rate = Math.round(d.completed / d.count * 100);
@@ -620,6 +782,67 @@
                           </div>
                         </div>
                       </div>
+
+                      {/* [기획] 평가·설문 4지표 카드 (M4) */}
+                      <div>
+                        <div className="text-[13px] font-bold text-slate-400 uppercase tracking-wide mb-3">평가·설문 현황</div>
+                        <div className="grid grid-cols-3 gap-3">
+                          {(() => {
+                            const examSubmitted = EXAM_RESULTS.length;
+                            const examAvg       = Math.round(EXAM_RESULTS.reduce((a,b) => a + b.score, 0) / examSubmitted);
+                            const examPassed    = EXAM_RESULTS.filter(r => r.passed).length;
+                            const examNotTaken  = totalEnrolled - examSubmitted;
+                            const quizSubmitted = Math.round(totalEnrolled * 0.61);
+                            const surveySubmitted = Math.round(totalEnrolled * 0.39);
+                            const cards = [
+                              { id: 'exam',   icon: 'quiz',     color: 'violet', title: '시험', stats: [
+                                { label: '응시',     value: `${examSubmitted}명` },
+                                { label: '평균 점수', value: `${examAvg}점`,    accent: true },
+                                { label: '합격',     value: `${examPassed}명` },
+                                { label: '미응시',   value: `${examNotTaken}명`, warn: examNotTaken > 0 },
+                              ]},
+                              { id: 'quiz',   icon: 'task',     color: 'indigo', title: '퀴즈', stats: [
+                                { label: '응시',     value: `${quizSubmitted}명` },
+                                { label: '평균 점수', value: '78점',           accent: true },
+                                { label: '합격',     value: `${Math.round(quizSubmitted * 0.83)}명` },
+                                { label: '미응시',   value: `${totalEnrolled - quizSubmitted}명`, warn: true },
+                              ]},
+                              { id: 'survey', icon: 'poll',     color: 'pink',   title: '설문', stats: [
+                                { label: '응답',     value: `${surveySubmitted}명` },
+                                { label: '응답률',   value: `${Math.round(surveySubmitted / totalEnrolled * 100)}%`, accent: true },
+                                { label: '미응답',   value: `${totalEnrolled - surveySubmitted}명`, warn: true },
+                                { label: '평균 만족도', value: '4.2/5' },
+                              ]},
+                            ];
+                            const COLOR_MAP = {
+                              violet: { bg: 'bg-violet-50',  text: 'text-violet-600',  border: 'border-violet-100' },
+                              indigo: { bg: 'bg-indigo-50',  text: 'text-indigo-600',  border: 'border-indigo-100' },
+                              pink:   { bg: 'bg-pink-50',    text: 'text-pink-600',    border: 'border-pink-100'   },
+                            };
+                            return cards.map(c => {
+                              const co = COLOR_MAP[c.color];
+                              return (
+                                <div key={c.id} className={`bg-white border ${co.border} rounded-xl p-4 shadow-sm`}>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <div className={`w-8 h-8 ${co.bg} rounded-lg flex items-center justify-center`}>
+                                      <MS name={c.icon} size={16} className={co.text}/>
+                                    </div>
+                                    <span className="text-[14px] font-bold text-slate-700">{c.title}</span>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {c.stats.map((s, i) => (
+                                      <div key={i} className="bg-slate-50 rounded-lg px-2.5 py-2">
+                                        <div className="text-[11px] font-bold text-slate-400 mb-0.5">{s.label}</div>
+                                        <div className={`text-[15px] font-black tabular-nums leading-none ${s.accent ? co.text : s.warn ? 'text-rose-500' : 'text-slate-800'}`}>{s.value}</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            });
+                          })()}
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -654,6 +877,10 @@
                           <button className="text-[13px] font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
                             <MS name="schedule" size={12}/> 전체 수강기간 변경
                           </button>
+                          <button onClick={() => setShowAlarmModal(true)}
+                            className="text-[13px] font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                            <MS name="notifications_active" size={12}/> 종료 임박 알림
+                          </button>
                           <button className="text-[13px] font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
                             <MS name="download" size={12}/> 다운로드
                           </button>
@@ -674,6 +901,7 @@
                               <th className="px-3 py-2.5 w-[100px]">진도율</th>
                               <th className="px-3 py-2.5 w-[80px] text-right">학습 시간</th>
                               <th className="px-3 py-2.5 w-[60px] text-center">이수</th>
+                              <th className="px-3 py-2.5 w-[60px] text-center">기간</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -725,6 +953,13 @@
                                     <span className="inline-block w-6 h-6 rounded-full border-2 border-slate-200"/>
                                   )}
                                 </td>
+                                <td className="px-3 py-2.5 text-center" onClick={ev => ev.stopPropagation()}>
+                                  <button onClick={() => setPeriodTarget(e)}
+                                    className="w-7 h-7 rounded-md hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 inline-flex items-center justify-center transition-colors"
+                                    title="개인 수강 기간 변경">
+                                    <MS name="schedule" size={15}/>
+                                  </button>
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -747,24 +982,93 @@
                   {/* ─── 콘텐츠 탭 (영상·시험·설문·자료 통합 + 카테고리 필터) ─── */}
                   {tab === 'content' && (
                     <div className="p-5 animate-fadeIn">
-                      {/* 카테고리 칩 */}
-                      <div className="flex items-center gap-2 mb-4">
-                        {[
-                          { k: 'all',    label: '전체',     icon: 'layers' },
-                          { k: 'video',  label: '영상',     icon: 'play_circle' },
-                          { k: 'exam',   label: '시험',     icon: 'quiz' },
-                          { k: 'survey', label: '설문',     icon: 'poll' },
-                          { k: 'pdf',    label: '자료',     icon: 'attach_file' },
-                        ].map(c => (
-                          <button key={c.k} onClick={() => setContentCat(c.k)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-colors border
-                              ${contentCat === c.k ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>
-                            <MS name={c.icon} size={13}/>{c.label}
-                          </button>
-                        ))}
+                      {/* 카테고리 칩 + 매트릭스 토글 (M6) */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          {[
+                            { k: 'all',    label: '전체',     icon: 'layers' },
+                            { k: 'video',  label: '영상',     icon: 'play_circle' },
+                            { k: 'exam',   label: '시험',     icon: 'quiz' },
+                            { k: 'survey', label: '설문',     icon: 'poll' },
+                            { k: 'pdf',    label: '자료',     icon: 'attach_file' },
+                          ].map(c => (
+                            <button key={c.k} onClick={() => { setContentCat(c.k); if (c.k !== 'exam') setMatrixOpen(false); }}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-colors border
+                                ${contentCat === c.k ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>
+                              <MS name={c.icon} size={13}/>{c.label}
+                            </button>
+                          ))}
+                        </div>
+                        {/* 매트릭스 토글: 시험일 때만 활성 */}
+                        <button
+                          disabled={contentCat !== 'exam'}
+                          onClick={() => setMatrixOpen(v => !v)}
+                          title={contentCat === 'exam' ? '회원별 점수 매트릭스 보기' : '시험 카테고리에서만 사용 가능'}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold transition-colors border
+                            ${contentCat !== 'exam'
+                              ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'
+                              : matrixOpen
+                                ? 'bg-violet-600 text-white border-violet-600'
+                                : 'bg-white text-violet-600 border-violet-200 hover:bg-violet-50'}`}>
+                          <MS name="grid_on" size={13}/> {matrixOpen ? '집계로' : '매트릭스'}
+                        </button>
                       </div>
 
-                      {/* 항목 카드 그리드 */}
+                      {/* M6 매트릭스 (시험 + 토글 ON) */}
+                      {contentCat === 'exam' && matrixOpen && (() => {
+                        const examItems = Array.from(new Set(EXAM_RESULTS.map(r => r.itemId))).map(id => {
+                          const r = EXAM_RESULTS.find(x => x.itemId === id);
+                          return { itemId: id, title: r.title };
+                        });
+                        const scoreOf = (eid, iid) => EXAM_RESULTS.find(r => r.enrolleeId === eid && r.itemId === iid);
+                        return (
+                          <div className="border border-slate-200 rounded-xl overflow-x-auto">
+                            <table className="w-full text-[13px]">
+                              <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr className="text-left text-slate-500 font-bold text-[12px]">
+                                  <th className="px-3 py-2.5 w-[160px] sticky left-0 bg-slate-50 z-10">회원</th>
+                                  {examItems.map(e => (
+                                    <th key={e.itemId} className="px-3 py-2.5 min-w-[140px] text-center">{e.title}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {ENROLLEES.map(en => (
+                                  <tr key={en.id} className="border-t border-slate-100 hover:bg-slate-50">
+                                    <td className="px-3 py-2.5 sticky left-0 bg-white z-10 border-r border-slate-100">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-white text-[10px] font-bold">{en.name.charAt(0)}</div>
+                                        <span className="font-bold text-slate-700">{en.name}</span>
+                                      </div>
+                                    </td>
+                                    {examItems.map(it => {
+                                      const r = scoreOf(en.id, it.itemId);
+                                      if (!r) {
+                                        return (
+                                          <td key={it.itemId} className="px-3 py-2.5 text-center">
+                                            <span className="text-[12px] font-bold text-slate-300">미응시</span>
+                                          </td>
+                                        );
+                                      }
+                                      return (
+                                        <td key={it.itemId} className="px-3 py-2.5 text-center">
+                                          <div className="flex items-center justify-center gap-2">
+                                            <span className={`text-[14px] font-black tabular-nums ${r.passed ? 'text-emerald-600' : 'text-rose-500'}`}>{r.score}점</span>
+                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${r.passed ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-rose-700 bg-rose-50 border-rose-200'}`}>{r.passed ? '합격' : '불합격'}</span>
+                                          </div>
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })()}
+
+                      {/* 항목 카드 그리드 (매트릭스 OFF일 때만) */}
+                      {!(contentCat === 'exam' && matrixOpen) && (
                       <div className="grid grid-cols-2 gap-3">
                         {CONTENT_PROGRESS.filter(c => contentCat === 'all' || c.type === contentCat).map(c => {
                           const ICONS = { video: 'play_circle', pdf: 'attach_file', exam: 'quiz', survey: 'poll' };
@@ -795,6 +1099,7 @@
                           );
                         })}
                       </div>
+                      )}
                     </div>
                   )}
 
@@ -855,18 +1160,41 @@
             <EnrollModal onClose={() => setShowEnrollModal(false)}/>
           )}
 
-          {/* 개인 상세 사이드 시트 (placeholder) */}
+          {/* M2 개인 수강 기간 변경 */}
+          {periodTarget && (
+            <PeriodModal enrollee={periodTarget} onClose={() => setPeriodTarget(null)}/>
+          )}
+
+          {/* M3 종료 임박 알림 */}
+          {showAlarmModal && (
+            <AlarmModal enrollees={ENROLLEES} onClose={() => setShowAlarmModal(false)}/>
+          )}
+
+          {/* M5 그룹별 학습량 */}
+          {showGroupStudy && (
+            <GroupStudyModal groups={GROUP_STUDY} formatDuration={formatDuration} onClose={() => setShowGroupStudy(false)}/>
+          )}
+
+          {/* M7 운영 종료 확인 */}
+          {showEndModal && (
+            <EndCourseModal onClose={() => setShowEndModal(false)}/>
+          )}
+
+          {/* 개인 상세 사이드 시트 (M1 — 진도/로그/영상 3-세그먼트) */}
           {selectedRow && (
             <div className="fixed inset-0 bg-slate-900/40 z-[100] flex justify-end animate-fadeIn" onClick={() => setSelectedRow(null)}>
-              <div className="w-[440px] bg-white h-full overflow-y-auto custom-scrollbar shadow-2xl" onClick={e => e.stopPropagation()}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+              <div className="w-[480px] bg-white h-full overflow-y-auto custom-scrollbar shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
+                {/* 헤더 */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0">
                   <h3 className="text-[15px] font-black text-slate-900">수강생 상세</h3>
                   <button onClick={() => setSelectedRow(null)} className="text-slate-400 hover:text-slate-600"><X size={20}/></button>
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-6">
+
+                {/* 프로필 + KPI */}
+                <div className="px-6 pt-5 pb-4 border-b border-slate-100 shrink-0">
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-white text-[20px] font-bold">{selectedRow.name.charAt(0)}</div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-[16px] font-black text-slate-900">{selectedRow.name}</p>
                       <p className="text-[13px] text-slate-500 font-mono">{selectedRow.userId}</p>
                       <div className="flex flex-wrap gap-1 mt-1">
@@ -875,28 +1203,131 @@
                         ))}
                       </div>
                     </div>
+                    <button onClick={() => setPeriodTarget(selectedRow)}
+                      className="text-[12px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 shrink-0"
+                      title="개인 수강 기간 변경">
+                      <MS name="schedule" size={13}/> 기간 변경
+                    </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
-                      <p className="text-[11px] font-bold text-slate-400 mb-1">진도율</p>
-                      <p className="text-[20px] font-black text-slate-900">{selectedRow.progress}<span className="text-[13px] text-slate-500">%</span></p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                      <p className="text-[10px] font-bold text-slate-400 mb-0.5">진도율</p>
+                      <p className="text-[18px] font-black text-slate-900 leading-none">{selectedRow.progress}<span className="text-[12px] text-slate-500">%</span></p>
                     </div>
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
-                      <p className="text-[11px] font-bold text-slate-400 mb-1">학습 시간</p>
-                      <p className="text-[20px] font-black text-slate-900">{selectedRow.studyTime}</p>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                      <p className="text-[10px] font-bold text-slate-400 mb-0.5">학습 시간</p>
+                      <p className="text-[18px] font-black text-slate-900 leading-none">{selectedRow.studyTime}</p>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                      <p className="text-[10px] font-bold text-slate-400 mb-0.5">이수</p>
+                      <p className={`text-[18px] font-black leading-none ${selectedRow.completed ? 'text-emerald-600' : 'text-slate-400'}`}>{selectedRow.completed ? '완료' : '미완'}</p>
                     </div>
                   </div>
-                  <p className="text-[13px] font-bold text-slate-400 mb-2">항목별 진행</p>
-                  <div className="space-y-2">
-                    {COURSE.chapters.flatMap(ch => ch.items).map(it => (
-                      <div key={it.id} className="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2">
-                        <MS name={it.type === 'video' ? 'play_circle' : it.type === 'pdf' ? 'attach_file' : it.type === 'exam' ? 'quiz' : 'poll'} size={16} className="text-slate-400"/>
-                        <span className="flex-1 text-[13px] font-bold text-slate-700 truncate">{it.title}</span>
-                        <span className="text-[11px] font-bold text-slate-500">미시작</span>
-                      </div>
+                </div>
+
+                {/* 3-세그먼트 컨트롤 (sticky) */}
+                <div className="px-6 pt-3 pb-2 bg-white sticky top-0 z-10 border-b border-slate-100 shrink-0">
+                  <div className="flex bg-slate-100 rounded-lg p-0.5">
+                    {[
+                      { k: 'progress', label: '진도',  icon: 'list_alt' },
+                      { k: 'log',      label: '로그',  icon: 'history' },
+                      { k: 'video',    label: '영상',  icon: 'play_circle' },
+                    ].map(s => (
+                      <button key={s.k} onClick={() => setSheetSeg(s.k)}
+                        className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-[12.5px] font-bold transition-colors
+                          ${sheetSeg === s.k ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                        <MS name={s.icon} size={13}/>{s.label}
+                      </button>
                     ))}
                   </div>
-                  <p className="text-[11px] text-slate-400 text-center mt-6 italic">Phase 1: 항목별 진행 데이터 연동 예정</p>
+                </div>
+
+                {/* 세그먼트 본문 */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4">
+                  {sheetSeg === 'progress' && (
+                    <div className="space-y-3">
+                      {COURSE.chapters.map(ch => (
+                        <div key={ch.id} className="border border-slate-200 rounded-xl overflow-hidden">
+                          <div className="bg-slate-50 px-3 py-2 text-[12px] font-bold text-slate-600 border-b border-slate-200">{ch.title}</div>
+                          <div className="divide-y divide-slate-100">
+                            {ch.items.map(it => {
+                              const done = STUDY_LOG.some(l => l.enrolleeId === selectedRow.id && l.item === it.title);
+                              return (
+                                <div key={it.id} className="flex items-center gap-2 px-3 py-2">
+                                  <MS name={it.type === 'video' ? 'play_circle' : it.type === 'pdf' ? 'attach_file' : it.type === 'exam' ? 'quiz' : 'poll'} size={15} className="text-slate-400 shrink-0"/>
+                                  <span className="flex-1 text-[13px] font-bold text-slate-700 truncate">{it.title}</span>
+                                  {it.isRequired && <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded shrink-0">필수</span>}
+                                  {done
+                                    ? <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">완료</span>
+                                    : <span className="text-[11px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">미시작</span>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {sheetSeg === 'log' && (() => {
+                    const logs = STUDY_LOG.filter(l => l.enrolleeId === selectedRow.id);
+                    if (logs.length === 0) {
+                      return <div className="text-center py-12 text-slate-400 text-[13px]">기록된 학습 로그가 없습니다.</div>;
+                    }
+                    return (
+                      <div className="border border-slate-200 rounded-xl overflow-hidden">
+                        <table className="w-full text-[12.5px]">
+                          <thead className="bg-slate-50 border-b border-slate-200">
+                            <tr className="text-left text-slate-500 font-bold text-[11px]">
+                              <th className="px-3 py-2">카리큘럼</th>
+                              <th className="px-3 py-2 w-[110px]">시작</th>
+                              <th className="px-3 py-2 w-[110px]">종료</th>
+                              <th className="px-3 py-2 w-[70px] text-right">수강시간</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {logs.map((l, i) => (
+                              <tr key={i} className="border-t border-slate-100">
+                                <td className="px-3 py-2">
+                                  <div className="text-[10.5px] text-slate-400 font-semibold">{l.chapter}</div>
+                                  <div className="text-[12.5px] font-bold text-slate-700">{l.item}</div>
+                                </td>
+                                <td className="px-3 py-2 text-slate-600 font-mono text-[10.5px]">{l.startedAt}</td>
+                                <td className="px-3 py-2 text-slate-600 font-mono text-[10.5px]">{l.endedAt}</td>
+                                <td className="px-3 py-2 text-right font-bold text-indigo-600 tabular-nums">{formatHMS(l.durationSec)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
+
+                  {sheetSeg === 'video' && (() => {
+                    const plays = VIDEO_PLAY.filter(v => v.enrolleeId === selectedRow.id);
+                    if (plays.length === 0) {
+                      return <div className="text-center py-12 text-slate-400 text-[13px]">영상 재생 기록이 없습니다.</div>;
+                    }
+                    return (
+                      <div className="space-y-2">
+                        {plays.map((v, i) => (
+                          <div key={i} className="border border-slate-200 rounded-xl p-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <MS name="play_circle" size={16} className="text-indigo-500 shrink-0"/>
+                              <span className="text-[12.5px] font-bold text-slate-700 truncate flex-1">{v.fileName}</span>
+                              <span className={`text-[13px] font-black tabular-nums ${v.rate === 100 ? 'text-emerald-600' : v.rate >= 60 ? 'text-indigo-600' : 'text-rose-500'}`}>{v.rate}%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full ${v.rate === 100 ? 'bg-emerald-500' : v.rate >= 60 ? 'bg-indigo-500' : 'bg-rose-400'}`} style={{ width: `${v.rate}%` }}/>
+                              </div>
+                              <span className="text-[10.5px] font-bold text-slate-400 tabular-nums w-[100px] text-right">{formatHMS(v.playedSec)} / {formatHMS(v.durationSec)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -1038,6 +1469,329 @@
               <button onClick={onClose} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-[14px] font-bold text-slate-600 hover:bg-slate-50">취소</button>
               <button className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5">
                 <MS name="check" size={14}/> 등록
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    /* ─── M2 PeriodModal — 개인 수강 기간 변경 ─── */
+    const PeriodModal = ({ enrollee, onClose }) => {
+      const [mode, setMode] = useState('unlimited');
+      const [startAt, setStartAt] = useState('2026-05-26T00:00');
+      const [endAt,   setEndAt]   = useState('2026-12-31T23:59');
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      }, [onClose]);
+      return (
+        <div className="fixed inset-0 bg-slate-900/60 z-[200] flex items-center justify-center p-4 animate-fadeIn" onClick={onClose}>
+          <div className="bg-white rounded-2xl shadow-2xl w-[480px] max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-[15px] font-black text-slate-900 flex items-center gap-2">
+                <MS name="schedule" size={18} className="text-indigo-500"/> 수강 기간 변경
+              </h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20}/></button>
+            </div>
+            <div className="px-6 py-5 space-y-5">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2.5 flex items-center gap-2">
+                <MS name="person" size={15} className="text-emerald-600"/>
+                <span className="text-[13px] font-bold text-emerald-700">대상: {enrollee.name} · {enrollee.userId}</span>
+              </div>
+
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input type="radio" checked={mode === 'date'} onChange={() => setMode('date')} className="accent-indigo-600 mt-1"/>
+                <div className="flex-1">
+                  <span className="text-[14px] font-bold text-slate-700">날짜 지정</span>
+                  {mode === 'date' && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <input type="datetime-local" value={startAt} onChange={e => setStartAt(e.target.value)}
+                        className="flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] font-mono focus:border-indigo-400 outline-none"/>
+                      <span className="text-slate-400">~</span>
+                      <input type="datetime-local" value={endAt} onChange={e => setEndAt(e.target.value)}
+                        className="flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] font-mono focus:border-indigo-400 outline-none"/>
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="radio" checked={mode === 'unlimited'} onChange={() => setMode('unlimited')} className="accent-indigo-600"/>
+                <span className="text-[14px] font-bold text-slate-700">제한 없음</span>
+              </label>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-2">
+              <button onClick={onClose} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-[14px] font-bold text-slate-600 hover:bg-slate-50">취소</button>
+              <button onClick={onClose} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5">
+                <MS name="check" size={14}/> 완료
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    /* ─── M3 AlarmModal — 종료 임박 알림 ─── */
+    const AlarmModal = ({ enrollees, onClose }) => {
+      const [channels, setChannels] = useState({ push: true, mail: false });
+      // 종료 7일 이내 (2026-05-26 기준)
+      const today = new Date('2026-05-26');
+      const targets = enrollees.filter(e => {
+        if (!e.endDate || e.endDate === '제한 없음') return false;
+        const end = new Date(e.endDate);
+        const diff = (end - today) / (1000 * 60 * 60 * 24);
+        return diff >= 0 && diff <= 7;
+      });
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      }, [onClose]);
+      return (
+        <div className="fixed inset-0 bg-slate-900/60 z-[200] flex items-center justify-center p-4 animate-fadeIn" onClick={onClose}>
+          <div className="bg-white rounded-2xl shadow-2xl w-[460px] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-[15px] font-black text-slate-900 flex items-center gap-2">
+                <MS name="notifications_active" size={18} className="text-amber-500"/> 종료 임박 알림
+              </h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20}/></button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                <div className="text-[12px] font-bold text-amber-700 mb-1">종료 7일 이내</div>
+                <div className="text-[24px] font-black text-amber-700 tabular-nums">{targets.length}<span className="text-[14px] ml-1">명</span></div>
+                {targets.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {targets.slice(0, 8).map(t => (
+                      <span key={t.id} className="text-[11px] font-bold text-amber-800 bg-white border border-amber-200 px-1.5 py-0.5 rounded">{t.name}</span>
+                    ))}
+                    {targets.length > 8 && <span className="text-[11px] font-bold text-amber-600">외 {targets.length - 8}명</span>}
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="text-[13px] font-bold text-slate-500 mb-2">알림 채널</div>
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={channels.push} onChange={() => setChannels(c => ({ ...c, push: !c.push }))} className="accent-indigo-600"/>
+                    <span className="text-[14px] font-bold text-slate-700">푸시</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={channels.mail} onChange={() => setChannels(c => ({ ...c, mail: !c.mail }))} className="accent-indigo-600"/>
+                    <span className="text-[14px] font-bold text-slate-700">메일</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-2">
+              <button onClick={onClose} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-[14px] font-bold text-slate-600 hover:bg-slate-50">취소</button>
+              <button onClick={onClose}
+                disabled={targets.length === 0 || (!channels.push && !channels.mail)}
+                className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5">
+                <MS name="send" size={14}/> 발송
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    /* ─── M5 GroupStudyModal — 그룹별 학습량 ─── */
+    const GroupStudyModal = ({ groups, formatDuration, onClose }) => {
+      const [q, setQ] = useState('');
+      const filtered = groups.filter(g => g.group.includes(q));
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      }, [onClose]);
+      return (
+        <div className="fixed inset-0 bg-slate-900/60 z-[200] flex items-center justify-center p-4 animate-fadeIn" onClick={onClose}>
+          <div className="bg-white rounded-2xl shadow-2xl w-[760px] max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-[15px] font-black text-slate-900 flex items-center gap-2">
+                <MS name="bar_chart" size={18} className="text-indigo-500"/> 그룹별 학습량
+              </h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20}/></button>
+            </div>
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-2">
+              <div className="relative">
+                <MS name="search" size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"/>
+                <input type="text" value={q} onChange={e => setQ(e.target.value)} placeholder="그룹 검색"
+                  className="pl-8 pr-3 py-1.5 text-[13px] border border-slate-200 rounded-lg w-[220px] focus:border-indigo-400 outline-none"/>
+              </div>
+              <button className="text-[13px] font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                <MS name="download" size={12}/> 다운로드
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <table className="w-full text-[13px]">
+                <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
+                  <tr className="text-left text-slate-500 font-bold text-[12px]">
+                    <th className="px-4 py-2.5">그룹</th>
+                    <th className="px-4 py-2.5 w-[110px] text-right">인원</th>
+                    <th className="px-4 py-2.5 w-[140px] text-right">평균 진도율</th>
+                    <th className="px-4 py-2.5 w-[140px] text-right">평균 학습시간</th>
+                    <th className="px-4 py-2.5 w-[140px] text-right">총 학습시간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(g => (
+                    <tr key={g.group} className="border-t border-slate-100 hover:bg-slate-50">
+                      <td className="px-4 py-3 font-bold text-slate-800">{g.group}</td>
+                      <td className="px-4 py-3 text-right tabular-nums text-slate-600 font-semibold">{g.count}명</td>
+                      <td className="px-4 py-3 text-right">
+                        <span className={`tabular-nums font-black ${g.avgProgress >= 75 ? 'text-emerald-600' : g.avgProgress >= 50 ? 'text-indigo-600' : 'text-rose-500'}`}>{g.avgProgress}%</span>
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums text-slate-700 font-bold">{formatDuration(g.avgStudyMin * 60)}</td>
+                      <td className="px-4 py-3 text-right tabular-nums text-slate-700 font-bold">{formatDuration(g.totalStudyMin * 60)}</td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && (
+                    <tr><td colSpan={5} className="text-center py-12 text-slate-400 text-[13px]">검색 결과가 없습니다.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    /* ─── M7 EndCourseModal — 운영 종료 4-액션 분리 ───
+       [[project_newcourse_operating_period_rebuttal]] 정책:
+         휴면 / 정상 종료 / 긴급 차단 (3-카드 선택) */
+    const EndCourseModal = ({ onClose }) => {
+      const [selected, setSelected] = useState(null);
+      const [confirmText, setConfirmText] = useState('');
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      }, [onClose]);
+
+      const ACTIONS = [
+        {
+          k: 'pause',
+          icon: 'pause_circle',
+          color: 'slate',
+          title: '휴면',
+          tagline: '재개 가능',
+          desc: '신규 등록·학습을 일시 중단합니다. 다시 운영 재개할 수 있습니다.',
+          impact: '신규 등록 ✕ · 기존 학습 ✕ · 재개 가능 ◯',
+          requireConfirm: false,
+        },
+        {
+          k: 'normal-end',
+          icon: 'event_busy',
+          color: 'indigo',
+          title: '정상 종료',
+          tagline: '신규 등록만 마감',
+          desc: '신규 등록을 막고, 기존 학습자는 수강 기간 안에서 학습을 마칠 수 있습니다.',
+          impact: '신규 등록 ✕ · 기존 학습 ◯ (수강 기간 내)',
+          requireConfirm: false,
+          recommended: true,
+        },
+        {
+          k: 'force-block',
+          icon: 'block',
+          color: 'rose',
+          title: '긴급 차단',
+          tagline: '즉시 학습 중단',
+          desc: '신규 등록과 기존 학습자의 학습을 즉시 중단합니다. 사고·법적 이슈 등 비상 상황에서만 사용합니다.',
+          impact: '신규 등록 ✕ · 기존 학습 ✕ (즉시) · 재개 불가',
+          requireConfirm: true,
+        },
+      ];
+
+      const COLOR_MAP = {
+        slate:  { bg: 'bg-slate-50',  text: 'text-slate-600',  border: 'border-slate-300',  ring: 'ring-slate-400',  btn: 'bg-slate-600 hover:bg-slate-700' },
+        indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-300', ring: 'ring-indigo-400', btn: 'bg-indigo-600 hover:bg-indigo-700' },
+        rose:   { bg: 'bg-rose-50',   text: 'text-rose-600',   border: 'border-rose-300',   ring: 'ring-rose-400',   btn: 'bg-rose-500 hover:bg-rose-600' },
+      };
+
+      const chosen = ACTIONS.find(a => a.k === selected);
+      const co     = chosen ? COLOR_MAP[chosen.color] : null;
+      const canSubmit = chosen && (!chosen.requireConfirm || confirmText === '긴급 차단');
+
+      return (
+        <div className="fixed inset-0 bg-slate-900/60 z-[200] flex items-center justify-center p-4 animate-fadeIn" onClick={onClose}>
+          <div className="bg-white rounded-2xl shadow-2xl w-[680px] max-h-[92vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+
+            {/* 헤더 */}
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+              <h3 className="text-[15px] font-black text-slate-900 flex items-center gap-2">
+                <MS name="stop_circle" size={18} className="text-slate-500"/> 코스 운영 종료
+              </h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20}/></button>
+            </div>
+
+            {/* 안내 */}
+            <div className="px-6 pt-5 pb-3 shrink-0">
+              <p className="text-[13px] text-slate-500 leading-relaxed">
+                상황에 맞는 종료 방식을 선택하세요.
+              </p>
+            </div>
+
+            {/* 3-카드 */}
+            <div className="px-6 pb-4 flex-1 overflow-y-auto custom-scrollbar">
+              <div className="space-y-2.5">
+                {ACTIONS.map(a => {
+                  const ac = COLOR_MAP[a.color];
+                  const isSel = selected === a.k;
+                  return (
+                    <button key={a.k} onClick={() => { setSelected(a.k); setConfirmText(''); }}
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-start gap-3
+                        ${isSel ? `${ac.border} ${ac.bg} ring-2 ${ac.ring} ring-opacity-30` : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                      <div className={`w-10 h-10 rounded-xl ${ac.bg} ${isSel ? 'ring-1 ring-white' : ''} flex items-center justify-center shrink-0`}>
+                        <MS name={a.icon} size={20} className={ac.text}/>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[15px] font-black text-slate-900">{a.title}</span>
+                          <span className={`text-[11px] font-bold ${ac.text} ${ac.bg} px-1.5 py-0.5 rounded`}>{a.tagline}</span>
+                          {a.recommended && <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">권장</span>}
+                          {a.requireConfirm && <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">2차 확인</span>}
+                        </div>
+                        <p className="text-[12.5px] text-slate-600 leading-relaxed mb-1.5">{a.desc}</p>
+                        <p className="text-[11.5px] font-bold text-slate-400 tabular-nums">{a.impact}</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 shrink-0 mt-1 flex items-center justify-center ${isSel ? `${ac.border} ${ac.bg}` : 'border-slate-300 bg-white'}`}>
+                        {isSel && <div className={`w-2.5 h-2.5 rounded-full ${ac.btn.split(' ')[0]}`}/>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* 2차 확인 (긴급 차단) */}
+              {chosen?.requireConfirm && (
+                <div className="mt-4 bg-rose-50 border border-rose-200 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MS name="warning" size={15} className="text-rose-600"/>
+                    <span className="text-[13px] font-black text-rose-700">긴급 차단 확인</span>
+                  </div>
+                  <p className="text-[12.5px] text-rose-700 mb-2.5 leading-relaxed">
+                    학습자가 즉시 학습을 못 합니다. 재개도 불가합니다. 진행하려면 아래 칸에 <span className="font-black">긴급 차단</span> 을 입력하세요.
+                  </p>
+                  <input type="text" value={confirmText} onChange={e => setConfirmText(e.target.value)}
+                    placeholder="긴급 차단"
+                    className="w-full border border-rose-300 rounded-lg px-3 py-2 text-[13px] font-mono focus:border-rose-500 outline-none bg-white"/>
+                </div>
+              )}
+            </div>
+
+            {/* 풋터 */}
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-2 shrink-0">
+              <button onClick={onClose} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-[14px] font-bold text-slate-600 hover:bg-slate-50">취소</button>
+              <button onClick={onClose}
+                disabled={!canSubmit}
+                className={`px-6 py-2.5 rounded-xl text-[14px] font-bold flex items-center gap-1.5 transition-colors
+                  ${canSubmit ? `${co.btn} text-white` : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                <MS name={chosen?.icon || 'check'} size={14}/>
+                {chosen ? `${chosen.title} 실행` : '방식 선택'}
               </button>
             </div>
           </div>

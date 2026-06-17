@@ -19,7 +19,7 @@
       }
     }
   </script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
   <style>
     @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
     .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
@@ -2505,7 +2505,7 @@
               {/* ── 섹션 0: 코스 정책 (maxRunDays) ── 1차 숨김
                    메모리 project_newcourse_operating_period_rebuttal 결정:
                    "운영기간은 시스템 필수가 아니라 개발 구현 단순화 목적". 사용자 정책 강제 X.
-                   대안: 수강기간 3종 + 종료하기 액션 + 백엔드 자동 archive 로직.
+                   대안: 수강기간 3종 + 종료하기 액션(휴면/정상 종료/긴급 차단).
                    maxRunDays state 자체는 default(365) 유지하되 UI 비노출.
               <section id="step-policy" className="scroll-mt-6 w-[800px] mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 ... 운영기간 UI 폐기 ...
