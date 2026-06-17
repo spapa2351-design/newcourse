@@ -92,6 +92,7 @@
     .cover-video { width: 152px; aspect-ratio: 3/4; border-radius: 14px; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0,0,0,.12); overflow: hidden; background: linear-gradient(165deg,#ecca4d 0%,#d4b13e 54%,#3b3b3b 55%,#232323 100%); }
     .cover-play { width: 54px; height: 54px; border-radius: 50%; background: rgba(0,0,0,.42); display: flex; align-items: center; justify-content: center; }
     .cover-vlabel { position: absolute; bottom: 7px; right: 9px; font-size: 9px; color: rgba(255,255,255,.7); font-weight: 600; }
+    .cover-img-icon { font-size: 40px; color: rgba(255,255,255,.55); }
     .cover-badge-row { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 0 2px; }
     .cover-badge-row .n-mark { color: var(--primary); font-weight: 800; font-size: 15px; }
     .cover-badge { color: var(--primary); background: var(--primary-lighter); font-weight: 700; font-size: 13px; padding: 5px 13px; border-radius: var(--r-pill); transition: all .2s; }
@@ -390,8 +391,7 @@
       <!-- 커버 영역 -->
       <div class="cover" data-feature-id="U3-01">
         <div class="cover-video">
-          <div class="cover-play"><span class="mi" style="font-size:32px; color:#fff;">play_arrow</span></div>
-          <div class="cover-vlabel">영상 미리보기</div>
+          <span class="mi cover-img-icon">image</span>
         </div>
         <div class="cover-badge-row"><span class="n-mark">N</span><span class="cover-badge" id="cover-enroll-badge">수강 신청 가능</span></div>
       </div>
