@@ -74,6 +74,31 @@
     .hero-desc { font-size: 14px; color: var(--muted-gray); font-weight: 500; }
     .hero-arrow { font-size: 20px; color: rgba(255,255,255,0.7); flex-shrink: 0; }
 
+    /* 코스 뷰어 — 학습 핵심 화면 전용 블록 (목록과 분리) */
+    .viewer-feature {
+      display: flex; align-items: center; gap: 20px;
+      padding: 24px 28px; border-radius: 16px;
+      background: var(--black); color: var(--white);
+      text-decoration: none; margin-bottom: 20px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .viewer-feature:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
+    .vf-icon {
+      width: 56px; height: 56px; border-radius: 13px;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
+      display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
+    }
+    .vf-text { flex: 1; min-width: 0; }
+    .vf-pill {
+      display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2); color: var(--white);
+      padding: 3px 9px; border-radius: 999px; margin-bottom: 9px;
+    }
+    .vf-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
+    .vf-desc { font-size: 12.5px; color: var(--muted-gray); font-weight: 500; font-family: ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .vf-arrow { font-size: 18px; color: rgba(255,255,255,0.7); flex-shrink: 0; }
+
     /* Section */
     .section {
       background: var(--white);
@@ -239,7 +264,7 @@
       <span class="section-num">01</span>
       <span class="section-title">기획·가이드 문서</span>
       <div class="section-line"></div>
-      <span class="section-count">5</span>
+      <span class="section-count">4</span>
     </div>
 
     <div class="col-header">
@@ -263,14 +288,6 @@
           <div class="btn-text">
             <div class="btn-title"><span class="title-text">오프라인 LMS 가이드</span></div>
             <div class="btn-desc">guide-offline-lms.html</div>
-          </div>
-          <i class="fa-solid fa-chevron-right btn-arrow"></i>
-        </a>
-        <a class="btn" href="docs/guide-admin-offline.html">
-          <div class="btn-icon"><i class="fa-solid fa-shield-halved"></i></div>
-          <div class="btn-text">
-            <div class="btn-title"><span class="title-text">관리자 오프라인 가이드</span></div>
-            <div class="btn-desc">guide-admin-offline.html</div>
           </div>
           <i class="fa-solid fa-chevron-right btn-arrow"></i>
         </a>
@@ -395,7 +412,7 @@
       <span class="section-num">03</span>
       <span class="section-title">학습자 - 프로토타이핑</span>
       <div class="section-line"></div>
-      <span class="section-count">9</span>
+      <span class="section-count">7</span>
     </div>
 
     <div class="col-header">
@@ -430,51 +447,35 @@
           </div>
           <i class="fa-solid fa-chevron-right btn-arrow"></i>
         </a>
+        <a class="btn" href="user/course-detail.html">
+          <div class="btn-icon"><i class="fa-solid fa-circle-info"></i></div>
+          <div class="btn-text">
+            <div class="btn-title"><span class="title-text">코스 상세 (신청)</span></div>
+            <div class="btn-desc">course-detail.html · 신청 게이트</div>
+          </div>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
         <a class="btn" href="user/my.html">
           <div class="btn-icon"><i class="fa-solid fa-bookmark"></i></div>
           <div class="btn-text">
             <div class="btn-title"><span class="title-text">MY 페이지</span></div>
-            <div class="btn-desc">my.html</div>
+            <div class="btn-desc">my.html · 내 학습 허브</div>
           </div>
           <i class="fa-solid fa-chevron-right btn-arrow"></i>
         </a>
-        <a class="btn" href="user/course-detail.html">
-          <div class="btn-icon"><i class="fa-solid fa-circle-info"></i></div>
-          <div class="btn-text">
-            <div class="btn-title"><span class="title-text">코스 상세 (미신청)</span></div>
-            <div class="btn-desc">course-detail.html</div>
-          </div>
-          <i class="fa-solid fa-chevron-right btn-arrow"></i>
-        </a>
-        <a class="btn" href="user/course-enrolled.html">
+        <a class="btn" href="user/course-enrolled.html" style="margin-left:18px;">
           <div class="btn-icon"><i class="fa-solid fa-play-circle"></i></div>
           <div class="btn-text">
-            <div class="btn-title"><span class="title-text">코스 상세 (수강 중)</span></div>
+            <div class="btn-title"><span class="title-text">↳ 내 학습 — 수강 중 상세</span></div>
             <div class="btn-desc">course-enrolled.html</div>
           </div>
           <i class="fa-solid fa-chevron-right btn-arrow"></i>
         </a>
-        <a class="btn" href="user/course-completed.html">
+        <a class="btn" href="user/course-completed.html" style="margin-left:18px;">
           <div class="btn-icon"><i class="fa-solid fa-circle-check"></i></div>
           <div class="btn-text">
-            <div class="btn-title"><span class="title-text">코스 상세 (완료)</span></div>
+            <div class="btn-title"><span class="title-text">↳ 내 학습 — 완료 상세</span></div>
             <div class="btn-desc">course-completed.html</div>
-          </div>
-          <i class="fa-solid fa-chevron-right btn-arrow"></i>
-        </a>
-        <a class="btn" href="user/course-viewer.html">
-          <div class="btn-icon"><i class="fa-solid fa-video"></i></div>
-          <div class="btn-text">
-            <div class="btn-title"><span class="title-text">코스 뷰어</span></div>
-            <div class="btn-desc">course-viewer.html</div>
-          </div>
-          <i class="fa-solid fa-chevron-right btn-arrow"></i>
-        </a>
-        <a class="btn" href="user/course-detail-newin.html">
-          <div class="btn-icon"><i class="fa-solid fa-palette"></i></div>
-          <div class="btn-text">
-            <div class="btn-title"><span class="title-text">코스 상세 (newin)</span></div>
-            <div class="btn-desc">course-detail-newin.html</div>
           </div>
           <i class="fa-solid fa-chevron-right btn-arrow"></i>
         </a>
@@ -490,7 +491,28 @@
     </div>
   </div>
 
-  <div class="version">newcourse Prototype Hub · v3.2 · 2026-05-21</div>
+  <!-- ═══════════ 04 뷰어 ═══════════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">뷰어</span>
+      <div class="section-line"></div>
+      <span class="section-count">1</span>
+    </div>
+
+    <!-- 코스 뷰어 — 학습 핵심 화면 (별도 섹션) -->
+    <a class="viewer-feature" href="user/course-viewer.html">
+      <div class="vf-icon"><i class="fa-solid fa-circle-play"></i></div>
+      <div class="vf-text">
+        <span class="vf-pill">학습 핵심 화면</span>
+        <div class="vf-title">코스 뷰어</div>
+        <div class="vf-desc">course-viewer.html · 실제 학습이 재생되는 화면</div>
+      </div>
+      <i class="fa-solid fa-chevron-right vf-arrow"></i>
+    </a>
+  </div>
+
+  <div class="version">newcourse Prototype Hub · v3.5 · 2026-05-27</div>
 
 </div>
 </body>
