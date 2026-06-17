@@ -152,7 +152,7 @@
     <p>오프라인 빌더 설정이 만들어내는 학습자 코스 상세 화면(<code>course-detail.html</code> 정보 탭)을 케이스별로 한 페이지에 모았습니다. 각 폰은 실제 화면 그대로 — 커버·배지·강사·학습 정보·카테고리·신청 버튼.</p>
     <div class="page-h legend" style="display:flex;">
       <span>코스 유형: <b style="color:var(--purple)">오프라인</b> (모든 케이스 항상 표시)</span>
-      <span>모집 상태: 수강 신청 가능 · 마감 임박 · 상시 모집 · 신청 마감</span>
+      <span>모집 상태: 수강 신청 가능 · 마감 임박 · 신청 마감</span>
       <span>내 수강 상태: 수강예정 · 수강중 · 학습 완료</span>
       <span style="color:var(--amber)">신청 방식(학습자 미노출, 관리자단 전용): 단일 선택 · 다중 조합 · 회차 선택형 · 관리자 지정</span>
     </div>
@@ -161,7 +161,7 @@
   <!-- ── 배지 출현 조건표 ── -->
   <div class="ref-panel">
     <h2>배지 출현 조건표</h2>
-    <p class="sub">배지는 성격이 다른 <b>3가족</b>입니다. 같은 슬롯에 섞지 않습니다. 오프라인 코스는 <b>신청 시작 전엔 학습자에게 안 보이므로 ‘오픈 예정’은 관리자 전용</b>이고, 신청 완료 후 교육 시작 전은 <b>‘수강예정’</b>(내 수강 상태)입니다. <b>신청 방식(가족 ②)은 학습자 미노출</b>(관리자단 전용), <b>관리자 배정</b>은 배정 즉시 ‘수강중’, <b>마감 임박</b>·<b>상시 모집</b>은 ‘수강 신청 가능’의 변형입니다.</p>
+    <p class="sub">배지는 성격이 다른 <b>3가족</b>입니다. 같은 슬롯에 섞지 않습니다. 오프라인 코스는 <b>신청 시작 전엔 학습자에게 안 보이므로 ‘오픈 예정’은 관리자 전용</b>이고, 신청 완료 후 교육 시작 전은 <b>‘수강예정’</b>(내 수강 상태)입니다. <b>신청 방식(가족 ②)은 학습자 미노출</b>(관리자단 전용), <b>관리자 배정</b>은 배정 즉시 ‘수강중’, <b>마감 임박</b>은 ‘수강 신청 가능’의 강조 서브입니다.</p>
     <div class="ref-conv">
       <span class="ci"><span class="tb st-purple">오프라인</span> 코스 유형 — 항상 표시(오프라인 코스 식별)</span>
       <span class="ci"><span class="tb st-green">채움</span> 모집 상태 — 학습자 화면 노출 · 시간·정원 자동 변동</span>
@@ -238,17 +238,11 @@
 
       <!-- 가족 3 -->
       <div class="ref-block">
-        <div class="bh"><span class="axis">가족 ③</span> 모집 형태 &amp; 내 수강 상태</div>
-        <div class="bnote">모집 형태는 ‘수강 신청 가능’과 함께 / 내 수강 상태는 신청 후 MY에서만</div>
+        <div class="bh"><span class="axis">가족 ③</span> 내 수강 상태</div>
+        <div class="bnote">신청한 학습자가 보는 상태 · 신청 후 MY/코스상세에서 표시</div>
         <table class="ref">
           <thead><tr><th>배지</th><th>출현 조건</th><th>비고</th></tr></thead>
           <tbody>
-            <tr class="row-div"><td colspan="3">모집 형태 (채움 · 학습자 노출)</td></tr>
-            <tr>
-              <td class="badge-cell"><span class="tb st-green"><span class="mi i14">all_inclusive</span>상시 모집</span></td>
-              <td class="cond">신청 마감일 미설정 &amp; 정원 소진 전</td>
-              <td class="memo">‘수강 신청 가능’의 변형 · 모집 상태 슬롯에 단독 표기</td>
-            </tr>
             <tr class="row-div"><td colspan="3">내 수강 상태 — 신청 후(카탈로그엔 모집 상태, 신청자에겐 이 상태)</td></tr>
             <tr>
               <td class="badge-cell"><span class="tb st-blue"><span class="mi i14">schedule</span>수강예정</span></td>
@@ -275,7 +269,7 @@
   <div class="gallery-h">케이스별 실제 화면 (9종)</div>
   <div class="gallery" id="gallery"></div>
 
-  <p class="ver">배지 분류 v1.6 · 2026-06-17 · 수강예정·학습 완료 케이스 추가(내 수강 상태) · ‘오픈 예정’ 학습자단 제거(오프라인 신청 전 비노출=관리자 전용) · ‘오프라인’ 유형 배지 항상 · 커버 이미지 · ‘수강 신청 가능’ 통일</p>
+  <p class="ver">배지 분류 v1.7 · 2026-06-17 · 상시 모집 제거(빌더 미지원 — 신청 마감일 필수) · 수강예정·학습 완료 케이스 · ‘오픈 예정’ 학습자단 제거 · ‘오프라인’ 유형 배지 항상 · 커버 이미지 · ‘수강 신청 가능’ 통일</p>
 </div>
 
 <script>
@@ -329,13 +323,13 @@ const CASES = [
     enrollP:'2026.04.20 — 2026.05.05', cancel:'교육 시작 1일 전까지 취소, 변경 불가',
     cats:['공통/온보딩','법정의무'] },
 
-  { n:'CASE 6', label:'장기 · 상시 모집', sel:'다중 조합', selCls:'lab-purple',
-    enroll:'enrolling', always:true,
+  { n:'CASE 6', label:'장기 · 다중 조합', sel:'다중 조합', selCls:'lab-purple',
+    enroll:'enrolling',
     title:'신임 팀장 리더십 캠프 (장기)',
-    intro:'여러 달에 걸친 장기 과정입니다. 상시 모집이며 정원 소진 시 마감됩니다.',
+    intro:'여러 달에 걸친 장기 과정입니다. 원하는 차수를 조합해 수강하며, 정원 소진 시 마감됩니다.',
     instr:{name:'최예진', sub:'리더십 개발 코치 · 외 2명', mixed:true},
     period:'2026.05.20 — 2026.07.31', days:'73일', place:'한샘 HQ 세미나룸 외',
-    enrollP:'상시 모집 (정원 소진 시 마감)', enrollPill:{t:'상시', c:'green'}, cancel:'교육 시작 2주 전까지 취소, 1주 전까지 변경 가능',
+    enrollP:'2026.04.20 — 2026.05.10', cancel:'교육 시작 2주 전까지 취소, 1주 전까지 변경 가능',
     cats:['리더십','자기경영'] },
 
   { n:'CASE 7', label:'신청 마감 · 기한 경과', sel:'단일 선택', selCls:'lab-amber',
@@ -371,7 +365,7 @@ const BTN = {
   enrolling:   { t:'수강 신청하기', icon:'arrow_forward', dis:false },
   closed:      { t:'신청이 마감되었습니다', icon:'', dis:true },
   scheduled:   { t:'내 수강 상세 보기', icon:'arrow_forward', dis:false },
-  completed:   { t:'수료증 보기', icon:'workspace_premium', dis:false },
+  completed:   { t:'내 수강 상세 보기', icon:'arrow_forward', dis:false },
   assigned:    { t:'내 수강 상세 보기', icon:'arrow_forward', dis:false },
 };
 
@@ -387,7 +381,6 @@ function statusBadge(c){
   // 모집 상태(가족①) — '오픈 예정'은 오프라인 학습자 비노출이라 폰 배지에서 제외(관리자 전용)
   if(c.enroll==='closed')      return `<span class="cover-badge st-grey">신청 마감</span>`;
   if(c.closingSoon)            return `<span class="cover-badge st-amber">마감 임박</span>`;
-  if(c.always)                 return `<span class="cover-badge st-green"><span class="mi i16">all_inclusive</span>상시 모집</span>`;
   return `<span class="cover-badge st-green">수강 신청 가능</span>`;
 }
 
