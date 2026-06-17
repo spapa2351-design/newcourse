@@ -159,7 +159,7 @@
     <span class="font-bold text-slate-800 text-base">오프라인 코스 가이드</span>
   </div>
   <div class="flex-1"></div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v1.9 · 2026-06-17</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v2.0 · 2026-06-18</span>
 </header>
 
 <script>
@@ -295,6 +295,16 @@ function closeMobileSidebar() {
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <span style="color:#1d4ed8;font-weight:700;font-size:13px;">2026-06-17 갱신</span>
         <div style="font-size:13px;color:#1e3a8a;line-height:1.7;">
+          <strong>2026-06-18 (v2.0):</strong> 오프라인 코스 결정사항을 반영했습니다.
+          <ul style="margin-top:6px;padding-left:18px;list-style:disc;">
+            <li>오프라인 빌더가 <strong>수강 신청 기간(시작·마감)을 필수로 받습니다</strong> — 마감 없는 상시 모집은 만들 수 없습니다.</li>
+            <li>신청 시작 전 코스는 <strong>학습자에게 노출되지 않습니다</strong> — "오픈 예정"(신청 오픈 전)은 관리자 전용 상태입니다.</li>
+            <li>학습자 수강 상태에 <strong>수강예정</strong>(신청 완료·교육 시작 전, 시작일 도달 시 수강중 자동 전환) 단계가 있습니다.</li>
+            <li>신청 방식(자율 단일/다중·관리자 지정·회차선택형)은 <strong>관리자단 분류</strong>로, 학습자 화면 배지로는 노출하지 않습니다.</li>
+            <li>관리자 배정 코스는 학습자에게 <strong>수강중</strong>으로 표시되고, 본문 "관리자 배정 교육" 안내 배너로 안내합니다.</li>
+            <li><strong>수료증 발급·다운로드는 미구현</strong>이라 안내에서 제외했습니다. 수료/미수료 판정과 출석률 기준(기본 75%)은 그대로 유지됩니다.</li>
+          </ul>
+          <div style="height:8px;"></div>
           <strong>2026-06-17 (v1.9):</strong> 오프라인 코스는 <strong>운영 종료 버튼을 두지 않습니다</strong> — 회차 종료·신청 기간 만료로 자연 종료(이미 종료된 코스는 "조회 전용" 표시). "문 닫기" 종료는 온라인 전용 개념. 학습자 코스 상세는 케이스 8종 상단 전환 + 헤더 분류/상태/방식 배지 줄 제거(커버 상태 배지만 유지).
           <div style="height:8px;"></div>
           <strong>2026-06-16 (v1.8):</strong> 오프라인 기능 변경분을 반영했습니다.
@@ -302,7 +312,7 @@ function closeMobileSidebar() {
             <li>수강관리에 <strong>회차별 정원 표시</strong> 복원 — 회차마다 좌석 수를 보여줍니다(날짜·장소별 물리 좌석). 출석·수료 판정과는 무관합니다.</li>
             <li>빌더에 <strong>차수 내 회차 시간 겹침 경고</strong> 추가 — 같은 시간대 회차는 출석 QR(차수당 1개)로 구분되지 않아 경고합니다.</li>
             <li><strong>수료 판정이 출석률 기준과 연동</strong>됩니다 — 빌더에서 정한 출석률(기본 75%) 미달자는 미수료로 처리됩니다.</li>
-            <li>학습자단 <strong>수료증 발급</strong>(미리보기 + 인쇄·PDF 저장)과 <strong>현장 QR 출석 체크인</strong> 동작이 연결됐습니다.</li>
+            <li>학습자단 <strong>현장 QR 출석 체크인</strong> 동작이 연결됐습니다.</li>
             <li>신청 화면의 <strong>캘린더를 없애고 차수 카드 단일 선택</strong>으로 단순화했습니다.</li>
           </ul>
         </div>
@@ -465,10 +475,10 @@ function closeMobileSidebar() {
               <tr class="border-b border-slate-100"><td class="py-2"><span class="badge badge-blue">수강중</span></td><td class="py-2">진행 중인 코스</td><td class="py-2">수강 중 화면</td></tr>
               <tr class="border-b border-slate-100"><td class="py-2"><span class="badge badge-amber">수강예정</span></td><td class="py-2">신청 완료, 시작 전</td><td class="py-2">수강 중 화면</td></tr>
               <tr class="border-b border-slate-100"><td class="py-2"><span class="badge badge-green">수강완료</span></td><td class="py-2">종료된 코스</td><td class="py-2">수강 완료 화면</td></tr>
-              <tr class="border-b border-slate-100"><td class="py-2"><span class="badge badge-red">시작전</span></td><td class="py-2">신청 기간 전, 미오픈</td><td class="py-2">코스 상세 화면</td></tr>
               <tr><td class="py-2"><span class="badge badge-slate">신청가능</span></td><td class="py-2">미신청 코스</td><td class="py-2">코스 상세 화면</td></tr>
             </tbody>
           </table>
+          <div class="callout callout-blue mt-3 text-xs">신청 시작 전 코스(오픈 예정)는 <strong>학습자 목록에 노출되지 않습니다</strong>. 신청이 시작돼야 목록에 나타납니다.</div>
         </div>
       </div>
     </div>
@@ -591,6 +601,9 @@ function closeMobileSidebar() {
     <div class="callout callout-blue">
       수강 신청 방법은 모드별로 다릅니다. 각 모드의 상세 안내는 <strong>"수강 신청"</strong> 섹션을 참고하세요.
     </div>
+    <div class="callout callout-amber">
+      위 신청 방식(자율 단일·자율 다중·지정 등록·회차선택형)은 <strong>관리자단 분류</strong>입니다. 학습자 화면에는 신청 방식 배지로 노출되지 않으며, 운영자 설정에 따라 화면 구성만 달라집니다.
+    </div>
 
     <div class="guide-section">
       <div class="section-title">차수(반) 선택 → 회차별 일정 확인</div>
@@ -643,8 +656,8 @@ function closeMobileSidebar() {
         </div>
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/A2_detail_before_open.png" class="screen-img" style="width:210px" alt="신청 오픈 전">
-          <div class="screen-label">신청 오픈 전</div>
-          <div class="screen-caption">커버 배지 "오픈 예정"<br>오픈 일시 표시, 버튼 비활성</div>
+          <div class="screen-label">신청 오픈 전 <span class="badge badge-slate">관리자 전용</span></div>
+          <div class="screen-caption">"오픈 예정"(before_open)은 <strong>관리자 전용 상태</strong>입니다.<br>신청 시작 전 코스는 학습자에게 노출되지 않습니다.</div>
         </div>
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/A3_detail_closed.png" class="screen-img" style="width:210px" alt="신청 마감">
@@ -685,10 +698,9 @@ function closeMobileSidebar() {
           </thead>
           <tbody>
             <tr>
-              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">신청 오픈 전</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">신청 오픈 전 <span class="badge badge-slate">관리자 전용</span></td>
               <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-amber">오픈 예정</span></td>
-              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">⏳ 오픈 일시 안내 (비활성)</td>
-              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">없음</td>
+              <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;" colspan="2">학습자 비노출 — 신청 시작 전 코스는 목록·상세에 나타나지 않습니다(관리자 전용 상태).</td>
             </tr>
             <tr style="background:#f8fafc;">
               <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">신청 기간 중</td>
@@ -859,7 +871,7 @@ function closeMobileSidebar() {
     <div class="page-header">
       <div class="page-tag">수강 신청</div>
       <h1 class="page-title">관리자 배정</h1>
-      <p class="page-desc">운영자가 학습자에게 특정 커리큘럼을 직접 지정한 방식입니다. 학습자는 별도 선택 없이 배정된 일정을 확인하기만 하면 됩니다.</p>
+      <p class="page-desc">운영자가 학습자에게 특정 커리큘럼을 직접 지정한 방식입니다. 별도 신청 없이 코스가 <strong>수강중</strong>으로 표시되고, 본문 "관리자 배정 교육" 안내 배너로 안내됩니다.</p>
     </div>
 
     <div class="guide-section">
@@ -867,11 +879,11 @@ function closeMobileSidebar() {
       <div class="flow-row">
         <div class="flow-box">코스 상세 열기</div>
         <span class="flow-arrow">→</span>
-        <div class="flow-box">배정 안내 배너 확인</div>
+        <div class="flow-box">"관리자 배정 교육" 안내 배너 확인</div>
         <span class="flow-arrow">→</span>
         <div class="flow-box">배정 일정 확인</div>
       </div>
-      <div class="callout callout-amber">관리자 배정 모드에서는 학습자가 일정을 선택할 수 없습니다. 수강 신청 버튼 자체가 비활성 상태입니다.</div>
+      <div class="callout callout-amber">관리자 배정 코스는 학습자에게 <strong>수강중</strong>으로 표시되며, 학습자가 직접 신청하거나 일정을 선택하지 않습니다. 별도 상태 배지 없이 본문 "관리자 배정 교육" 안내 배너로 안내합니다.</div>
     </div>
 
     <div class="guide-section">
@@ -1070,7 +1082,7 @@ function closeMobileSidebar() {
     <div class="page-header">
       <div class="page-tag">수강 완료</div>
       <h1 class="page-title">수강 완료 화면</h1>
-      <p class="page-desc">모든 수업이 종료되고 수료 판정이 끝난 상태입니다. 수료자는 화면에서 수료증을 발급받을 수 있습니다.</p>
+      <p class="page-desc">모든 수업이 종료되고 수료 판정이 끝난 상태입니다. 화면에서 출석률과 수료/미수료 결과를 확인할 수 있습니다.</p>
     </div>
 
     <div class="guide-section">
@@ -1084,16 +1096,16 @@ function closeMobileSidebar() {
     </div>
 
     <div class="guide-section">
-      <div class="section-title">수료증 발급 <span class="badge badge-blue">2026-06-16</span></div>
-      <div class="section-desc">수료 기준(출석률)을 충족한 학습자는 "수료증 다운로드" 버튼으로 수료증을 발급받습니다. 버튼을 누르면 수료증 미리보기 모달이 열리고, 모달에서 <strong>인쇄·PDF 저장</strong>이 가능합니다.</div>
+      <div class="section-title">수료 / 미수료 판정</div>
+      <div class="section-desc">수강 완료 화면에서는 본인의 출석률과 수료/미수료 결과를 확인합니다.</div>
       <div class="grid grid-cols-2 gap-3" style="max-width:600px;">
         <div class="border border-slate-200 rounded-xl p-4 bg-white">
           <div class="font-bold text-sm text-slate-700 mb-2">수료자</div>
-          <div class="text-xs text-slate-500 leading-relaxed">"수료증 다운로드" 버튼 활성 → 미리보기 모달 → 인쇄·PDF 저장.</div>
+          <div class="text-xs text-slate-500 leading-relaxed">출석률 기준(기본 75%)을 충족하면 <strong>수료</strong>로 표시됩니다.</div>
         </div>
         <div class="border border-slate-200 rounded-xl p-4 bg-white">
           <div class="font-bold text-sm text-slate-700 mb-2">미수료자</div>
-          <div class="text-xs text-slate-500 leading-relaxed">출석률 미달 시 버튼이 "미수료 · 수료증 발급 불가"로 표시되어 발급되지 않습니다.</div>
+          <div class="text-xs text-slate-500 leading-relaxed">출석률 미달 시 <strong>미수료</strong>로 표시됩니다.</div>
         </div>
       </div>
       <div class="callout callout-blue">수료 여부는 빌더에서 설정한 출석률 기준(기본 75%)으로 결정됩니다. 자세한 판정 기준은 관리자 가이드 "출석·수료 탭"을 참고하세요.</div>
@@ -2164,7 +2176,7 @@ function closeMobileSidebar() {
           수료 처리는 <strong>빌더에서 설정한 출석률 기준(기본 75%)</strong>을 따릅니다. 기준을 충족한 학습자만 <strong>수료</strong>, 미달자는 <strong>미수료</strong>로 처리됩니다.
         </div>
         <div class="callout callout-amber">
-          이전에 전원이 일괄 수료되던 동작을 바로잡은 것입니다. 출석·지각·조퇴는 출석으로 인정, 결석·미확인은 불인정입니다. 기준 미달자에게 수료증은 발급되지 않습니다.
+          이전에 전원이 일괄 수료되던 동작을 바로잡은 것입니다. 출석·지각·조퇴는 출석으로 인정, 결석·미확인은 불인정입니다. 기준 미달자는 미수료로 처리됩니다.
         </div>
       </div>
 

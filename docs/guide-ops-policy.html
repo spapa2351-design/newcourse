@@ -172,7 +172,7 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v1.9 · 2026-06-17</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.0 · 2026-06-18</span>
   <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
@@ -271,13 +271,13 @@ function closeMobileSidebar() {
 
 <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
   <div style="display:flex;gap:10px;align-items:flex-start;">
-    <span style="color:#1d4ed8;font-weight:700;font-size:13px;">2026-06-17 갱신</span>
+    <span style="color:#1d4ed8;font-weight:700;font-size:13px;">2026-06-18 갱신</span>
     <div style="font-size:13px;color:#1e3a8a;line-height:1.7;">
-      오프라인 운영 정책 변경분을 반영했습니다. (v1.9 · 2026-06-17)
+      오프라인 운영 정책 변경분을 반영했습니다. (v2.0 · 2026-06-18)
       <ul style="margin-top:6px;padding-left:18px;list-style:disc;">
         <li><strong>오프라인 코스는 운영 종료 버튼을 두지 않습니다</strong> — 회차 종료·신청 기간 만료로 자연 종료(이미 종료된 코스는 "조회 전용"으로 표시). 서버 부하 대비 "문 닫기" 종료는 실시간 학습이 있는 온라인 전용 개념입니다. (운영 종료)</li>
         <li><strong>수료 판정이 출석률 기준과 연동</strong>됩니다 — 출석률(기본 75%) 충족자만 수료, 미달자는 미수료. 이전의 전원 일괄 수료 동작을 정정했습니다. (3장 수료 처리)</li>
-        <li>수료자에게 <strong>수료증 발급</strong>(미리보기 + 인쇄·PDF)이 가능해졌습니다. 미수료자는 발급 불가. (3장 수료 처리)</li>
+        <li><strong>수료증 발급·다운로드 기능은 아직 제공하지 않습니다</strong> — 출석률(기본 75%) 기준의 수료/미수료 판정까지만 동작합니다. 수료증 발급은 Phase 2 예정. (3장 수료 처리)</li>
         <li>수강관리에 <strong>회차별 정원 표시</strong> 복원 — 회차 좌석 수를 보여줍니다(날짜·장소별 물리 좌석, 출석·수료 판정과 무관). (4장 정원 변경 정책)</li>
         <li>코스 개설 시 <strong>차수 내 회차 시간 겹침 경고</strong> — 같은 시간대 회차는 QR(차수당 1개)로 구분되지 않습니다. (FLOW-01 코스 개설)</li>
         <li>학습자 신청 화면의 <strong>캘린더 제거 → 차수 카드 단일 선택</strong>으로 단순화. (FLOW-02 자율 수강신청)</li>
@@ -357,7 +357,7 @@ function closeMobileSidebar() {
       </table>
     </div>
     <div class="callout callout-blue mt-2">
-      <strong>FLOW-05 (수료 처리)</strong> <span class="b b-blue">2026-06-16</span> — 수료 판정이 출석률 기준(기본 75%)과 연동됩니다. 기준 충족자는 수료, 미달자는 미수료로 처리되고 수료자에게 수료증이 발급됩니다. 자세한 기준은 3장 수료 처리를 참고하세요.
+      <strong>FLOW-05 (수료 처리)</strong> <span class="b b-blue">2026-06-16</span> — 수료 판정이 출석률 기준(기본 75%)과 연동됩니다. 기준 충족자는 수료, 미달자는 미수료로 처리됩니다. 자세한 기준은 3장 수료 처리를 참고하세요.
     </div>
   </div>
 
@@ -893,7 +893,7 @@ function closeMobileSidebar() {
           <tr><td><span class="b b-slate">준비중</span></td><td>아직 퍼블리싱 전. 학습자 앱에 안 보임</td><td>퍼블리싱 8항목 확인 → 공개 처리</td></tr>
           <tr><td><span class="b b-blue">모집중</span></td><td>신청 기간 내. 학습자가 신청 가능한 상태</td><td>잔여석 모니터링. 정원 초과 문의 대응</td></tr>
           <tr><td><span class="b b-orange">진행중</span></td><td>수업이 진행 중인 상태 (신청 기간 종료 후)</td><td>회차별 출석 관리. QR 운영 준비</td></tr>
-          <tr><td><span class="b b-green">완료</span></td><td>모든 회차 종료 완료 (운영자가 미확인 인원 정리 후)</td><td>출석률 기준으로 수료/미수료 판정 확인. 수료자 수료증 발급</td></tr>
+          <tr><td><span class="b b-green">완료</span></td><td>모든 회차 종료 완료 (운영자가 미확인 인원 정리 후)</td><td>출석률 기준으로 수료/미수료 판정 확인</td></tr>
         </tbody>
       </table>
     </div>
@@ -1682,7 +1682,7 @@ function closeMobileSidebar() {
         </thead>
         <tbody>
           <tr><td>블렌디드 코스 (온라인+오프라인 혼합)</td><td>온라인·오프라인 빌더가 분리 운영. 한 코스 안에 슬롯 단위 혼합 미설계</td><td><span class="b b-violet">Phase 3</span></td></tr>
-          <tr><td>수료증 이력 관리</td><td>수료 판정(출석률 연동)·수료증 발급(미리보기·인쇄·PDF)은 동작. 발급 이력 저장·재발급·일괄 다운로드는 미구현</td><td><span class="b b-violet">Phase 2</span></td></tr>
+          <tr><td>수료증 발급·이력 관리</td><td>수료 판정(출석률 연동)까지만 동작. 수료증 발급·다운로드·이력 저장·재발급은 미구현</td><td><span class="b b-violet">Phase 2</span></td></tr>
           <tr><td>커리큘럼별 대상자 분기</td><td>대상자 설정은 코스 레벨만. 슬롯 단위 "이건 개발팀만" 분기 없음</td><td><span class="b b-violet">Phase 3 (블렌디드)</span></td></tr>
           <tr><td>학습 경로 (Learning Path)</td><td>온라인 그룹별 이수 조건·역할 기반 필수 콘텐츠 미설계 영역</td><td><span class="b b-slate">미정</span></td></tr>
           <tr><td>대기열·취소 시 자동 승격</td><td>정원 마감 시 단순 마감 배지. 대기 등록·자동 승격 흐름 없음</td><td><span class="b b-slate">미정</span></td></tr>
@@ -2238,7 +2238,7 @@ function closeMobileSidebar() {
         <tbody>
           <tr><td>실제로 출석했지만 QR 미스캔으로 결석 처리됨</td><td>출석 관리 → 해당 수강생 → 드롭다운 → <strong>출석</strong> 또는 <strong>지각</strong>으로 변경</td></tr>
           <tr><td>여러 명을 한번에 수정해야 함</td><td>"미확인 일괄 처리" 도구 사용. 일괄 정정 기능은 Phase 2 확장 예정</td></tr>
-          <tr><td>이미 수료 판정이 끝난 뒤 출석을 고친 경우</td><td>출석률은 즉시 재계산됩니다. 단, 이미 발급된 수료증·확정 이력의 자동 갱신은 Phase 2 대응</td></tr>
+          <tr><td>이미 수료 판정이 끝난 뒤 출석을 고친 경우</td><td>출석률은 즉시 재계산됩니다. 단, 이미 확정된 수료/미수료 이력의 자동 갱신은 Phase 2 대응</td></tr>
         </tbody>
       </table>
     </div>
@@ -2418,7 +2418,6 @@ function closeMobileSidebar() {
         <tbody>
           <tr><td><strong>출석률 기준</strong></td><td>빌더에서 설정한 출석률 이상 (<strong>기본 75%</strong>)</td><td>출석·지각·조퇴 모두 출석 1회로 인정. 결석·미확인은 불인정</td></tr>
           <tr><td><strong>수료 판정</strong> <span class="b b-blue">2026-06-16</span></td><td>출석률 충족자 = <span class="b b-green">수료</span> / 미달자 = <span class="b b-red">미수료</span></td><td>출석률 기준과 연동. 전원 일괄 수료 동작은 폐지됨</td></tr>
-          <tr><td><strong>수료증 발급</strong> <span class="b b-blue">2026-06-16</span></td><td>수료자에게 발급(학습자 화면 미리보기 + 인쇄·PDF)</td><td>미수료자는 "미수료 · 수료증 발급 불가"로 표시</td></tr>
         </tbody>
       </table>
     </div>
@@ -2768,7 +2767,7 @@ function closeMobileSidebar() {
           <tr><td>"저 출석했는데 결석으로 되어 있어요"</td><td>해당 회차 출석 상태 확인. 마감 전 미확인이었는지 확인</td><td>실제 출석 확인 후 → 결석 → 출석 수동 변경</td></tr>
           <tr><td>"지각으로 처리됐는데 출석으로 바꿔주세요"</td><td>지각 기준 시간과 실제 스캔 시각 확인</td><td>기준 초과면 지각 정상. 기준 이내면 수동 출석 변경</td></tr>
           <tr><td>"수료가 안 됐는데 이상해요"</td><td>출석률 계산 확인. 지각·조퇴도 출석 인정 여부 확인</td><td>75% 미달이면 미수료 정상. 기록 오류이면 정정 후 재계산</td></tr>
-          <tr><td>"수료증은 언제 받나요?"</td><td>모든 회차 종료 후 출석률이 수료 기준(기본 75%) 이상인지 확인</td><td>수료자는 수강 완료 화면에서 "수료증 다운로드"로 발급(미리보기 + 인쇄·PDF). 미달자는 미수료라 발급 불가 안내</td></tr>
+          <tr><td>"수료증은 언제 받나요?"</td><td>모든 회차 종료 후 출석률이 수료 기준(기본 75%) 이상인지 확인</td><td>출석률 충족 시 수료로 판정됩니다. 수료증 발급·다운로드 기능은 아직 제공되지 않으므로(Phase 2 예정) 그렇게 안내</td></tr>
           <tr><td>"QR을 못 찍었는데 출석 처리 가능한가요?"</td><td>현장 운영 담당자 또는 강사에게 확인</td><td>실제 출석 확인 후 → 수동 출석 처리</td></tr>
         </tbody>
       </table>
