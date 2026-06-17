@@ -496,10 +496,6 @@
     <div style="height: 20px;"></div>
   </div>
 
-  <!-- ══ 하단 CTA ══ -->
-  <div class="bottom-cta">
-    <button class="btn-primary qr" onclick="openQrModal()"><span class="mi">qr_code_scanner</span> QR 출석 체크인</button>
-  </div>
 
 </div>
 
@@ -597,33 +593,6 @@
   </div>
 </div>
 
-<!-- ══ QR 출석 체크인 모달 ══ -->
-<div class="modal-overlay" id="modal-qr" onclick="if(event.target===this)closeQrModal()">
-  <div class="modal-box" style="text-align:center;">
-    <div id="qr-scan-view">
-      <div class="modal-title">현장 QR 출석 체크인</div>
-      <div style="font-size:13px;color:var(--secondary);margin-bottom:16px;line-height:1.5;">교육장에서 강사가 띄운 QR을<br>카메라로 비추면 출석이 기록됩니다.</div>
-      <div style="width:170px;height:170px;margin:0 auto 18px;border:2px dashed var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;background:var(--body-bg);">
-        <span class="mi" style="font-size:80px;color:var(--secondary);">qr_code_scanner</span>
-      </div>
-      <div class="modal-btn-row">
-        <button class="modal-btn outline" onclick="closeQrModal()">닫기</button>
-        <button class="modal-btn primary" onclick="simulateQrScan()">QR 스캔</button>
-      </div>
-    </div>
-    <div id="qr-done-view" style="display:none;">
-      <div style="margin:8px 0 12px;"><span class="mi" style="font-size:48px;color:var(--green);">check_circle</span></div>
-      <div class="modal-title">출석이 기록되었습니다</div>
-      <div style="font-size:13px;color:var(--secondary);margin-bottom:20px;" id="qr-done-time"></div>
-      <button class="modal-btn primary" style="width:100%;" onclick="closeQrModal()">확인</button>
-    </div>
-  </div>
-</div>
-<script>
-function openQrModal(){ document.getElementById('qr-scan-view').style.display='block'; document.getElementById('qr-done-view').style.display='none'; document.getElementById('modal-qr').classList.add('open'); }
-function closeQrModal(){ document.getElementById('modal-qr').classList.remove('open'); }
-function simulateQrScan(){ const n=new Date(); const t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); document.getElementById('qr-done-time').textContent='오늘 회차 · '+t+' 출석 처리'; document.getElementById('qr-scan-view').style.display='none'; document.getElementById('qr-done-view').style.display='block'; }
-</script>
 
 <script>
 let currentPolicy = 'open';

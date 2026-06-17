@@ -104,6 +104,13 @@
     .chip-blue { background: #E6F1FB; color: #185FA5; }
     .chip-orange { background: #FFF0E6; color: #A84300; }
     .chip-green { background: var(--success-bg); color: var(--success); }
+    /* 헤더 배지 — offline-course-cases.html 갤러리 디자인 정합 */
+    .badge { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:800; border-radius:8px; padding:4px 10px; white-space:nowrap; line-height:1; margin-right:6px; }
+    .badge.b-blue { color:#2e84ff; background:#eaf2ff; }
+    .badge.b-green { color:#0f9d63; background:#e6f7ef; }
+    .badge.b-amber { color:#b96a00; background:#fff4e0; }
+    .badge.b-grey { color:#6b7684; background:#f2f4f6; }
+    .badge.b-purple { color:#6d3fd4; background:#f1ecfe; }
 
     .course-title { font-size: 22px; font-weight: 700; line-height: 1.4; margin-top: 12px; margin-bottom: 12px; color: var(--black); }
     .course-desc { font-size: 14px; color: var(--secondary); line-height: 1.6; margin-bottom: 20px; }
@@ -333,7 +340,7 @@
     <button class="proto-chip active" id="chip-detail" onclick="goScreen('screen-detail')">① 코스 상세 보기</button>
     <button class="proto-chip" id="chip-confirm" onclick="goConfirm()" disabled>② 신청 확인</button>
     <button class="proto-chip" id="chip-done" onclick="openSuccessModal()">③ 신청 완료 모달</button>
-    <button class="proto-chip" id="chip-my" onclick="goScreen('screen-my')">④ 내 수강 내역</button>
+    <button class="proto-chip" id="chip-my" onclick="location.href='my.html'">④ 내 학습(MY) 화면</button>
   </div>
 
   <div style="margin-top: 16px; background: #fff; padding: 14px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,.08);">
@@ -366,12 +373,6 @@
     <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="enroll_sim" value="enrolling" checked onclick="setEnrollSim('enrolling')"> 신청 기간 중</label>
     <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="enroll_sim" value="closed" onclick="setEnrollSim('closed')"> 신청 마감</label>
 
-    <div style="height: 1px; background: var(--border); margin: 12px 0;"></div>
-
-    <div style="font-size: 11px; font-weight: 800; color: var(--error); margin-bottom: 10px;">취소·변경 기한 (내 수강)</div>
-    <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="time_sim" value="before_all" checked onclick="setTimeSim('before_all')"> 기한 내 (취소/변경 가능)</label>
-    <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="time_sim" value="past_change" onclick="setTimeSim('past_change')"> 변경 기한 경과</label>
-    <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;"><input type="radio" name="time_sim" value="past_all" onclick="setTimeSim('past_all')"> 모든 기한 경과</label>
     </details>
   </div>
 </div>
@@ -403,12 +404,12 @@
       </div>
 
       <!-- 수강중 배너 -->
-      <div id="enrolled-banner" style="display:none; margin:16px 20px 0; padding:16px; background:#E6F4EA; border:1.5px solid #A5D6A7; border-radius:12px; cursor:pointer;" onclick="location.href='course-enrolled.html'">
+      <div id="enrolled-banner" style="display:none; margin:16px 20px 0; padding:16px; background:#E6F4EA; border:1.5px solid #A5D6A7; border-radius:12px; cursor:pointer;" onclick="location.href='my.html'">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
           <div style="font-weight:700; color:var(--success); font-size:14px; display:flex; align-items:center; gap:6px;">
             <span style="width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;"></span> 이 코스를 수강 중입니다
           </div>
-          <span style="font-size:12px; color:var(--success); font-weight:700;">상세 <span class="mi i14">arrow_forward</span></span>
+          <span style="font-size:12px; color:var(--success); font-weight:700;">내 학습에서 보기 <span class="mi i14">arrow_forward</span></span>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <span style="font-size:12px; font-weight:700; padding:3px 10px; border-radius:6px; background:rgba(26,122,74,.1); color:var(--success);">A반 (5월 평일반)</span>
@@ -417,10 +418,13 @@
       </div>
 
       <!-- 수강 완료 배너 -->
-      <div id="completed-banner" style="display:none; margin:16px 20px 0; padding:16px; background:#F1F5F9; border:1.5px solid #CBD5E1; border-radius:12px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-          <span class="mi i18">workspace_premium</span>
-          <span style="font-weight:700; color:#475569; font-size:14px;">수강이 완료된 코스입니다</span>
+      <div id="completed-banner" style="display:none; margin:16px 20px 0; padding:16px; background:#F1F5F9; border:1.5px solid #CBD5E1; border-radius:12px; cursor:pointer;" onclick="location.href='my.html'">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="mi i18">workspace_premium</span>
+            <span style="font-weight:700; color:#475569; font-size:14px;">수강이 완료된 코스입니다</span>
+          </div>
+          <span style="font-size:12px; color:#475569; font-weight:700;">내 학습에서 보기 <span class="mi i14">arrow_forward</span></span>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <span style="font-size:12px; font-weight:700; padding:3px 10px; border-radius:6px; background:#E2E8F0; color:#475569;">A반 · 수료</span>
@@ -431,7 +435,6 @@
 
       <!-- 헤더: 제목 + 설명 (탭 위 항상 노출) -->
       <div class="section" style="padding-bottom: 16px; border-bottom: none;">
-        <div id="header-badges" style="margin-bottom: 12px;"></div>
         <div class="course-title" id="course-title">2026 직무교육 —<br>프로젝트 관리 심화</div>
         <p class="course-desc" id="course-desc" style="margin-bottom:0;">PM 직무에서 실제 활용 가능한 프로젝트 관리 방법론과 케이스 스터디를 통해 실전 역량을 강화합니다. 각 회차별 실습과 그룹 과제가 포함됩니다.</p>
       </div>
@@ -546,59 +549,6 @@
     </div>
   </div>
 
-  <!-- ════════ SCREEN 4: 내 수강 내역 ════════ -->
-  <div class="screen" id="screen-my">
-    <div class="nav"><button class="nav-back" onclick="goScreen('screen-detail')"><span class="mi">arrow_back</span></button><span class="nav-title">내 수강 내역</span></div>
-    <div class="scroll-area">
-      <div style="padding:20px 20px 10px; font-size:14px; font-weight: 700; color:var(--secondary)">신청된 오프라인 코스 · 1건</div>
-
-      <div class="my-course-card">
-        <div class="my-course-hdr">
-          <div class="my-course-thumb"><span class="mi">assignment</span></div>
-          <div style="flex: 1;">
-            <div class="my-course-name">2026 직무교육 — 프로젝트 관리 심화</div>
-            <div class="my-course-sub">김민준 · 직무교육</div>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-          <span class="chip chip-blue" id="my-enroll-type">신청 완료</span>
-          <span class="chip" style="background: var(--primary-lighter); color: var(--primary);" id="my-status-sub"></span>
-        </div>
-
-        <div class="result-row"><span class="result-label">교육 일정</span><span class="result-val" id="my-info-date"></span></div>
-        <div class="result-row" style="padding: 8px 0; border-bottom: 1px dashed rgba(0,0,0,0.08);"><span class="result-label">장소</span><span class="result-val" id="my-info-loc"></span></div>
-        <div class="result-row" style="padding: 8px 0;"><span class="result-label">출석 현황</span><span class="result-val">진행 전</span></div>
-
-        <!-- 액션 버튼 영역 -->
-        <div id="my-action-btns" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px;">
-          <button id="btn-change-course" class="btn-primary" style="height:42px; font-size:13px; background:#fff; color:var(--black); border:1px solid var(--border); box-shadow:none;" onclick="openChangeSchedule()"><span class="mi i16">event_repeat</span> 일정 변경</button>
-          <button id="btn-cancel-course" class="btn-primary danger" style="height:42px; font-size:13px; background:#fff; color:var(--error); border:1px solid rgba(255,25,67,.3); box-shadow:none;" onclick="openCancelModal()"><span class="mi i18">close</span> 수강 취소</button>
-        </div>
-        <!-- 취소 및 변경 기한 안내 텍스트 -->
-        <div id="cancel-notice" style="font-size:11px; color:var(--secondary); margin-top:12px; text-align:center; font-weight:600;">
-          교육 시작 3일 전까지 취소, 5일 전까지 변경 가능합니다.
-        </div>
-      </div>
-    </div>
-    <div class="bottom-cta">
-      <button class="btn-primary"><span class="mi i18">qr_code_scanner</span> 현장 QR 출석 체크</button>
-    </div>
-  </div>
-
-  <!-- ════════ SCREEN 5: 취소 완료 ════════ -->
-  <div class="screen" id="screen-cancelled">
-    <div class="nav"><button class="nav-back" onclick="goScreen('screen-detail')"><span class="mi i18">close</span></button><span class="nav-title">취소 완료</span></div>
-    <div class="scroll-area" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center;">
-      <div style="margin-bottom:20px;"><span class="mi" style="font-size:64px; color:#a1a1a1;">event_busy</span></div>
-      <div style="font-size:22px;font-weight:700;margin-bottom:10px">수강이 취소되었습니다</div>
-      <p style="color:var(--secondary);font-size:14px; line-height: 1.6;">신청하신 코스 일정이 정상적으로 취소되었습니다. 다시 수강하시려면 코스 상세에서 재신청해 주세요.</p>
-    </div>
-    <div class="bottom-cta">
-      <button class="btn-primary" onclick="goScreen('screen-detail')">확인</button>
-    </div>
-  </div>
-
   <!-- ── 신청 완료 팝업 모달 ── -->
   <div class="modal-overlay" id="modal-success">
     <div style="background: var(--white); border-radius: var(--r-lg); padding: 32px 24px; width: 100%; max-width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center;">
@@ -611,17 +561,6 @@
     </div>
   </div>
 
-  <!-- ── 수강 취소 확인 팝업 모달 ── -->
-  <div class="modal-overlay" id="modal-cancel">
-    <div style="background: var(--white); border-radius: var(--r-lg); padding: 32px 24px; width: 100%; max-width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center;">
-      <div style="margin-bottom: 16px;"><span class="mi i48" style="color:#d00c0c;">error</span></div>
-      <div style="font-size: 18px; font-weight: 700; margin-bottom: 24px; color: var(--black);">수강을 정말 취소하시겠습니까?</div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-        <button class="btn-primary" style="height:48px; font-size:15px; background:var(--bg-main); color:var(--black); box-shadow:none; border-radius: 8px; border:1px solid var(--border);" onclick="closeCancelModal()">취소</button>
-        <button class="btn-primary" style="height:48px; font-size:15px; background:var(--error); box-shadow:none; border-radius: 8px;" onclick="confirmCancel()">확인</button>
-      </div>
-    </div>
-  </div>
 
 </div>
 
@@ -722,11 +661,11 @@ const isMixedInstructor = (opt) => {
 
 /* ── State ── */
 let currentMode = 'single';
+let curCategory = '직무교육';
 const multiLimit = 2;
 let selectedIds = [];
 let selectedSessionMap = {}; // { optId: sessionId } — 회차선택형 회차 선택
 let activeDetailId = null;
-let timeSim = 'before_all';
 let enrollSim = 'enrolling';
 let myStatus = 'none';
 
@@ -749,7 +688,7 @@ function setMyStatus(status) {
       btn.disabled = false;
       btn.style.background = 'var(--success,#1A7A4A)';
       btn.style.boxShadow = '0 4px 15px rgba(26,122,74,0.3)';
-      btn.onclick = function() { location.href = 'course-enrolled.html'; };
+      btn.onclick = function() { location.href = 'my.html'; };
     }
   } else if (status === 'completed') {
     completedBanner.style.display = '';
@@ -891,6 +830,7 @@ function applyCase(i) {
   const cat = document.getElementById('cat-chips-box');
   if (cat) cat.innerHTML = c.cats.map(x => `<span class="cat-chip">${x}</span>`).join('');
   // 차수 모드 + 상태
+  curCategory = (c.cats && c.cats[0]) || '직무교육';
   currentMode = c.mode; selectedIds = []; activeDetailId = null; enrollSim = c.enroll || 'enrolling';
   initData(); updateCaseUI();
 }
@@ -902,13 +842,6 @@ function toggleMap() {
   const open = box.style.display === 'flex';
   box.style.display = open ? 'none' : 'flex';
   if (caret) caret.textContent = open ? 'expand_more' : 'expand_less';
-}
-
-function setTimeSim(val) {
-  timeSim = val;
-  if (document.getElementById('screen-my').classList.contains('active')) {
-    updateMyCourseUI();
-  }
 }
 
 function setEnrollSim(val) {
@@ -934,18 +867,20 @@ function updateBadgesAndNotice() {
     noticeArea.textContent = '관리자가 배정한 일정입니다. 아래 배정된 커리큘럼을 확인해 주세요.';
   }
 
-  let enrollChip = '';
-  if (currentMode === 'assigned') {
-    enrollChip = '<span class="chip" style="background:#FFF3E0; color:#E65100;">배정 완료</span>';
-  } else if (enrollSim === 'before_open') {
-    enrollChip = '<span class="chip" style="background:#FFF3E0; color:#E65100;">오픈 예정</span>';
-  } else if (enrollSim === 'enrolling') {
-    enrollChip = '<span class="chip chip-green">신청 중</span>';
-  } else if (enrollSim === 'closed') {
-    enrollChip = '<span class="chip" style="background:#F1F5F9; color:#64748B;">신청 마감</span>';
-  }
+  // 상태 배지 (갤러리 색)
+  let statusBadge = '';
+  if (currentMode === 'assigned')        statusBadge = '';                                         // 관리자 배정은 신청방식으로 표기
+  else if (enrollSim === 'before_open')  statusBadge = '<span class="badge b-grey">예정</span>';
+  else if (enrollSim === 'enrolling')    statusBadge = '<span class="badge b-green">신청 중</span>';
+  else if (enrollSim === 'closed')       statusBadge = '<span class="badge b-grey">신청 마감</span>';
 
-  badgeArea.innerHTML = `<span class="chip chip-blue">직무교육</span>${enrollChip}<span class="chip chip-orange">${typeLabel}</span>`;
+  // 신청 방식 배지 (갤러리 라벨·색)
+  let methodBadge = '';
+  if (currentMode === 'single')          methodBadge = '<span class="badge b-amber">단일 선택</span>';
+  else if (currentMode === 'multi')      methodBadge = '<span class="badge b-purple">다중 조합</span>';
+  else if (currentMode === 'assigned')   methodBadge = '<span class="badge" style="color:#b54708; background:#fff0e0;">관리자 지정</span>';
+
+  if (badgeArea) badgeArea.innerHTML = `<span class="badge b-blue">${curCategory}</span>${statusBadge}${methodBadge}`;
 }
 
 /* ── 수강 신청 기간 + 관리자 배정 UI ── */
@@ -1398,96 +1333,16 @@ function bindData(type) {
   }
 }
 
-/* ── 내 수강 화면 UI ── */
-function updateMyCourseUI() {
-  const enrollType = document.getElementById('my-enroll-type');
-  const actionBtns = document.getElementById('my-action-btns');
-  const cancelNotice = document.getElementById('cancel-notice');
-
-  if (currentMode === 'assigned') {
-    if (enrollType) { enrollType.textContent = '관리자 배정'; enrollType.className = 'chip'; enrollType.style.cssText = 'background:#FFF3E0; color:#E65100; display:inline-flex; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; margin-right:6px;'; }
-    if (actionBtns) actionBtns.style.display = 'none';
-    if (cancelNotice) { cancelNotice.style.color = 'var(--secondary)'; cancelNotice.textContent = '관리자가 배정한 교육입니다. 변경이 필요한 경우 관리자에게 문의하세요.'; }
-    return;
-  }
-
-  if (enrollType) { enrollType.textContent = '신청 완료'; enrollType.className = 'chip chip-blue'; enrollType.style.cssText = ''; }
-  if (actionBtns) actionBtns.style.display = '';
-  updateCancelButtonUI();
-}
-
-function updateCancelButtonUI() {
-  const cancelBtn = document.getElementById('btn-cancel-course');
-  const changeBtn = document.getElementById('btn-change-course');
-  const noticeText = document.getElementById('cancel-notice');
-  if (!cancelBtn || !changeBtn) return;
-
-  if (timeSim === 'past_all') {
-    changeBtn.disabled = true;
-    changeBtn.style.color = '#94A3B8';
-    changeBtn.style.borderColor = '#E2E8F0';
-    changeBtn.style.background = '#F8FAFC';
-
-    cancelBtn.disabled = true;
-    cancelBtn.style.color = '#94A3B8';
-    cancelBtn.style.borderColor = '#E2E8F0';
-    cancelBtn.style.background = '#F8FAFC';
-    cancelBtn.innerHTML = '<span class="mi i18">close</span> 취소 불가';
-
-    if (noticeText) {
-      noticeText.style.color = 'var(--error)';
-      noticeText.innerHTML = '<span class="mi i16">error</span> 취소 및 일정 변경 기한이 모두 지났습니다.';
-    }
-  } else if (timeSim === 'past_change') {
-    changeBtn.disabled = true;
-    changeBtn.style.color = '#94A3B8';
-    changeBtn.style.borderColor = '#E2E8F0';
-    changeBtn.style.background = '#F8FAFC';
-
-    cancelBtn.disabled = false;
-    cancelBtn.style.color = 'var(--error)';
-    cancelBtn.style.borderColor = 'rgba(255,25,67,.3)';
-    cancelBtn.style.background = '#fff';
-    cancelBtn.innerHTML = '<span class="mi i18">close</span> 수강 취소';
-
-    if (noticeText) {
-      noticeText.style.color = '#D97706';
-      noticeText.innerHTML = '<span class="mi i16">warning</span> 일정 변경은 불가하며, 수강 취소만 가능합니다.';
-    }
-  } else {
-    changeBtn.disabled = false;
-    changeBtn.style.color = 'var(--black)';
-    changeBtn.style.borderColor = 'var(--border)';
-    changeBtn.style.background = '#fff';
-
-    cancelBtn.disabled = false;
-    cancelBtn.style.color = 'var(--error)';
-    cancelBtn.style.borderColor = 'rgba(255,25,67,.3)';
-    cancelBtn.style.background = '#fff';
-    cancelBtn.innerHTML = '<span class="mi i18">close</span> 수강 취소';
-
-    if (noticeText) {
-      noticeText.style.color = 'var(--secondary)';
-      noticeText.innerHTML = '교육 시작 3일 전까지 취소, 5일 전까지 변경 가능합니다.';
-    }
-  }
-}
-
 function goScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const target = document.getElementById(id);
   if (target) target.classList.add('active');
 
   document.querySelectorAll('.proto-chip').forEach(c => c.classList.remove('active'));
-  const chipMap = { 'screen-detail': 'chip-detail', 'screen-confirm': 'chip-confirm', 'screen-my': 'chip-my', 'screen-cancelled': 'chip-cancel' };
+  const chipMap = { 'screen-detail': 'chip-detail', 'screen-confirm': 'chip-confirm' };
   if (chipMap[id]) {
     const chip = document.getElementById(chipMap[id]);
     if (chip) chip.classList.add('active');
-  }
-
-  if (id === 'screen-my') {
-    bindData('done');
-    updateMyCourseUI();
   }
 }
 
@@ -1531,40 +1386,11 @@ function openSuccessModal() {
   document.querySelectorAll('.proto-chip').forEach(c => c.classList.remove('active'));
   const chip = document.getElementById('chip-done');
   if (chip) chip.classList.add('active');
-  bindData('done');
 }
 
 function closeSuccessModal() {
   document.getElementById('modal-success').classList.remove('open');
-  goScreen('screen-my');
-}
-
-function openChangeSchedule() {
-  if (currentMode === 'assigned') return;
-  if (timeSim !== 'before_all') return;
-  goScreen('screen-detail');
-  openModal();
-}
-
-function openCancelModal() {
-  if (currentMode === 'assigned') return;
-  if (timeSim === 'past_all') return;
-  document.getElementById('modal-cancel').classList.add('open');
-  document.querySelectorAll('.proto-chip').forEach(c => c.classList.remove('active'));
-  const cancelChip = document.getElementById('chip-cancel');
-  if (cancelChip) cancelChip.classList.add('active');
-}
-
-function closeCancelModal() {
-  document.getElementById('modal-cancel').classList.remove('open');
-  document.querySelectorAll('.proto-chip').forEach(c => c.classList.remove('active'));
-  const myChip = document.getElementById('chip-my');
-  if (myChip) myChip.classList.add('active');
-}
-
-function confirmCancel() {
-  closeCancelModal();
-  goScreen('screen-cancelled');
+  location.href = 'my.html';
 }
 
 /* ── Init ── */
