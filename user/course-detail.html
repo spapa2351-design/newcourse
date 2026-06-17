@@ -874,13 +874,8 @@ function updateBadgesAndNotice() {
   else if (enrollSim === 'enrolling')    statusBadge = '<span class="badge b-green">신청 중</span>';
   else if (enrollSim === 'closed')       statusBadge = '<span class="badge b-grey">신청 마감</span>';
 
-  // 신청 방식 배지 (갤러리 라벨·색)
-  let methodBadge = '';
-  if (currentMode === 'single')          methodBadge = '<span class="badge b-amber">단일 선택</span>';
-  else if (currentMode === 'multi')      methodBadge = '<span class="badge b-purple">다중 조합</span>';
-  else if (currentMode === 'assigned')   methodBadge = '<span class="badge" style="color:#b54708; background:#fff0e0;">관리자 지정</span>';
-
-  if (badgeArea) badgeArea.innerHTML = `<span class="badge b-blue">${curCategory}</span>${statusBadge}${methodBadge}`;
+  // 신청 방식 배지는 학습자단 미노출(2026-06-17 이팀장) — 운영 분류는 admin에서만, 관리자 배정은 아래 본문 배너로 안내
+  if (badgeArea) badgeArea.innerHTML = `<span class="badge b-blue">${curCategory}</span>${statusBadge}`;
 }
 
 /* ── 수강 신청 기간 + 관리자 배정 UI ── */
@@ -900,10 +895,14 @@ function updateEnrollUI() {
       const opt = mockData.assigned[0];
       groupChip.innerHTML = '<span class="mi i14">group</span> 배정 그룹: ' + (opt.group || '');
     }
-    if (badge) { badge.textContent = '배정 완료'; badge.style.background = '#FFF3E0'; badge.style.color = '#E65100'; }
+    // 관리자 배정 = 신청 절차 없이 이미 등록된 상태 → 학습자에겐 '수강중'으로 표시(2026-06-17 이팀장)
+    if (badge) { badge.style.display = ''; badge.textContent = '수강중'; badge.style.background = 'var(--success-bg,#E6F4EA)'; badge.style.color = 'var(--success,#1A7A4A)'; }
     if (btn) {
-      btn.innerHTML = '<span class="mi i16">assignment</span> 배정 일정 확인 완료';
-      btn.disabled = true;
+      btn.innerHTML = '내 수강 상세 보기 <span class="mi i16" style="margin-left:4px;">arrow_forward</span>';
+      btn.disabled = false;
+      btn.style.background = 'var(--success,#1A7A4A)';
+      btn.style.boxShadow = '0 4px 15px rgba(26,122,74,0.3)';
+      btn.onclick = function() { location.href = 'my.html'; };
     }
     if (rowCancelRule) rowCancelRule.style.display = 'none';
     if (rowEnrollPeriod) rowEnrollPeriod.style.display = 'none';
@@ -912,6 +911,7 @@ function updateEnrollUI() {
 
   /* ── 자율 수강 모드 ── */
   if (banner) banner.style.display = 'none';
+  if (badge) badge.style.display = '';
   if (rowCancelRule) rowCancelRule.style.display = '';
   if (rowEnrollPeriod) rowEnrollPeriod.style.display = '';
 

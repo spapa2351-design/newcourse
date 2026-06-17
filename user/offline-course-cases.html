@@ -11,7 +11,7 @@
     --primary:#2e84ff; --primary-hover:#0052c7; --primary-lighter:#ebf3ff;
     --black:#191f28; --secondary:#6b7684; --muted:#bababa;
     --border:#e5e8eb; --surface:#f2f4f6; --white:#fff; --body-bg:#f2f2f2;
-    --error:#d00c0c; --success:#15b86d; --amber:#b96a00;
+    --error:#d00c0c; --success:#15b86d; --amber:#b96a00; --purple:#6d3fd4;
     --r-sm:8px; --r:12px; --r-lg:16px; --r-pill:300px;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -25,8 +25,38 @@
   .page-h .legend{ margin-top:14px; display:flex; flex-wrap:wrap; gap:8px; }
   .page-h .legend span{ font-size:12px; font-weight:600; color:var(--secondary); background:var(--white); border:1px solid var(--border); border-radius:8px; padding:5px 10px; }
 
+  /* ── 배지 조건표 ── */
+  .ref-panel{ background:var(--white); border:1px solid var(--border); border-radius:16px; padding:24px 26px 26px; margin-top:22px; }
+  .ref-panel h2{ font-size:18px; font-weight:800; }
+  .ref-panel .sub{ font-size:13px; color:var(--secondary); margin:6px 0 4px; line-height:1.6; }
+  .ref-conv{ display:flex; flex-wrap:wrap; gap:14px; margin:14px 0 20px; font-size:12px; color:var(--secondary); font-weight:600; }
+  .ref-conv .ci{ display:flex; align-items:center; gap:7px; }
+  .ref-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:22px; }
+  .ref-block .bh{ font-size:13.5px; font-weight:800; color:var(--black); margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+  .ref-block .bnote{ font-size:11.5px; color:var(--secondary); font-weight:600; margin-bottom:10px; }
+  .ref-block .axis{ font-size:10.5px; font-weight:800; letter-spacing:.3px; color:var(--primary); background:var(--primary-lighter); border-radius:6px; padding:2px 7px; }
+  table.ref{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.ref th{ text-align:left; font-weight:700; color:var(--secondary); padding:8px 10px; border-bottom:1.5px solid var(--border); background:var(--surface); white-space:nowrap; }
+  table.ref th:first-child{ border-top-left-radius:8px; } table.ref th:last-child{ border-top-right-radius:8px; }
+  table.ref td{ padding:10px; border-bottom:1px solid var(--border); color:var(--black); vertical-align:top; line-height:1.5; }
+  table.ref td.cond{ color:#3a4250; }
+  table.ref td.memo{ color:var(--secondary); font-size:11.5px; }
+  .ok{ color:var(--success); font-weight:800; } .no{ color:var(--muted); font-weight:800; } .partial{ color:var(--amber); font-weight:800; }
+  .row-div td{ background:var(--surface); font-size:11px; font-weight:800; color:var(--secondary); padding:6px 10px; letter-spacing:.3px; }
+
+  /* 표·갤러리 공용 배지 */
+  .tb{ display:inline-flex; align-items:center; gap:4px; font-weight:700; font-size:11.5px; padding:3px 10px; border-radius:var(--r-pill); white-space:nowrap; }
+  .st-blue{ color:var(--primary); background:var(--primary-lighter); }
+  .st-amber{ color:var(--amber); background:#fff4e0; }
+  .st-grey{ color:var(--secondary); background:var(--surface); }
+  .st-green{ color:#0f9d63; background:#e6f7ef; }
+  .st-orange{ color:#b54708; background:#fff0e0; }
+  .st-purple{ color:var(--purple); background:#f1ecfe; }
+  .outline{ background:transparent; border:1.5px solid currentColor; }
+
   /* ── 갤러리 그리드 ── */
-  .gallery{ display:grid; grid-template-columns:repeat(auto-fill,minmax(392px,1fr)); gap:30px 24px; margin-top:28px; justify-items:center; }
+  .gallery{ display:grid; grid-template-columns:repeat(auto-fill,minmax(392px,1fr)); gap:30px 24px; margin-top:14px; justify-items:center; }
+  .gallery-h{ font-size:16px; font-weight:800; margin-top:30px; }
   .case-col{ width:392px; }
   .case-label{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; padding:0 4px; }
   .case-label .num{ font-size:15px; font-weight:800; color:var(--black); }
@@ -53,14 +83,10 @@
   .cover-video{ width:152px; aspect-ratio:3/4; border-radius:14px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,.12); overflow:hidden; background:linear-gradient(165deg,#ecca4d 0%,#d4b13e 54%,#3b3b3b 55%,#232323 100%); }
   .cover-play{ width:54px; height:54px; border-radius:50%; background:rgba(0,0,0,.42); display:flex; align-items:center; justify-content:center; }
   .cover-vlabel{ position:absolute; bottom:7px; right:9px; font-size:9px; color:rgba(255,255,255,.7); font-weight:600; }
-  .cover-badge-row{ display:flex; align-items:center; justify-content:center; gap:6px; padding:12px 0 2px; }
+  .cover-badge-row{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px; padding:12px 12px 2px; }
   .cover-badge-row .n-mark{ color:var(--primary); font-weight:800; font-size:15px; }
-  .cover-badge{ font-weight:700; font-size:13px; padding:5px 13px; border-radius:var(--r-pill); }
-  .st-blue{ color:var(--primary); background:var(--primary-lighter); }
-  .st-amber{ color:var(--amber); background:#fff4e0; }
-  .st-grey{ color:var(--secondary); background:var(--surface); }
-  .st-green{ color:#0f9d63; background:#e6f7ef; }
-  .st-orange{ color:#b54708; background:#fff0e0; }
+  .cover-badge{ font-weight:700; font-size:13px; padding:5px 13px; border-radius:var(--r-pill); display:inline-flex; align-items:center; gap:4px; }
+  .cover-badge.mini{ font-size:11.5px; padding:3px 10px; }
 
   .section{ padding:0 20px; }
   .course-title{ font-size:22px; font-weight:700; line-height:1.4; margin:14px 0 12px; color:var(--black); }
@@ -83,6 +109,10 @@
   .instr-soft.muted{ color:var(--muted); }
   .instructor-sub{ font-size:13px; color:var(--secondary); margin-top:4px; }
   .instructor-sub.muted{ color:var(--muted); }
+
+  .assigned-banner{ margin:16px 0 4px; padding:14px 16px; background:#fff8e1; border:1.5px solid #ffe082; border-radius:var(--r-lg); }
+  .assigned-banner .ab-h{ font-weight:800; color:#e65100; font-size:13.5px; display:flex; align-items:center; gap:6px; }
+  .assigned-banner .ab-d{ font-size:12.5px; color:#8a6d3b; margin-top:5px; line-height:1.5; }
 
   .info-card{ display:flex; gap:12px; align-items:flex-start; padding:15px 16px; background:var(--white); border:1px solid var(--border); border-radius:var(--r-lg); margin-top:10px; }
   .info-icon{ width:24px; flex-shrink:0; color:var(--secondary); }
@@ -109,6 +139,8 @@
   .heart{ width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--secondary); flex-shrink:0; }
   .btn-primary{ flex:1; height:54px; border-radius:var(--r); background:var(--primary); color:#fff; border:none; font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; }
   .btn-primary.disabled{ background:var(--body-bg); color:#b0b8c1; }
+
+  .ver{ font-size:11.5px; color:var(--muted); font-weight:600; margin-top:30px; text-align:right; }
 </style>
 </head>
 <body>
@@ -116,21 +148,135 @@
 
   <div class="page-h">
     <h1>오프라인 코스 케이스 갤러리 — 실제 학습자 화면 (8종)</h1>
-    <p>오프라인 빌더 설정이 만들어내는 학습자 코스 상세 화면(<code>course-detail.html</code> 정보 탭)을 케이스별로 한 페이지에 모았습니다. 각 폰은 실제 화면 그대로 — 커버·상태 배지·강사·학습 정보·카테고리·신청 버튼.</p>
+    <p>오프라인 빌더 설정이 만들어내는 학습자 코스 상세 화면(<code>course-detail.html</code> 정보 탭)을 케이스별로 한 페이지에 모았습니다. 각 폰은 실제 화면 그대로 — 커버·배지·강사·학습 정보·카테고리·신청 버튼.</p>
     <div class="page-h legend" style="display:flex;">
-      <span>상태: 수강 신청 가능 / 마감 임박 / 신청 마감 / 상시 모집 / 관리자 배정 / 오픈 예정</span>
-      <span>신청 방식: 단일 선택 · 다중 조합 · 회차 선택형 · 관리자 지정</span>
+      <span>모집 상태(폰 노출): 예정 · 신청 중 · 마감 임박 · 상시 모집 · 신청 마감</span>
+      <span style="color:var(--amber)">신청 방식(학습자 미노출, 관리자단 전용): 단일 선택 · 다중 조합 · 회차 선택형 · 관리자 지정</span>
     </div>
   </div>
 
+  <!-- ── 배지 출현 조건표 ── -->
+  <div class="ref-panel">
+    <h2>배지 출현 조건표</h2>
+    <p class="sub">배지는 성격이 다른 <b>3가족</b>입니다. 같은 슬롯에 섞지 않습니다. <b>신청 방식(가족 ②)은 학습자 화면에 노출하지 않고</b> 관리자단(목록·빌더)에서만 씁니다. <b>관리자 배정</b>은 배정 즉시 ‘수강중’으로 표시하고 본문 ‘관리자 배정 교육’ 배너로 경위를 안내하며, <b>마감 임박</b>은 별도 상태가 아니라 ‘신청 중’의 강조 서브, <b>상시 모집</b>은 ‘신청 중’의 변형입니다.</p>
+    <div class="ref-conv">
+      <span class="ci"><span class="tb st-green">채움</span> 모집 상태 — 학습자 화면 노출 · 시간·정원 자동 변동</span>
+      <span class="ci"><span class="tb st-amber outline">테두리</span> 신청 방식 — <b style="color:var(--amber)">학습자 미노출</b> · 관리자단 전용</span>
+      <span class="ci"><span class="tb st-blue">내 수강</span> 신청 후 상태 — MY 전용(카탈로그 배지 아님)</span>
+    </div>
+
+    <div class="ref-grid">
+      <!-- 가족 1 -->
+      <div class="ref-block">
+        <div class="bh"><span class="axis">가족 ①</span> 모집 상태</div>
+        <div class="bnote">코스 상세·목록에 노출 · 시간/정원에 따라 자동 변동</div>
+        <table class="ref">
+          <thead><tr><th>배지</th><th>출현 조건</th><th>버튼</th><th>정본</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="badge-cell"><span class="tb st-grey">예정</span></td>
+              <td class="cond">코스 공개됨 &amp; 오늘 &lt; 신청 시작일</td>
+              <td class="memo">오픈 예정 (비활성)</td>
+              <td class="ok">○</td>
+            </tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-green">신청 중</span></td>
+              <td class="cond">신청 시작 ≤ 오늘 ≤ 마감 &amp; 정원 여유</td>
+              <td class="memo">수강 신청하기</td>
+              <td class="ok">○</td>
+            </tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-amber">마감 임박</span></td>
+              <td class="cond">‘신청 중’의 서브 — 마감 D-N 이내 또는 잔여 정원 소수</td>
+              <td class="memo">수강 신청하기 (활성)</td>
+              <td class="partial">△</td>
+            </tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-grey">신청 마감</span></td>
+              <td class="cond">오늘 &gt; 마감일 또는 정원 소진</td>
+              <td class="memo">신청이 마감되었습니다 (비활성)</td>
+              <td class="ok">○</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 가족 2 -->
+      <div class="ref-block">
+        <div class="bh"><span class="axis">가족 ②</span> 신청 방식 <span style="font-size:11px;font-weight:700;color:var(--amber);">· 학습자단 미노출</span></div>
+        <div class="bnote">코스 설정값 · 고정 · <b>관리자단(목록·빌더)에서만</b> 사용 · 학습자 화면엔 안 보임</div>
+        <table class="ref">
+          <thead><tr><th>배지</th><th>출현 조건</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="badge-cell"><span class="tb st-amber outline">단일 선택</span></td>
+              <td class="cond">차수 1개 선택</td>
+              <td class="memo">회차 선택형이 하위</td>
+            </tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-purple outline">다중 조합</span></td>
+              <td class="cond">여러 차수 조합</td>
+              <td class="memo">일정 겹치는 차수 동시 선택 불가</td>
+            </tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-blue outline">회차 선택형</span></td>
+              <td class="cond">차수 1개 안에서 회차 1개 선택</td>
+              <td class="memo">단일 선택 하위 · 법정의무 등</td>
+            </tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-orange outline">관리자 지정</span></td>
+              <td class="cond">관리자가 배정 · 개인 신청 절차 없음</td>
+              <td class="memo"><b>학습자단은 ‘수강중’으로 표시 + 본문 ‘관리자 배정 교육’ 배너</b> · 카탈로그 미노출, 배정자 MY에만</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 가족 3 -->
+      <div class="ref-block">
+        <div class="bh"><span class="axis">가족 ③</span> 모집 형태 &amp; 내 수강 상태</div>
+        <div class="bnote">모집 형태는 ‘신청 중’과 함께 / 내 수강 상태는 신청 후 MY에서만</div>
+        <table class="ref">
+          <thead><tr><th>배지</th><th>출현 조건</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr class="row-div"><td colspan="3">모집 형태 (채움 · 학습자 노출)</td></tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-green"><span class="mi i14">all_inclusive</span>상시 모집</span></td>
+              <td class="cond">신청 마감일 미설정 &amp; 정원 소진 전</td>
+              <td class="memo">‘신청 중’의 변형 · 모집 상태 슬롯에 단독 표기</td>
+            </tr>
+            <tr class="row-div"><td colspan="3">내 수강 상태 — MY 전용(카탈로그 배지 아님)</td></tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-blue">수강중</span></td>
+              <td class="cond">신청 완료(또는 <b>관리자 배정</b>) &amp; 학습기간 진행 중</td>
+              <td class="memo">관리자 배정은 배정 즉시 수강중 · my.html</td>
+            </tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-blue"><span class="mi i14">check</span>학습 완료</span></td>
+              <td class="cond">수료 조건 충족</td>
+              <td class="memo">my.html</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:16px;">정본 열: ○ = <code>course-detail.html</code>이 동일하게 렌더 · △ = 분류상 정당하나 ‘신청 중’ + 마감 D-N 백엔드 로직이 있어야 표시(현재 갤러리 강조용).</p>
+  </div>
+
+  <div class="gallery-h">케이스별 실제 화면 (8종)</div>
   <div class="gallery" id="gallery"></div>
+
+  <p class="ver">배지 분류 v1.3 · 2026-06-17 · 신청 방식 학습자단 미노출(가족 ②) · 관리자 배정 = ‘수강중’ 표시 + 본문 배너 · 폰엔 모집 상태/내 수강(채움)만</p>
 </div>
 
 <script>
-/* course-detail.html COURSE_CASES 8종 (정본 데이터 일치) + 케이스 메타 */
+/* 정본 course-detail.html COURSE_CASES 8종 기반 + 배지 3가족 분류 정합(2026-06-17)
+   - enroll: 모집 상태(before_open / enrolling / closed / assigned)  → 채움 배지
+   - sel   : 신청 방식(단일 선택 / 다중 조합 / 회차 선택형 / 관리자 지정) → 테두리 배지
+   - closingSoon: enrolling의 서브상태(마감 임박) · always: 모집 형태(상시 모집) */
 const CASES = [
   { n:'CASE 1', label:'표준 다회차', sel:'단일 선택', selCls:'lab-amber',
-    status:{t:'수강 신청 가능', c:'st-blue'}, enroll:'enrolling',
+    enroll:'enrolling',
     title:'2026 직무교육 — 프로젝트 관리 심화',
     intro:'PM 직무에서 실제 활용 가능한 프로젝트 관리 방법론과 케이스 스터디를 통해 실전 역량을 강화합니다. 각 회차별 실습과 그룹 과제가 포함됩니다.',
     instr:{name:'김민준', sub:'프로젝트 관리 전문가 · A등급 강사', mixed:false},
@@ -138,17 +284,17 @@ const CASES = [
     enrollP:'2026.04.15 09:00 — 2026.04.30 18:00', cancel:'교육 시작 3일 전까지 취소, 5일 전까지 변경 가능',
     cats:['직무교육','리더십','자기경영','특강'] },
 
-  { n:'CASE 2', label:'단일 하루 특강', sel:'단일 선택', selCls:'lab-amber',
-    status:{t:'마감 임박', c:'st-amber'}, enroll:'closed', enrollPill:{t:'마감 임박', c:'amber'},
+  { n:'CASE 2', label:'단일 하루 특강 · 마감 임박', sel:'단일 선택', selCls:'lab-amber',
+    enroll:'enrolling', closingSoon:true,
     title:'고객 응대 서비스 매너 특강',
     intro:'현장에서 바로 쓰는 고객 응대 기본기와 클레임 대응을 하루 과정으로 익힙니다.',
     instr:{name:'한소희', sub:'고객 서비스 교육 전문가', mixed:false},
-    period:'2026.03.15 (당일 1일)', days:'당일', place:'한샘 HQ 대교육장',
-    enrollP:'~ 2026.03.10 18:00', cancel:'신청 후 취소 · 변경 불가 (단일 일정)',
+    period:'2026.06.27 (당일 1일)', days:'당일', place:'한샘 HQ 대교육장',
+    enrollP:'~ 2026.06.20 18:00', enrollPill:{t:'마감 D-3', c:'red'}, cancel:'신청 후 취소 · 변경 불가 (단일 일정)',
     cats:['직무교육','특강'] },
 
   { n:'CASE 3', label:'회차별 강사·장소 상이', sel:'다중 조합', selCls:'lab-purple',
-    status:{t:'수강 신청 가능', c:'st-blue'}, enroll:'enrolling',
+    enroll:'enrolling',
     title:'리더십 특강 시리즈 (여러 차수 조합)',
     intro:'원하는 특강을 골라 조합해 수강합니다. 회차마다 강사·교육장이 다릅니다.',
     instr:{name:'강태훈', sub:'안전보건 법정의무교육 전문 · 외 3명', mixed:true},
@@ -157,7 +303,7 @@ const CASES = [
     cats:['직무교육','리더십'] },
 
   { n:'CASE 4', label:'관리자 지정 등록', sel:'관리자 지정', selCls:'lab-orange',
-    status:{t:'관리자 배정', c:'st-orange'}, enroll:'assigned',
+    enroll:'assigned',
     title:'하반기 신입사원 온보딩 (7월)',
     intro:'관리자가 직접 배정한 교육입니다. 별도 신청 없이 배정된 일정에 참석합니다.',
     instr:{name:'박지훈', sub:'신입사원 온보딩 전문 강사', mixed:false},
@@ -166,7 +312,7 @@ const CASES = [
     cats:['공통/온보딩'] },
 
   { n:'CASE 5', label:'법정의무 (회차 선택형)', sel:'회차 선택형', selCls:'lab-blue', extra:{t:'법정의무', c:'lab-red'},
-    status:{t:'수강 신청 가능', c:'st-blue'}, enroll:'enrolling',
+    enroll:'enrolling',
     title:'안전보건 법정의무교육 (상반기)',
     intro:'제공되는 회차 중 참석 가능한 1개를 선택합니다. 법정 의무교육으로 출석률 100%가 수료 기준입니다.',
     instr:{name:'강태훈', sub:'안전보건 법정의무교육 전문 강사', mixed:false},
@@ -175,7 +321,7 @@ const CASES = [
     cats:['공통/온보딩','법정의무'] },
 
   { n:'CASE 6', label:'장기 · 상시 모집', sel:'다중 조합', selCls:'lab-purple',
-    status:{t:'상시 모집', c:'st-green'}, enroll:'enrolling',
+    enroll:'enrolling', always:true,
     title:'신임 팀장 리더십 캠프 (장기)',
     intro:'여러 달에 걸친 장기 과정입니다. 상시 모집이며 정원 소진 시 마감됩니다.',
     instr:{name:'최예진', sub:'리더십 개발 코치 · 외 2명', mixed:true},
@@ -184,7 +330,7 @@ const CASES = [
     cats:['리더십','자기경영'] },
 
   { n:'CASE 7', label:'신청 마감 · 기한 경과', sel:'단일 선택', selCls:'lab-amber',
-    status:{t:'신청 마감', c:'st-grey'}, enroll:'closed', enrollPill:{t:'마감', c:'grey'},
+    enroll:'closed',
     title:'영업 전략 부트캠프 (5기)',
     intro:'접수가 마감된 코스입니다. 취소·변경 기한도 모두 지났습니다.',
     instr:{name:'김도윤', sub:'영업 전략 컨설턴트 · B등급 강사', mixed:false},
@@ -193,7 +339,7 @@ const CASES = [
     cats:['영업'] },
 
   { n:'CASE 8', label:'최소 정보 · 미정', sel:'단일 선택', selCls:'lab-amber',
-    status:{t:'오픈 예정', c:'st-amber'}, enroll:'before_open',
+    enroll:'before_open',
     title:'2026 하반기 직무 향상 과정 (준비 중)',
     intro:'세부 일정이 확정되는 대로 안내됩니다.',
     instr:{name:'대표 강사', sub:'강사 정보 추후 안내', mixed:false, muted:true},
@@ -202,12 +348,26 @@ const CASES = [
     cats:['직무교육'] },
 ];
 
+/* 신청 버튼 (정본 매핑) — 마감 임박은 enrolling이므로 '수강 신청하기' 활성 */
 const BTN = {
   enrolling:   { t:'수강 신청하기', icon:'arrow_forward', dis:false },
   closed:      { t:'신청이 마감되었습니다', icon:'', dis:true },
   before_open: { t:'오픈 예정', icon:'schedule', dis:true },
-  assigned:    { t:'배정 일정 확인 완료', icon:'assignment', dis:true },
+  assigned:    { t:'내 수강 상세 보기', icon:'arrow_forward', dis:false },
 };
+
+/* 폰(학습자 화면)에는 가족 ① 모집 상태만 노출.
+   - 신청 방식(가족 ②)은 학습자단 미노출(2026-06-17 이팀장), admin에서만.
+   - 상시 모집은 '신청 중'의 변형으로 모집 상태 슬롯에 단독 표기.
+   - 관리자 배정은 상태 배지 없이 본문 '관리자 배정 교육' 배너로 안내. */
+function statusBadge(c){
+  if(c.enroll==='assigned')    return `<span class="cover-badge st-blue">수강중</span>`;  // 관리자 배정 = 배정 즉시 수강중(2026-06-17 이팀장)
+  if(c.enroll==='before_open') return `<span class="cover-badge st-grey">예정</span>`;
+  if(c.enroll==='closed')      return `<span class="cover-badge st-grey">신청 마감</span>`;
+  if(c.closingSoon)            return `<span class="cover-badge st-amber">마감 임박</span>`;
+  if(c.always)                 return `<span class="cover-badge st-green"><span class="mi i16">all_inclusive</span>상시 모집</span>`;
+  return `<span class="cover-badge st-green">신청 중</span>`;
+}
 
 function pill(p){ return p ? `<span class="pill ${p.c}">${p.t}</span>` : ''; }
 
@@ -236,7 +396,7 @@ function phone(c){
 
       <div class="cover">
         <div class="cover-video"><div class="cover-play"><span class="mi" style="font-size:32px; color:#fff;">play_arrow</span></div><div class="cover-vlabel">영상 미리보기</div></div>
-        <div class="cover-badge-row"><span class="n-mark">N</span><span class="cover-badge ${c.status.c}">${c.status.t}</span></div>
+        <div class="cover-badge-row"><span class="n-mark">N</span>${statusBadge(c)}</div>
       </div>
 
       <div class="section">
@@ -251,6 +411,7 @@ function phone(c){
       <div class="detail-tabs"><span class="detail-tab active">정보</span><span class="detail-tab">커리큘럼</span></div>
 
       <div class="section">
+        ${c.enroll==='assigned' ? `<div class="assigned-banner"><div class="ab-h"><span class="mi i16">verified_user</span> 관리자 배정 교육</div><div class="ab-d">관리자가 배정한 일정입니다. 별도 신청 절차 없이 배정된 일정에 참석합니다.</div></div>` : ''}
         <div class="instructor-card">
           <div class="instructor-avatar"><span class="mi">person</span></div>
           <div>${instrName}<div class="instructor-sub${c.instr.muted?' muted':''}">${c.instr.sub}</div></div>
