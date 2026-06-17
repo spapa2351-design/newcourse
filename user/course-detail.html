@@ -363,14 +363,15 @@
     <div style="height: 1px; background: var(--border); margin: 12px 0;"></div>
 
     <div style="font-size: 11px; font-weight: 800; color: var(--success); margin-bottom: 10px;">나의 수강 상태</div>
-    <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="my_status" value="none" checked onclick="setMyStatus('none')"> 미신청</label>
+    <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="my_status" value="none" checked onclick="setMyStatus('none')"> 수강 신청 가능(미신청)</label>
+    <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="my_status" value="scheduled" onclick="setMyStatus('scheduled')"> 수강예정 (신청 완료·시작 전)</label>
     <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="my_status" value="enrolled" onclick="setMyStatus('enrolled')"> 수강중</label>
     <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;"><input type="radio" name="my_status" value="completed" onclick="setMyStatus('completed')"> 수강 완료</label>
 
     <div style="height: 1px; background: var(--border); margin: 16px 0;"></div>
 
     <div style="font-size: 11px; font-weight: 800; color: #D97706; margin-bottom: 10px;">수강 신청 기간</div>
-    <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="enroll_sim" value="before_open" onclick="setEnrollSim('before_open')"> 신청 오픈 전</label>
+    <div style="font-size:11px; color:var(--muted); margin-bottom:8px; line-height:1.5;">※ ‘신청 오픈 전’은 오프라인 학습자에게 비노출(관리자 전용)이라 제외</div>
     <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="enroll_sim" value="enrolling" checked onclick="setEnrollSim('enrolling')"> 신청 기간 중</label>
     <label style="display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="enroll_sim" value="closed" onclick="setEnrollSim('closed')"> 신청 마감</label>
 
@@ -393,7 +394,7 @@
         <div class="cover-video">
           <span class="mi cover-img-icon">image</span>
         </div>
-        <div class="cover-badge-row"><span class="n-mark">N</span><span class="cover-badge" id="cover-enroll-badge">수강 신청 가능</span></div>
+        <div class="cover-badge-row"><span class="n-mark">N</span><span class="cover-badge" style="color:#6d3fd4; background:#f1ecfe;">오프라인</span><span class="cover-badge" id="cover-enroll-badge">수강 신청 가능</span></div>
       </div>
 
       <!-- 관리자 배정 안내 배너 -->
@@ -680,7 +681,15 @@ function setMyStatus(status) {
   enrolledBanner.style.display = 'none';
   completedBanner.style.display = 'none';
 
-  if (status === 'enrolled') {
+  if (status === 'scheduled') {
+    // 수강예정: 신청 완료, 교육 시작 전 — 시작일 도달 시 '수강중' 전환(2026-06-17 이팀장)
+    if (badge) { badge.style.display = ''; badge.textContent = '수강예정'; badge.style.background = 'var(--primary-lighter,#ebf3ff)'; badge.style.color = 'var(--primary,#2e84ff)'; }
+    if (btn) {
+      btn.innerHTML = '내 수강 상세 보기 <span class="mi i16" style="margin-left:4px;">arrow_forward</span>';
+      btn.disabled = false; btn.style.background = ''; btn.style.boxShadow = '';
+      btn.onclick = function() { location.href = 'my.html'; };
+    }
+  } else if (status === 'enrolled') {
     enrolledBanner.style.display = '';
     if (badge) { badge.textContent = '수강중'; badge.style.background = 'var(--success-bg,#E6F4EA)'; badge.style.color = 'var(--success,#1A7A4A)'; }
     if (btn) {

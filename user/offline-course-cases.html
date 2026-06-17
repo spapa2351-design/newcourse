@@ -148,10 +148,12 @@
 <div class="wrap">
 
   <div class="page-h">
-    <h1>오프라인 코스 케이스 갤러리 — 실제 학습자 화면 (8종)</h1>
+    <h1>오프라인 코스 케이스 갤러리 — 실제 학습자 화면 (9종)</h1>
     <p>오프라인 빌더 설정이 만들어내는 학습자 코스 상세 화면(<code>course-detail.html</code> 정보 탭)을 케이스별로 한 페이지에 모았습니다. 각 폰은 실제 화면 그대로 — 커버·배지·강사·학습 정보·카테고리·신청 버튼.</p>
     <div class="page-h legend" style="display:flex;">
-      <span>모집 상태(폰 노출): 예정 · 수강 신청 가능 · 마감 임박 · 상시 모집 · 신청 마감</span>
+      <span>코스 유형: <b style="color:var(--purple)">오프라인</b> (모든 케이스 항상 표시)</span>
+      <span>모집 상태: 수강 신청 가능 · 마감 임박 · 상시 모집 · 신청 마감</span>
+      <span>내 수강 상태: 수강예정 · 수강중 · 학습 완료</span>
       <span style="color:var(--amber)">신청 방식(학습자 미노출, 관리자단 전용): 단일 선택 · 다중 조합 · 회차 선택형 · 관리자 지정</span>
     </div>
   </div>
@@ -159,8 +161,9 @@
   <!-- ── 배지 출현 조건표 ── -->
   <div class="ref-panel">
     <h2>배지 출현 조건표</h2>
-    <p class="sub">배지는 성격이 다른 <b>3가족</b>입니다. 같은 슬롯에 섞지 않습니다. <b>신청 방식(가족 ②)은 학습자 화면에 노출하지 않고</b> 관리자단(목록·빌더)에서만 씁니다. <b>관리자 배정</b>은 배정 즉시 ‘수강중’으로 표시하고 본문 ‘관리자 배정 교육’ 배너로 경위를 안내하며, <b>마감 임박</b>은 별도 상태가 아니라 ‘수강 신청 가능’의 강조 서브, <b>상시 모집</b>은 ‘수강 신청 가능’의 변형입니다.</p>
+    <p class="sub">배지는 성격이 다른 <b>3가족</b>입니다. 같은 슬롯에 섞지 않습니다. 오프라인 코스는 <b>신청 시작 전엔 학습자에게 안 보이므로 ‘오픈 예정’은 관리자 전용</b>이고, 신청 완료 후 교육 시작 전은 <b>‘수강예정’</b>(내 수강 상태)입니다. <b>신청 방식(가족 ②)은 학습자 미노출</b>(관리자단 전용), <b>관리자 배정</b>은 배정 즉시 ‘수강중’, <b>마감 임박</b>·<b>상시 모집</b>은 ‘수강 신청 가능’의 변형입니다.</p>
     <div class="ref-conv">
+      <span class="ci"><span class="tb st-purple">오프라인</span> 코스 유형 — 항상 표시(오프라인 코스 식별)</span>
       <span class="ci"><span class="tb st-green">채움</span> 모집 상태 — 학습자 화면 노출 · 시간·정원 자동 변동</span>
       <span class="ci"><span class="tb st-amber outline">테두리</span> 신청 방식 — <b style="color:var(--amber)">학습자 미노출</b> · 관리자단 전용</span>
       <span class="ci"><span class="tb st-blue">내 수강</span> 신청 후 상태 — MY 전용(카탈로그 배지 아님)</span>
@@ -174,11 +177,11 @@
         <table class="ref">
           <thead><tr><th>배지</th><th>출현 조건</th><th>버튼</th><th>정본</th></tr></thead>
           <tbody>
-            <tr>
+            <tr style="opacity:.6;">
               <td class="badge-cell"><span class="tb st-grey">예정</span></td>
               <td class="cond">코스 공개됨 &amp; 오늘 &lt; 신청 시작일</td>
-              <td class="memo">오픈 예정 (비활성)</td>
-              <td class="ok">○</td>
+              <td class="memo"><b>오프라인은 학습자 비노출</b> — 신청 전엔 카탈로그에 안 뜸 · 관리자 빌더·목록 전용</td>
+              <td class="partial">관리자</td>
             </tr>
             <tr>
               <td class="badge-cell"><span class="tb st-green">수강 신청 가능</span></td>
@@ -246,7 +249,12 @@
               <td class="cond">신청 마감일 미설정 &amp; 정원 소진 전</td>
               <td class="memo">‘수강 신청 가능’의 변형 · 모집 상태 슬롯에 단독 표기</td>
             </tr>
-            <tr class="row-div"><td colspan="3">내 수강 상태 — MY 전용(카탈로그 배지 아님)</td></tr>
+            <tr class="row-div"><td colspan="3">내 수강 상태 — 신청 후(카탈로그엔 모집 상태, 신청자에겐 이 상태)</td></tr>
+            <tr>
+              <td class="badge-cell"><span class="tb st-blue"><span class="mi i14">schedule</span>수강예정</span></td>
+              <td class="cond">신청 완료 &amp; 오늘 &lt; 교육 시작일 (다중·다회차는 가장 빠른 회차)</td>
+              <td class="memo">교육 시작일 도달 시 ‘수강중’ 자동 전환 · course-enrolled.html</td>
+            </tr>
             <tr>
               <td class="badge-cell"><span class="tb st-blue">수강중</span></td>
               <td class="cond">신청 완료(또는 <b>관리자 배정</b>) &amp; 학습기간 진행 중</td>
@@ -264,10 +272,10 @@
     <p class="sub" style="margin-top:16px;">정본 열: ○ = <code>course-detail.html</code>이 동일하게 렌더 · △ = 분류상 정당하나 ‘수강 신청 가능’ + 마감 D-N 백엔드 로직이 있어야 표시(현재 갤러리 강조용).</p>
   </div>
 
-  <div class="gallery-h">케이스별 실제 화면 (8종)</div>
+  <div class="gallery-h">케이스별 실제 화면 (9종)</div>
   <div class="gallery" id="gallery"></div>
 
-  <p class="ver">배지 분류 v1.4 · 2026-06-17 · ‘신청 중’ → ‘수강 신청 가능’ 통일(실서비스 표준 정합) · 신청 방식 학습자단 미노출 · 관리자 배정 = ‘수강중’ · 폰엔 모집 상태/내 수강(채움)만</p>
+  <p class="ver">배지 분류 v1.6 · 2026-06-17 · 수강예정·학습 완료 케이스 추가(내 수강 상태) · ‘오픈 예정’ 학습자단 제거(오프라인 신청 전 비노출=관리자 전용) · ‘오프라인’ 유형 배지 항상 · 커버 이미지 · ‘수강 신청 가능’ 통일</p>
 </div>
 
 <script>
@@ -339,21 +347,31 @@ const CASES = [
     enrollP:'2026.05.30 종료 — 신청 마감', enrollMuted:true, cancel:'취소 · 변경 기한이 모두 지났습니다',
     cats:['영업'] },
 
-  { n:'CASE 8', label:'최소 정보 · 미정', sel:'단일 선택', selCls:'lab-amber',
-    enroll:'before_open',
-    title:'2026 하반기 직무 향상 과정 (준비 중)',
-    intro:'세부 일정이 확정되는 대로 안내됩니다.',
-    instr:{name:'대표 강사', sub:'강사 정보 추후 안내', mixed:false, muted:true},
-    period:'2026.08.01 — 2026.08.02', days:'2일', place:'장소 미정 — 추후 안내', placeMuted:true,
-    enrollP:'2026.07.01 — 2026.07.20', cancel:'별도 제한 없음 (정책 미설정)', cancelMuted:true,
+  { n:'CASE 8', label:'수강예정 · 신청 완료', sel:'단일 선택', selCls:'lab-amber',
+    enroll:'scheduled',
+    title:'2026 하반기 직무 향상 과정',
+    intro:'신청이 완료된 코스입니다. 교육 시작일에 맞춰 참석해 주세요. 일정·장소는 내 수강에서 확인할 수 있습니다.',
+    instr:{name:'박서연', sub:'직무 역량 강화 전문 강사', mixed:false},
+    period:'2026.08.01 — 2026.08.02', days:'2일', place:'판교 연수원',
+    enrollP:'신청 완료 — 교육 시작 D-14', enrollPill:{t:'D-14', c:'blue'}, cancel:'교육 시작 5일 전까지 취소 가능', cancelMuted:true,
     cats:['직무교육'] },
+
+  { n:'CASE 9', label:'학습 완료 · 수료', sel:'단일 선택', selCls:'lab-amber',
+    enroll:'completed',
+    title:'2026 상반기 리더십 집중 과정',
+    intro:'모든 일정에 참석하여 수료한 코스입니다. 출석률 100%로 학습을 완료했습니다.',
+    instr:{name:'최예진', sub:'리더십 개발 코치', mixed:false},
+    period:'2026.03.02 — 2026.03.06', days:'5일', place:'한샘 HQ 대교육장',
+    enrollP:'수료 완료 · 2026.03.06', enrollMuted:true, cancel:'종료된 코스입니다', cancelMuted:true,
+    cats:['리더십','자기경영'] },
 ];
 
 /* 신청 버튼 (정본 매핑) — 마감 임박은 enrolling이므로 '수강 신청하기' 활성 */
 const BTN = {
   enrolling:   { t:'수강 신청하기', icon:'arrow_forward', dis:false },
   closed:      { t:'신청이 마감되었습니다', icon:'', dis:true },
-  before_open: { t:'오픈 예정', icon:'schedule', dis:true },
+  scheduled:   { t:'내 수강 상세 보기', icon:'arrow_forward', dis:false },
+  completed:   { t:'수료증 보기', icon:'workspace_premium', dis:false },
   assigned:    { t:'내 수강 상세 보기', icon:'arrow_forward', dis:false },
 };
 
@@ -362,8 +380,11 @@ const BTN = {
    - 상시 모집은 '수강 신청 가능'의 변형으로 모집 상태 슬롯에 단독 표기.
    - 관리자 배정은 상태 배지 없이 본문 '관리자 배정 교육' 배너로 안내. */
 function statusBadge(c){
-  if(c.enroll==='assigned')    return `<span class="cover-badge st-blue">수강중</span>`;  // 관리자 배정 = 배정 즉시 수강중(2026-06-17 이팀장)
-  if(c.enroll==='before_open') return `<span class="cover-badge st-grey">예정</span>`;
+  // 내 수강 상태(가족③) — 신청한 학습자가 보는 상태
+  if(c.enroll==='completed')   return `<span class="cover-badge st-blue"><span class="mi i16">check</span>학습 완료</span>`;
+  if(c.enroll==='scheduled')   return `<span class="cover-badge st-blue"><span class="mi i16">schedule</span>수강예정</span>`;  // 신청 완료·시작 전(2026-06-17 이팀장)
+  if(c.enroll==='assigned')    return `<span class="cover-badge st-blue">수강중</span>`;  // 관리자 배정 = 배정 즉시 수강중
+  // 모집 상태(가족①) — '오픈 예정'은 오프라인 학습자 비노출이라 폰 배지에서 제외(관리자 전용)
   if(c.enroll==='closed')      return `<span class="cover-badge st-grey">신청 마감</span>`;
   if(c.closingSoon)            return `<span class="cover-badge st-amber">마감 임박</span>`;
   if(c.always)                 return `<span class="cover-badge st-green"><span class="mi i16">all_inclusive</span>상시 모집</span>`;
@@ -397,7 +418,7 @@ function phone(c){
 
       <div class="cover">
         <div class="cover-video"><span class="mi cover-img-icon">image</span></div>
-        <div class="cover-badge-row"><span class="n-mark">N</span>${statusBadge(c)}</div>
+        <div class="cover-badge-row"><span class="n-mark">N</span><span class="cover-badge st-purple">오프라인</span>${statusBadge(c)}</div>
       </div>
 
       <div class="section">
