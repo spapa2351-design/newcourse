@@ -748,7 +748,7 @@ function switchMode(mode) {
 
 /* ── 전체 케이스 프리셋 (상단 버튼) — _offline-course-cases.html 8케이스 기반 ── */
 const COURSE_CASES = [
-  { label:'① 표준 다회차', mode:'single', enroll:'enrolling', cover:'신청 중',
+  { label:'① 표준 다회차', mode:'single', enroll:'enrolling', cover:'수강 신청 가능',
     title:'2026 직무교육 —<br>프로젝트 관리 심화',
     intro:'PM 직무에서 실제 활용 가능한 프로젝트 관리 방법론과 케이스 스터디를 통해 실전 역량을 강화합니다. 각 회차별 실습과 그룹 과제가 포함됩니다.',
     instr:{name:'김민준', sub:'프로젝트 관리 전문가 · A등급 강사', mixed:false},
@@ -762,7 +762,7 @@ const COURSE_CASES = [
     period:'2026.03.15 (당일 1일)', days:'당일', place:'한샘 HQ 대교육장',
     enrollP:'~ 2026.03.10 18:00', cancel:'신청 후 취소 · 변경 불가 (단일 일정)', cancelMuted:false,
     cats:['직무교육','특강'] },
-  { label:'③ 회차별 강사·장소 상이', mode:'multi', enroll:'enrolling', cover:'신청 중',
+  { label:'③ 회차별 강사·장소 상이', mode:'multi', enroll:'enrolling', cover:'수강 신청 가능',
     title:'리더십 특강 시리즈<br>(여러 차수 조합)',
     intro:'원하는 특강을 골라 조합해 수강합니다. 회차마다 강사·교육장이 다릅니다.',
     instr:{name:'강태훈', sub:'안전보건 법정의무교육 전문 · 외 3명', mixed:true},
@@ -776,7 +776,7 @@ const COURSE_CASES = [
     period:'2026.07.01 — 2026.07.03', days:'3일', place:'판교 연수원',
     enrollP:'관리자 배정 — 신청 절차 없음', cancel:'개인 취소·변경 불가 — 담당자 문의', cancelMuted:false,
     cats:['공통/온보딩'] },
-  { label:'⑤ 법정의무 (회차선택형)', mode:'single', enroll:'enrolling', cover:'신청 중',
+  { label:'⑤ 법정의무 (회차선택형)', mode:'single', enroll:'enrolling', cover:'수강 신청 가능',
     title:'안전보건 법정의무교육<br>(상반기)',
     intro:'제공되는 회차 중 참석 가능한 1개를 선택합니다. 법정 의무교육으로 출석률 100%가 수료 기준입니다.',
     instr:{name:'강태훈', sub:'안전보건 법정의무교육 전문 강사', mixed:false},
@@ -871,7 +871,7 @@ function updateBadgesAndNotice() {
   let statusBadge = '';
   if (currentMode === 'assigned')        statusBadge = '';                                         // 관리자 배정은 신청방식으로 표기
   else if (enrollSim === 'before_open')  statusBadge = '<span class="badge b-grey">예정</span>';
-  else if (enrollSim === 'enrolling')    statusBadge = '<span class="badge b-green">신청 중</span>';
+  else if (enrollSim === 'enrolling')    statusBadge = '<span class="badge b-green">수강 신청 가능</span>';
   else if (enrollSim === 'closed')       statusBadge = '<span class="badge b-grey">신청 마감</span>';
 
   // 신청 방식 배지는 학습자단 미노출(2026-06-17 이팀장) — 운영 분류는 admin에서만, 관리자 배정은 아래 본문 배너로 안내
@@ -920,7 +920,7 @@ function updateEnrollUI() {
     if (btn) { btn.innerHTML = '<span class="mi i16">schedule</span> 2026.04.15 09:00 오픈 예정'; btn.disabled = true; }
     if (periodText) { periodText.textContent = '2026.04.15 09:00 — 2026.04.30 18:00'; periodText.style.color = '#E65100'; }
   } else if (enrollSim === 'enrolling') {
-    if (badge) { badge.textContent = '신청 가능'; badge.style.background = '#fff'; badge.style.color = 'var(--primary)'; }
+    if (badge) { badge.textContent = '수강 신청 가능'; badge.style.background = '#fff'; badge.style.color = 'var(--primary)'; }
     if (btn) {
       btn.innerHTML = '수강 신청하기 <span class="mi i16" style="margin-left:4px;">arrow_forward</span>';
       btn.disabled = false;
