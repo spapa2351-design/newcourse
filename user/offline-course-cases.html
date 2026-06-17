@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오프라인 코스 케이스 갤러리 — 실제 화면(8종)</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+<style>
+  :root{
+    --primary:#2e84ff; --primary-hover:#0052c7; --primary-lighter:#ebf3ff;
+    --black:#191f28; --secondary:#6b7684; --muted:#bababa;
+    --border:#e5e8eb; --surface:#f2f4f6; --white:#fff; --body-bg:#f2f2f2;
+    --error:#d00c0c; --success:#15b86d; --amber:#b96a00;
+    --r-sm:8px; --r:12px; --r-lg:16px; --r-pill:300px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif; letter-spacing:-0.5px; background:#eceef0; color:var(--black); padding:32px 20px 80px; }
+  .mi{ font-family:'Material Symbols Rounded'; font-weight:normal; font-style:normal; font-size:20px; line-height:1; display:inline-flex; align-items:center; vertical-align:middle; font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
+  .mi.i14{ font-size:14px; } .mi.i16{ font-size:16px; } .mi.i18{ font-size:18px; }
+
+  .wrap{ max-width:1760px; margin:0 auto; }
+  .page-h h1{ font-size:25px; font-weight:800; }
+  .page-h p{ font-size:14px; color:var(--secondary); margin-top:8px; line-height:1.6; }
+  .page-h .legend{ margin-top:14px; display:flex; flex-wrap:wrap; gap:8px; }
+  .page-h .legend span{ font-size:12px; font-weight:600; color:var(--secondary); background:var(--white); border:1px solid var(--border); border-radius:8px; padding:5px 10px; }
+
+  /* ── 갤러리 그리드 ── */
+  .gallery{ display:grid; grid-template-columns:repeat(auto-fill,minmax(392px,1fr)); gap:30px 24px; margin-top:28px; justify-items:center; }
+  .case-col{ width:392px; }
+  .case-label{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; padding:0 4px; }
+  .case-label .num{ font-size:15px; font-weight:800; color:var(--black); }
+  .lab-chip{ font-size:11px; font-weight:800; border-radius:7px; padding:3px 9px; white-space:nowrap; }
+  .lab-blue{ color:var(--primary); background:#eaf2ff; }
+  .lab-amber{ color:var(--amber); background:#fff4e0; }
+  .lab-purple{ color:#6d3fd4; background:#f1ecfe; }
+  .lab-grey{ color:var(--secondary); background:var(--surface); }
+  .lab-green{ color:#0f9d63; background:#e6f7ef; }
+  .lab-orange{ color:#b54708; background:#fff0e0; }
+  .lab-red{ color:var(--error); background:#ffeaec; }
+
+  /* ── 폰 프레임 ── */
+  .phone{ width:392px; background:var(--white); border-radius:30px; border:1px solid #dfe3e8; box-shadow:0 14px 44px rgba(0,0,0,.16); overflow:hidden; }
+  .statusbar{ display:flex; justify-content:space-between; align-items:center; padding:11px 24px 5px; font-size:13px; font-weight:700; color:var(--black); }
+  .statusbar .icons{ display:flex; align-items:center; gap:5px; }
+  .statusbar .icons .mi{ font-size:16px; }
+
+  .nav{ display:flex; align-items:center; justify-content:space-between; padding:8px 16px 12px; }
+  .nav-x{ width:34px; height:34px; display:flex; align-items:center; justify-content:center; color:var(--black); }
+  .nav-search{ display:flex; flex-direction:column; align-items:center; gap:1px; color:var(--black); font-size:10px; font-weight:600; }
+
+  .cover{ padding:8px 0 6px; display:flex; flex-direction:column; align-items:center; }
+  .cover-video{ width:152px; aspect-ratio:3/4; border-radius:14px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,.12); overflow:hidden; background:linear-gradient(165deg,#ecca4d 0%,#d4b13e 54%,#3b3b3b 55%,#232323 100%); }
+  .cover-play{ width:54px; height:54px; border-radius:50%; background:rgba(0,0,0,.42); display:flex; align-items:center; justify-content:center; }
+  .cover-vlabel{ position:absolute; bottom:7px; right:9px; font-size:9px; color:rgba(255,255,255,.7); font-weight:600; }
+  .cover-badge-row{ display:flex; align-items:center; justify-content:center; gap:6px; padding:12px 0 2px; }
+  .cover-badge-row .n-mark{ color:var(--primary); font-weight:800; font-size:15px; }
+  .cover-badge{ font-weight:700; font-size:13px; padding:5px 13px; border-radius:var(--r-pill); }
+  .st-blue{ color:var(--primary); background:var(--primary-lighter); }
+  .st-amber{ color:var(--amber); background:#fff4e0; }
+  .st-grey{ color:var(--secondary); background:var(--surface); }
+  .st-green{ color:#0f9d63; background:#e6f7ef; }
+  .st-orange{ color:#b54708; background:#fff0e0; }
+
+  .section{ padding:0 20px; }
+  .course-title{ font-size:22px; font-weight:700; line-height:1.4; margin:14px 0 12px; color:var(--black); }
+  .course-desc-row{ display:flex; gap:8px; align-items:flex-start; padding:2px 0 4px; }
+  .course-desc-row .flag{ color:var(--secondary); flex-shrink:0; padding-top:2px; }
+  .course-desc{ font-size:13.5px; color:var(--secondary); line-height:1.6; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .course-desc-row .caret{ color:var(--muted); flex-shrink:0; padding-top:2px; }
+
+  .detail-tabs{ display:flex; padding:14px 20px 0; border-bottom:1px solid var(--border); margin-top:8px; }
+  .detail-tab{ padding:12px 4px; margin-right:28px; font-size:15px; font-weight:700; color:var(--muted); position:relative; }
+  .detail-tab.active{ color:var(--black); }
+  .detail-tab.active::after{ content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--black); border-radius:2px; }
+
+  .instructor-card{ display:flex; align-items:center; gap:14px; padding:16px; background:var(--surface); border-radius:var(--r-lg); margin:18px 0 4px; }
+  .instructor-avatar{ width:48px; height:48px; border-radius:50%; background:var(--black); display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0; }
+  .instructor-avatar .mi{ font-size:26px; }
+  .instructor-name{ font-size:15px; font-weight:700; color:var(--black); display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .instructor-name.muted{ color:var(--muted); }
+  .instr-soft{ font-size:10.5px; font-weight:600; color:var(--secondary); background:#e8ebed; border-radius:6px; padding:2px 7px; white-space:nowrap; }
+  .instr-soft.muted{ color:var(--muted); }
+  .instructor-sub{ font-size:13px; color:var(--secondary); margin-top:4px; }
+  .instructor-sub.muted{ color:var(--muted); }
+
+  .info-card{ display:flex; gap:12px; align-items:flex-start; padding:15px 16px; background:var(--white); border:1px solid var(--border); border-radius:var(--r-lg); margin-top:10px; }
+  .info-icon{ width:24px; flex-shrink:0; color:var(--secondary); }
+  .info-icon.warn{ color:var(--error); }
+  .info-label{ font-size:12px; color:var(--secondary); font-weight:600; display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px; }
+  .info-val{ font-size:14.5px; color:var(--black); font-weight:700; line-height:1.45; word-break:keep-all; }
+  .info-val.red{ color:var(--error); }
+  .info-val.muted{ color:var(--muted); font-weight:600; }
+  .info-badge{ font-size:12px; font-weight:800; color:var(--primary); }
+  .map-link{ font-size:12px; color:var(--secondary); font-weight:600; }
+  .pill{ font-size:11px; font-weight:700; border-radius:20px; padding:2px 9px; }
+  .pill.amber{ color:var(--amber); background:#fff4e0; }
+  .pill.grey{ color:var(--secondary); background:var(--surface); }
+  .pill.green{ color:#0f9d63; background:#e6f7ef; }
+  .pill.red{ color:var(--error); background:#ffeaec; }
+  .pill.blue{ color:var(--primary); background:#eaf2ff; }
+
+  .cat-wrap{ padding:22px 20px 6px; border-top:8px solid var(--body-bg); margin-top:20px; }
+  .cat-title{ font-size:14px; font-weight:700; margin-bottom:14px; }
+  .cat-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .cat-chip{ padding:8px 16px; border:1px solid var(--border); border-radius:var(--r-pill); font-size:13px; font-weight:600; color:#545454; background:var(--white); }
+
+  .bottom-cta{ display:flex; align-items:center; gap:12px; padding:12px 16px 20px; border-top:1px solid var(--border); margin-top:12px; }
+  .heart{ width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--secondary); flex-shrink:0; }
+  .btn-primary{ flex:1; height:54px; border-radius:var(--r); background:var(--primary); color:#fff; border:none; font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .btn-primary.disabled{ background:var(--body-bg); color:#b0b8c1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="page-h">
+    <h1>오프라인 코스 케이스 갤러리 — 실제 학습자 화면 (8종)</h1>
+    <p>오프라인 빌더 설정이 만들어내는 학습자 코스 상세 화면(<code>course-detail.html</code> 정보 탭)을 케이스별로 한 페이지에 모았습니다. 각 폰은 실제 화면 그대로 — 커버·상태 배지·강사·학습 정보·카테고리·신청 버튼.</p>
+    <div class="page-h legend" style="display:flex;">
+      <span>상태: 수강 신청 가능 / 마감 임박 / 신청 마감 / 상시 모집 / 관리자 배정 / 오픈 예정</span>
+      <span>신청 방식: 단일 선택 · 다중 조합 · 회차 선택형 · 관리자 지정</span>
+    </div>
+  </div>
+
+  <div class="gallery" id="gallery"></div>
+</div>
+
+<script>
+/* course-detail.html COURSE_CASES 8종 (정본 데이터 일치) + 케이스 메타 */
+const CASES = [
+  { n:'CASE 1', label:'표준 다회차', sel:'단일 선택', selCls:'lab-amber',
+    status:{t:'수강 신청 가능', c:'st-blue'}, enroll:'enrolling',
+    title:'2026 직무교육 — 프로젝트 관리 심화',
+    intro:'PM 직무에서 실제 활용 가능한 프로젝트 관리 방법론과 케이스 스터디를 통해 실전 역량을 강화합니다. 각 회차별 실습과 그룹 과제가 포함됩니다.',
+    instr:{name:'김민준', sub:'프로젝트 관리 전문가 · A등급 강사', mixed:false},
+    period:'2026.05.01 — 2026.06.30', days:'61일', place:'한샘 HQ 대교육장 B동 3층',
+    enrollP:'2026.04.15 09:00 — 2026.04.30 18:00', cancel:'교육 시작 3일 전까지 취소, 5일 전까지 변경 가능',
+    cats:['직무교육','리더십','자기경영','특강'] },
+
+  { n:'CASE 2', label:'단일 하루 특강', sel:'단일 선택', selCls:'lab-amber',
+    status:{t:'마감 임박', c:'st-amber'}, enroll:'closed', enrollPill:{t:'마감 임박', c:'amber'},
+    title:'고객 응대 서비스 매너 특강',
+    intro:'현장에서 바로 쓰는 고객 응대 기본기와 클레임 대응을 하루 과정으로 익힙니다.',
+    instr:{name:'한소희', sub:'고객 서비스 교육 전문가', mixed:false},
+    period:'2026.03.15 (당일 1일)', days:'당일', place:'한샘 HQ 대교육장',
+    enrollP:'~ 2026.03.10 18:00', cancel:'신청 후 취소 · 변경 불가 (단일 일정)',
+    cats:['직무교육','특강'] },
+
+  { n:'CASE 3', label:'회차별 강사·장소 상이', sel:'다중 조합', selCls:'lab-purple',
+    status:{t:'수강 신청 가능', c:'st-blue'}, enroll:'enrolling',
+    title:'리더십 특강 시리즈 (여러 차수 조합)',
+    intro:'원하는 특강을 골라 조합해 수강합니다. 회차마다 강사·교육장이 다릅니다.',
+    instr:{name:'강태훈', sub:'안전보건 법정의무교육 전문 · 외 3명', mixed:true},
+    period:'2026.04.07 — 2026.04.11', days:'5일', place:'한샘 HQ 대교육장 외 2곳', placePill:{t:'3곳', c:'grey'},
+    enrollP:'2026.03.20 — 2026.04.03', cancel:'교육 시작 3일 전까지 취소, 5일 전까지 변경 가능',
+    cats:['직무교육','리더십'] },
+
+  { n:'CASE 4', label:'관리자 지정 등록', sel:'관리자 지정', selCls:'lab-orange',
+    status:{t:'관리자 배정', c:'st-orange'}, enroll:'assigned',
+    title:'하반기 신입사원 온보딩 (7월)',
+    intro:'관리자가 직접 배정한 교육입니다. 별도 신청 없이 배정된 일정에 참석합니다.',
+    instr:{name:'박지훈', sub:'신입사원 온보딩 전문 강사', mixed:false},
+    period:'2026.07.01 — 2026.07.03', days:'3일', place:'판교 연수원',
+    enrollP:'관리자 배정 — 신청 절차 없음', enrollMuted:true, cancel:'개인 취소·변경 불가 — 담당자 문의',
+    cats:['공통/온보딩'] },
+
+  { n:'CASE 5', label:'법정의무 (회차 선택형)', sel:'회차 선택형', selCls:'lab-blue', extra:{t:'법정의무', c:'lab-red'},
+    status:{t:'수강 신청 가능', c:'st-blue'}, enroll:'enrolling',
+    title:'안전보건 법정의무교육 (상반기)',
+    intro:'제공되는 회차 중 참석 가능한 1개를 선택합니다. 법정 의무교육으로 출석률 100%가 수료 기준입니다.',
+    instr:{name:'강태훈', sub:'안전보건 법정의무교육 전문 강사', mixed:false},
+    period:'2026.05.07 — 2026.06.04', days:'29일', place:'본사 교육장 A · B · 원격', placePill:{t:'3곳', c:'grey'},
+    enrollP:'2026.04.20 — 2026.05.05', cancel:'교육 시작 1일 전까지 취소, 변경 불가',
+    cats:['공통/온보딩','법정의무'] },
+
+  { n:'CASE 6', label:'장기 · 상시 모집', sel:'다중 조합', selCls:'lab-purple',
+    status:{t:'상시 모집', c:'st-green'}, enroll:'enrolling',
+    title:'신임 팀장 리더십 캠프 (장기)',
+    intro:'여러 달에 걸친 장기 과정입니다. 상시 모집이며 정원 소진 시 마감됩니다.',
+    instr:{name:'최예진', sub:'리더십 개발 코치 · 외 2명', mixed:true},
+    period:'2026.05.20 — 2026.07.31', days:'73일', place:'한샘 HQ 세미나룸 외',
+    enrollP:'상시 모집 (정원 소진 시 마감)', enrollPill:{t:'상시', c:'green'}, cancel:'교육 시작 2주 전까지 취소, 1주 전까지 변경 가능',
+    cats:['리더십','자기경영'] },
+
+  { n:'CASE 7', label:'신청 마감 · 기한 경과', sel:'단일 선택', selCls:'lab-amber',
+    status:{t:'신청 마감', c:'st-grey'}, enroll:'closed', enrollPill:{t:'마감', c:'grey'},
+    title:'영업 전략 부트캠프 (5기)',
+    intro:'접수가 마감된 코스입니다. 취소·변경 기한도 모두 지났습니다.',
+    instr:{name:'김도윤', sub:'영업 전략 컨설턴트 · B등급 강사', mixed:false},
+    period:'2026.06.02 — 2026.06.06', days:'5일', place:'판교 연수원',
+    enrollP:'2026.05.30 종료 — 신청 마감', enrollMuted:true, cancel:'취소 · 변경 기한이 모두 지났습니다',
+    cats:['영업'] },
+
+  { n:'CASE 8', label:'최소 정보 · 미정', sel:'단일 선택', selCls:'lab-amber',
+    status:{t:'오픈 예정', c:'st-amber'}, enroll:'before_open',
+    title:'2026 하반기 직무 향상 과정 (준비 중)',
+    intro:'세부 일정이 확정되는 대로 안내됩니다.',
+    instr:{name:'대표 강사', sub:'강사 정보 추후 안내', mixed:false, muted:true},
+    period:'2026.08.01 — 2026.08.02', days:'2일', place:'장소 미정 — 추후 안내', placeMuted:true,
+    enrollP:'2026.07.01 — 2026.07.20', cancel:'별도 제한 없음 (정책 미설정)', cancelMuted:true,
+    cats:['직무교육'] },
+];
+
+const BTN = {
+  enrolling:   { t:'수강 신청하기', icon:'arrow_forward', dis:false },
+  closed:      { t:'신청이 마감되었습니다', icon:'', dis:true },
+  before_open: { t:'오픈 예정', icon:'schedule', dis:true },
+  assigned:    { t:'배정 일정 확인 완료', icon:'assignment', dis:true },
+};
+
+function pill(p){ return p ? `<span class="pill ${p.c}">${p.t}</span>` : ''; }
+
+function phone(c){
+  const b = BTN[c.enroll];
+  const instrName = `<span class="instructor-name${c.instr.muted?' muted':''}">${c.instr.name}` +
+    (c.instr.mixed ? ` <span class="instr-soft">회차별 강사 상이</span>` : '') +
+    (c.instr.muted ? ` <span class="instr-soft muted">미배정</span>` : '') + `</span>`;
+
+  const placeRight = c.placePill ? pill(c.placePill) : `<span class="map-link">지도 보기 <span class="mi i14">expand_more</span></span>`;
+  const enrollRight = c.enrollPill ? pill(c.enrollPill) : '';
+
+  return `
+  <div class="case-col">
+    <div class="case-label">
+      <span class="num">${c.n} · ${c.label}</span>
+      <span class="lab-chip ${c.selCls}">${c.sel}</span>
+      ${c.extra ? `<span class="lab-chip ${c.extra.c}">${c.extra.t}</span>` : ''}
+    </div>
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span class="icons"><span class="mi">signal_cellular_alt</span><span class="mi">wifi</span><span class="mi">battery_full</span></span></div>
+      <div class="nav">
+        <span class="nav-x"><span class="mi">close</span></span>
+        <span class="nav-search"><span class="mi i18">search</span>코스 검색</span>
+      </div>
+
+      <div class="cover">
+        <div class="cover-video"><div class="cover-play"><span class="mi" style="font-size:32px; color:#fff;">play_arrow</span></div><div class="cover-vlabel">영상 미리보기</div></div>
+        <div class="cover-badge-row"><span class="n-mark">N</span><span class="cover-badge ${c.status.c}">${c.status.t}</span></div>
+      </div>
+
+      <div class="section">
+        <div class="course-title">${c.title}</div>
+        <div class="course-desc-row">
+          <span class="mi i18 flag">flag</span>
+          <span class="course-desc">${c.intro}</span>
+          <span class="mi i18 caret">expand_more</span>
+        </div>
+      </div>
+
+      <div class="detail-tabs"><span class="detail-tab active">정보</span><span class="detail-tab">커리큘럼</span></div>
+
+      <div class="section">
+        <div class="instructor-card">
+          <div class="instructor-avatar"><span class="mi">person</span></div>
+          <div>${instrName}<div class="instructor-sub${c.instr.muted?' muted':''}">${c.instr.sub}</div></div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon"><span class="mi i16">calendar_month</span></div>
+          <div style="flex:1; min-width:0;">
+            <div class="info-label">교육 전체 기간 <span class="info-badge">${c.days}</span></div>
+            <div class="info-val">${c.period}</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon"><span class="mi i16">apartment</span></div>
+          <div style="flex:1; min-width:0;">
+            <div class="info-label">기본 장소명 ${placeRight}</div>
+            <div class="info-val${c.placeMuted?' muted':''}">${c.place}</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon"><span class="mi i16">event</span></div>
+          <div style="flex:1; min-width:0;">
+            <div class="info-label">수강 신청 기간 ${enrollRight}</div>
+            <div class="info-val${c.enrollMuted?' muted':''}">${c.enrollP}</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon ${c.cancelMuted?'':'warn'}"><span class="mi i16">${c.cancelMuted?'info':'warning'}</span></div>
+          <div style="flex:1; min-width:0;">
+            <div class="info-label">취소 · 변경 규정</div>
+            <div class="info-val${c.cancelMuted?' muted':' red'}">${c.cancel}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cat-wrap">
+        <div class="cat-title">카테고리</div>
+        <div class="cat-chips">${c.cats.map(x=>`<span class="cat-chip">${x}</span>`).join('')}</div>
+      </div>
+
+      <div class="bottom-cta">
+        <span class="heart"><span class="mi">favorite</span></span>
+        <button class="btn-primary${b.dis?' disabled':''}">${b.t}${b.icon?` <span class="mi i16">${b.icon}</span>`:''}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('gallery').innerHTML = CASES.map(phone).join('');
+</script>
+</body>
+</html>
