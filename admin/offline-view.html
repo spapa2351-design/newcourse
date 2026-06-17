@@ -357,7 +357,7 @@
   const COMPLETION_MIN_RATE = (COURSE.completionMinRate != null) ? COURSE.completionMinRate : 75;
 
   /* ── 코스 상태별 뷰 모드 (오프라인: active·published·scheduled·draft·closed) ──
-     오프라인은 온라인의 4-액션 종료 모달이 없는 단순 모델. 운영중/예정/종료 구분만. */
+     오프라인은 종료 모달(온라인 전용)이 없는 단순 모델 — 회차 종료·신청 만료로 자연 종료. 운영중/예정/종료 상태로만 구분. */
   const OFF_STATUS = {
     active:    { badge: '운영중', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
     published: { badge: '운영중', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
@@ -511,9 +511,6 @@
     const [enrollType, setEnrollType] = useState('selected');
     const [selectedMembers, setSelectedMembers] = useState(new Set());
     const [showMemberPicker, setShowMemberPicker] = useState(false);
-    const [operationConfirm, setOperationConfirm] = useState(false);
-    const [endChoice, setEndChoice] = useState(null);
-    const [endConfirmText, setEndConfirmText] = useState('');
     const [qrCountdown, setQrCountdown] = useState(30);
     const qrTimerRef = useRef(null);
     const bcRef = useRef(null);
@@ -1181,15 +1178,10 @@
                   <QrCode size={13}/> 라이브 출석
                 </button>
               )}
-              {isClosedCourse ? (
+              {isClosedCourse && (
                 <div className="w-full flex items-center justify-center gap-1.5 bg-slate-50 text-slate-400 border border-slate-200 font-bold text-[12px] py-2 rounded-xl">
                   <Power size={12}/> 종료됨 · 조회 전용
                 </div>
-              ) : (
-                <button onClick={()=>setOperationConfirm(true)}
-                  className="w-full flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-[13px] py-2 rounded-xl transition-colors">
-                  <Power size={12}/> 운영 종료
-                </button>
               )}
             </div>
           </aside>
@@ -1993,70 +1985,6 @@
             </div>
           </div>
         )}
-
-        {/* ══ 운영 종료 — 3-카드 (휴면 / 정상 종료 / 긴급 차단) ══ */}
-        {operationConfirm && (() => {
-          const ACTIONS = [
-            { k:'pause',  Icon:PauseCircle, color:'slate',  title:'휴면',      tagline:'재개 가능',        desc:'신규 등록·학습을 일시 중단합니다. 다시 운영 재개할 수 있습니다.',                       impact:'신규 등록 ✕ · 기존 학습 ✕ · 재개 가능 ◯',        requireConfirm:false },
-            { k:'normal', Icon:CalendarX,   color:'indigo', title:'정상 종료', tagline:'신규 등록만 마감', desc:'신규 등록을 막고, 기존 학습자는 수강 기간 안에서 학습을 마칠 수 있습니다.',           impact:'신규 등록 ✕ · 기존 학습 ◯ (수강 기간 내)',       requireConfirm:false, recommended:true },
-            { k:'force',  Icon:Ban,         color:'rose',   title:'긴급 차단', tagline:'즉시 학습 중단',   desc:'신규 등록과 기존 학습자의 학습을 즉시 중단합니다. 사고·법적 이슈 등 비상 상황에서만 사용합니다.', impact:'신규 등록 ✕ · 기존 학습 ✕ (즉시) · 재개 불가', requireConfirm:true },
-          ];
-          const CM = {
-            slate:  { bg:'bg-slate-50',  text:'text-slate-600',  border:'border-slate-300',  ring:'ring-slate-400',  btn:'bg-slate-600 hover:bg-slate-700' },
-            indigo: { bg:'bg-indigo-50', text:'text-indigo-600', border:'border-indigo-300', ring:'ring-indigo-400', btn:'bg-indigo-600 hover:bg-indigo-700' },
-            rose:   { bg:'bg-rose-50',   text:'text-rose-600',   border:'border-rose-300',   ring:'ring-rose-400',   btn:'bg-rose-500 hover:bg-rose-600' },
-          };
-          const close = () => { setOperationConfirm(false); setEndChoice(null); setEndConfirmText(''); };
-          const chosen = ACTIONS.find(a => a.k === endChoice);
-          const co = chosen ? CM[chosen.color] : null;
-          const canSubmit = chosen && (!chosen.requireConfirm || endConfirmText === '긴급 차단');
-          return (
-          <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4" onClick={close}>
-            <div className="bg-white rounded-2xl shadow-xl w-[560px] max-h-[92vh] flex flex-col overflow-hidden animate-slideUp" onClick={e=>e.stopPropagation()}>
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-                <h3 className="text-[15px] font-black text-slate-900 flex items-center gap-2"><Power size={18} className="text-slate-500"/> 코스 운영 종료</h3>
-                <button onClick={close} className="text-slate-400 hover:text-slate-600"><X size={20}/></button>
-              </div>
-              <div className="px-6 pt-5 pb-3 shrink-0"><p className="text-[13px] text-slate-500 leading-relaxed">상황에 맞는 종료 방식을 선택하세요.</p></div>
-              <div className="px-6 pb-4 flex-1 overflow-y-auto custom-scrollbar">
-                <div className="space-y-2.5">
-                  {ACTIONS.map(a => { const ac=CM[a.color]; const isSel=endChoice===a.k; const AIcon=a.Icon; return (
-                    <button key={a.k} onClick={()=>{ setEndChoice(a.k); setEndConfirmText(''); }}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-start gap-3 ${isSel ? `${ac.border} ${ac.bg} ring-2 ${ac.ring} ring-opacity-30` : 'border-slate-200 bg-white hover:border-slate-300'}`}>
-                      <div className={`w-10 h-10 rounded-xl ${ac.bg} flex items-center justify-center shrink-0`}><AIcon size={20} className={ac.text}/></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[15px] font-black text-slate-900">{a.title}</span>
-                          <span className={`text-[11px] font-bold ${ac.text} ${ac.bg} px-1.5 py-0.5 rounded`}>{a.tagline}</span>
-                          {a.recommended && <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">권장</span>}
-                          {a.requireConfirm && <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">2차 확인</span>}
-                        </div>
-                        <p className="text-[12.5px] text-slate-600 leading-relaxed mb-1.5">{a.desc}</p>
-                        <p className="text-[11.5px] font-bold text-slate-400">{a.impact}</p>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 shrink-0 mt-1 flex items-center justify-center ${isSel ? `${ac.border} ${ac.bg}` : 'border-slate-300 bg-white'}`}>{isSel && <div className={`w-2.5 h-2.5 rounded-full ${ac.btn.split(' ')[0]}`}/>}</div>
-                    </button>
-                  );})}
-                </div>
-                {chosen?.requireConfirm && (
-                  <div className="mt-4 bg-rose-50 border border-rose-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2"><AlertCircle size={15} className="text-rose-600"/><span className="text-[13px] font-black text-rose-700">긴급 차단 확인</span></div>
-                    <p className="text-[12.5px] text-rose-700 mb-2.5 leading-relaxed">학습자가 즉시 학습을 못 합니다. 재개도 불가합니다. 진행하려면 아래 칸에 <span className="font-black">긴급 차단</span> 을 입력하세요.</p>
-                    <input type="text" value={endConfirmText} onChange={e=>setEndConfirmText(e.target.value)} placeholder="긴급 차단" className="w-full border border-rose-300 rounded-lg px-3 py-2 text-[13px] focus:border-rose-500 outline-none bg-white"/>
-                  </div>
-                )}
-              </div>
-              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-2 shrink-0">
-                <button onClick={close} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-[14px] font-bold text-slate-600 hover:bg-slate-50">취소</button>
-                <button onClick={close} disabled={!canSubmit}
-                  className={`px-6 py-2.5 rounded-xl text-[14px] font-bold flex items-center gap-1.5 transition-colors ${canSubmit ? `${co.btn} text-white` : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
-                  {chosen ? `${chosen.title} 실행` : '방식 선택'}
-                </button>
-              </div>
-            </div>
-          </div>
-          );
-        })()}
 
         {/* ══ 회차 상세 팝오버 ══ */}
         {calPopover && (
