@@ -351,7 +351,7 @@
     <button class="case-pill" onclick="applyCase(2)">③ 회차별 강사·장소 상이</button>
     <button class="case-pill" onclick="applyCase(3)">④ 관리자 지정 등록</button>
     <button class="case-pill" onclick="applyCase(4)">⑤ 법정의무 (회차선택형)</button>
-    <button class="case-pill" onclick="applyCase(5)">⑥ 장기 · 상시 모집</button>
+    <button class="case-pill" onclick="applyCase(5)">⑥ 장기 · 다중 조합</button>
     <button class="case-pill" onclick="applyCase(6)">⑦ 신청 마감 · 기한 경과</button>
     <button class="case-pill" onclick="applyCase(7)">⑧ 최소 정보 · 미정</button>
     <div class="case-switch-desc" id="case-switch-desc">상단 버튼으로 케이스별 화면을 미리볼 수 있습니다.</div>
@@ -792,12 +792,12 @@ const COURSE_CASES = [
     period:'2026.05.07 — 2026.06.04', days:'29일', place:'본사 교육장 A · B · 원격',
     enrollP:'2026.04.20 — 2026.05.05', cancel:'교육 시작 1일 전까지 취소, 변경 불가', cancelMuted:false,
     cats:['공통/온보딩','법정의무'] },
-  { label:'⑥ 장기 · 상시 모집', mode:'multi', enroll:'enrolling', cover:'상시 모집',
+  { label:'⑥ 장기 · 다중 조합', mode:'multi', enroll:'enrolling', cover:'수강 신청 가능',
     title:'신임 팀장 리더십 캠프<br>(장기)',
-    intro:'여러 달에 걸친 장기 과정입니다. 상시 모집이며 정원 소진 시 마감됩니다.',
+    intro:'여러 달에 걸친 장기 과정입니다. 원하는 차수를 조합해 수강하며, 정원 소진 시 마감됩니다.',
     instr:{name:'최예진', sub:'리더십 개발 코치 · 외 2명', mixed:true},
     period:'2026.05.20 — 2026.07.31', days:'73일', place:'한샘 HQ 세미나룸 외',
-    enrollP:'상시 모집 (정원 소진 시 마감)', cancel:'교육 시작 2주 전까지 취소, 1주 전까지 변경 가능', cancelMuted:false,
+    enrollP:'2026.04.20 — 2026.05.10', cancel:'교육 시작 2주 전까지 취소, 1주 전까지 변경 가능', cancelMuted:false,
     cats:['리더십','자기경영'] },
   { label:'⑦ 신청 마감 · 기한 경과', mode:'single', enroll:'closed', cover:'신청 마감',
     title:'영업 전략 부트캠프<br>(5기)',

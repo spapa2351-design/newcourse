@@ -272,55 +272,14 @@
 
   <!-- 하단 CTA -->
   <div class="bottom-cta">
-    <button class="btn-primary" id="btn-cert" onclick="openCertModal()" style="background:var(--primary); color:#fff; box-shadow: 0 4px 15px rgba(46,132,255,.3);">
-      <span class="mi">download</span> 수료증 다운로드
+    <button class="btn-primary" id="btn-cert" onclick="location.href='my.html'" style="background:var(--primary); color:#fff; box-shadow: 0 4px 15px rgba(46,132,255,.3);">
+      내 학습으로 <span class="mi">arrow_forward</span>
     </button>
   </div>
 
 </div>
 
-<!-- ══ 수료증 모달 ══ -->
-<style>
-  .cert-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; padding:20px; }
-  .cert-overlay.open { display:flex; }
-  .cert-modal { background:#fff; border-radius:16px; padding:18px; width:100%; max-width:380px; }
-  #cert-paper { border:2px solid var(--primary); border-radius:12px; padding:28px 22px; text-align:center; background:#fff; }
-  .cert-h { font-size:12px; font-weight:700; color:var(--primary); letter-spacing:4px; }
-  .cert-title { font-size:26px; font-weight:800; color:#222; margin:6px 0 16px; letter-spacing:8px; }
-  .cert-row { font-size:13px; color:#888; margin-top:8px; line-height:1.5; }
-  .cert-strong { font-size:16px; font-weight:700; color:#222; }
-  @media print { body * { visibility:hidden; } .cert-overlay, .cert-overlay * { visibility:visible; } .cert-overlay { position:fixed; background:#fff; padding:0; } .cert-modal>.cert-btns { display:none; } }
-</style>
-<div class="cert-overlay" id="cert-overlay" onclick="if(event.target===this)closeCertModal()">
-  <div class="cert-modal">
-    <div id="cert-paper">
-      <div class="cert-h">CERTIFICATE</div>
-      <div class="cert-title">수 료 증</div>
-      <div class="cert-row">아래 교육과정을 성실히 이수하였기에 이 증서를 수여합니다.</div>
-      <div style="height:14px;"></div>
-      <div class="cert-row">수료자</div>
-      <div class="cert-strong" id="cert-name">홍길동</div>
-      <div class="cert-row" style="margin-top:12px;">과정명</div>
-      <div class="cert-strong" id="cert-course">—</div>
-      <div class="cert-row" style="margin-top:12px;">출석률 <b id="cert-rate" style="color:var(--primary);">—</b> · 수료 기준 75% 이상</div>
-      <div class="cert-row" id="cert-date" style="margin-top:14px;">—</div>
-      <div class="cert-row" style="margin-top:18px; font-weight:700; color:#222;">㈜뉴인 러닝센터</div>
-    </div>
-    <div class="cert-btns" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px;">
-      <button onclick="closeCertModal()" style="height:46px; border-radius:10px; border:1px solid #e5e5e5; background:#f2f2f2; font-size:14px; font-weight:600; cursor:pointer;">닫기</button>
-      <button onclick="window.print()" style="height:46px; border-radius:10px; border:none; background:var(--primary); color:#fff; font-size:14px; font-weight:600; cursor:pointer;">인쇄 · PDF 저장</button>
-    </div>
-  </div>
-</div>
-<script>
-function openCertModal(){
-  var c=document.querySelector('.complete-course-name'); if(c) document.getElementById('cert-course').textContent=c.textContent;
-  var r=document.getElementById('stat-rate'); if(r) document.getElementById('cert-rate').textContent=r.textContent;
-  var p=document.querySelector('.complete-package'); if(p) document.getElementById('cert-date').textContent=p.textContent;
-  document.getElementById('cert-overlay').classList.add('open');
-}
-function closeCertModal(){ document.getElementById('cert-overlay').classList.remove('open'); }
-</script>
+<!-- 수료증 모달 제거(2026-06-17 이팀장) — 수료증 기능 미구현 -->
 
 <script>
 const results = {
@@ -381,19 +340,6 @@ function setResult(type) {
   document.getElementById('stat-attend').textContent = r.attend;
   document.getElementById('stat-absent').textContent = r.absent;
   document.getElementById('stat-absent').style.color = r.absentColor;
-
-  const btn = document.getElementById('btn-cert');
-  if (r.certEnabled) {
-    btn.disabled = false;
-    btn.innerHTML = '<span class="mi">download</span> 수료증 다운로드';
-    btn.style.background = 'var(--primary)';
-    btn.style.boxShadow = '0 4px 15px rgba(46,132,255,.3)';
-  } else {
-    btn.disabled = true;
-    btn.innerHTML = '미수료 · 수료증 발급 불가';
-    btn.style.background = '';
-    btn.style.boxShadow = '';
-  }
 
   const navBadge = document.getElementById('nav-badge');
   if (r.badgeClass === 'pass') {
