@@ -4,26 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>오프라인 코스 — 직무교육</title>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --primary: #5569ff;
-      --primary-lighter: #EEF0FF;
-      --secondary: #6E759F;
-      --error: #FF1943;
-      --success-dark: #1A7A4A;
-      --success-bg: #E6F4EA;
-      --black: #223354;
-      --body-bg: #f2f5f9;
-      --white: #ffffff;
-      --border: rgba(34,51,84,.10);
-      --r: 10px; --r-lg: 16px;
+    /* Material Symbols Rounded — 단일 아이콘 라이브러리 (이모지/아이콘폰트 통일) */
+    .mi{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+    .mi.fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
+    .mi.i9{font-size:9px}.mi.i10{font-size:10px}.mi.i14{font-size:14px}.mi.i16{font-size:16px}.mi.i18{font-size:18px}.mi.i48{font-size:48px}
+    :root{
+      /* ===== TouchClass tokens (design/touchclass_design.md) ===== */
+      --brand-01:#ebf3ff; --brand-02:#dbeaff; --brand-05:#61a2ff;
+      --brand-06:#2e84ff; --brand-08:#0052c7;
+      --n-00:#ffffff; --n-01:#f2f2f2; --n-02:#e5e5e5; --n-04:#bababa;
+      --n-05:#a1a1a1; --n-06:#878787; --n-07:#6e6e6e; --n-08:#545454;
+      --n-09:#3b3b3b; --n-10:#222222;
+      --red:#d00c0c; --red-bg:#ffeded; --orange:#ff603e; --orange-bg:#fff1ed;
+      --green:#2f9e31; --green-bg:#edf8ed; --live:#ff3b3b;
+      --gold:#ffc700; --silver:#bababa; --bronze:#b07c5a;
+      /* legacy alias → 터치클래스 값 */
+      --primary:#2e84ff; --primary-hover:#0052c7; --primary-dark:#0052c7;
+      --primary-lighter:#ebf3ff; --mint:#ebf3ff; --mint-tint:#ebf3ff;
+      --secondary:#878787; --muted:#bababa;
+      --error:#d00c0c; --error-bg:#ffeded;
+      --success:#2f9e31; --success-dark:#2f9e31; --success-bg:#edf8ed;
+      --warning:#ff603e; --warning-dark:#ff603e; --warning-bg:#fff1ed;
+      --black:#222222; --white:#ffffff;
+      --body-bg:#f2f2f2; --border:#e5e5e5;
+      --card-shadow:0 2px 8px rgba(0,0,0,.1);
+      --r:12px; --r-lg:16px; --r-xl:20px; --r-pill:300px;
     }
     html, body { height: 100%; }
     body {
-      font-family: 'Pretendard','Inter',sans-serif;
+      font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+      letter-spacing:-0.6px;
       font-size: 14px; color: var(--black); background: var(--body-bg);
     }
 
@@ -34,8 +48,8 @@
       display: flex; flex-direction: column;
     }
     @media (min-width: 768px) {
-      body { background: #e8ecf4; display: flex; align-items: center; justify-content: center; padding: 32px 16px; min-height: 100vh; }
-      .app { border-radius: var(--r-lg); box-shadow: 0 20px 60px rgba(34,51,84,.18); overflow: hidden; width: 390px; height: 860px; min-height: auto; }
+      body { background: #ededed; display: flex; align-items: center; justify-content: center; padding: 32px 16px; min-height: 100vh; }
+      .app { border-radius: var(--r-lg); box-shadow: 0 20px 60px rgba(0,0,0,.12); overflow: hidden; width: 390px; height: 860px; min-height: auto; }
     }
 
     /* ── 헤더 ── */
@@ -48,7 +62,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 18px; color: var(--black); cursor: pointer;
     }
-    .top-header h1 { flex: 1; font-size: 18px; font-weight: 800; }
+    .top-header h1 { flex: 1; font-size: 18px; font-weight: 700; }
 
     /* ── 서브 카테고리 탭 ── */
     .sub-tabs {
@@ -58,7 +72,7 @@
     }
     .sub-tabs::-webkit-scrollbar { display: none; }
     .sub-tab {
-      padding: 10px 14px; font-size: 14px; font-weight: 700;
+      padding: 10px 14px; font-size: 14px; font-weight: 600;
       color: var(--secondary); cursor: pointer; position: relative;
       border: none; background: none; white-space: nowrap; font-family: inherit;
     }
@@ -75,14 +89,14 @@
     .search-bar input {
       width: 100%; padding: 10px 14px 10px 36px;
       border: 1px solid var(--border); border-radius: var(--r);
-      background: #F6F8FB; font-size: 13px; font-weight: 500;
+      background: var(--n-01); font-size: 13px; font-weight: 500;
       color: var(--black); outline: none; font-family: inherit;
     }
-    .search-bar input::placeholder { color: #A0AEC0; }
+    .search-bar input::placeholder { color: var(--muted); }
     .search-bar input:focus { border-color: var(--primary); background: var(--white); }
     .search-bar .icon {
       position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-      color: #A0AEC0; font-size: 13px;
+      color: var(--muted); font-size: 13px;
     }
 
     /* ── 필터 체크박스 행 ── */
@@ -104,7 +118,7 @@
     }
     .toggle-switch {
       width: 36px; height: 20px; border-radius: 10px;
-      background: #E2E8F0; position: relative; cursor: pointer;
+      background: var(--n-02); position: relative; cursor: pointer;
       transition: background .2s;
     }
     .toggle-switch.on { background: var(--primary); }
@@ -127,7 +141,7 @@
       border: none; background: none; cursor: pointer; font-family: inherit;
       display: flex; align-items: center; gap: 3px;
     }
-    .sort-btn i { font-size: 10px; }
+    .sort-btn .mi { font-size: 14px; }
     .view-toggle {
       width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
       background: var(--white); display: flex; align-items: center; justify-content: center;
@@ -159,16 +173,16 @@
     }
     .g-badge {
       padding: 2px 6px; border-radius: 4px;
-      font-size: 9px; font-weight: 800; white-space: nowrap;
+      font-size: 9px; font-weight: 600; white-space: nowrap;
       backdrop-filter: blur(4px);
     }
     .g-badge.offline { background: rgba(0,0,0,.55); color: #fff; }
-    .g-badge.enrollable { background: rgba(255,255,255,.92); color: var(--success-dark); }
-    .g-badge.not-started { background: rgba(255,25,67,.85); color: #fff; }
-    .g-badge.in-progress { background: rgba(85,105,255,.85); color: #fff; }
-    .g-badge.scheduled { background: rgba(100,116,139,.8); color: #fff; }
-    .g-badge.ended { background: rgba(255,25,67,.12); color: var(--error); border: 1px solid rgba(255,25,67,.25); }
-    .g-badge.completed { background: rgba(255,255,255,.92); color: var(--success-dark); }
+    .g-badge.enrollable { background: rgba(255,255,255,.92); color: var(--brand-06); }
+    .g-badge.not-started { background: rgba(0,0,0,.55); color: #fff; }
+    .g-badge.in-progress { background: rgba(46,132,255,.85); color: #fff; }
+    .g-badge.scheduled { background: rgba(0,0,0,.55); color: #fff; }
+    .g-badge.ended { background: rgba(0,0,0,.45); color: #fff; }
+    .g-badge.completed { background: rgba(255,255,255,.92); color: var(--brand-06); }
 
     .g-card-title {
       font-size: 12px; font-weight: 700; color: var(--black);
@@ -182,24 +196,24 @@
       font-size: 11px; font-weight: 700; color: var(--primary);
       display: flex; align-items: center; gap: 3px;
     }
-    .g-card-bottom .progress i { font-size: 8px; }
+    .g-card-bottom .progress .mi { font-size: 10px; }
     .g-card-bottom .info-btn {
-      width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #E2E8F0;
-      background: none; color: #CBD5E1; font-size: 9px; cursor: pointer;
+      width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--n-02);
+      background: none; color: var(--n-04); font-size: 9px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       margin-left: auto;
     }
 
     /* ── 상태 텍스트 배지 (카드 하단용) ── */
     .g-status {
-      font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 3px;
+      font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 6px;
     }
-    .g-status.enrollable { color: var(--success-dark); border: 1px solid var(--success-dark); background: var(--success-bg); }
-    .g-status.not-started { color: var(--error); border: 1px solid var(--error); background: #FFF5F7; }
-    .g-status.in-progress { color: var(--primary); border: 1px solid var(--primary); background: var(--primary-lighter); }
-    .g-status.scheduled { color: #64748B; border: 1px solid #CBD5E1; background: #F8FAFC; }
-    .g-status.ended { color: #94A3B8; border: 1px solid #E2E8F0; background: #F8FAFC; }
-    .g-status.completed { color: var(--success-dark); border: 1px solid var(--success-dark); background: var(--success-bg); }
+    .g-status.enrollable { color: var(--brand-06); background: var(--brand-01); }
+    .g-status.not-started { color: var(--n-07); background: var(--n-01); }
+    .g-status.in-progress { color: var(--brand-06); background: var(--brand-01); }
+    .g-status.scheduled { color: var(--n-07); background: var(--n-01); }
+    .g-status.ended { color: var(--n-05); background: var(--n-01); }
+    .g-status.completed { color: var(--brand-06); background: var(--brand-01); }
   </style>
 </head>
 <body>
@@ -208,7 +222,7 @@
 
   <!-- ── 헤더 ── -->
   <div class="top-header">
-    <button class="btn-back" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></button>
+    <button class="btn-back" onclick="history.back()"><span class="mi">chevron_left</span></button>
     <h1>직무교육</h1>
   </div>
 
@@ -223,7 +237,7 @@
 
   <!-- ── 검색 ── -->
   <div class="search-bar" data-feature-id="U2-03">
-    <i class="fa-solid fa-magnifying-glass icon"></i>
+    <span class="mi icon">search</span>
     <input type="text" placeholder="어떤 코스를 찾으세요?">
   </div>
 
@@ -231,18 +245,14 @@
   <div class="filter-row">
     <label class="filter-check"><input type="checkbox"> 수강신청가능</label>
     <label class="filter-check"><input type="checkbox"> 수강중</label>
-    <div class="filter-toggle">
-      <span>필수</span>
-      <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
-    </div>
   </div>
 
   <!-- ── 건수 + 정렬 ── -->
   <div class="count-row">
     <span class="count-text">12개 코스</span>
     <div class="sort-area">
-      <button class="sort-btn"><i class="fa-solid fa-chevron-down"></i> 추천순</button>
-      <button class="view-toggle"><i class="fa-solid fa-grip"></i></button>
+      <button class="sort-btn"><span class="mi">expand_more</span> 추천순</button>
+      <button class="view-toggle"><span class="mi i14">grid_view</span></button>
     </div>
   </div>
 
@@ -254,13 +264,13 @@
         <div class="g-card-cover">
           <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=400&fit=crop" alt="">
           <div class="g-badges">
-            <span class="g-badge enrollable"><i class="fa-solid fa-check" style="font-size:7px;"></i> 신청가능</span>
+            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
           </div>
         </div>
         <div class="g-card-title">2026 직무교육 — 프로젝트 관리 심화</div>
         <div class="g-card-bottom">
           <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -269,13 +279,13 @@
         <div class="g-card-cover">
           <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=400&fit=crop" alt="">
           <div class="g-badges">
-            <span class="g-badge enrollable"><i class="fa-solid fa-check" style="font-size:7px;"></i> 신청가능</span>
+            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
           </div>
         </div>
         <div class="g-card-title">데이터 기반 의사결정 실습</div>
         <div class="g-card-bottom">
           <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -289,8 +299,8 @@
         </div>
         <div class="g-card-title">ESG 실무 워크숍</div>
         <div class="g-card-bottom">
-          <span class="progress"><i class="fa-solid fa-play"></i> 66%</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <span class="progress"><span class="mi">play_circle</span> 66%</span>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -305,7 +315,7 @@
         <div class="g-card-title">신입사원 OJT 과정</div>
         <div class="g-card-bottom">
           <span class="g-status not-started">시작전</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -320,7 +330,7 @@
         <div class="g-card-title">글로벌 비즈니스 매너</div>
         <div class="g-card-bottom">
           <span class="g-status scheduled">수강예정</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -329,13 +339,13 @@
         <div class="g-card-cover">
           <img src="https://images.unsplash.com/photo-1560439514-4e9645039924?w=300&h=400&fit=crop" alt="">
           <div class="g-badges">
-            <span class="g-badge completed"><i class="fa-solid fa-check" style="font-size:7px;"></i> 학습 완료</span>
+            <span class="g-badge completed"><span class="mi" style="font-size:9px;">check</span> 학습 완료</span>
           </div>
         </div>
         <div class="g-card-title">2025 하반기 리더십 심화</div>
         <div class="g-card-bottom">
-          <span class="progress"><i class="fa-solid fa-play"></i> 100%</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <span class="progress"><span class="mi">play_circle</span> 100%</span>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -350,7 +360,7 @@
         <div class="g-card-title">2025 법정의무교육</div>
         <div class="g-card-bottom">
           <span class="g-status ended">수강종료</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -359,13 +369,13 @@
         <div class="g-card-cover">
           <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&h=400&fit=crop" alt="">
           <div class="g-badges">
-            <span class="g-badge enrollable"><i class="fa-solid fa-check" style="font-size:7px;"></i> 신청가능</span>
+            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
           </div>
         </div>
         <div class="g-card-title">커뮤니케이션 스킬 강화</div>
         <div class="g-card-bottom">
           <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -379,8 +389,8 @@
         </div>
         <div class="g-card-title">코칭 리더십 심화 과정</div>
         <div class="g-card-bottom">
-          <span class="progress"><i class="fa-solid fa-play"></i> 33%</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <span class="progress"><span class="mi">play_circle</span> 33%</span>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -389,13 +399,13 @@
         <div class="g-card-cover">
           <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop" alt="">
           <div class="g-badges">
-            <span class="g-badge enrollable"><i class="fa-solid fa-check" style="font-size:7px;"></i> 신청가능</span>
+            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
           </div>
         </div>
         <div class="g-card-title">디자인 씽킹 마스터클래스</div>
         <div class="g-card-bottom">
           <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -404,13 +414,13 @@
         <div class="g-card-cover">
           <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=300&h=400&fit=crop" alt="">
           <div class="g-badges">
-            <span class="g-badge enrollable"><i class="fa-solid fa-check" style="font-size:7px;"></i> 신청가능</span>
+            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
           </div>
         </div>
         <div class="g-card-title">비즈니스 협상 실전</div>
         <div class="g-card-bottom">
           <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
@@ -425,7 +435,7 @@
         <div class="g-card-title">AI 활용 업무 자동화</div>
         <div class="g-card-bottom">
           <span class="g-status scheduled">수강예정</span>
-          <button class="info-btn"><i class="fa-solid fa-info"></i></button>
+          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 

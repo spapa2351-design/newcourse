@@ -48,6 +48,7 @@
   .tb{ display:inline-flex; align-items:center; gap:4px; font-weight:700; font-size:11.5px; padding:3px 10px; border-radius:var(--r-pill); white-space:nowrap; }
   .st-blue{ color:var(--primary); background:var(--primary-lighter); }
   .st-amber{ color:var(--amber); background:#fff4e0; }
+  .st-red{ color:var(--error); background:#ffeded; }
   .st-grey{ color:var(--secondary); background:var(--surface); }
   .st-green{ color:#0f9d63; background:#e6f7ef; }
   .st-orange{ color:#b54708; background:#fff0e0; }
@@ -164,9 +165,9 @@
     <p class="sub">배지는 성격이 다른 <b>3가족</b>입니다. 같은 슬롯에 섞지 않습니다. 오프라인 코스는 <b>신청 시작 전엔 학습자에게 안 보이므로 ‘오픈 예정’은 관리자 전용</b>이고, 신청 완료 후 교육 시작 전은 <b>‘수강예정’</b>(내 수강 상태)입니다. <b>신청 방식(가족 ②)은 학습자 미노출</b>(관리자단 전용), <b>관리자 배정</b>은 배정 즉시 ‘수강중’, <b>마감 임박</b>은 ‘수강 신청 가능’의 강조 서브입니다.</p>
     <div class="ref-conv">
       <span class="ci"><span class="tb st-purple">오프라인</span> 코스 유형 — 항상 표시(오프라인 코스 식별)</span>
-      <span class="ci"><span class="tb st-green">채움</span> 모집 상태 — 학습자 화면 노출 · 시간·정원 자동 변동</span>
+      <span class="ci"><span class="tb st-blue">채움</span> 모집 상태 — 학습자 화면 노출 · 시간·정원 자동 변동</span>
       <span class="ci"><span class="tb st-amber outline">테두리</span> 신청 방식 — <b style="color:var(--amber)">학습자 미노출</b> · 관리자단 전용</span>
-      <span class="ci"><span class="tb st-blue">내 수강</span> 신청 후 상태 — MY 전용(카탈로그 배지 아님)</span>
+      <span class="ci"><span class="tb st-blue">내 수강</span> 신청 후 상태 — 신청자 행은 카탈로그에도 표시 · MY</span>
     </div>
 
     <div class="ref-grid">
@@ -184,13 +185,13 @@
               <td class="partial">관리자</td>
             </tr>
             <tr>
-              <td class="badge-cell"><span class="tb st-green">수강 신청 가능</span></td>
+              <td class="badge-cell"><span class="tb st-blue">수강 신청 가능</span></td>
               <td class="cond">신청 시작 ≤ 오늘 ≤ 마감 &amp; 정원 여유</td>
               <td class="memo">수강 신청하기</td>
               <td class="ok">○</td>
             </tr>
             <tr>
-              <td class="badge-cell"><span class="tb st-amber">마감 임박</span></td>
+              <td class="badge-cell"><span class="tb st-red">마감 임박</span></td>
               <td class="cond">‘수강 신청 가능’의 서브 — 마감 D-N 이내 또는 잔여 정원 소수</td>
               <td class="memo">수강 신청하기 (활성)</td>
               <td class="partial">△</td>
@@ -239,11 +240,11 @@
       <!-- 가족 3 -->
       <div class="ref-block">
         <div class="bh"><span class="axis">가족 ③</span> 내 수강 상태</div>
-        <div class="bnote">신청한 학습자가 보는 상태 · 신청 후 MY/코스상세에서 표시</div>
+        <div class="bnote">신청한 학습자가 보는 상태 · 신청 후 카탈로그(신청자 행)·MY·코스상세에서 표시</div>
         <table class="ref">
           <thead><tr><th>배지</th><th>출현 조건</th><th>비고</th></tr></thead>
           <tbody>
-            <tr class="row-div"><td colspan="3">내 수강 상태 — 신청 후(카탈로그엔 모집 상태, 신청자에겐 이 상태)</td></tr>
+            <tr class="row-div"><td colspan="3">내 수강 상태 — 신청 후 · 신청자 행은 카탈로그·MY 모두 이 상태(미신청자에겐 모집 상태)</td></tr>
             <tr>
               <td class="badge-cell"><span class="tb st-blue"><span class="mi i14">schedule</span>수강예정</span></td>
               <td class="cond">신청 완료 &amp; 오늘 &lt; 교육 시작일 (다중·다회차는 가장 빠른 회차)</td>
@@ -269,7 +270,7 @@
   <div class="gallery-h">케이스별 실제 화면 (9종)</div>
   <div class="gallery" id="gallery"></div>
 
-  <p class="ver">배지 분류 v1.7 · 2026-06-17 · 상시 모집 제거(빌더 미지원 — 신청 마감일 필수) · 수강예정·학습 완료 케이스 · ‘오픈 예정’ 학습자단 제거 · ‘오프라인’ 유형 배지 항상 · 커버 이미지 · ‘수강 신청 가능’ 통일</p>
+  <p class="ver">배지 분류 v1.10 · 2026-06-18 · 마감 임박=레드(st-red) · 내 수강 상태(수강중·학습완료) 카탈로그 신청자 행 표시 명문화 · 수강 신청 가능=파랑(st-blue)·오프라인 유형=보라(필수 주황 회피) · 상시 모집 제거(빌더 미지원 — 신청 마감일 필수) · 수강예정·학습 완료 케이스 · ‘오픈 예정’ 학습자단 제거 · ‘오프라인’ 유형 배지 항상 · 커버 이미지 · ‘수강 신청 가능’ 통일</p>
 </div>
 
 <script>
@@ -380,8 +381,8 @@ function statusBadge(c){
   if(c.enroll==='assigned')    return `<span class="cover-badge st-blue">수강중</span>`;  // 관리자 배정 = 배정 즉시 수강중
   // 모집 상태(가족①) — '오픈 예정'은 오프라인 학습자 비노출이라 폰 배지에서 제외(관리자 전용)
   if(c.enroll==='closed')      return `<span class="cover-badge st-grey">신청 마감</span>`;
-  if(c.closingSoon)            return `<span class="cover-badge st-amber">마감 임박</span>`;
-  return `<span class="cover-badge st-green">수강 신청 가능</span>`;
+  if(c.closingSoon)            return `<span class="cover-badge st-red">마감 임박</span>`;
+  return `<span class="cover-badge st-blue">수강 신청 가능</span>`;
 }
 
 function pill(p){ return p ? `<span class="pill ${p.c}">${p.t}</span>` : ''; }

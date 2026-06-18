@@ -880,7 +880,7 @@ function updateBadgesAndNotice() {
   let statusBadge = '';
   if (currentMode === 'assigned')        statusBadge = '';                                         // 관리자 배정은 신청방식으로 표기
   else if (enrollSim === 'before_open')  statusBadge = '<span class="badge b-grey">예정</span>';
-  else if (enrollSim === 'enrolling')    statusBadge = '<span class="badge b-green">수강 신청 가능</span>';
+  else if (enrollSim === 'enrolling')    statusBadge = '<span class="badge b-blue">수강 신청 가능</span>';
   else if (enrollSim === 'closed')       statusBadge = '<span class="badge b-grey">신청 마감</span>';
 
   // 신청 방식 배지는 학습자단 미노출(2026-06-17 이팀장) — 운영 분류는 admin에서만, 관리자 배정은 아래 본문 배너로 안내
