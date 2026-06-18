@@ -292,6 +292,7 @@
     .conf-detail-item { background: #f6f6f6; border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
     .conf-detail-item-name { font-weight: 700; font-size: 14px; color: var(--black); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
     .conf-detail-item-sub { font-size: 12px; color: var(--secondary); }
+    .conf-detail-item-sub + .conf-detail-item-sub { margin-top: 5px; }
     .result-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed rgba(0,0,0,0.08); }
     .result-row:last-child { border-bottom: none; }
     .result-label { color: var(--secondary); font-size: 13px; font-weight: 600; }
@@ -345,7 +346,7 @@
   </div>
 
   <div style="margin-top: 16px; background: #fff; padding: 14px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,.08);">
-    <div class="case-switch-label">코스 케이스 (상단 전환 · 8종)</div>
+    <div class="case-switch-label">코스 케이스 (상단 전환 · 7종)</div>
     <button class="case-pill active" onclick="applyCase(0)">① 표준 다회차</button>
     <button class="case-pill" onclick="applyCase(1)">② 단일 하루 특강</button>
     <button class="case-pill" onclick="applyCase(2)">③ 회차별 강사·장소 상이</button>
@@ -353,7 +354,6 @@
     <button class="case-pill" onclick="applyCase(4)">⑤ 법정의무 (회차선택형)</button>
     <button class="case-pill" onclick="applyCase(5)">⑥ 장기 · 다중 조합</button>
     <button class="case-pill" onclick="applyCase(6)">⑦ 신청 마감 · 기한 경과</button>
-    <button class="case-pill" onclick="applyCase(7)">⑧ 최소 정보 · 미정</button>
     <div class="case-switch-desc" id="case-switch-desc">상단 버튼으로 케이스별 화면을 미리볼 수 있습니다.</div>
   </div>
 
@@ -545,8 +545,9 @@
       </div>
       <div id="conf-detail-items" class="conf-detail-wrap" style="display:none;"></div>
     </div>
-    <div class="bottom-cta">
-      <button class="btn-primary" onclick="openSuccessModal()"><span class="mi i18">check</span> 최종 수강 신청</button>
+    <div class="bottom-cta" style="display:flex; gap:10px;">
+      <button onclick="goScreen('screen-detail'); closeModal();" style="flex:0 0 33%; height:54px; border-radius:12px; border:1px solid var(--border); background:#fff; color:var(--secondary); font-size:16px; font-weight:700; cursor:pointer;">취소</button>
+      <button class="btn-primary" onclick="openSuccessModal()" style="flex:1;"><span class="mi i18">check</span> 최종 수강 신청</button>
     </div>
   </div>
 
@@ -691,17 +692,17 @@ function setMyStatus(status) {
     }
   } else if (status === 'enrolled') {
     enrolledBanner.style.display = '';
-    if (badge) { badge.textContent = '수강중'; badge.style.background = 'var(--success-bg,#E6F4EA)'; badge.style.color = 'var(--success,#1A7A4A)'; }
+    if (badge) { badge.textContent = '수강중'; badge.style.background = 'var(--primary-lighter,#ebf3ff)'; badge.style.color = 'var(--primary,#2e84ff)'; }
     if (btn) {
       btn.innerHTML = '내 수강 상세 보기 <span class="mi i16" style="margin-left:4px;">arrow_forward</span>';
       btn.disabled = false;
-      btn.style.background = 'var(--success,#1A7A4A)';
-      btn.style.boxShadow = '0 4px 15px rgba(26,122,74,0.3)';
+      btn.style.background = '';
+      btn.style.boxShadow = '';
       btn.onclick = function() { location.href = 'my.html'; };
     }
   } else if (status === 'completed') {
     completedBanner.style.display = '';
-    if (badge) { badge.textContent = '수강 완료'; badge.style.background = '#F1F5F9'; badge.style.color = '#475569'; }
+    if (badge) { badge.textContent = '학습완료'; badge.style.background = 'var(--primary-lighter,#ebf3ff)'; badge.style.color = 'var(--primary,#2e84ff)'; }
     if (btn) {
       btn.innerHTML = '수강 완료 · 출석률 100%';
       btn.disabled = true;
@@ -718,6 +719,7 @@ function setMyStatus(status) {
     }
     updateEnrollUI();
   }
+  updateBadgesAndNotice();   // 헤더 모집배지를 myStatus에 맞게 동기화(신청 후엔 숨김)
 }
 
 function initData() {
@@ -764,7 +766,7 @@ const COURSE_CASES = [
     period:'2026.05.01 — 2026.06.30', days:'61일', place:'한샘 HQ 대교육장 B동 3층',
     enrollP:'2026.04.15 09:00 — 2026.04.30 18:00', cancel:'교육 시작 3일 전까지 취소, 5일 전까지 변경 가능', cancelMuted:false,
     cats:['직무교육','리더십','자기경영','특강'] },
-  { label:'② 단일 하루 특강', mode:'single', enroll:'closed', cover:'마감 임박',
+  { label:'② 단일 하루 특강', mode:'single', enroll:'enrolling', closingSoon:true, cover:'마감 임박',
     title:'고객 응대 서비스 매너<br>특강',
     intro:'현장에서 바로 쓰는 고객 응대 기본기와 클레임 대응을 하루 과정으로 익힙니다.',
     instr:{name:'한소희', sub:'고객 서비스 교육 전문가', mixed:false},
@@ -806,13 +808,6 @@ const COURSE_CASES = [
     period:'2026.06.02 — 2026.06.06', days:'5일', place:'판교 연수원',
     enrollP:'2026.05.30 종료 — 신청 마감', cancel:'취소 · 변경 기한이 모두 지났습니다', cancelMuted:false,
     cats:['영업'] },
-  { label:'⑧ 최소 정보 · 미정', mode:'single', enroll:'before_open', cover:'예정',
-    title:'2026 하반기 직무 향상<br>과정 (준비 중)',
-    intro:'세부 일정이 확정되는 대로 안내됩니다.',
-    instr:{name:'대표 강사', sub:'강사 정보 추후 안내', mixed:false, muted:true},
-    period:'2026.08.01 — 2026.08.02', days:'2일', place:'장소 미정 — 추후 안내', placeMuted:true,
-    enrollP:'2026.07.01 — 2026.07.20', cancel:'별도 제한 없음 (정책 미설정)', cancelMuted:true,
-    cats:['직무교육'] },
 ];
 
 function applyCase(i) {
@@ -840,7 +835,10 @@ function applyCase(i) {
   if (cat) cat.innerHTML = c.cats.map(x => `<span class="cat-chip">${x}</span>`).join('');
   // 차수 모드 + 상태
   curCategory = (c.cats && c.cats[0]) || '직무교육';
-  currentMode = c.mode; selectedIds = []; activeDetailId = null; enrollSim = c.enroll || 'enrolling';
+  currentMode = c.mode; selectedIds = []; activeDetailId = null; enrollSim = c.enroll || 'enrolling'; window.__closeSoon = !!c.closingSoon;
+  // 케이스 전환 = 새 코스 미리보기 → 나의 수강 상태 미신청 리셋 + 좌측 라디오(수강상태·신청기간) 화면과 동기화
+  myStatus = 'none'; var __mr = document.querySelector('input[name="my_status"][value="none"]'); if (__mr) __mr.checked = true;
+  var __er = document.querySelector('input[name="enroll_sim"][value="' + enrollSim + '"]'); if (__er) __er.checked = true;
   initData(); updateCaseUI();
 }
 
@@ -855,6 +853,8 @@ function toggleMap() {
 
 function setEnrollSim(val) {
   enrollSim = val;
+  // 신청 기간 시뮬은 '미신청' 맥락 — 나의 수강 상태를 미신청으로 리셋 + 라디오 동기화(화면-라디오 일치)
+  myStatus = 'none'; var __mr = document.querySelector('input[name="my_status"][value="none"]'); if (__mr) __mr.checked = true;
   updateEnrollUI();
   updateBadgesAndNotice();
 }
@@ -876,11 +876,11 @@ function updateBadgesAndNotice() {
     noticeArea.textContent = '관리자가 배정한 일정입니다. 아래 배정된 커리큘럼을 확인해 주세요.';
   }
 
-  // 상태 배지 (갤러리 색)
+  // 상태 배지 — 신청 후(수강예정/수강중/완료)면 헤더 모집배지 숨김(커버 배지가 내 수강 상태 표시), 미신청일 때만 모집 상태 노출
   let statusBadge = '';
-  if (currentMode === 'assigned')        statusBadge = '';                                         // 관리자 배정은 신청방식으로 표기
-  else if (enrollSim === 'before_open')  statusBadge = '<span class="badge b-grey">예정</span>';
-  else if (enrollSim === 'enrolling')    statusBadge = '<span class="badge b-blue">수강 신청 가능</span>';
+  if (myStatus && myStatus !== 'none')   statusBadge = '';
+  else if (currentMode === 'assigned')   statusBadge = '';                                         // 관리자 배정은 본문 배너로 안내
+  else if (enrollSim === 'enrolling')    statusBadge = window.__closeSoon ? '<span class="badge" style="color:#d00c0c;background:#ffeded">마감 임박</span>' : '<span class="badge b-blue">수강 신청 가능</span>';
   else if (enrollSim === 'closed')       statusBadge = '<span class="badge b-grey">신청 마감</span>';
 
   // 신청 방식 배지는 학습자단 미노출(2026-06-17 이팀장) — 운영 분류는 admin에서만, 관리자 배정은 아래 본문 배너로 안내
@@ -905,12 +905,12 @@ function updateEnrollUI() {
       groupChip.innerHTML = '<span class="mi i14">group</span> 배정 그룹: ' + (opt.group || '');
     }
     // 관리자 배정 = 신청 절차 없이 이미 등록된 상태 → 학습자에겐 '수강중'으로 표시(2026-06-17 이팀장)
-    if (badge) { badge.style.display = ''; badge.textContent = '수강중'; badge.style.background = 'var(--success-bg,#E6F4EA)'; badge.style.color = 'var(--success,#1A7A4A)'; }
+    if (badge) { badge.style.display = ''; badge.textContent = '수강중'; badge.style.background = 'var(--primary-lighter,#ebf3ff)'; badge.style.color = 'var(--primary,#2e84ff)'; }
     if (btn) {
       btn.innerHTML = '내 수강 상세 보기 <span class="mi i16" style="margin-left:4px;">arrow_forward</span>';
       btn.disabled = false;
-      btn.style.background = 'var(--success,#1A7A4A)';
-      btn.style.boxShadow = '0 4px 15px rgba(26,122,74,0.3)';
+      btn.style.background = '';
+      btn.style.boxShadow = '';
       btn.onclick = function() { location.href = 'my.html'; };
     }
     if (rowCancelRule) rowCancelRule.style.display = 'none';
@@ -924,12 +924,8 @@ function updateEnrollUI() {
   if (rowCancelRule) rowCancelRule.style.display = '';
   if (rowEnrollPeriod) rowEnrollPeriod.style.display = '';
 
-  if (enrollSim === 'before_open') {
-    if (badge) { badge.textContent = '오픈 예정'; badge.style.background = '#FFF3E0'; badge.style.color = '#E65100'; }
-    if (btn) { btn.innerHTML = '<span class="mi i16">schedule</span> 2026.04.15 09:00 오픈 예정'; btn.disabled = true; }
-    if (periodText) { periodText.textContent = '2026.04.15 09:00 — 2026.04.30 18:00'; periodText.style.color = '#E65100'; }
-  } else if (enrollSim === 'enrolling') {
-    if (badge) { badge.textContent = '수강 신청 가능'; badge.style.background = '#fff'; badge.style.color = 'var(--primary)'; }
+  if (enrollSim === 'enrolling') {
+    if (badge) { if (window.__closeSoon) { badge.textContent = '마감 임박'; badge.style.background = '#ffeded'; badge.style.color = '#d00c0c'; } else { badge.textContent = '수강 신청 가능'; badge.style.background = '#fff'; badge.style.color = 'var(--primary)'; } }
     if (btn) {
       btn.innerHTML = '수강 신청하기 <span class="mi i16" style="margin-left:4px;">arrow_forward</span>';
       btn.disabled = false;
@@ -1302,9 +1298,10 @@ function bindData(type) {
       displayLoc = firstOpt.sessions[0].loc;
     }
   } else if (currentMode === 'multi') {
+    const totalSess = selectedIds.reduce((n, id) => { const o = mockData.multi.find(x => x.id === id); return n + (o ? o.sessions.length : 0); }, 0);
     displayDate = firstOpt.sessions[0].date.replace(/-/g, '.') +
-      (selectedIds.length > 1 ? ` 외 ${selectedIds.length - 1}개 일정` : '');
-    displayLoc = firstOpt.sessions[0].loc + (selectedIds.length > 1 ? ' 외' : '');
+      (totalSess > 1 ? ` 외 ${totalSess - 1}개 일정` : '');
+    displayLoc = firstOpt.sessions[0].loc + (totalSess > 1 ? ' 외' : '');
   } else {
     displayDate = firstOpt.sessions[0].date.replace(/-/g, '.') +
       (firstOpt.sessions.length > 1 ? ` 외 ${firstOpt.sessions.length - 1}개 일정` : '');
@@ -1324,11 +1321,20 @@ function bindData(type) {
           selectedIds.map(id => {
             const opt = mockData.multi.find(x => x.id === id);
             if (!opt) return '';
-            const s = opt.sessions[0];
             const reqBadge = opt.req
               ? '<span style="font-size:10px;font-weight:700;color:#A84300;background:#FFF0E6;padding:1px 6px;border-radius:20px;">필수</span>'
               : '';
-            return `<div class="conf-detail-item"><div class="conf-detail-item-name">${reqBadge}${opt.name}</div><div class="conf-detail-item-sub"><span class="mi i16">calendar_month</span> ${s.date.replace(/-/g,'.')} ${s.dayStr} ${s.time} &nbsp;<span class="mi i14">location_on</span> ${s.loc}</div></div>`;
+            const cnt = opt.sessions.length;
+            const cntBadge = cnt > 1
+              ? `<span style="font-size:10px;font-weight:700;color:var(--secondary);background:#ececec;padding:1px 7px;border-radius:20px;">${cnt}회차</span>`
+              : '';
+            // 차수 안 회차 전부 펼침(다회차 차수 누락 방지) — 회차별 날짜·시간·장소·강사
+            const rows = opt.sessions.map(s => {
+              const t = s.title ? `<b style="color:var(--black);font-weight:600;">${s.title}</b> ` : '';
+              const instr = s.instructor ? ` &nbsp;<span class="mi i14">person</span> ${s.instructor}` : '';
+              return `<div class="conf-detail-item-sub">${t}<span class="mi i16">calendar_month</span> ${s.date.replace(/-/g,'.')} ${s.dayStr} ${s.time} &nbsp;<span class="mi i14">location_on</span> ${s.loc}${instr}</div>`;
+            }).join('');
+            return `<div class="conf-detail-item"><div class="conf-detail-item-name">${reqBadge}${opt.name}${cntBadge}</div>${rows}</div>`;
           }).join('');
       } else {
         detailWrap.style.display = 'none';

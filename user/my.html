@@ -228,6 +228,24 @@
     .attend-bar-fill.warn { background: var(--warning); }
     .attend-bar-fill.danger { background: var(--error); }
 
+    /* ── 단순화 카드 (학습자 이해 우선) ── */
+    .cc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .cc-name{font-size:16px;font-weight:700;line-height:1.35;color:var(--black)}
+    .cc-meta{font-size:12px;color:var(--n-06);margin-top:4px;font-weight:500}
+    .cc-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+    .cc-status.ing{background:var(--brand-01);color:var(--brand-06)}     /* 진행중 = 파랑 */
+    .cc-status.soon{background:var(--n-01);color:var(--n-07)}            /* 예정 = 회색 */
+    .cc-next{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;background:#f5f8ff;border-radius:12px}
+    .cc-next .dday{font-size:17px;font-weight:800;color:var(--brand-06);min-width:48px;text-align:center;line-height:1.1}
+    .cc-next .when{font-size:14px;font-weight:700;color:var(--n-10)}
+    .cc-next .where{font-size:12px;color:var(--n-07);margin-top:3px;display:flex;align-items:center;gap:3px}
+    .cc-next .where .mi{font-size:14px}
+    .cc-prog{margin-top:12px}
+    .cc-prog .t{font-size:12px;color:var(--n-07);font-weight:600;margin-bottom:6px}
+    .cc-prog .t b{color:var(--brand-06)}
+    .cc-prog .bar{height:6px;border-radius:3px;background:var(--n-01);overflow:hidden}
+    .cc-prog .bar>i{display:block;height:100%;background:var(--brand-06);border-radius:3px}
+
     /* 다음 회차 미니 정보 */
     .next-mini {
       display: flex; align-items: center; gap: 8px;
@@ -377,14 +395,14 @@
     .tab-item .mi { font-size: 22px; margin-bottom: 1px; }
 
     /* ── 사이드 Proto 메뉴 ── */
-    .proto-bar { position: fixed; top: 50%; right: 30px; transform: translateY(-50%); z-index: 500; }
+    .proto-bar { position: fixed; top: 50%; left: 30px; transform: translateY(-50%); z-index: 500; }
     .proto-chips { display: flex; flex-direction: column; gap: 8px; }
     .proto-chip {
       padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
       cursor: pointer; border: none; background: #fff; color: var(--secondary);
       box-shadow: 0 2px 10px rgba(0,0,0,.08); transition: all .15s; text-align: left;
     }
-    .proto-chip:hover { transform: translateX(-3px); color: var(--black); }
+    .proto-chip:hover { transform: translateX(3px); color: var(--black); }
     .proto-chip.active { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(46,132,255,.3); }
     .proto-chip.active-warn { background: var(--error); color: #fff; box-shadow: 0 4px 15px rgba(208,12,12,.3); }
     @media (max-width: 900px) { .proto-bar { display: none; } }
@@ -458,11 +476,11 @@
 <div class="proto-bar">
   <div style="font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">시뮬레이션</div>
   <div class="proto-chips">
-    <button class="proto-chip" onclick="setView('no-hero')">D-7 이상 (히어로 없음)</button>
+    <button class="proto-chip" onclick="setView('empty')">① 수강 코스 없음</button>
     <button class="proto-chip active" onclick="setView('has-courses')">일반 (D-3)</button>
     <button class="proto-chip" onclick="setView('today')">오늘 교육 있는 날</button>
     <button class="proto-chip" onclick="setView('busy')">이번 주 5건 몰림</button>
-    <button class="proto-chip" onclick="setView('empty')">수강 코스 없음</button>
+    <button class="proto-chip" onclick="setView('no-hero')">D-7 이상 (히어로 없음)</button>
   </div>
   <div style="font-size: 10px; font-weight: 800; color: var(--secondary); margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 1px;">QR 출석 결과</div>
   <div class="proto-chips">
@@ -498,16 +516,8 @@
     <button class="main-tab highlight active" onclick="selectTab(this)">오프라인</button>
   </div>
 
-  <!-- ════ 필터 ════ -->
-  <div class="filter-bar">
-    <div class="filter-chips">
-      <button class="filter-chip active" onclick="setFilter(this,'all')">전체</button>
-      <button class="filter-chip" onclick="setFilter(this,'ongoing')">수강중</button>
-      <button class="filter-chip" onclick="setFilter(this,'upcoming')">수강예정</button>
-      <button class="filter-chip" onclick="setFilter(this,'done')">수강종료</button>
-    </div>
-  </div>
-  <div class="filter-count" id="filter-count">
+  <!-- ════ 건수 (필터칩 제거 — 섹션으로 그룹핑) ════ -->
+  <div class="filter-count" id="filter-count" style="border-top:1px solid var(--border);">
     <span id="count-text">수강중인 오프라인 코스 · <strong>3</strong>건</span>
   </div>
 
@@ -628,53 +638,45 @@
 
         <!-- 카드 1: 진행중 코스 -->
         <div class="course-card" data-feature-id="U4-02" onclick="location.href='course-enrolled.html'">
-          <div class="card-top">
-            <div class="card-thumb" style="background: linear-gradient(135deg, #2e84ff, #61a2ff); color: #fff;"><span class="mi" style="font-size:28px;">assignment</span></div>
-            <div class="card-info">
-              <div class="card-badges">
-                <span class="badge-sm" style="background:var(--primary-lighter); color:var(--primary);">A반 (5월 평일반)</span>
-                <span class="badge-sm" style="background:var(--success-bg); color:var(--success);">진행중</span>
-              </div>
-              <div class="card-name">2026 직무교육 — 프로젝트 관리 심화</div>
-              <div class="card-sub">김민준 · 총 5회차</div>
+          <div class="cc-head">
+            <div>
+              <div class="cc-name">2026 직무교육 — 프로젝트 관리 심화</div>
+              <div class="cc-meta">A반 (5월 평일반) · 김민준 · 총 5회차</div>
+            </div>
+            <span class="cc-status ing">진행중</span>
+          </div>
+          <div class="cc-next" id="card1-next" data-feature-id="U4-03">
+            <div class="dday">D-3</div>
+            <div>
+              <div class="when">3회차 · 4/12(토) 09:00</div>
+              <div class="where"><span class="mi">location_on</span>본사 대교육장 B동 3층</div>
             </div>
           </div>
-          <div class="attend-bar-wrap" data-feature-id="U4-03">
-            <div class="attend-label">
-              <span class="label">출석률 (2/5회차 완료)</span>
-              <span class="val">100%</span>
-            </div>
-            <div class="attend-bar"><div class="attend-bar-fill good" style="width:100%"></div></div>
-          </div>
-          <div class="next-mini" id="card1-next">
-            <span class="dday">D-3</span>
-            <span>3회차 · 4/12(토) 09:00 · 본사 대교육장</span>
+          <div class="cc-prog">
+            <div class="t">총 5회차 중 <b>2회</b> 출석</div>
+            <div class="bar"><i style="width:40%"></i></div>
           </div>
         </div>
 
         <!-- 카드 2: 예정 코스 -->
         <div class="course-card" onclick="location.href='course-enrolled.html'">
-          <div class="card-top">
-            <div class="card-thumb" style="background: linear-gradient(135deg, #10B981, #34D399); color: #fff;"><span class="mi" style="font-size:28px;">eco</span></div>
-            <div class="card-info">
-              <div class="card-badges">
-                <span class="badge-sm" style="background:var(--success-bg); color:var(--success);">B반 (6월반)</span>
-                <span class="badge-sm" style="background:var(--warning-bg); color:var(--warning);">예정</span>
-              </div>
-              <div class="card-name">ESG 실무 워크숍</div>
-              <div class="card-sub">이서연 · 총 3회차</div>
+          <div class="cc-head">
+            <div>
+              <div class="cc-name">ESG 실무 워크숍</div>
+              <div class="cc-meta">B반 (6월반) · 이서연 · 총 3회차</div>
+            </div>
+            <span class="cc-status soon">예정</span>
+          </div>
+          <div class="cc-next">
+            <div class="dday">D-62</div>
+            <div>
+              <div class="when">1회차 · 6/10(화) 09:00</div>
+              <div class="where"><span class="mi">location_on</span>방배 실습실</div>
             </div>
           </div>
-          <div class="attend-bar-wrap">
-            <div class="attend-label">
-              <span class="label">교육 시작 전</span>
-              <span class="val">—</span>
-            </div>
-            <div class="attend-bar"><div class="attend-bar-fill good" style="width:0%"></div></div>
-          </div>
-          <div class="next-mini">
-            <span class="dday">D-62</span>
-            <span>1회차 · 6/10(화) 09:00 · 방배 실습실</span>
+          <div class="cc-prog">
+            <div class="t">교육 시작 전 · 총 3회차</div>
+            <div class="bar"><i style="width:0%"></i></div>
           </div>
         </div>
       </div>
@@ -819,17 +821,20 @@ function applyView(view) {
     empty.style.display = '';
   } else {
     hasCourses.style.display = '';
+    const ccNext = (dday, when, where, red) =>
+      `<div class="dday"${red ? ' style="color:var(--error)"' : ''}>${dday}</div>` +
+      `<div><div class="when">${when}</div><div class="where"><span class="mi">location_on</span>${where}</div></div>`;
     if (view === 'no-hero') {
-      card1Next.innerHTML = '<span class="dday">D-24</span><span>3회차 · 5/3(토) 09:00 · 본사 대교육장</span>';
+      if (card1Next) card1Next.innerHTML = ccNext('D-24', '3회차 · 5/3(토) 09:00', '본사 대교육장');
     } else if (view === 'today') {
       heroToday.style.display = '';
-      card1Next.innerHTML = '<span class="dday imminent" style="color:var(--error);background:var(--error-bg);">오늘</span><span>3회차 · 09:00 · 본사 대교육장</span>';
+      if (card1Next) card1Next.innerHTML = ccNext('오늘', '3회차 · 09:00', '본사 대교육장', true);
     } else if (view === 'busy') {
       heroBusy.style.display = '';
-      card1Next.innerHTML = '<span class="dday imminent" style="color:var(--error);background:var(--error-bg);">D-1</span><span>3회차 · 4/10(목) 09:00 · 본사 대교육장</span>';
+      if (card1Next) card1Next.innerHTML = ccNext('D-1', '3회차 · 4/10(목) 09:00', '본사 대교육장', true);
     } else {
       heroNormal.style.display = '';
-      card1Next.innerHTML = '<span class="dday">D-3</span><span>3회차 · 4/12(토) 09:00 · 본사 대교육장</span>';
+      if (card1Next) card1Next.innerHTML = ccNext('D-3', '3회차 · 4/12(토) 09:00', '본사 대교육장 B동 3층');
     }
   }
 
