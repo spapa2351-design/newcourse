@@ -234,7 +234,7 @@
     .cc-meta{font-size:12px;color:var(--n-06);margin-top:4px;font-weight:500}
     .cc-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap;flex-shrink:0}
     .cc-status.ing{background:var(--brand-01);color:var(--brand-06)}     /* 진행중 = 파랑 */
-    .cc-status.soon{background:var(--n-01);color:var(--n-07)}            /* 예정 = 회색 */
+    .cc-status.soon{background:var(--brand-01);color:var(--brand-06)}     /* 예정 = 파랑(코스상세 수강예정 기준) */
     .cc-next{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;background:#f5f8ff;border-radius:12px}
     .cc-next .dday{font-size:17px;font-weight:800;color:var(--brand-06);min-width:48px;text-align:center;line-height:1.1}
     .cc-next .when{font-size:14px;font-weight:700;color:var(--n-10)}
@@ -245,6 +245,17 @@
     .cc-prog .t b{color:var(--brand-06)}
     .cc-prog .bar{height:6px;border-radius:3px;background:var(--n-01);overflow:hidden}
     .cc-prog .bar>i{display:block;height:100%;background:var(--brand-06);border-radius:3px}
+
+    /* ── 완료 가로 슬라이딩 아카이브 (원래 MY 패턴 차용) ── */
+    .done-scroll{display:flex;gap:12px;overflow-x:auto;padding:0 16px 6px;scroll-snap-type:x mandatory;-ms-overflow-style:none;scrollbar-width:none}
+    .done-scroll::-webkit-scrollbar{display:none}
+    .done-card-h{flex:0 0 138px;scroll-snap-align:start;cursor:pointer}
+    .done-cover{aspect-ratio:3/3.5;border-radius:12px;overflow:hidden;position:relative;margin-bottom:8px}
+    .done-cover .gloss{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35))}
+    .done-cover .ct{position:absolute;top:9px;left:10px;right:10px;font-size:10px;font-weight:800;line-height:1.25;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3)}
+    .done-cover .cert{position:absolute;bottom:8px;left:8px;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;background:var(--brand-06);color:#fff}
+    .done-title{font-size:13px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:3px}
+    .done-meta{font-size:11px;color:var(--n-06);font-weight:500}
 
     /* 다음 회차 미니 정보 */
     .next-mini {
@@ -681,21 +692,39 @@
         </div>
       </div>
 
-      <!-- ── 완료된 코스 ── -->
-      <div class="section-group">
+      <!-- ── 완료된 코스 (가로 슬라이딩 아카이브) ── -->
+      <div class="section-group" style="padding-bottom:8px;">
         <div class="section-title">
-          <h3>완료된 코스 <span class="count">1</span></h3>
+          <h3>완료된 코스 <span class="count">7</span></h3>
+          <button class="more" onclick="location.href='my-completed.html'">전체보기 <span class="mi" style="font-size:16px;">chevron_right</span></button>
         </div>
-
-        <div class="done-card" onclick="location.href='course-completed.html'">
-          <div class="done-thumb"><span class="mi" style="font-size:24px;color:var(--gold);">trophy</span></div>
-          <div class="done-info">
-            <div class="done-name">2025 하반기 리더십 심화</div>
-            <div class="done-sub">총 4회차 · 출석률 100% · 2025.12.20 완료</div>
-          </div>
-          <div class="done-status pass">수료</div>
+      </div>
+      <div class="done-scroll">
+        <div class="done-card-h" onclick="location.href='course-completed.html'">
+          <div class="done-cover" style="background:linear-gradient(155deg,#3b5bdb,#5c7cfa)"><div class="gloss"></div><div class="ct">2025 하반기<br>리더십 심화</div><span class="cert">수료</span></div>
+          <div class="done-title">2025 하반기 리더십 심화</div>
+          <div class="done-meta">출석 100% · 12.20 수료</div>
         </div>
-
+        <div class="done-card-h" onclick="location.href='course-completed.html'">
+          <div class="done-cover" style="background:linear-gradient(155deg,#0ca678,#20c997)"><div class="gloss"></div><div class="ct">산업안전보건<br>법정교육</div><span class="cert">수료</span></div>
+          <div class="done-title">산업안전보건 법정 직무교육</div>
+          <div class="done-meta">출석 100% · 05.30 수료</div>
+        </div>
+        <div class="done-card-h" onclick="location.href='course-completed.html'">
+          <div class="done-cover" style="background:linear-gradient(155deg,#e8590c,#fd7e14)"><div class="gloss"></div><div class="ct">고객 응대<br>서비스 매너</div><span class="cert">수료</span></div>
+          <div class="done-title">고객 응대 서비스 매너 특강</div>
+          <div class="done-meta">출석 100% · 03.06 수료</div>
+        </div>
+        <div class="done-card-h" onclick="location.href='course-completed.html'">
+          <div class="done-cover" style="background:linear-gradient(155deg,#7048e8,#9775fa)"><div class="gloss"></div><div class="ct">환경관리<br>실무 과정</div><span class="cert">수료</span></div>
+          <div class="done-title">2025 환경관리 실무 과정</div>
+          <div class="done-meta">출석 92% · 2025.12 수료</div>
+        </div>
+        <div class="done-card-h" onclick="location.href='course-completed.html'">
+          <div class="done-cover" style="background:linear-gradient(155deg,#1098ad,#22b8cf)"><div class="gloss"></div><div class="ct">비계 조립·해체<br>안전 실무</div><span class="cert">수료</span></div>
+          <div class="done-title">비계 조립·해체 작업 안전</div>
+          <div class="done-meta">출석 100% · 2025.10 수료</div>
+        </div>
       </div>
 
       <div style="height: 20px;"></div>

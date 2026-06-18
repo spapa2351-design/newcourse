@@ -98,6 +98,31 @@
     .enroll-item-label { font-size: 11px; font-weight: 600; opacity: .7; margin-bottom: 2px; }
     .enroll-item-val { font-size: 14px; font-weight: 700; }
 
+    /* ── course-detail 공용 컴포넌트 재사용 (badge·cover·라이트 카드) ── */
+    .badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;border-radius:8px;padding:4px 10px;white-space:nowrap;line-height:1;}
+    .badge.b-blue{color:#2e84ff;background:#eaf2ff;}
+    .badge.b-purple{color:#6d3fd4;background:#f1ecfe;}
+    .badge.b-grey{color:#6b7684;background:#f2f4f6;}
+    .cover{padding:18px 0 0;display:flex;flex-direction:column;align-items:center;}
+    .cover-video{width:140px;aspect-ratio:3/4;border-radius:14px;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.12);overflow:hidden;background:linear-gradient(165deg,#ecca4d 0%,#d4b13e 54%,#3b3b3b 55%,#232323 100%);}
+    .cover-play{width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;}
+    .cover-vlabel{position:absolute;bottom:7px;right:9px;font-size:9px;color:rgba(255,255,255,.7);font-weight:600;}
+    .cover-badge-row{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 0 2px;}
+    .course-head{padding:6px 20px 0;text-align:center;}
+    .course-title{font-size:18px;font-weight:800;line-height:1.3;color:var(--black);}
+    .course-sub{font-size:13px;color:var(--secondary);font-weight:600;margin-top:5px;}
+    .my-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 16px 8px;}
+    .ms-item{background:var(--n-01);border-radius:12px;padding:12px 14px;}
+    .ms-item .lbl{font-size:11px;color:var(--n-06);font-weight:600;display:block;margin-bottom:3px;}
+    .ms-item .val{font-size:15px;color:var(--n-10);font-weight:800;}
+    .att-bar-wrap{margin:0 16px 16px;padding:14px;background:var(--n-01);border-radius:12px;}
+    .att-bar-label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--n-07);margin-bottom:10px;}
+    .att-bar-label .g{color:var(--n-08);}
+    .att-bar-label .g b{color:var(--brand-06);}
+    .att-bar-track{height:8px;border-radius:4px;background:var(--n-02);position:relative;}
+    .att-bar-fill{height:100%;border-radius:4px;background:var(--brand-06);transition:width .4s ease;}
+    .att-grad-line{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:75%;box-shadow:0 0 2px rgba(0,0,0,.25);}
+
     /* ── 섹션 ── */
     .section { padding: 20px 16px; border-bottom: 8px solid var(--body-bg); }
     .section:last-child { border-bottom: none; }
@@ -350,47 +375,38 @@
   <div class="nav">
     <button class="nav-back" onclick="history.back()"><span class="mi">chevron_left</span></button>
     <span class="nav-title">내 코스 상세</span>
-    <span class="nav-badge" style="background:var(--success-bg); color:var(--success);">수강중</span>
+    <span class="badge b-blue">수강중</span>
   </div>
 
   <div class="scroll-area">
 
-    <!-- ══ 내 수강 정보 카드 ══ -->
-    <div class="enroll-card">
-      <div class="enroll-status"><span class="dot"></span> 수강중</div>
-      <div class="enroll-course-name">2026 직무교육 —<br>프로젝트 관리 심화</div>
-      <div class="enroll-package">A반 (5월 평일반) · 김민준 강사</div>
-      <div class="enroll-grid">
-        <div class="enroll-item">
-          <div class="enroll-item-label">출석률</div>
-          <div class="enroll-item-val">100% (2/5)</div>
-        </div>
-        <div class="enroll-item">
-          <div class="enroll-item-label">다음 회차</div>
-          <div class="enroll-item-val">D-3 · 4/12</div>
-        </div>
-        <div class="enroll-item">
-          <div class="enroll-item-label">교육 기간</div>
-          <div class="enroll-item-val">3/29 — 4/26</div>
-        </div>
-        <div class="enroll-item">
-          <div class="enroll-item-label">장소</div>
-          <div class="enroll-item-val">본사 대교육장</div>
-        </div>
+    <!-- ══ 커버 + 배지 (course-detail 공용 컴포넌트 재사용) ══ -->
+    <div class="cover">
+      <div class="cover-video"><div class="cover-play"><span class="mi" style="color:#fff;font-size:26px;">play_arrow</span></div><div class="cover-vlabel">오프라인 코스</div></div>
+      <div class="cover-badge-row">
+        <span class="badge b-purple">오프라인</span>
+        <span class="badge b-blue">수강중</span>
       </div>
+    </div>
+    <div class="course-head">
+      <h2 class="course-title">2026 직무교육 — 프로젝트 관리 심화</h2>
+      <div class="course-sub">A반 (5월 평일반) · 김민준 강사</div>
+    </div>
 
-      <!-- 출석률 바 + 75% 수료 기준선 -->
-      <div class="enroll-bar-wrap">
-        <div class="enroll-bar-label">
-          <span>출석률</span>
-          <span>수료 기준 75%</span>
-        </div>
-        <div class="enroll-bar-track">
-          <div class="enroll-bar-fill" style="width:100%"></div>
-          <div class="graduation-line">
-            <span class="graduation-label">75%</span>
-          </div>
-        </div>
+    <!-- ══ 내 수강 요약 (공용 라이트 카드) ══ -->
+    <div class="my-summary">
+      <div class="ms-item"><span class="lbl">출석률</span><span class="val">100% (2/5)</span></div>
+      <div class="ms-item"><span class="lbl">다음 회차</span><span class="val">D-3 · 4/12</span></div>
+      <div class="ms-item"><span class="lbl">교육 기간</span><span class="val">3/29 — 4/26</span></div>
+      <div class="ms-item"><span class="lbl">장소</span><span class="val">본사 대교육장</span></div>
+    </div>
+
+    <!-- ══ 출석률 바 + 75% 수료 기준선 (라이트) ══ -->
+    <div class="att-bar-wrap">
+      <div class="att-bar-label"><span>출석률</span><span class="g"><b>75%</b> 수료 기준</span></div>
+      <div class="att-bar-track">
+        <div class="att-bar-fill" style="width:100%"></div>
+        <div class="att-grad-line"></div>
       </div>
     </div>
 

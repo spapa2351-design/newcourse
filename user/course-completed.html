@@ -69,46 +69,42 @@
       cursor: pointer; color: var(--black); font-size: 16px;
     }
     .nav-title { font-size: 15px; font-weight: 700; flex: 1; }
-    .nav-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
 
     .scroll-area { flex: 1; overflow-y: auto; }
 
-    /* ── 수료 카드 ── */
-    .complete-card {
-      margin: 16px; padding: 24px; border-radius: var(--r-lg);
-      background: var(--white); border: 1px solid var(--border);
-      text-align: center; position: relative;
-    }
-    .complete-icon { font-size: 48px; margin-bottom: 12px; }
-    .complete-badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 6px 16px; border-radius: 20px;
-      font-size: 13px; font-weight: 700; margin-bottom: 14px;
-    }
-    .complete-badge.pass { background: var(--success-bg); color: var(--success); }
-    .complete-badge.fail { background: var(--error-bg); color: var(--error); }
-    .complete-course-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
-    .complete-package { font-size: 13px; color: var(--secondary); font-weight: 600; margin-bottom: 16px; }
+    /* ── course-detail 공용 컴포넌트 재사용 (badge·cover·n-01 라이트 카드) ── */
+    .badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;border-radius:8px;padding:4px 10px;white-space:nowrap;line-height:1;}
+    .badge.b-blue{color:#2e84ff;background:#eaf2ff;}
+    .badge.b-green{color:#0f9d63;background:#e6f7ef;}
+    .badge.b-red{color:#d00c0c;background:#ffeded;}
+    .badge.b-grey{color:#6b7684;background:#f2f4f6;}
+    .badge.b-purple{color:#6d3fd4;background:#f1ecfe;}
+    .cover{padding:18px 0 0;display:flex;flex-direction:column;align-items:center;}
+    .cover-video{width:140px;aspect-ratio:3/4;border-radius:14px;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.12);overflow:hidden;background:linear-gradient(165deg,#ecca4d 0%,#d4b13e 54%,#3b3b3b 55%,#232323 100%);}
+    .cover-play{width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;}
+    .cover-vlabel{position:absolute;bottom:7px;right:9px;font-size:9px;color:rgba(255,255,255,.7);font-weight:600;}
+    .cover-badge-row{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 0 2px;}
+    .course-head{padding:6px 20px 0;text-align:center;}
+    .course-title{font-size:18px;font-weight:800;line-height:1.3;color:var(--black);}
+    .course-sub{font-size:13px;color:var(--secondary);font-weight:600;margin-top:5px;}
+    .my-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:18px 16px 8px;}
+    .ms-item{background:var(--n-01);border-radius:12px;padding:12px 14px;text-align:center;}
+    .ms-item .lbl{font-size:11px;color:var(--n-06);font-weight:600;display:block;margin-bottom:3px;}
+    .ms-item .val{font-size:15px;color:var(--n-10);font-weight:800;}
+    .ms-item .val.good{color:var(--success);}
+    .ms-item .val.bad{color:var(--error);}
+    .att-bar-wrap{margin:0 16px 16px;padding:14px;background:var(--n-01);border-radius:12px;}
+    .att-bar-label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--n-07);margin-bottom:10px;}
+    .att-bar-label .g{color:var(--n-08);}
+    .att-bar-label .g b{color:var(--brand-06);}
+    .att-bar-track{height:8px;border-radius:4px;background:var(--n-02);position:relative;}
+    .att-bar-fill{height:100%;border-radius:4px;background:var(--brand-06);transition:width .4s ease;}
+    .att-grad-line{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:75%;box-shadow:0 0 2px rgba(0,0,0,.25);}
 
-    .complete-reason {
-      font-size: 12px; font-weight: 600; margin: -8px 0 16px;
-      padding: 6px 14px; border-radius: 6px; display: inline-block;
-    }
+    /* 수료/미수료 사유 칩 */
+    .complete-reason { font-size: 12px; font-weight: 600; margin: 12px auto 0; padding: 6px 14px; border-radius: 6px; display: inline-block; }
     .complete-reason.ok { background: var(--success-bg); color: var(--success); }
     .complete-reason.ng { background: var(--error-bg); color: var(--error); }
-
-    .complete-stats {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px;
-      background: var(--border); border-radius: var(--r); overflow: hidden;
-    }
-    .stat-item {
-      background: var(--body-bg); padding: 14px 8px; text-align: center;
-    }
-    .stat-label { font-size: 11px; font-weight: 600; color: var(--secondary); margin-bottom: 4px; }
-    .stat-val { font-size: 18px; font-weight: 700; }
-    .stat-val.good { color: var(--success); }
-    .stat-val.warn { color: var(--warning); }
-    .stat-val.bad { color: var(--error); }
 
     /* ── 섹션 ── */
     .section { padding: 20px 16px; border-bottom: 8px solid var(--body-bg); }
@@ -130,8 +126,8 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 13px; font-weight: 700; flex-shrink: 0;
     }
-    .sess-num.attended { background: var(--brand-01); color: var(--brand-06); }
-    .sess-num.late { background: var(--warning-bg); color: var(--warning); }
+    .sess-num.attended { background: var(--green-bg); color: var(--green); }
+    .sess-num.late { background: var(--orange-bg); color: var(--orange); }
     .sess-num.absent { background: var(--error-bg); color: var(--error); }
     .sess-info { flex: 1; min-width: 0; }
     .sess-name { font-size: 14px; font-weight: 700; color: var(--black); margin-bottom: 2px; }
@@ -143,8 +139,8 @@
     .sess-badge {
       font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; flex-shrink: 0;
     }
-    .sess-badge.attended { background: var(--brand-01); color: var(--brand-06); }
-    .sess-badge.late { background: var(--warning-bg); color: var(--warning); }
+    .sess-badge.attended { background: var(--green-bg); color: var(--green); }
+    .sess-badge.late { background: var(--orange-bg); color: var(--orange); }
     .sess-badge.absent { background: var(--error-bg); color: var(--error); }
 
     /* ── 코스 안내 (접기) ── */
@@ -207,32 +203,38 @@
   <div class="nav">
     <button class="nav-back" onclick="history.back()"><span class="mi">chevron_left</span></button>
     <span class="nav-title">수강 완료 상세</span>
-    <span class="nav-badge" id="nav-badge" style="background:var(--n-01); color:var(--n-07);">수강 완료</span>
+    <span class="badge b-green" id="nav-badge">수료</span>
   </div>
 
   <div class="scroll-area">
 
-    <!-- ══ 수료 카드 ══ -->
-    <div class="complete-card" id="complete-card">
-      <div class="complete-icon" id="complete-icon"><span class="mi" style="font-size:48px;">trophy</span></div>
-      <div class="complete-badge pass" id="complete-badge"><span class="mi" style="font-size:11px;">check</span> 수료</div>
-      <div class="complete-reason ok" id="complete-reason">출석률 100% — 수료 기준(75%) 충족</div>
-      <div class="complete-course-name">2025 하반기 리더십 심화</div>
-      <div class="complete-package">A반 (10월반) · 박지원 강사 · 2025.12.20 완료</div>
+    <!-- ══ 커버 + 배지 (course-detail 공용 컴포넌트 재사용) ══ -->
+    <div class="cover">
+      <div class="cover-video"><div class="cover-play"><span class="mi" style="color:#fff;font-size:26px;">play_arrow</span></div><div class="cover-vlabel">오프라인 코스</div></div>
+      <div class="cover-badge-row">
+        <span class="badge b-purple">오프라인</span>
+        <span class="badge b-green" id="status-badge"><span class="mi" style="font-size:12px;">check</span> 수료</span>
+      </div>
+    </div>
+    <div class="course-head">
+      <h2 class="course-title">2025 하반기 리더십 심화</h2>
+      <div class="course-sub">A반 (10월반) · 박지원 강사 · 2025.12.20 완료</div>
+      <span class="complete-reason ok" id="complete-reason">출석률 100% — 수료 기준(75%) 충족</span>
+    </div>
 
-      <div class="complete-stats" id="complete-stats">
-        <div class="stat-item">
-          <div class="stat-label">출석률</div>
-          <div class="stat-val good" id="stat-rate">100%</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">출석</div>
-          <div class="stat-val" id="stat-attend" style="color:var(--primary);">4회</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">결석</div>
-          <div class="stat-val" id="stat-absent" style="color:var(--secondary);">0회</div>
-        </div>
+    <!-- ══ 내 결과 요약 (공용 n-01 라이트 카드) ══ -->
+    <div class="my-summary">
+      <div class="ms-item"><span class="lbl">출석률</span><span class="val good" id="stat-rate">100%</span></div>
+      <div class="ms-item"><span class="lbl">출석</span><span class="val" id="stat-attend">4회</span></div>
+      <div class="ms-item"><span class="lbl">결석</span><span class="val" id="stat-absent">0회</span></div>
+    </div>
+
+    <!-- ══ 출석률 바 + 75% 수료 기준선 (라이트) ══ -->
+    <div class="att-bar-wrap">
+      <div class="att-bar-label"><span>출석률</span><span class="g"><b>75%</b> 수료 기준</span></div>
+      <div class="att-bar-track">
+        <div class="att-bar-fill" id="att-bar-fill" style="width:100%"></div>
+        <div class="att-grad-line"></div>
       </div>
     </div>
 
@@ -326,31 +328,35 @@ function setResult(type) {
   if (typeof event !== 'undefined' && event && event.target) event.target.classList.add('active');
 
   const r = results[type];
+  const pass = r.badgeClass === 'pass';
 
-  document.getElementById('complete-icon').innerHTML = '<span class="mi" style="font-size:48px;">' + r.icon + '</span>';
   const reason = document.getElementById('complete-reason');
   reason.textContent = r.reason;
   reason.className = 'complete-reason ' + r.reasonClass;
-  const badge = document.getElementById('complete-badge');
-  badge.className = 'complete-badge ' + r.badgeClass;
-  badge.innerHTML = (r.badgeClass === 'pass' ? '<span class="mi" style="font-size:11px;">check</span> ' : '<span class="mi" style="font-size:11px;">close</span> ') + r.badgeText;
 
-  document.getElementById('stat-rate').textContent = r.rate;
-  document.getElementById('stat-rate').className = 'stat-val ' + r.rateClass;
+  // 커버 배지 (공용 .badge.b-*)
+  const statusBadge = document.getElementById('status-badge');
+  statusBadge.className = 'badge ' + (pass ? 'b-green' : 'b-red');
+  statusBadge.innerHTML = '<span class="mi" style="font-size:12px;">' + (pass ? 'check' : 'close') + '</span> ' + r.badgeText;
+
+  // 결과 요약 (공용 라이트 카드)
+  const rate = document.getElementById('stat-rate');
+  rate.textContent = r.rate;
+  rate.className = 'val ' + r.rateClass;
   document.getElementById('stat-attend').textContent = r.attend;
-  document.getElementById('stat-absent').textContent = r.absent;
-  document.getElementById('stat-absent').style.color = r.absentColor;
+  const absent = document.getElementById('stat-absent');
+  absent.textContent = r.absent;
+  absent.className = 'val' + (parseInt(r.absent, 10) > 0 ? ' bad' : '');
 
+  // 출석률 바
+  const fill = document.getElementById('att-bar-fill');
+  fill.style.width = (parseInt(r.rate, 10) || 0) + '%';
+  fill.style.background = pass ? 'var(--success)' : 'var(--error)';
+
+  // 상단 nav 배지 (공용 .badge.b-*)
   const navBadge = document.getElementById('nav-badge');
-  if (r.badgeClass === 'pass') {
-    navBadge.style.background = 'var(--success-bg)';
-    navBadge.style.color = 'var(--success)';
-    navBadge.textContent = '수료';
-  } else {
-    navBadge.style.background = 'var(--error-bg)';
-    navBadge.style.color = 'var(--error)';
-    navBadge.textContent = '미수료';
-  }
+  navBadge.className = 'badge ' + (pass ? 'b-green' : 'b-red');
+  navBadge.textContent = pass ? '수료' : '미수료';
 
   renderSessions(r.sessions);
 }
