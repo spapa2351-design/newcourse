@@ -8,12 +8,10 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    /* Material Symbols Rounded — 단일 아이콘 라이브러리 (이모지/아이콘폰트 통일) */
+    /* Material Symbols Rounded — 단일 아이콘 라이브러리 */
     .mi{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
-    .mi.fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
-    .mi.i9{font-size:9px}.mi.i10{font-size:10px}.mi.i14{font-size:14px}.mi.i16{font-size:16px}.mi.i18{font-size:18px}.mi.i48{font-size:48px}
+    .mi.i9{font-size:9px}.mi.i10{font-size:10px}.mi.i14{font-size:14px}.mi.i16{font-size:16px}.mi.i18{font-size:18px}
     :root{
-      /* ===== TouchClass tokens (design/touchclass_design.md) ===== */
       --brand-01:#ebf3ff; --brand-02:#dbeaff; --brand-05:#61a2ff;
       --brand-06:#2e84ff; --brand-08:#0052c7;
       --n-00:#ffffff; --n-01:#f2f2f2; --n-02:#e5e5e5; --n-04:#bababa;
@@ -21,18 +19,14 @@
       --n-09:#3b3b3b; --n-10:#222222;
       --red:#d00c0c; --red-bg:#ffeded; --orange:#ff603e; --orange-bg:#fff1ed;
       --green:#2f9e31; --green-bg:#edf8ed; --live:#ff3b3b;
-      --gold:#ffc700; --silver:#bababa; --bronze:#b07c5a;
-      /* legacy alias → 터치클래스 값 */
+      /* legacy alias */
       --primary:#2e84ff; --primary-hover:#0052c7; --primary-dark:#0052c7;
-      --primary-lighter:#ebf3ff; --mint:#ebf3ff; --mint-tint:#ebf3ff;
-      --secondary:#878787; --muted:#bababa;
+      --primary-lighter:#ebf3ff; --secondary:#878787; --muted:#bababa;
       --error:#d00c0c; --error-bg:#ffeded;
-      --success:#2f9e31; --success-dark:#2f9e31; --success-bg:#edf8ed;
-      --warning:#ff603e; --warning-dark:#ff603e; --warning-bg:#fff1ed;
+      --success:#2f9e31; --success-bg:#edf8ed;
       --black:#222222; --white:#ffffff;
       --body-bg:#f2f2f2; --border:#e5e5e5;
-      --card-shadow:0 2px 8px rgba(0,0,0,.1);
-      --r:12px; --r-lg:16px; --r-xl:20px; --r-pill:300px;
+      --r:12px; --r-lg:16px; --r-pill:300px;
     }
     html, body { height: 100%; }
     body {
@@ -83,11 +77,9 @@
     }
 
     /* ── 검색 ── */
-    .search-bar {
-      margin: 14px 20px 0; position: relative;
-    }
+    .search-bar { margin: 14px 20px 0; position: relative; }
     .search-bar input {
-      width: 100%; padding: 10px 14px 10px 36px;
+      width: 100%; padding: 11px 14px 11px 38px;
       border: 1px solid var(--border); border-radius: var(--r);
       background: var(--n-01); font-size: 13px; font-weight: 500;
       color: var(--black); outline: none; font-family: inherit;
@@ -95,125 +87,72 @@
     .search-bar input::placeholder { color: var(--muted); }
     .search-bar input:focus { border-color: var(--primary); background: var(--white); }
     .search-bar .icon {
-      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-      color: var(--muted); font-size: 13px;
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 16px;
     }
-
-    /* ── 필터 체크박스 행 ── */
-    .filter-row {
-      display: flex; align-items: center; gap: 16px;
-      padding: 12px 20px 0;
-    }
-    .filter-check {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 13px; font-weight: 600; color: var(--secondary); cursor: pointer;
-    }
-    .filter-check input[type="checkbox"] {
-      width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;
-    }
-    .filter-check.active { color: var(--black); }
-    .filter-toggle {
-      margin-left: auto; display: flex; align-items: center; gap: 6px;
-      font-size: 13px; font-weight: 600; color: var(--secondary);
-    }
-    .toggle-switch {
-      width: 36px; height: 20px; border-radius: 10px;
-      background: var(--n-02); position: relative; cursor: pointer;
-      transition: background .2s;
-    }
-    .toggle-switch.on { background: var(--primary); }
-    .toggle-switch::after {
-      content: ''; position: absolute; top: 2px; left: 2px;
-      width: 16px; height: 16px; border-radius: 50%; background: #fff;
-      box-shadow: 0 1px 3px rgba(0,0,0,.15); transition: left .2s;
-    }
-    .toggle-switch.on::after { left: 18px; }
 
     /* ── 건수 + 정렬 행 ── */
     .count-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 20px 10px;
+      padding: 14px 20px 6px;
     }
-    .count-text { font-size: 13px; font-weight: 600; color: var(--secondary); }
-    .sort-area { display: flex; align-items: center; gap: 10px; }
+    .count-text { font-size: 14px; font-weight: 700; color: var(--n-08); }
+    .sort-area { display: flex; align-items: center; gap: 10px; color: var(--n-06); }
     .sort-btn {
-      font-size: 12px; font-weight: 700; color: var(--secondary);
+      font-size: 13px; font-weight: 600; color: var(--n-07);
       border: none; background: none; cursor: pointer; font-family: inherit;
       display: flex; align-items: center; gap: 3px;
     }
-    .sort-btn .mi { font-size: 14px; }
-    .view-toggle {
-      width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
-      background: var(--white); display: flex; align-items: center; justify-content: center;
-      font-size: 13px; color: var(--secondary); cursor: pointer;
-    }
+    .sort-btn .mi { font-size: 16px; }
+    .sort-divider { width: 1px; height: 14px; background: var(--n-02); }
+    .view-icon { font-size: 18px; color: var(--n-07); cursor: pointer; }
 
     /* ── 스크롤 영역 ── */
     .scroll-area { flex: 1; overflow-y: auto; background: var(--white); }
 
-    /* ── 그리드 (3열) ── */
-    .course-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 14px 10px; padding: 0 20px 24px;
+    /* ── 리스트 (신청 전 카탈로그) ── */
+    .list-wrap { padding: 2px 0 24px; }
+    .l-card {
+      display: flex; gap: 14px; padding: 16px 20px;
+      border-bottom: 1px solid var(--border); cursor: pointer; position: relative;
+      transition: background .12s;
     }
-
-    /* ── 코스 카드 ── */
-    .g-card { cursor: pointer; }
-    .g-card-cover {
-      width: 100%; aspect-ratio: 3/4; border-radius: var(--r);
-      overflow: hidden; position: relative; background: #eee;
-      margin-bottom: 8px;
+    .l-card:active { background: var(--n-01); }
+    .l-thumb {
+      width: 92px; height: 118px; border-radius: var(--r); flex-shrink: 0;
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
     }
-    .g-card-cover img { width: 100%; height: 100%; object-fit: cover; }
-
-    /* 배지 (커버 위) */
-    .g-badges {
-      position: absolute; top: 6px; left: 6px; right: 6px;
-      display: flex; flex-wrap: wrap; gap: 3px; z-index: 3;
+    .l-thumb .play {
+      width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,.4);
+      display: flex; align-items: center; justify-content: center;
     }
-    .g-badge {
-      padding: 2px 6px; border-radius: 4px;
-      font-size: 9px; font-weight: 600; white-space: nowrap;
-      backdrop-filter: blur(4px);
-    }
-    .g-badge.offline { background: rgba(0,0,0,.55); color: #fff; }
-    .g-badge.enrollable { background: rgba(255,255,255,.92); color: var(--brand-06); }
-    .g-badge.not-started { background: rgba(0,0,0,.55); color: #fff; }
-    .g-badge.in-progress { background: rgba(46,132,255,.85); color: #fff; }
-    .g-badge.scheduled { background: rgba(0,0,0,.55); color: #fff; }
-    .g-badge.ended { background: rgba(0,0,0,.45); color: #fff; }
-    .g-badge.completed { background: rgba(255,255,255,.92); color: var(--brand-06); }
-
-    .g-card-title {
-      font-size: 12px; font-weight: 700; color: var(--black);
-      line-height: 1.4; margin-bottom: 4px;
+    .l-body { flex: 1; min-width: 0; }
+    .l-meta { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--n-07); margin-top: 4px; }
+    .l-meta .mi { font-size: 14px; color: var(--n-05); }
+    .l-title {
+      font-size: 15px; font-weight: 700; color: var(--black); line-height: 1.35;
+      margin-bottom: 10px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .g-card-bottom {
-      display: flex; align-items: center; gap: 4px;
-    }
-    .g-card-bottom .progress {
-      font-size: 11px; font-weight: 700; color: var(--primary);
-      display: flex; align-items: center; gap: 3px;
-    }
-    .g-card-bottom .progress .mi { font-size: 10px; }
-    .g-card-bottom .info-btn {
-      width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--n-02);
-      background: none; color: var(--n-04); font-size: 9px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      margin-left: auto;
-    }
+    .l-period { margin-bottom: 6px; }
+    .l-period .lbl { font-size: 12px; font-weight: 600; color: var(--n-08); }
+    .l-period .val { font-size: 12px; font-weight: 500; color: var(--n-05); margin-top: 1px; }
+    .l-badges { display: flex; align-items: center; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 
-    /* ── 상태 텍스트 배지 (카드 하단용) ── */
-    .g-status {
-      font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 6px;
+    /* ── 배지 ── */
+    .bdg {
+      font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 6px;
+      white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; line-height: 1;
     }
-    .g-status.enrollable { color: var(--brand-06); background: var(--brand-01); }
-    .g-status.not-started { color: var(--n-07); background: var(--n-01); }
-    .g-status.in-progress { color: var(--brand-06); background: var(--brand-01); }
-    .g-status.scheduled { color: var(--n-07); background: var(--n-01); }
-    .g-status.ended { color: var(--n-05); background: var(--n-01); }
-    .g-status.completed { color: var(--brand-06); background: var(--brand-01); }
+    .bdg-new { color: var(--brand-06); font-weight: 800; font-size: 13px; padding: 0 3px; }   /* N (신규) */
+    .bdg.type     { color: #6d3fd4; background: #f1ecfe; }   /* 오프라인 (유형) */
+    .bdg.enrollable { color: #2e84ff; background: #eaf2ff; }   /* 수강신청가능 */
+    .bdg.imminent { color: #fff; background: var(--red); }    /* 마감 임박 */
+    .bdg.closed   { color: #6b7684; background: #f2f4f6; }     /* 신청 마감 */
+    .bdg.ing      { color: #2e84ff; background: #fff; border: 1px solid #b8d4ff; }  /* 수강중 (내수강) */
+    .bdg.completed{ color: #fff; background: var(--brand-06); }  /* 학습 완료 (내수강) */
   </style>
 </head>
 <body>
@@ -228,11 +167,11 @@
 
   <!-- ── 서브 카테고리 탭 ── -->
   <div class="sub-tabs" data-feature-id="U2-01">
-    <button class="sub-tab active" onclick="setSubTab(this)">전체</button>
-    <button class="sub-tab" onclick="setSubTab(this)">프로젝트관리</button>
-    <button class="sub-tab" onclick="setSubTab(this)">데이터분석</button>
-    <button class="sub-tab" onclick="setSubTab(this)">커뮤니케이션</button>
-    <button class="sub-tab" onclick="setSubTab(this)">문제해결</button>
+    <button class="sub-tab active" onclick="setSubTab(this)">목공</button>
+    <button class="sub-tab" onclick="setSubTab(this)">설비</button>
+    <button class="sub-tab" onclick="setSubTab(this)">전기</button>
+    <button class="sub-tab" onclick="setSubTab(this)">환경</button>
+    <button class="sub-tab" onclick="setSubTab(this)">안전</button>
   </div>
 
   <!-- ── 검색 ── -->
@@ -241,201 +180,109 @@
     <input type="text" placeholder="어떤 코스를 찾으세요?">
   </div>
 
-  <!-- ── 필터 체크박스 ── -->
-  <div class="filter-row">
-    <label class="filter-check"><input type="checkbox"> 수강신청가능</label>
-    <label class="filter-check"><input type="checkbox"> 수강중</label>
-  </div>
-
   <!-- ── 건수 + 정렬 ── -->
   <div class="count-row">
-    <span class="count-text">12개 코스</span>
+    <span class="count-text">38개</span>
     <div class="sort-area">
-      <button class="sort-btn"><span class="mi">expand_more</span> 추천순</button>
-      <button class="view-toggle"><span class="mi i14">grid_view</span></button>
+      <button class="sort-btn"><span class="mi">expand_more</span> 최근 등록순</button>
+      <span class="sort-divider"></span>
+      <span class="mi view-icon">format_list_bulleted</span>
     </div>
   </div>
 
   <div class="scroll-area">
-    <div class="course-grid">
+    <div class="list-wrap">
 
-      <!-- 1: 수강 신청 가능 -->
-      <div class="g-card" data-feature-id="U2-04" onclick="location.href='course-detail.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
+      <!-- 1: 수강신청가능 -->
+      <div class="l-card" data-feature-id="U2-04" onclick="location.href='course-detail.html'">
+        <div class="l-thumb" style="background:linear-gradient(155deg,#3b5bdb,#5c7cfa)"><span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span></div>
+        <div class="l-body">
+          <div class="l-title">[2026 직무교육] 목공 기계 안전 실무</div>
+          <div class="l-period"><div class="lbl">신청기간</div><div class="val">2026.05.10 09:00 ~ 2026.05.24 18:00</div></div>
+          <div class="l-period"><div class="lbl">교육 기간</div><div class="val">2026.06.01 09:00 ~ 2026.06.05 18:00</div></div>
+          <div class="l-meta"><span class="mi">place</span>본사 대교육장 · 총 4회차</div>
+          <div class="l-badges">
+            <span class="bdg-new">N</span>
+            <span class="bdg type">오프라인</span>
+            <span class="bdg enrollable">수강신청가능</span>
           </div>
-        </div>
-        <div class="g-card-title">2026 직무교육 — 프로젝트 관리 심화</div>
-        <div class="g-card-bottom">
-          <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
-      <!-- 2: 수강 신청 가능 -->
-      <div class="g-card" onclick="location.href='course-detail.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
+      <!-- 2: 마감 임박 -->
+      <div class="l-card" onclick="location.href='course-detail.html'">
+        <div class="l-thumb" style="background:linear-gradient(155deg,#0ca678,#20c997)"><span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span></div>
+        <div class="l-body">
+          <div class="l-title">[2026 직무교육] 정밀 가공 기초 과정</div>
+          <div class="l-period"><div class="lbl">신청기간</div><div class="val">2026.05.10 09:00 ~ 2026.05.13 18:00</div></div>
+          <div class="l-period"><div class="lbl">교육 기간</div><div class="val">2026.05.20 09:00 ~ 2026.05.22 18:00</div></div>
+          <div class="l-meta"><span class="mi">place</span>평택 실습센터 · 총 3회차</div>
+          <div class="l-badges">
+            <span class="bdg-new">N</span>
+            <span class="bdg type">오프라인</span>
+            <span class="bdg imminent">마감 임박</span>
           </div>
-        </div>
-        <div class="g-card-title">데이터 기반 의사결정 실습</div>
-        <div class="g-card-bottom">
-          <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
-      <!-- 3: 수강중 -->
-      <div class="g-card" onclick="location.href='course-enrolled.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge in-progress">수강중</span>
+      <!-- 3: 신청 마감 -->
+      <div class="l-card" onclick="location.href='course-detail.html'">
+        <div class="l-thumb" style="background:linear-gradient(155deg,#868e96,#adb5bd)"><span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span></div>
+        <div class="l-body">
+          <div class="l-title">[2025 법정의무교육] 산업안전보건 교육</div>
+          <div class="l-period"><div class="lbl">신청기간</div><div class="val">2025.05.10 09:00 ~ 2025.05.20 18:00</div></div>
+          <div class="l-period"><div class="lbl">교육 기간</div><div class="val">2025.06.01 09:00 ~ 2025.06.03 18:00</div></div>
+          <div class="l-meta"><span class="mi">place</span>본사 대강당 · 총 1회차</div>
+          <div class="l-badges">
+            <span class="bdg type">오프라인</span>
+            <span class="bdg closed">신청 마감</span>
           </div>
-        </div>
-        <div class="g-card-title">ESG 실무 워크숍</div>
-        <div class="g-card-bottom">
-          <span class="progress"><span class="mi">play_circle</span> 66%</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
-      <!-- 4: 시작전 -->
-      <div class="g-card" onclick="location.href='course-detail.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge not-started">시작전</span>
+      <!-- 4: 수강중 (내 수강) -->
+      <div class="l-card" onclick="location.href='course-detail.html'">
+        <div class="l-thumb" style="background:linear-gradient(155deg,#7048e8,#9775fa)"><span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span></div>
+        <div class="l-body">
+          <div class="l-title">[2026 직무교육] 목재 도장·마감 실무</div>
+          <div class="l-period"><div class="lbl">신청기간</div><div class="val">2026.04.01 09:00 ~ 2026.04.20 18:00</div></div>
+          <div class="l-period"><div class="lbl">교육 기간</div><div class="val">2026.05.06 09:00 ~ 2026.06.24 18:00</div></div>
+          <div class="l-meta"><span class="mi">place</span>방배 실습실 · 총 5회차</div>
+          <div class="l-badges">
+            <span class="bdg type">오프라인</span>
+            <span class="bdg ing">수강중</span>
           </div>
-        </div>
-        <div class="g-card-title">신입사원 OJT 과정</div>
-        <div class="g-card-bottom">
-          <span class="g-status not-started">시작전</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
-      <!-- 5: 수강예정 -->
-      <div class="g-card" onclick="location.href='course-enrolled.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge scheduled">수강예정</span>
+      <!-- 5: 학습 완료 (내 수강) -->
+      <div class="l-card" onclick="location.href='course-detail.html'">
+        <div class="l-thumb" style="background:linear-gradient(155deg,#1098ad,#22b8cf)"><span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span></div>
+        <div class="l-body">
+          <div class="l-title">[2025 법정의무교육] 개인정보보호 교육</div>
+          <div class="l-period"><div class="lbl">신청기간</div><div class="val">2025.04.20 09:00 ~ 2025.05.04 18:00</div></div>
+          <div class="l-period"><div class="lbl">교육 기간</div><div class="val">2025.05.11 09:00 ~ 2025.05.11 16:00</div></div>
+          <div class="l-meta"><span class="mi">place</span>본사 교육장 · 총 1회차</div>
+          <div class="l-badges">
+            <span class="bdg type">오프라인</span>
+            <span class="bdg completed"><span class="mi" style="font-size:11px;">check</span> 학습 완료</span>
           </div>
-        </div>
-        <div class="g-card-title">글로벌 비즈니스 매너</div>
-        <div class="g-card-bottom">
-          <span class="g-status scheduled">수강예정</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
-      <!-- 6: 학습 완료 -->
-      <div class="g-card" onclick="location.href='course-completed.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1560439514-4e9645039924?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge completed"><span class="mi" style="font-size:9px;">check</span> 학습 완료</span>
+      <!-- 6: 수강신청가능 -->
+      <div class="l-card" onclick="location.href='course-detail.html'">
+        <div class="l-thumb" style="background:linear-gradient(155deg,#f76707,#ff922b)"><span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span></div>
+        <div class="l-body">
+          <div class="l-title">[2026 직무교육] CNC 운용 기초</div>
+          <div class="l-period"><div class="lbl">신청기간</div><div class="val">2026.05.12 09:00 ~ 2026.05.30 18:00</div></div>
+          <div class="l-period"><div class="lbl">교육 기간</div><div class="val">2026.06.10 09:00 ~ 2026.06.12 18:00</div></div>
+          <div class="l-meta"><span class="mi">place</span>평택 실습센터 · 총 3회차</div>
+          <div class="l-badges">
+            <span class="bdg-new">N</span>
+            <span class="bdg type">오프라인</span>
+            <span class="bdg enrollable">수강신청가능</span>
           </div>
-        </div>
-        <div class="g-card-title">2025 하반기 리더십 심화</div>
-        <div class="g-card-bottom">
-          <span class="progress"><span class="mi">play_circle</span> 100%</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
-        </div>
-      </div>
-
-      <!-- 7: 수강종료 -->
-      <div class="g-card" onclick="location.href='course-completed.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge ended">수강종료</span>
-          </div>
-        </div>
-        <div class="g-card-title">2025 법정의무교육</div>
-        <div class="g-card-bottom">
-          <span class="g-status ended">수강종료</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
-        </div>
-      </div>
-
-      <!-- 8: 신청가능 -->
-      <div class="g-card" onclick="location.href='course-detail.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
-          </div>
-        </div>
-        <div class="g-card-title">커뮤니케이션 스킬 강화</div>
-        <div class="g-card-bottom">
-          <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
-        </div>
-      </div>
-
-      <!-- 9: 수강중 -->
-      <div class="g-card" onclick="location.href='course-enrolled.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge in-progress">수강중</span>
-          </div>
-        </div>
-        <div class="g-card-title">코칭 리더십 심화 과정</div>
-        <div class="g-card-bottom">
-          <span class="progress"><span class="mi">play_circle</span> 33%</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
-        </div>
-      </div>
-
-      <!-- 10: 신청가능 -->
-      <div class="g-card" onclick="location.href='course-detail.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
-          </div>
-        </div>
-        <div class="g-card-title">디자인 씽킹 마스터클래스</div>
-        <div class="g-card-bottom">
-          <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
-        </div>
-      </div>
-
-      <!-- 11: 신청가능 -->
-      <div class="g-card" onclick="location.href='course-detail.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge enrollable"><span class="mi" style="font-size:9px;">check</span> 신청가능</span>
-          </div>
-        </div>
-        <div class="g-card-title">비즈니스 협상 실전</div>
-        <div class="g-card-bottom">
-          <span class="g-status enrollable">수강 신청 가능</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
-        </div>
-      </div>
-
-      <!-- 12: 수강예정 -->
-      <div class="g-card" onclick="location.href='course-enrolled.html'">
-        <div class="g-card-cover">
-          <img src="https://images.unsplash.com/photo-1515378960530-7c0da6231fb1?w=300&h=400&fit=crop" alt="">
-          <div class="g-badges">
-            <span class="g-badge scheduled">수강예정</span>
-          </div>
-        </div>
-        <div class="g-card-title">AI 활용 업무 자동화</div>
-        <div class="g-card-bottom">
-          <span class="g-status scheduled">수강예정</span>
-          <button class="info-btn"><span class="mi" style="font-size:11px;">info</span></button>
         </div>
       </div>
 
