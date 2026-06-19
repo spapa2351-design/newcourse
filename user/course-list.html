@@ -153,6 +153,29 @@
     .bdg.closed   { color: #6b7684; background: #f2f4f6; }     /* 신청 마감 */
     .bdg.ing      { color: #2e84ff; background: #fff; border: 1px solid #b8d4ff; }  /* 수강중 (내수강) */
     .bdg.completed{ color: #fff; background: var(--brand-06); }  /* 학습 완료 (내수강) */
+
+    /* ── 리스트/썸네일 토글 ── */
+    .view-toggle { display: flex; gap: 2px; background: var(--n-01); border-radius: 8px; padding: 2px; }
+    .vt-btn {
+      width: 28px; height: 24px; border: none; background: none; border-radius: 6px;
+      color: var(--n-05); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .vt-btn.active { background: var(--white); color: var(--black); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    .vt-btn .mi { font-size: 18px; }
+
+    /* ── 썸네일(그리드) 뷰 ── */
+    .thumb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; padding: 10px 20px 24px; }
+    .t-card { cursor: pointer; }
+    .t-cover {
+      aspect-ratio: 3/4; border-radius: 12px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,.12);
+    }
+    .t-cover .play { width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; }
+    .t-badges { position: absolute; top: 8px; left: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+    .t-badges .bdg { font-size: 10px; padding: 3px 7px; }
+    .t-title { font-size: 13px; font-weight: 700; line-height: 1.35; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .t-meta { font-size: 11px; color: var(--n-06); font-weight: 500; margin-top: 3px; display: flex; align-items: center; gap: 3px; }
+    .t-meta .mi { font-size: 13px; color: var(--n-05); }
   </style>
 </head>
 <body>
@@ -186,12 +209,15 @@
     <div class="sort-area">
       <button class="sort-btn"><span class="mi">expand_more</span> 최근 등록순</button>
       <span class="sort-divider"></span>
-      <span class="mi view-icon">format_list_bulleted</span>
+      <div class="view-toggle">
+        <button class="vt-btn active" onclick="setView('list', this)" aria-label="리스트 보기"><span class="mi">format_list_bulleted</span></button>
+        <button class="vt-btn" onclick="setView('thumb', this)" aria-label="썸네일 보기"><span class="mi">grid_view</span></button>
+      </div>
     </div>
   </div>
 
   <div class="scroll-area">
-    <div class="list-wrap">
+    <div class="list-wrap" id="view-list">
 
       <!-- 1: 수강신청가능 -->
       <div class="l-card" data-feature-id="U2-04" onclick="location.href='course-detail.html'">
@@ -286,6 +312,65 @@
         </div>
       </div>
 
+    </div><!-- /view-list -->
+
+    <!-- ── 썸네일(그리드) 뷰 ── -->
+    <div class="thumb-grid" id="view-thumb" style="display:none;">
+
+      <div class="t-card" onclick="location.href='course-detail.html'">
+        <div class="t-cover" style="background:linear-gradient(155deg,#3b5bdb,#5c7cfa)">
+          <div class="t-badges"><span class="bdg enrollable">수강신청가능</span></div>
+          <span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span>
+        </div>
+        <div class="t-title">[2026 직무교육] 목공 기계 안전 실무</div>
+        <div class="t-meta"><span class="mi">place</span>본사 대교육장 · 총 4회차</div>
+      </div>
+
+      <div class="t-card" onclick="location.href='course-detail.html'">
+        <div class="t-cover" style="background:linear-gradient(155deg,#0ca678,#20c997)">
+          <div class="t-badges"><span class="bdg imminent">마감 임박</span></div>
+          <span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span>
+        </div>
+        <div class="t-title">[2026 직무교육] 정밀 가공 기초 과정</div>
+        <div class="t-meta"><span class="mi">place</span>평택 실습센터 · 총 3회차</div>
+      </div>
+
+      <div class="t-card" onclick="location.href='course-detail.html'">
+        <div class="t-cover" style="background:linear-gradient(155deg,#868e96,#adb5bd)">
+          <div class="t-badges"><span class="bdg closed">신청 마감</span></div>
+          <span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span>
+        </div>
+        <div class="t-title">[2025 법정의무교육] 산업안전보건 교육</div>
+        <div class="t-meta"><span class="mi">place</span>본사 대강당 · 총 1회차</div>
+      </div>
+
+      <div class="t-card" onclick="location.href='course-detail.html'">
+        <div class="t-cover" style="background:linear-gradient(155deg,#7048e8,#9775fa)">
+          <div class="t-badges"><span class="bdg ing">수강중</span></div>
+          <span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span>
+        </div>
+        <div class="t-title">[2026 직무교육] 목재 도장·마감 실무</div>
+        <div class="t-meta"><span class="mi">place</span>방배 실습실 · 총 5회차</div>
+      </div>
+
+      <div class="t-card" onclick="location.href='course-detail.html'">
+        <div class="t-cover" style="background:linear-gradient(155deg,#1098ad,#22b8cf)">
+          <div class="t-badges"><span class="bdg completed"><span class="mi" style="font-size:10px;">check</span> 학습 완료</span></div>
+          <span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span>
+        </div>
+        <div class="t-title">[2025 법정의무교육] 개인정보보호 교육</div>
+        <div class="t-meta"><span class="mi">place</span>본사 교육장 · 총 1회차</div>
+      </div>
+
+      <div class="t-card" onclick="location.href='course-detail.html'">
+        <div class="t-cover" style="background:linear-gradient(155deg,#f76707,#ff922b)">
+          <div class="t-badges"><span class="bdg enrollable">수강신청가능</span></div>
+          <span class="play"><span class="mi" style="color:#fff;font-size:18px;">play_arrow</span></span>
+        </div>
+        <div class="t-title">[2026 직무교육] CNC 운용 기초</div>
+        <div class="t-meta"><span class="mi">place</span>평택 실습센터 · 총 3회차</div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -294,6 +379,14 @@
 function setSubTab(el) {
   document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
+}
+
+/* ── 리스트 / 썸네일 뷰 토글 ── */
+function setView(v, el) {
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('view-list').style.display  = (v === 'list')  ? '' : 'none';
+  document.getElementById('view-thumb').style.display = (v === 'thumb') ? '' : 'none';
 }
 </script>
 
