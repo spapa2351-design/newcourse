@@ -174,6 +174,9 @@
     }
     .next-bottom .loc { font-size: 13px; font-weight: 600; opacity: 0.85; }
     .next-bottom .loc .mi { margin-right: 4px; font-size: 14px; }
+    .hero-map { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 20px; border: none; background: rgba(255,255,255,.2); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; backdrop-filter: blur(4px); flex-shrink: 0; }
+    .hero-map .mi { font-size: 14px; }
+    .hero-map:active { background: rgba(255,255,255,.32); }
     .btn-qr {
       padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
       background: rgba(255,255,255,.2); color: #fff; border: 1px solid rgba(255,255,255,.3);
@@ -267,10 +270,11 @@
     .fchip { font-size: 13px; font-weight: 700; padding: 7px 16px; border-radius: var(--r-pill); border: 1px solid var(--border); background: var(--white); color: var(--secondary); cursor: pointer; transition: all .15s; }
     .fchip.active { background: var(--black); color: #fff; border-color: var(--black); }
 
-    /* ── 수강완료: 카드 그리드 (done-card-h 재사용, 세로 2열) ── */
-    .done-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 8px 16px 24px; }
-    .done-grid .done-card-h { flex: none; width: auto; }
-    .done-cover .cert.fail { background: var(--n-06); }
+    /* ── 수강완료: 리스트 (done-card 행 재사용) ── */
+    .done-list { padding: 8px 16px 24px; }
+    .done-list .done-card { align-items: flex-start; }
+    .done-list .done-thumb { width: 56px; height: 56px; border-radius: 10px; overflow: hidden; }
+    .done-list .done-sub + .done-sub { margin-top: 2px; }
 
     /* 다음 회차 미니 정보 */
     .next-mini {
@@ -385,11 +389,11 @@
     .done-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
     .done-sub { font-size: 12px; color: var(--secondary); }
     .done-status {
-      font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px;
-      flex-shrink: 0;
+      font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px;
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 3px;
     }
-    .done-status.pass { background: var(--success-bg); color: var(--success); }
-    .done-status.fail { background: var(--error-bg); color: var(--error); }
+    .done-status.pass { background: var(--primary); color: #fff; }      /* 학습 완료(수료) = 파랑 */
+    .done-status.fail { background: var(--n-01); color: var(--n-06); }  /* 미수료 = 중립 회색 */
 
     /* ── 빈 상태 ── */
     .empty-state {
@@ -568,6 +572,7 @@
         </div>
         <div class="next-bottom">
           <span class="loc"><span class="mi">location_on</span> 본사 대교육장 B동 3층</span>
+          <button class="hero-map" onclick="openMap('본사 대교육장 B동 3층')"><span class="mi">directions</span> 길찾기</button>
         </div>
       </div>
 
@@ -590,7 +595,7 @@
           </div>
         </div>
         <div class="today-hero-bottom">
-          <button class="btn-map" title="길찾기"><span class="mi i18">directions</span></button>
+          <button class="btn-map" title="길찾기" onclick="openMap('본사 대교육장 B동 3층')"><span class="mi i18">directions</span></button>
         </div>
       </div>
 
@@ -672,8 +677,8 @@
           <h3>수강중인 코스 <span class="count">2</span></h3>
         </div>
 
-        <!-- 카드 1: 진행중 코스 -->
-        <div class="course-card" data-feature-id="U4-02" onclick="location.href='course-enrolled.html'">
+        <!-- 카드 1: 진행중 코스 (수강 시작됨 → 취소·변경 불가) -->
+        <div class="course-card" data-feature-id="U4-02" onclick="location.href='course-offline.html?status=enrolled'">
           <div class="cc-head">
             <div>
               <div class="cc-name">2026 직무교육 — 프로젝트 관리 심화</div>
@@ -694,8 +699,8 @@
           </div>
         </div>
 
-        <!-- 카드 2: 예정 코스 -->
-        <div class="course-card" onclick="location.href='course-enrolled.html'">
+        <!-- 카드 2: 예정 코스 (시작 전 → 취소·변경 가능) -->
+        <div class="course-card" onclick="location.href='course-offline.html?status=scheduled'">
           <div class="cc-head">
             <div>
               <div class="cc-name">ESG 실무 워크숍</div>
@@ -739,48 +744,76 @@
        <button class="fchip" onclick="filterDone('pass', this)">수료</button>
        <button class="fchip" onclick="filterDone('fail', this)">미수료</button>
      </div>
-     <div class="done-grid" id="done-grid">
+     <div class="done-list" id="done-list">
 
-       <div class="done-card-h" data-status="pass" onclick="location.href='course-completed.html'">
-         <div class="done-cover" style="background:linear-gradient(155deg,#3b5bdb,#5c7cfa)"><div class="gloss"></div><div class="ct">2025 하반기<br>리더십 심화</div><span class="cert">수료</span></div>
-         <div class="done-title">2025 하반기 리더십 심화</div>
-         <div class="done-meta">출석 100% · 12.20 수료</div>
+       <div class="done-card" data-status="pass" onclick="location.href='course-offline.html?status=completed'">
+         <div class="done-thumb" style="background:linear-gradient(155deg,#3b5bdb,#5c7cfa)"></div>
+         <div class="done-info">
+           <div class="done-name">2025 하반기 리더십 심화</div>
+           <div class="done-sub">A반 (10월반) · 박지원 강사</div>
+           <div class="done-sub">출석 100% · 2025.12.20 수료</div>
+         </div>
+         <span class="done-status pass"><span class="mi" style="font-size:11px;">check</span> 학습 완료</span>
        </div>
 
-       <div class="done-card-h" data-status="pass" onclick="location.href='course-completed.html'">
-         <div class="done-cover" style="background:linear-gradient(155deg,#0ca678,#20c997)"><div class="gloss"></div><div class="ct">산업안전보건<br>법정교육</div><span class="cert">수료</span></div>
-         <div class="done-title">산업안전보건 법정 직무교육</div>
-         <div class="done-meta">출석 100% · 05.30 수료</div>
+       <div class="done-card" data-status="pass" onclick="location.href='course-offline.html?status=completed'">
+         <div class="done-thumb" style="background:linear-gradient(155deg,#0ca678,#20c997)"></div>
+         <div class="done-info">
+           <div class="done-name">산업안전보건 법정 직무교육</div>
+           <div class="done-sub">안전 1차 · 김안전 강사</div>
+           <div class="done-sub">출석 100% · 2025.05.30 수료</div>
+         </div>
+         <span class="done-status pass"><span class="mi" style="font-size:11px;">check</span> 학습 완료</span>
        </div>
 
-       <div class="done-card-h" data-status="pass" onclick="location.href='course-completed.html'">
-         <div class="done-cover" style="background:linear-gradient(155deg,#e8590c,#fd7e14)"><div class="gloss"></div><div class="ct">고객 응대<br>서비스 매너</div><span class="cert">수료</span></div>
-         <div class="done-title">고객 응대 서비스 매너 특강</div>
-         <div class="done-meta">출석 100% · 03.06 수료</div>
+       <div class="done-card" data-status="pass" onclick="location.href='course-offline.html?status=completed'">
+         <div class="done-thumb" style="background:linear-gradient(155deg,#e8590c,#fd7e14)"></div>
+         <div class="done-info">
+           <div class="done-name">고객 응대 서비스 매너 특강</div>
+           <div class="done-sub">특강 · 이서비스 강사</div>
+           <div class="done-sub">출석 100% · 2025.03.06 수료</div>
+         </div>
+         <span class="done-status pass"><span class="mi" style="font-size:11px;">check</span> 학습 완료</span>
        </div>
 
-       <div class="done-card-h" data-status="pass" onclick="location.href='course-completed.html'">
-         <div class="done-cover" style="background:linear-gradient(155deg,#7048e8,#9775fa)"><div class="gloss"></div><div class="ct">환경관리<br>실무 과정</div><span class="cert">수료</span></div>
-         <div class="done-title">2025 환경관리 실무 과정</div>
-         <div class="done-meta">출석 92% · 2025.12 수료</div>
+       <div class="done-card" data-status="pass" onclick="location.href='course-offline.html?status=completed'">
+         <div class="done-thumb" style="background:linear-gradient(155deg,#7048e8,#9775fa)"></div>
+         <div class="done-info">
+           <div class="done-name">2025 환경관리 실무 과정</div>
+           <div class="done-sub">1기 · 정환경 강사</div>
+           <div class="done-sub">출석 92% · 2025.12.18 수료</div>
+         </div>
+         <span class="done-status pass"><span class="mi" style="font-size:11px;">check</span> 학습 완료</span>
        </div>
 
-       <div class="done-card-h" data-status="pass" onclick="location.href='course-completed.html'">
-         <div class="done-cover" style="background:linear-gradient(155deg,#1098ad,#22b8cf)"><div class="gloss"></div><div class="ct">비계 조립·해체<br>안전 실무</div><span class="cert">수료</span></div>
-         <div class="done-title">비계 조립·해체 작업 안전</div>
-         <div class="done-meta">출석 100% · 2025.10 수료</div>
+       <div class="done-card" data-status="pass" onclick="location.href='course-offline.html?status=completed'">
+         <div class="done-thumb" style="background:linear-gradient(155deg,#1098ad,#22b8cf)"></div>
+         <div class="done-info">
+           <div class="done-name">비계 조립·해체 작업 안전</div>
+           <div class="done-sub">안전 2차 · 강현장 강사</div>
+           <div class="done-sub">출석 100% · 2025.10.11 수료</div>
+         </div>
+         <span class="done-status pass"><span class="mi" style="font-size:11px;">check</span> 학습 완료</span>
        </div>
 
-       <div class="done-card-h" data-status="pass" onclick="location.href='course-completed.html'">
-         <div class="done-cover" style="background:linear-gradient(155deg,#f76707,#ff922b)"><div class="gloss"></div><div class="ct">신입사원<br>직무 온보딩</div><span class="cert">수료</span></div>
-         <div class="done-title">신입사원 직무 온보딩</div>
-         <div class="done-meta">출석 100% · 2025.08 수료</div>
+       <div class="done-card" data-status="pass" onclick="location.href='course-offline.html?status=completed'">
+         <div class="done-thumb" style="background:linear-gradient(155deg,#f76707,#ff922b)"></div>
+         <div class="done-info">
+           <div class="done-name">신입사원 직무 온보딩</div>
+           <div class="done-sub">2025 상반기 · 박서준 강사</div>
+           <div class="done-sub">출석 100% · 2025.08.22 수료</div>
+         </div>
+         <span class="done-status pass"><span class="mi" style="font-size:11px;">check</span> 학습 완료</span>
        </div>
 
-       <div class="done-card-h" data-status="fail" onclick="location.href='course-completed.html'">
-         <div class="done-cover" style="background:linear-gradient(155deg,#868e96,#adb5bd)"><div class="gloss"></div><div class="ct">정보보호<br>의무교육</div><span class="cert fail">미수료</span></div>
-         <div class="done-title">정보보호 의무교육</div>
-         <div class="done-meta">출석 50% · 2025.06 종료</div>
+       <div class="done-card" data-status="fail" onclick="location.href='course-offline.html?status=failed'">
+         <div class="done-thumb" style="background:linear-gradient(155deg,#868e96,#adb5bd)"></div>
+         <div class="done-info">
+           <div class="done-name">정보보호 의무교육</div>
+           <div class="done-sub">의무 차수 · 한보안 강사</div>
+           <div class="done-sub">출석 50% · 2025.06.07 종료</div>
+         </div>
+         <span class="done-status fail">미수료</span>
        </div>
 
      </div>
@@ -868,6 +901,11 @@ function selectTab(el) {
   el.classList.add('active');
 }
 
+/* ── 장소 길찾기 (카카오맵 검색 — 실제 API 연동은 개발팀) ── */
+function openMap(place) {
+  window.open('https://map.kakao.com/link/search/' + encodeURIComponent(place || ''), '_blank');
+}
+
 /* ── 수강중 / 수강완료 세그먼트 ── */
 function selectSeg(seg, el) {
   document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
@@ -880,7 +918,7 @@ function selectSeg(seg, el) {
 function filterDone(status, el) {
   document.querySelectorAll('#seg-completed .fchip').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  document.querySelectorAll('#done-grid .done-card-h').forEach(c => {
+  document.querySelectorAll('#done-list .done-card').forEach(c => {
     c.style.display = (status === 'all' || c.dataset.status === status) ? '' : 'none';
   });
 }
