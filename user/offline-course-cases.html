@@ -150,7 +150,7 @@
 
   <div class="page-h">
     <h1>오프라인 코스 케이스 갤러리 — 실제 학습자 화면 (9종)</h1>
-    <p>오프라인 빌더 설정이 만들어내는 학습자 코스 상세 화면(<code>course-detail.html</code> 정보 탭)을 케이스별로 한 페이지에 모았습니다. 각 폰은 실제 화면 그대로 — 커버·배지·강사·학습 정보·카테고리·신청 버튼.</p>
+    <p>오프라인 빌더 설정이 만들어내는 학습자 코스 상세 화면(<code>course-offline.html</code> 정보 탭)을 케이스별로 한 페이지에 모았습니다. 각 폰은 실제 화면 그대로 — 커버·배지·강사·학습 정보·카테고리·신청 버튼.</p>
     <div class="page-h legend" style="display:flex;">
       <span>코스 유형: <b style="color:var(--purple)">오프라인</b> (모든 케이스 항상 표시)</span>
       <span>모집 상태: 수강 신청 가능 · 마감 임박 · 신청 마감</span>
@@ -248,7 +248,7 @@
             <tr>
               <td class="badge-cell"><span class="tb st-blue"><span class="mi i14">schedule</span>수강예정</span></td>
               <td class="cond">신청 완료 &amp; 오늘 &lt; 교육 시작일 (다중·다회차는 가장 빠른 회차)</td>
-              <td class="memo">교육 시작일 도달 시 ‘수강중’ 자동 전환 · course-enrolled.html</td>
+              <td class="memo">교육 시작일 도달 시 ‘수강중’ 자동 전환 · course-offline.html?status=enrolled</td>
             </tr>
             <tr>
               <td class="badge-cell"><span class="tb st-blue">수강중</span></td>
@@ -264,7 +264,7 @@
         </table>
       </div>
     </div>
-    <p class="sub" style="margin-top:16px;">정본 열: ○ = <code>course-detail.html</code>이 동일하게 렌더 · △ = 분류상 정당하나 ‘수강 신청 가능’ + 마감 D-N 백엔드 로직이 있어야 표시(현재 갤러리 강조용).</p>
+    <p class="sub" style="margin-top:16px;">정본 열: ○ = <code>course-offline.html</code>이 동일하게 렌더 · △ = 분류상 정당하나 ‘수강 신청 가능’ + 마감 D-N 백엔드 로직이 있어야 표시(현재 갤러리 강조용).</p>
   </div>
 
   <div class="gallery-h">케이스별 실제 화면 (9종)</div>
@@ -274,7 +274,7 @@
 </div>
 
 <script>
-/* 정본 course-detail.html COURSE_CASES 8종 기반 + 배지 3가족 분류 정합(2026-06-17)
+/* 정본 course-offline.html COURSE_CASES 8종 기반 + 배지 3가족 분류 정합(2026-06-17)
    - enroll: 모집 상태(before_open / enrolling / closed / assigned)  → 채움 배지
    - sel   : 신청 방식(단일 선택 / 다중 조합 / 회차 선택형 / 관리자 지정) → 테두리 배지
    - closingSoon: enrolling의 서브상태(마감 임박) · always: 모집 형태(상시 모집) */
