@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>블렌디드 코스 수료조건 — 리서치 & 결론</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['"Pretendard Variable"','Pretendard','-apple-system','sans-serif'] } } } };
+  </script>
+  <style>
+    body { font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif; letter-spacing: -0.3px; }
+    .pill { display:inline-flex; align-items:center; gap:4px; font-weight:700; border-radius:9999px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+<div class="max-w-4xl mx-auto px-5 py-10">
+
+  <!-- ── Hero ── -->
+  <header class="mb-8">
+    <div class="text-[12px] font-bold tracking-widest text-indigo-500 uppercase mb-2">newcourse · 기획팀 리서치 보고</div>
+    <h1 class="text-3xl font-black text-slate-900 leading-tight mb-3">블렌디드 코스 수료조건</h1>
+    <p class="text-[15px] text-slate-500 leading-relaxed">온라인(영상·시험) + 오프라인(집합 수업)을 한 코스로 묶을 때, <strong class="text-slate-700">"수료"를 어떻게 판정할지</strong> 업계·법정 기준을 조사해 우리 방식을 검증했습니다. 개발·운영·영업 공유용.</p>
+    <div class="mt-3 text-[12px] text-slate-400">v1.0 · 2026-06-24 · 대상: 개발팀 · 운영팀 · 영업팀</div>
+  </header>
+
+  <!-- ── 한 줄 결론 배너 ── -->
+  <div class="rounded-2xl bg-slate-900 text-white p-6 mb-8 shadow-lg">
+    <div class="text-[12px] font-bold text-indigo-300 uppercase tracking-wider mb-2">결론</div>
+    <p class="text-[19px] font-extrabold leading-snug">우리 방식(<span class="text-blue-300">온라인 이수</span> <span class="text-amber-300">AND</span> <span class="text-orange-300">오프라인 출석</span>, 따로 판정)은
+      <span class="underline decoration-indigo-400 decoration-2 underline-offset-4">법정 기준과 일치하는 정석</span>입니다.</p>
+    <p class="text-[14px] text-slate-300 mt-2">"블렌디드 전체를 진도율 100% 하나로" 잡는 건 오히려 <strong class="text-white">비표준</strong>입니다.</p>
+  </div>
+
+  <!-- ── 1. 왜 헷갈리나 ── -->
+  <section class="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
+    <h2 class="text-[18px] font-black text-slate-900 mb-3">1. 왜 수료 기준이 헷갈릴까?</h2>
+    <p class="text-[14px] text-slate-600 leading-relaxed mb-4">온라인과 오프라인은 <strong>측정 단위가 다릅니다.</strong> 그래서 그냥 더하거나 평균 내면 왜곡이 생깁니다.</p>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+        <div class="pill bg-blue-600 text-white text-[12px] px-2.5 py-1 mb-2">온라인</div>
+        <p class="text-[14px] font-bold text-slate-800">진도율 / 이수</p>
+        <p class="text-[13px] text-slate-500 mt-1">영상 시청률, 시험 합격 — "콘텐츠를 다 봤나"</p>
+      </div>
+      <div class="rounded-xl border border-orange-200 bg-orange-50 p-4">
+        <div class="pill bg-orange-500 text-white text-[12px] px-2.5 py-1 mb-2">오프라인</div>
+        <p class="text-[14px] font-bold text-slate-800">출석률</p>
+        <p class="text-[13px] text-slate-500 mt-1">집합 수업에 몇 번 나왔나 — "현장에 왔나"</p>
+      </div>
+    </div>
+    <div class="mt-4 rounded-xl bg-rose-50 border border-rose-200 p-4 text-[13px] text-rose-700 leading-relaxed">
+      <strong>합산하면 사고가 납니다.</strong> 예: 온라인 100% + 오프라인 50%를 평균 내면 75%로 "통과"가 되는데, 실제로는 <strong>집합 수업을 절반만 빠진 미달자</strong>입니다. 법정의무교육이면 컴플라이언스 문제로 직결됩니다.
+    </div>
+  </section>
+
+  <!-- ── 2. 우리 방식 ── -->
+  <section class="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
+    <h2 class="text-[18px] font-black text-slate-900 mb-1">2. 우리 방식 — 트랙별로 따로 판정한 뒤 둘 다 충족(AND)</h2>
+    <p class="text-[14px] text-slate-500 mb-5">합치지 않습니다. 온라인은 온라인 기준으로, 오프라인은 오프라인 기준으로 각각 판정하고, <strong class="text-slate-700">둘 다 통과해야 수료</strong>입니다.</p>
+    <div class="flex flex-col sm:flex-row items-stretch gap-3">
+      <div class="flex-1 rounded-xl border-2 border-blue-200 bg-blue-50 p-4 text-center">
+        <div class="text-[12px] font-bold text-blue-600 mb-1">온라인 트랙</div>
+        <div class="text-[15px] font-extrabold text-slate-800">필수 항목 전체 이수</div>
+        <div class="text-[12px] text-slate-500 mt-1">영상 시청률·시험 합격 등 각 항목 조건 충족</div>
+      </div>
+      <div class="flex items-center justify-center">
+        <span class="pill bg-amber-400 text-slate-900 text-[15px] font-black px-4 py-2">AND</span>
+      </div>
+      <div class="flex-1 rounded-xl border-2 border-orange-200 bg-orange-50 p-4 text-center">
+        <div class="text-[12px] font-bold text-orange-600 mb-1">오프라인 트랙</div>
+        <div class="text-[15px] font-extrabold text-slate-800">차수 출석률 충족</div>
+        <div class="text-[12px] text-slate-500 mt-1">차수별 출석률 기준(법정 100% · 일반 75% 등)</div>
+      </div>
+      <div class="flex items-center justify-center">
+        <span class="text-slate-300 text-2xl font-black">→</span>
+      </div>
+      <div class="flex items-center justify-center rounded-xl border-2 border-emerald-300 bg-emerald-50 px-5 py-4">
+        <span class="text-[16px] font-extrabold text-emerald-700">수료</span>
+      </div>
+    </div>
+    <p class="text-[12px] text-slate-400 mt-4">※ 빌더에서 영상·차수 출석 기준은 각 항목마다 따로 설정합니다. 차수마다 다른 출석률(예: 법정 100% / 일반 75%)도 가능합니다.</p>
+  </section>
+
+  <!-- ── 3. 업계·법정 관행 비교 ── -->
+  <section class="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
+    <h2 class="text-[18px] font-black text-slate-900 mb-4">3. 다른 곳은 어떻게 하나? (리서치)</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-[13px] border-collapse">
+        <thead>
+          <tr class="text-left text-slate-500 border-b-2 border-slate-200">
+            <th class="py-2.5 pr-3 font-bold">기관 · 표준</th>
+            <th class="py-2.5 px-3 font-bold">온라인</th>
+            <th class="py-2.5 px-3 font-bold">오프라인</th>
+            <th class="py-2.5 pl-3 font-bold">결합 방식</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr class="bg-indigo-50/40">
+            <td class="py-3 pr-3 font-bold text-slate-800">고용노동부 혼합훈련<br><span class="text-[11px] font-normal text-slate-400">(국민내일배움카드 · 법정)</span></td>
+            <td class="py-3 px-3">진도율 80% 이상</td>
+            <td class="py-3 px-3">출석률 80% 이상</td>
+            <td class="py-3 pl-3"><span class="pill bg-emerald-100 text-emerald-700 text-[11px] px-2 py-0.5">각각 충족 (AND)</span></td>
+          </tr>
+          <tr>
+            <td class="py-3 pr-3 font-bold text-slate-800">국제 LMS<br><span class="text-[11px] font-normal text-slate-400">(Absorb · TalentLMS 등)</span></td>
+            <td class="py-3 px-3">온라인 진도 자동 추적</td>
+            <td class="py-3 px-3">강사가 출석 확인·표기</td>
+            <td class="py-3 pl-3"><span class="pill bg-emerald-100 text-emerald-700 text-[11px] px-2 py-0.5">항목별 완료 → 코스 완료</span></td>
+          </tr>
+          <tr>
+            <td class="py-3 pr-3 font-bold text-slate-800">대학 사례<br><span class="text-[11px] font-normal text-slate-400">(일부 블렌디드 강의)</span></td>
+            <td class="py-3 px-3">온라인 진도율</td>
+            <td class="py-3 px-3">출석률</td>
+            <td class="py-3 pl-3"><span class="pill bg-amber-100 text-amber-700 text-[11px] px-2 py-0.5">평균 75% (합산형)</span></td>
+          </tr>
+          <tr class="bg-blue-50/40">
+            <td class="py-3 pr-3 font-bold text-indigo-700">우리 (newcourse)</td>
+            <td class="py-3 px-3">필수 항목 전체 이수</td>
+            <td class="py-3 px-3">차수 출석률 충족</td>
+            <td class="py-3 pl-3"><span class="pill bg-emerald-100 text-emerald-700 text-[11px] px-2 py-0.5">트랙별 AND</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-[13px] text-slate-500 mt-4 leading-relaxed">기업 교육·법정 훈련의 <strong class="text-slate-700">주류는 트랙별 AND</strong>입니다. 평균(합산)형은 일부 대학에서 쓰지만, 위 1번의 왜곡 위험이 있어 의무교육엔 부적합합니다.</p>
+  </section>
+
+  <!-- ── 4. Q&A ── -->
+  <section class="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
+    <h2 class="text-[18px] font-black text-slate-900 mb-4">4. 자주 묻는 질문</h2>
+    <div class="space-y-4">
+      <div>
+        <p class="text-[15px] font-bold text-slate-800">Q. 블렌디드는 "진도율 100%"로 하면 되지 않나요?</p>
+        <p class="text-[14px] text-slate-600 mt-1.5 leading-relaxed"><strong class="text-rose-600">아닙니다.</strong> 블렌디드 <strong>전체를 단일 100%</strong>로 묶는 건 표준이 아닙니다. "100%"는 보통 <strong>온라인 이러닝(법정의무교육) 한 부분</strong>에 붙는 값입니다. 블렌디드는 온라인·오프라인을 <strong>각각의 기준</strong>(온라인 진도 X% + 오프라인 출석 Y%)으로 봅니다.</p>
+      </div>
+      <div class="border-t border-slate-100 pt-4">
+        <p class="text-[15px] font-bold text-slate-800">Q. 그럼 우리 방식에 구멍이 있나요?</p>
+        <p class="text-[14px] text-slate-600 mt-1.5 leading-relaxed"><strong class="text-emerald-600">없습니다.</strong> 우리의 트랙별 AND는 <strong>고용노동부 혼합훈련 법정 기준(집체 출석률 AND 원격 진도율 각각 80%)과 정확히 같은 구조</strong>입니다. 가장 권위 있는 근거와 일치합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. 후속 강화 ── -->
+  <section class="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm">
+    <h2 class="text-[18px] font-black text-slate-900 mb-1">5. 후속 강화 항목 <span class="text-[13px] font-medium text-slate-400">(구멍 아님 · 더 좋게)</span></h2>
+    <div class="mt-4 space-y-3">
+      <div class="flex gap-3 items-start">
+        <span class="pill bg-slate-200 text-slate-700 text-[12px] w-6 h-6 justify-center shrink-0">1</span>
+        <p class="text-[14px] text-slate-600"><strong class="text-slate-800">트랙별 기준 % 요약 노출</strong> — "온라인 진도 N% · 오프라인 출석 N%"를 운영자가 한눈에 보게.</p>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="pill bg-slate-200 text-slate-700 text-[12px] w-6 h-6 justify-center shrink-0">2</span>
+        <p class="text-[14px] text-slate-600"><strong class="text-slate-800">평균형 옵션</strong> — 대학식 "평균 75%"를 원하는 고객 대비(기본은 AND 유지).</p>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="pill bg-slate-200 text-slate-700 text-[12px] w-6 h-6 justify-center shrink-0">3</span>
+        <p class="text-[14px] text-slate-600"><strong class="text-slate-800">선이수 게이트</strong> — "온라인 먼저 듣고 → 오프라인 참석" 순서 강제(국제 LMS 공통 기능).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 출처 ── -->
+  <section class="rounded-2xl bg-slate-100 border border-slate-200 p-5">
+    <h3 class="text-[13px] font-black text-slate-600 mb-3">출처</h3>
+    <ul class="space-y-1.5 text-[12.5px] text-slate-500">
+      <li>· <a class="text-indigo-600 hover:underline" href="https://www.nodong.or.kr/instruction/2040694" target="_blank" rel="noopener">국민내일배움카드 운영규정 (혼합훈련 수료 기준)</a></li>
+      <li>· <a class="text-indigo-600 hover:underline" href="https://mcea.co.kr/sub6-1/?bmode=view&idx=168183371" target="_blank" rel="noopener">고용노동부 훈련 수료·제적 기준 정리 (미래융합교육원)</a></li>
+      <li>· <a class="text-indigo-600 hover:underline" href="https://support.absorblms.com/hc/en-us/articles/115015751048-Enrollment-Completion-Progress" target="_blank" rel="noopener">Enrollment, Completion &amp; Progress — Absorb LMS</a></li>
+      <li>· <a class="text-indigo-600 hover:underline" href="https://knowledgeanywhere.com/articles/how-do-i-track-offline-training-in-my-lms-tracking-blended-learning/" target="_blank" rel="noopener">Tracking Offline / Blended Training in an LMS — Knowledge Anywhere</a></li>
+      <li>· <a class="text-indigo-600 hover:underline" href="https://www.yu.ac.kr/main/life/qna.do?mode=view&articleNo=5996793" target="_blank" rel="noopener">블렌디드 강의 진도율 75% 기준 — 영남대</a></li>
+      <li>· <a class="text-indigo-600 hover:underline" href="https://dpi.wi.gov/online-blended-learning/attendance" target="_blank" rel="noopener">Attendance in Online and Blended Learning — Wisconsin DPI</a></li>
+    </ul>
+  </section>
+
+  <footer class="text-center text-[11px] text-slate-400 mt-8">
+    newcourse · 블렌디드 코스 수료조건 리서치 · v1.0 · 2026-06-24 · 기획팀
+  </footer>
+
+</div>
+</body>
+</html>
