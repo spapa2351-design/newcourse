@@ -441,10 +441,12 @@
       const [detailImages, setDetailImages] = useState([]);
 
       const [regPeriod, setRegPeriod] = useState({ start: '2026-04-10T09:00', end: '2026-04-25T18:00' });
+      const [regNoLimit, setRegNoLimit] = useState(false);   // 신청 기간 제한 없음 — 오프라인은 마감을 차수별 일정·정원에 위임(상시/장기 모집)
       const [cancelPolicy, setCancelPolicy] = useState({ enabled: false, mode: 'allowed', relativeValue: 3, relativeUnit: 'day' });
       // mode: 'allowed' = 기한부 취소 가능 | 'blocked' = 취소 불가
       const [changePolicy, setChangePolicy] = useState({ enabled: false, relativeValue: 5, relativeUnit: 'day' });
-      const [isSelfEnroll, setIsSelfEnroll] = useState(true);
+      const [isSelfEnroll, setIsSelfEnroll] = useState(true);   // 회원이 직접 신청
+      const [adminAssign, setAdminAssign] = useState(false);    // 관리자가 등록 — 회원신청과 독립, 둘 다 ON 가능
       const [isPreviewOpen, setIsPreviewOpen] = useState(false);
       const [isStructureOpen, setIsStructureOpen] = useState(false);
       const [optionSettingsId, setOptionSettingsId] = useState(null);
@@ -473,6 +475,10 @@
       const [assignPage, setAssignPage] = useState(1);
       const [assignGroupFilter, setAssignGroupFilter] = useState('all');
       const [assignGroupDrop, setAssignGroupDrop] = useState(false);
+      // 코스 분류 — 다중 선택 + 검색 체크박스 트리 (TouchClass 코스 분류 UI)
+      const [catPickerOpen, setCatPickerOpen] = useState(false);
+      const [catSearch, setCatSearch] = useState('');
+      const [catCollapsed, setCatCollapsed] = useState(new Set());
       const [publishType, setPublishType] = useState('now'); // now | scheduled
       const [publishSchedule, setPublishSchedule] = useState('');
       const [scheduledAt, setScheduledAt] = useState(null); // 예약 확정 시 datetime string 저장
@@ -583,12 +589,13 @@
         { label: '코스명 입력', ok: !!courseInfo.title.trim() },
         { label: '담당 강사 지정', ok: !!courseInfo.instructor.trim() },
         { label: '교육 장소 설정', ok: !!courseInfo.location.trim() },
-        { label: '신청 기간 설정', ok: !!regPeriod.start && !!regPeriod.end },
+        { label: '등록 방식 1개 이상', ok: isSelfEnroll || adminAssign },
+        { label: '신청 기간 설정', ok: !isSelfEnroll || regNoLimit || (!!regPeriod.start && !!regPeriod.end) },
         { label: '최소 1개 차수 생성', ok: options.length > 0 },
         { label: '모든 차수에 회차 존재', ok: options.every(o => o.sessions.length > 0) },
         { label: '모든 회차 날짜/시간 설정', ok: options.every(o => o.sessions.every(s => s.date && s.startTime && s.endTime)) },
         { label: '다중 조합형 차수 일정 미겹침', ok: selectionRule !== 'multiple' || !hasOptionOverlap },
-        { label: '배정 인원 일정 겹침 없음 (지정등록)', ok: isSelfEnroll || !hasPersonOverlap },
+        { label: '배정 인원 일정 겹침 없음 (지정등록)', ok: !adminAssign || !hasPersonOverlap },
         { label: '수료 조건 최소 1개 설정', ok: completionRules.length > 0 },
       ];
 
@@ -951,6 +958,9 @@
           return n === 3 ? 'done' : n > 0 ? 'partial' : 'empty';
         }
         if (sec === 2) {
+          if (!isSelfEnroll && !adminAssign) return 'empty';   // 등록 방식 없음
+          if (!isSelfEnroll) return 'done';                    // 관리자 등록만 → 신청기간 불필요
+          if (regNoLimit) return 'done';
           return (regPeriod.start && regPeriod.end) ? 'done' : (regPeriod.start || regPeriod.end) ? 'partial' : 'empty';
         }
         if (sec === 3) {
@@ -966,14 +976,15 @@
       const titleOk = !!courseInfo.title.trim();
       const instructorOk = !!courseInfo.instructor.trim();
       const locationOk = !!courseInfo.location.trim();
-      const regOk = !!regPeriod.start && !!regPeriod.end;
+      const enrollOk = isSelfEnroll || adminAssign;   // 등록 방식 최소 1개
+      const regOk = !isSelfEnroll || regNoLimit || (!!regPeriod.start && !!regPeriod.end);   // 신청 기간은 회원 신청 + 기간지정일 때만 필수
       const optionsOk = options.length > 0 && options.every(o => o.sessions.length > 0) && options.every(o => o.sessions.every(s => s.date && s.startTime && s.endTime));
       const completionOk = completionRules.length > 0;
       const stepValidation = [
         { id: 'step-info',       label: '코스 기본 정보',  required: true, status: (titleOk && instructorOk && locationOk) ? 'ok' : 'warn',
           detail: !titleOk ? '코스명 입력 필요' : !instructorOk ? '강사 지정 필요' : !locationOk ? '교육 장소 설정 필요' : '코스명·강사·장소 입력됨' },
-        { id: 'step-register',   label: '모집 설정',      required: true, status: regOk ? 'ok' : 'warn',
-          detail: regOk ? '신청 기간 설정됨' : '신청 기간 미지정' },
+        { id: 'step-register',   label: '모집 설정',      required: true, status: (enrollOk && regOk) ? 'ok' : 'warn',
+          detail: !enrollOk ? '등록 방식 1개 이상 선택' : (!isSelfEnroll ? '관리자 등록' : (regNoLimit ? '상시 모집 (마감은 차수별)' : (regOk ? '신청 기간 설정됨' : '신청 기간 미지정'))) },
         /* step-options(차수·회차) sentinel은 차수 제거 정론에 따라 제거됨 — 좌측 미니맵 항목도 함께 삭제 */
         { id: 'step-completion', label: '수료 조건',      required: true, status: completionOk ? 'ok' : 'warn',
           detail: completionOk ? `수료 조건 ${completionRules.length}개` : '수료 조건 최소 1개 필요' },
@@ -1157,15 +1168,66 @@
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1.5">카테고리 분류 <span className="text-red-500">*</span></label>
-                    <select value={courseInfo.category} onChange={e => setCourseInfo({...courseInfo, category: e.target.value})} className="w-full border border-slate-300 rounded-lg p-3 text-[14px] focus:border-indigo-500 outline-none bg-white">
-                      <option value="">선택하세요</option>
-                      {categories.map(cat => (
-                        <optgroup key={cat.group} label={cat.group}>
-                          {cat.items.map(item => <option key={item} value={item}>{item}</option>)}
-                        </optgroup>
-                      ))}
-                    </select>
+                    <div className="flex items-center gap-3 mb-2">
+                      <label className="text-sm font-bold text-slate-700">코스 분류 <span className="text-red-500">*</span></label>
+                      <button type="button" onClick={() => setCatPickerOpen(o => !o)}
+                        className="inline-flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[13px] font-bold hover:bg-indigo-700 transition-colors">
+                        <Wand2 size={13}/> 변경
+                      </button>
+                    </div>
+                    {(() => {
+                      const selCats = courseInfo.categories || (courseInfo.category ? [courseInfo.category] : []);
+                      const setCats = next => setCourseInfo({ ...courseInfo, categories: next, category: next[0] || '' });
+                      return (
+                        <div>
+                          {selCats.length > 0 ? (
+                            <div className="space-y-1.5">
+                              {selCats.map(c => (
+                                <div key={c} className="flex items-center gap-2">
+                                  <span className="border border-slate-300 rounded-md px-2.5 py-1 text-[13px] font-bold text-slate-700 bg-white">{c}</span>
+                                  <button type="button" onClick={() => setCats(selCats.filter(x => x !== c))} className="text-red-400 hover:text-red-600"><X size={14}/></button>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-[13px] text-slate-400">분류를 선택하세요 ([변경]을 눌러 추가)</div>
+                          )}
+                          {catPickerOpen && (
+                            <div className="mt-2 border border-slate-200 rounded-xl shadow-lg bg-white overflow-hidden w-full max-w-[360px]">
+                              <div className="relative px-3 py-2.5 border-b border-slate-100 bg-indigo-50/40">
+                                <Search size={13} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"/>
+                                <input value={catSearch} onChange={e => setCatSearch(e.target.value)} placeholder="분류 검색"
+                                  className="w-full pl-7 pr-2 py-1 text-[13px] bg-transparent outline-none"/>
+                              </div>
+                              <div className="max-h-[300px] overflow-y-auto custom-scrollbar py-1">
+                                {categories.map(cat => {
+                                  const collapsed = catCollapsed.has(cat.group);
+                                  const items = cat.items.filter(it => !catSearch || it.includes(catSearch));
+                                  if (catSearch && items.length === 0) return null;
+                                  return (
+                                    <div key={cat.group}>
+                                      <button type="button" onClick={() => setCatCollapsed(prev => { const n = new Set(prev); n.has(cat.group) ? n.delete(cat.group) : n.add(cat.group); return n; })}
+                                        className="w-full flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold text-slate-500 hover:bg-slate-50">
+                                        <ChevronDown size={13} className={`transition-transform ${collapsed ? '-rotate-90' : ''}`}/> {cat.group}
+                                      </button>
+                                      {!collapsed && items.map(it => {
+                                        const on = selCats.includes(it);
+                                        return (
+                                          <label key={it} className="flex items-center gap-2.5 pl-9 pr-3 py-1.5 cursor-pointer hover:bg-indigo-50/50">
+                                            <input type="checkbox" checked={on} onChange={() => setCats(on ? selCats.filter(x => x !== it) : [...selCats, it])} className="w-4 h-4 accent-indigo-600"/>
+                                            <span className="text-[13px] text-slate-700">{it}</span>
+                                          </label>
+                                        );
+                                      })}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* 강사 — 대표 강사 + 소개 + 차수·회차별 강사 다름 토글 (3단 상속) */}
@@ -1327,10 +1389,21 @@
                   <div className="ml-auto flex items-center gap-2"><SecStatus status={secStatus(2)}/><ChevronDown size={16} className={`text-slate-400 transition-transform ${secOpen.s2 ? '' : '-rotate-90'}`}/></div>
                 </div>
                 <div className={`p-6 space-y-6 ${!secOpen.s2 ? 'hidden' : ''}`}>
-                  {/* 수강 신청 기간 — 항상 고정 */}
+                  {/* 수강 신청 기간 — 제한 없음(상시) 가능, 마감은 차수별 위임 */}
                   <div data-feature-id="A2-04">
-                    <label className="block text-[14px] font-bold text-slate-800 mb-1">수강 신청 기간 <span className="text-red-500">*</span></label>
-                    <p className="text-[12px] text-slate-400 mb-3">코스 운영 기간을 설정합니다. 오프라인 코스는 반드시 기간이 지정되어야 합니다.</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[14px] font-bold text-slate-800">수강 신청 기간 {!regNoLimit && <span className="text-red-500">*</span>}</label>
+                      <label className="flex items-center gap-1.5 text-[12px] font-bold text-slate-600 cursor-pointer">
+                        <input type="checkbox" checked={regNoLimit} onChange={e => setRegNoLimit(e.target.checked)} className="w-3.5 h-3.5 accent-indigo-500"/>
+                        제한 없음 (상시 모집)
+                      </label>
+                    </div>
+                    {regNoLimit ? (
+                      <div className="text-[13px] text-slate-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mt-2">
+                        <span className="font-bold text-amber-700">상시 모집</span> — 코스 차원의 신청 마감이 없습니다. 실제 마감은 <span className="font-bold">각 차수의 일정·정원</span>에서 결정됩니다. <span className="text-amber-700">차수가 하나도 없으면 신청을 받을 수 없으니 차수를 먼저 등록하세요.</span>
+                      </div>
+                    ) : (<>
+                    <p className="text-[12px] text-slate-400 mb-3">코스 운영 기간을 설정합니다. 상시 모집이 아니면 기간을 지정해야 합니다.</p>
                     <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                       <div className="flex-1">
                         <label className="block text-[12px] font-bold text-slate-500 mb-1.5">신청 오픈 일시</label>
@@ -1341,6 +1414,7 @@
                         <input type="datetime-local" value={regPeriod.end} onChange={e => setRegPeriod({...regPeriod, end: e.target.value})} className="w-full border border-slate-300 rounded-lg p-2.5 text-[14px] outline-none focus:border-indigo-500 text-slate-700 bg-white"/>
                       </div>
                     </div>
+                    </>)}
                   </div>
 
                   <div data-feature-id="A2-05">
@@ -1476,14 +1550,14 @@
                         </div>
 
                         <div className="relative">
-                          <label className="block text-[14px] font-bold text-slate-800 mb-3">수강 신청 권한 (그룹 지정) <span className="text-[12px] font-normal text-slate-400 ml-1">미선택 시 전체 공개</span></label>
+                          <label className="block text-[14px] font-bold text-slate-800 mb-3">수강 신청 권한</label>
                           <div
                             className="border border-slate-300 rounded-lg p-2.5 flex items-center justify-between bg-white cursor-pointer hover:border-indigo-400 transition-colors min-h-[42px]"
                             onClick={() => setEligGrpDrop(p => !p)}
                           >
                             <div className="flex flex-wrap gap-2">
                               {eligibleGroups.length === 0 ? (
-                                <span className="text-[13px] text-slate-400">전체 공개 (그룹 미지정)</span>
+                                <span className="text-[13px] text-slate-400">그룹 선택</span>
                               ) : (
                                 eligibleGroups.map(grp => (
                                   <span key={grp.id} className="flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-md text-[13px] font-bold shadow-sm">
@@ -1508,7 +1582,6 @@
                               )}
                             </div>
                           )}
-                          <p className="text-[12px] text-slate-500 mt-2">특정 그룹을 지정하면 해당 그룹만 수강 신청할 수 있습니다.</p>
                         </div>
                         <div className="pt-6 border-t border-slate-100">
                           <label className="block text-[14px] font-bold text-slate-800 mb-3 flex items-center gap-2">
@@ -1548,14 +1621,19 @@
                         </div>
                       </div>
                     )}
-                    <div className={`p-4 bg-slate-50 flex justify-between items-center cursor-pointer hover:bg-slate-100 transition-colors ${isSelfEnroll ? 'border-t border-slate-200' : ''}`} onClick={() => setIsSelfEnroll(false)}>
+                    <div className="p-4 bg-slate-50 flex justify-between items-center cursor-pointer hover:bg-slate-100 transition-colors border-t border-slate-200" onClick={() => setAdminAssign(v => !v)}>
                       <div>
                         <div className="font-bold text-[15px] text-slate-800">관리자 지정 등록</div>
                         <div className="text-[13px] text-slate-500 mt-0.5">수강 신청 절차 없이, 관리자가 명단을 엑셀/조직도로 일괄 등록합니다.</div>
                       </div>
-                      <Toggle active={!isSelfEnroll} onClick={e => { e.stopPropagation(); setIsSelfEnroll(!isSelfEnroll); }}/>
+                      <Toggle active={adminAssign} onClick={e => { e.stopPropagation(); setAdminAssign(v => !v); }}/>
                     </div>
                   </div>
+                  {!isSelfEnroll && !adminAssign && (
+                    <div className="mt-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-[12px] text-rose-600 flex items-center gap-1.5">
+                      <AlertTriangle size={13}/> 등록 방식을 최소 1개 이상 켜야 합니다. 모두 끄면 아무도 수강할 수 없습니다.
+                    </div>
+                  )}
                   </div>
                 </div>
               </section>
@@ -1820,7 +1898,7 @@
                         )}
 
                         {/* 그룹 배정 (강제 배정 모드) */}
-                        {!isCollapsed && !isSelfEnroll && (
+                        {!isCollapsed && adminAssign && (
                           <div className="px-3 py-2 bg-indigo-50 border-b border-indigo-100 flex items-center gap-2 flex-wrap">
                             <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><Users size={9}/> 배정 인원</div>
                             <button onClick={e => { e.stopPropagation(); setAssignModalOptId(opt.id); setAssignTemp(new Set(opt.members || [])); setAssignSearch(''); setAssignPage(1); setAssignGroupFilter('all'); }}
@@ -2021,7 +2099,7 @@
                                           <input type="number" min="0" value={sess.capacity !== null && sess.capacity !== undefined ? sess.capacity : ''} onChange={e => handleSessionCapacityChange(sess.id, opt.id, e.target.value)} placeholder={`${opt.capacity}`} className="w-16 text-[12px] font-bold text-center border border-indigo-300 rounded px-1.5 py-1 outline-none focus:border-indigo-500 bg-indigo-50"/>
                                           <span className="text-[11px] text-slate-400">명</span>
                                         </div>
-                                        {!isSelfEnroll && (
+                                        {adminAssign && (
                                           <div className="flex flex-wrap gap-1 items-center">
                                             {sessGroups.map(g => (
                                               <span key={g.id} className="inline-flex items-center gap-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 px-1.5 py-0.5 rounded-full text-[11px] font-bold">
@@ -2134,7 +2212,7 @@
                     {isSelfEnroll && (
                       <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-slate-400 mb-2">
                         <Calendar size={10}/>
-                        신청 {fmtDateTime(regPeriod.start)} ~ {fmtDateTime(regPeriod.end)}
+                        {regNoLimit ? '상시 모집 · 차수별 마감' : `신청 ${fmtDateTime(regPeriod.start)} ~ ${fmtDateTime(regPeriod.end)}`}
                       </div>
                     )}
                     {/* 코스명 */}
@@ -2172,8 +2250,8 @@
 
                   {/* 신청 영역 */}
                   <div className="px-5 pb-8 pt-4">
-                    {!isSelfEnroll ? (
-                      /* 강제 할당 모드 */
+                    {(!isSelfEnroll && adminAssign) ? (
+                      /* 강제 할당 모드 (관리자 등록만 켜진 경우 미리보기) */
                       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
                         <div className="text-[14px] font-black text-amber-800 mb-1">관리자 배정 교육</div>
                         <div className="text-[12px] text-amber-600">담당자가 직접 배정한 교육입니다.<br/>별도 신청 없이 일정을 확인하세요.</div>
