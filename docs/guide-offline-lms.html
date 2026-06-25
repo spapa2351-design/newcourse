@@ -159,7 +159,7 @@
     <span class="font-bold text-slate-800 text-base">오프라인 코스 가이드</span>
   </div>
   <div class="flex-1"></div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v2.4 · 2026-06-25</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v2.5 · 2026-06-25</span>
 </header>
 
 <script>
@@ -280,52 +280,8 @@ function closeMobileSidebar() {
 <!-- Content -->
 <main id="content" class="px-10 py-10 max-w-4xl">
 
-  <!-- newcourse 시스템 안내 -->
   <div class="page active" id="page-intro">
-    <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
-      <div style="display:flex;gap:10px;align-items:flex-start;">
-        <span style="color:#059669;font-weight:700;font-size:13px;">NEW</span>
-        <div style="font-size:13.5px;color:#065f46;line-height:1.6;">
-          <strong>2026-05 newcourse 시스템 추가.</strong> 본 가이드는 현재 운영중인 오프라인 LMS(<code>offline-list.html</code> · <code>offline-builder.html</code> · <code>offline-view.html</code>) 기준입니다. 신규 코스 등록 시 어드민 사이드바의 <strong>코스v2</strong> 그룹에서 <strong>온라인 코스</strong> / <strong>오프라인 코스</strong>를 선택할 수도 있습니다. 두 시스템은 영구 공존하며 데이터·기능은 별도입니다. 자세한 내용은 <a href="newcourse.html" style="color:#047857;text-decoration:underline;">newcourse.html</a> 참조.
-        </div>
-      </div>
-    </div>
 
-    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
-      <div style="display:flex;gap:10px;align-items:flex-start;">
-        <span style="color:#1d4ed8;font-weight:700;font-size:13px;">2026-06-25 갱신</span>
-        <div style="font-size:13px;color:#1e3a8a;line-height:1.7;">
-          <strong>2026-06-25 (v2.4):</strong> <strong>관리자 수강생 등록 정책을 정리했습니다.</strong> ① 코스 목록의 신청 방식 라벨을 빌더와 맞춰 <strong>"관리자 지정 등록"</strong>으로 통일했습니다(이전 "강제 할당"). ② <strong>공개예약 코스도 수강관리가 활성</strong>됩니다 — 공개 전 관리자 사전 배정용(임시저장 코스만 비활성). ③ 수강생 등록 시 <strong>선택 인원이 잔여석을 넘으면 "정원을 N명으로 늘려 등록"</strong> 옵션이 뜹니다 — 정원을 함께 올려 등록(자율 신청·관리자 배정은 같은 정원·잔여석 공유). 정원을 늘리지 않으면 초과 등록은 막힙니다.
-          <div style="height:8px;"></div>
-          <strong>2026-06-25 (v2.3):</strong> <strong>QR 출석 방식을 바로잡았습니다.</strong> 학습자 앱에는 누르는 "QR 체크인 버튼"이 없습니다 — 출석은 교육장에 게시된 QR을 <strong>휴대폰 카메라로 직접 스캔</strong>하면 처리되고, 스캔 결과(출석/지각/만료 등)만 화면에 표시됩니다. MY 탭·수강 중 화면 설명을 이 방식으로 정정했습니다.
-          <div style="height:8px;"></div>
-          <strong>2026-06-25 (v2.2):</strong> 차수마다 <strong>신청 가능한 그룹을 따로 제한</strong>할 수 있습니다(자율 수강 시). 차수의 신청 권한은 <strong>코스에서 정한 신청 권한의 하위 그룹만</strong> 고를 수 있고, 비우면 코스 권한을 그대로 적용합니다(예: 평일반=영업본부, 주말반=관리본부). 신청 자격 = 코스 권한 ∩ 차수 권한.
-          <div style="height:8px;"></div>
-          <strong>2026-06-23 (v2.1):</strong> 학습자 코스 화면을 <strong>한 페이지(course-offline.html)</strong>로 합쳤습니다 — 온라인 코스처럼 <strong>신청 전·수강 중·완료를 같은 화면</strong>에서 상태에 따라 보여줍니다(신청하면 같은 화면이 "수강예정" 현황으로 바뀌고, 시작 전이면 일정 변경·취소 가능, 시작 후엔 담당자 문의 안내). 따로 있던 수강중·완료 상세 화면은 이 페이지로 통합됐습니다.
-          <div style="height:8px;"></div>
-          <strong>2026-06-18 (v2.0):</strong> 오프라인 코스 결정사항을 반영했습니다.
-          <ul style="margin-top:6px;padding-left:18px;list-style:disc;">
-            <li>오프라인 빌더가 <strong>수강 신청 기간(시작·마감)을 필수로 받습니다</strong> — 마감 없는 상시 모집은 만들 수 없습니다.</li>
-            <li>신청 시작 전 코스는 <strong>학습자에게 노출되지 않습니다</strong> — "오픈 예정"(신청 오픈 전)은 관리자 전용 상태입니다.</li>
-            <li>학습자 수강 상태에 <strong>수강예정</strong>(신청 완료·교육 시작 전, 시작일 도달 시 수강중 자동 전환) 단계가 있습니다.</li>
-            <li>신청 방식(자율 단일/다중·관리자 지정·회차선택형)은 <strong>관리자단 분류</strong>로, 학습자 화면 배지로는 노출하지 않습니다.</li>
-            <li>관리자 배정 코스는 학습자에게 <strong>수강중</strong>으로 표시되고, 본문 "관리자 배정 교육" 안내 배너로 안내합니다.</li>
-            <li><strong>수료증 발급·다운로드는 미구현</strong>이라 안내에서 제외했습니다. 수료/미수료 판정과 출석률 기준(기본 75%)은 그대로 유지됩니다.</li>
-          </ul>
-          <div style="height:8px;"></div>
-          <strong>2026-06-17 (v1.9):</strong> 오프라인 코스는 <strong>운영 종료 버튼을 두지 않습니다</strong> — 회차 종료·신청 기간 만료로 자연 종료(이미 종료된 코스는 "조회 전용" 표시). "문 닫기" 종료는 온라인 전용 개념. 학습자 코스 상세는 케이스 8종 상단 전환 + 헤더 분류/상태/방식 배지 줄 제거(커버 상태 배지만 유지).
-          <div style="height:8px;"></div>
-          <strong>2026-06-16 (v1.8):</strong> 오프라인 기능 변경분을 반영했습니다.
-          <ul style="margin-top:6px;padding-left:18px;list-style:disc;">
-            <li>수강관리에 <strong>회차별 정원 표시</strong> 복원 — 회차마다 좌석 수를 보여줍니다(날짜·장소별 물리 좌석). 출석·수료 판정과는 무관합니다.</li>
-            <li>빌더에 <strong>차수 내 회차 시간 겹침 경고</strong> 추가 — 같은 시간대 회차는 출석 QR(차수당 1개)로 구분되지 않아 경고합니다.</li>
-            <li><strong>수료 판정이 출석률 기준과 연동</strong>됩니다 — 빌더에서 정한 출석률(기본 75%) 미달자는 미수료로 처리됩니다.</li>
-            <li>학습자단 <strong>현장 QR 출석 체크인</strong> 동작이 연결됐습니다.</li>
-            <li>신청 화면의 <strong>캘린더를 없애고 차수 카드 단일 선택</strong>으로 단순화했습니다.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
 
 
     <div class="breadcrumb">시작하기</div>
