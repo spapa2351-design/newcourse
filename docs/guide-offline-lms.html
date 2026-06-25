@@ -159,7 +159,7 @@
     <span class="font-bold text-slate-800 text-base">오프라인 코스 가이드</span>
   </div>
   <div class="flex-1"></div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v2.0 · 2026-06-18</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v2.4 · 2026-06-25</span>
 </header>
 
 <script>
@@ -293,8 +293,16 @@ function closeMobileSidebar() {
 
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
-        <span style="color:#1d4ed8;font-weight:700;font-size:13px;">2026-06-17 갱신</span>
+        <span style="color:#1d4ed8;font-weight:700;font-size:13px;">2026-06-25 갱신</span>
         <div style="font-size:13px;color:#1e3a8a;line-height:1.7;">
+          <strong>2026-06-25 (v2.4):</strong> <strong>관리자 수강생 등록 정책을 정리했습니다.</strong> ① 코스 목록의 신청 방식 라벨을 빌더와 맞춰 <strong>"관리자 지정 등록"</strong>으로 통일했습니다(이전 "강제 할당"). ② <strong>공개예약 코스도 수강관리가 활성</strong>됩니다 — 공개 전 관리자 사전 배정용(임시저장 코스만 비활성). ③ 수강생 등록 시 <strong>선택 인원이 잔여석을 넘으면 "정원을 N명으로 늘려 등록"</strong> 옵션이 뜹니다 — 정원을 함께 올려 등록(자율 신청·관리자 배정은 같은 정원·잔여석 공유). 정원을 늘리지 않으면 초과 등록은 막힙니다.
+          <div style="height:8px;"></div>
+          <strong>2026-06-25 (v2.3):</strong> <strong>QR 출석 방식을 바로잡았습니다.</strong> 학습자 앱에는 누르는 "QR 체크인 버튼"이 없습니다 — 출석은 교육장에 게시된 QR을 <strong>휴대폰 카메라로 직접 스캔</strong>하면 처리되고, 스캔 결과(출석/지각/만료 등)만 화면에 표시됩니다. MY 탭·수강 중 화면 설명을 이 방식으로 정정했습니다.
+          <div style="height:8px;"></div>
+          <strong>2026-06-25 (v2.2):</strong> 차수마다 <strong>신청 가능한 그룹을 따로 제한</strong>할 수 있습니다(자율 수강 시). 차수의 신청 권한은 <strong>코스에서 정한 신청 권한의 하위 그룹만</strong> 고를 수 있고, 비우면 코스 권한을 그대로 적용합니다(예: 평일반=영업본부, 주말반=관리본부). 신청 자격 = 코스 권한 ∩ 차수 권한.
+          <div style="height:8px;"></div>
+          <strong>2026-06-23 (v2.1):</strong> 학습자 코스 화면을 <strong>한 페이지(course-offline.html)</strong>로 합쳤습니다 — 온라인 코스처럼 <strong>신청 전·수강 중·완료를 같은 화면</strong>에서 상태에 따라 보여줍니다(신청하면 같은 화면이 "수강예정" 현황으로 바뀌고, 시작 전이면 일정 변경·취소 가능, 시작 후엔 담당자 문의 안내). 따로 있던 수강중·완료 상세 화면은 이 페이지로 통합됐습니다.
+          <div style="height:8px;"></div>
           <strong>2026-06-18 (v2.0):</strong> 오프라인 코스 결정사항을 반영했습니다.
           <ul style="margin-top:6px;padding-left:18px;list-style:disc;">
             <li>오프라인 빌더가 <strong>수강 신청 기간(시작·마감)을 필수로 받습니다</strong> — 마감 없는 상시 모집은 만들 수 없습니다.</li>
@@ -892,7 +900,7 @@ function closeMobileSidebar() {
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/A5_detail_assigned.png" class="screen-img" style="width:210px" alt="배정 상세">
           <div class="screen-label">코스 상세 (배정됨)</div>
-          <div class="screen-caption">🛡️ 관리자 배정 교육 배너<br>버튼: "배정 일정 확인 완료" (비활성)</div>
+          <div class="screen-caption">🛡️ 관리자 배정 교육 배너<br>버튼: "내 수강 현황 보기" (신청 단계 없음)</div>
         </div>
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/E1_confirm_assigned.png" class="screen-img" style="width:210px" alt="배정 확인">
@@ -947,12 +955,12 @@ function closeMobileSidebar() {
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/D1_modal_session_calendar.png" class="screen-img" style="width:210px" alt="회차 목록">
           <div class="screen-label">① 커리큘럼 선택 → 회차 목록</div>
-          <div class="screen-caption">회차선택형 카드 선택 시<br>회차 목록이 하단에 펼쳐짐<br><span style="color:#94a3b8">(2026-06-16 이후 캡처 갱신 예정)</span></div>
+          <div class="screen-caption">회차선택형 카드 선택 시<br>회차 목록이 하단에 펼쳐짐</div>
         </div>
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/D2_modal_session_date_picked.png" class="screen-img" style="width:210px" alt="회차 표시">
           <div class="screen-label">② 회차 목록 표시</div>
-          <div class="screen-caption">각 회차의 날짜·시간·장소가<br>카드로 나열됨<br><span style="color:#94a3b8">(2026-06-16 이후 캡처 갱신 예정)</span></div>
+          <div class="screen-caption">각 회차의 날짜·시간·장소가<br>카드로 나열됨</div>
         </div>
         <div class="screen-card">
           <img src="../screenshots/enroll-cases/D3_modal_session_time_selected.png" class="screen-img" style="width:210px" alt="회차 선택">
@@ -992,7 +1000,7 @@ function closeMobileSidebar() {
     <div class="page-header">
       <div class="page-tag">수강 중</div>
       <h1 class="page-title">수강 중 화면</h1>
-      <p class="page-desc">수강 신청 완료 후, 수업이 진행되는 기간 동안 보이는 화면입니다. 강의실 정보·출석 현황·QR 체크인 버튼을 확인할 수 있습니다.</p>
+      <p class="page-desc">수강 신청 완료 후, 수업이 진행되는 기간 동안 보이는 화면입니다. 강의실 정보·출석 현황을 확인할 수 있습니다. 출석은 교육장에 게시된 QR을 휴대폰 카메라로 스캔해 처리합니다(앱 안에 체크인 버튼 없음).</p>
     </div>
 
     <div class="guide-section">
@@ -1131,7 +1139,7 @@ function closeMobileSidebar() {
     <div class="page-header">
       <div class="page-tag">MY 탭</div>
       <h1 class="page-title">MY 탭</h1>
-      <p class="page-desc">내가 신청한 오프라인 코스를 한눈에 확인하는 탭입니다. 다가오는 수업 히어로 카드, 코스 목록, QR 출석 체크인 기능을 제공합니다.</p>
+      <p class="page-desc">내가 신청한 오프라인 코스를 한눈에 확인하는 탭입니다. 다가오는 수업 히어로 카드, 코스 목록을 제공합니다. <strong>출석은 교육장에 게시된 QR을 휴대폰 카메라로 직접 스캔</strong>해 처리하며(앱 안에 누르는 체크인 버튼은 없습니다), 스캔 결과가 화면에 표시됩니다.</p>
     </div>
 
     <div class="guide-section">
@@ -1141,12 +1149,12 @@ function closeMobileSidebar() {
         <div class="screen-card" style="flex-shrink:0">
           <img src="../screenshots/my/01_has_courses.png" class="screen-img" style="width:190px" alt="D-3">
           <div class="screen-label">D-3 (일반)</div>
-          <div class="screen-caption">다음 수업까지 3일 이내. QR 버튼 노출</div>
+          <div class="screen-caption">다음 수업까지 3일 이내. 일정·장소·길찾기 표시</div>
         </div>
         <div class="screen-card" style="flex-shrink:0">
           <img src="../screenshots/my/02_today.png" class="screen-img" style="width:190px" alt="오늘">
           <div class="screen-label">오늘 수업</div>
-          <div class="screen-caption">당일 수업. "QR 출석 체크인" 대형 버튼 활성</div>
+          <div class="screen-caption">당일 수업. 시간·장소·길찾기 강조. 출석은 교육장 QR을 카메라로 스캔</div>
         </div>
         <div class="screen-card" style="flex-shrink:0">
           <img src="../screenshots/my/03_no_hero.png" class="screen-img" style="width:190px" alt="D-7 이상">
@@ -1280,7 +1288,7 @@ function closeMobileSidebar() {
         <div class="flow-box">수료 처리</div>
       </div>
       <div class="callout callout-blue mt-4">
-        <strong>퍼블리싱 전</strong>에는 수강관리 버튼이 비활성 상태입니다. 코스를 퍼블리싱해야 수강생 등록과 출석 관리가 가능합니다.
+        <strong>임시저장(초안)</strong> 상태에서만 수강관리 버튼이 비활성입니다. <strong>공개예약·운영중·종료 코스는 활성</strong>이며, 공개예약 코스는 공개 전에도 관리자가 수강생을 미리 배정할 수 있습니다.
       </div>
     </div>
 
@@ -1406,7 +1414,7 @@ function closeMobileSidebar() {
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">표지</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스 커버 이미지 썸네일</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">상태</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">운영중 / 공개예약 / 임시저장 / 종료 배지</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스명</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스 제목 + "N개 반" 배지 + 대표 장소. 클릭 시 빌더로 이동</td></tr>
-          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강관리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">운영중·종료 코스만 활성. <code>offline-view.html</code>로 이동</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강관리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">운영중·공개예약·종료 코스 활성(임시저장만 비활성). <code>offline-view.html</code>로 이동</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">N개 차수 · 총 N회차 버튼. 클릭 시 차수 행 펼치기/접기</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">분류</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">카테고리 배지</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">교육 기간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">차수 전체 기간 범위. D-day 배지(D-Day·D-N) 표시</td></tr>
@@ -1660,7 +1668,7 @@ function closeMobileSidebar() {
         </div>
         <div style="border:2px solid #fde68a; border-radius:12px; padding:18px; background:#fffbeb;">
           <div style="font-size:20px; margin-bottom:8px;">📌</div>
-          <div style="font-size:13px; font-weight:700; color:#78350f; margin-bottom:6px;">관리자 강제 할당</div>
+          <div style="font-size:13px; font-weight:700; color:#78350f; margin-bottom:6px;">관리자 지정 등록</div>
           <div style="font-size:12px; color:#92400e; line-height:1.5;">운영자가 수강생을 특정 차수에 직접 배정. 학습자는 확인만 가능. 취소·변경 불가.</div>
           <span class="badge badge-amber" style="margin-top:8px; display:inline-block;">assign</span>
         </div>
@@ -1680,8 +1688,9 @@ function closeMobileSidebar() {
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강 신청 기간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">오픈 일시 + 마감 일시. 기간 외엔 학습자 신청 불가</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">취소 정책</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">자율 수강 시만 표시. <strong>기한부</strong>(N일 전까지 취소 가능) / <strong>불가</strong></td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">변경 제한</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">일정 변경 가능 여부 및 기한 설정</td></tr>
-          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강 신청 권한</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">특정 그룹만 신청 가능하도록 그룹 지정</td></tr>
-          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수 선택 규칙</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">단일 선택 vs 다중 선택(N개). 다중 시 최대 선택 개수 입력 필드 활성</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">수강 신청 권한 <span style="font-size:10px; color:#64748b;">(코스)</span></td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">코스 전체에 적용. 특정 그룹만 신청 가능하도록 그룹 지정(비우면 전체 회원)</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수별 신청 권한 <span class="badge badge-blue">2026-06-25</span></td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">자율 수강 시, 차수마다 신청 가능한 그룹을 따로 제한. <strong>코스 신청 권한의 하위 그룹만</strong> 선택 가능하며, 비우면 코스 권한을 그대로 적용. 신청 자격 = 코스 권한 ∩ 차수 권한(예: 평일반=영업본부, 주말반=관리본부)</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">차수 선택 규칙</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">단일 선택 vs 다중 선택(N개). 다중 시 최대 선택 개수 입력 필드 활성</td></tr>
         </tbody>
       </table>
     </div>
@@ -1696,9 +1705,9 @@ function closeMobileSidebar() {
           <div class="screen-caption">취소·변경 정책, 차수 선택 규칙 노출</div>
         </div>
         <div class="screen-card">
-          <img src="../screenshots/admin/offline-builder/04_enroll_setting_assign.png" class="screen-img" style="width:100%" alt="강제 할당 설정" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="screen-placeholder" style="width:360px;height:320px;display:none">📸 캡처 필요<br>섹션2 강제 할당 설정 상태</div>
-          <div class="screen-label">관리자 강제 할당 모드</div>
+          <img src="../screenshots/admin/offline-builder/04_enroll_setting_assign.png" class="screen-img" style="width:100%" alt="지정 등록 설정" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="screen-placeholder" style="width:360px;height:320px;display:none">📸 캡처 필요<br>섹션2 지정 등록 설정 상태</div>
+          <div class="screen-label">관리자 지정 등록 모드</div>
           <div class="screen-caption">취소·변경 정책 비노출<br>차수별 그룹 배정 UI로 전환</div>
         </div>
       </div>
@@ -1869,13 +1878,13 @@ function closeMobileSidebar() {
     </div>
 
     <div class="guide-section">
-      <div class="section-title">강제 할당 모드의 그룹 배정</div>
-      <div class="section-desc">수강 신청 설정에서 "관리자 강제 할당"을 선택하면 각 차수에 그룹 배정 UI가 활성화됩니다.</div>
+      <div class="section-title">지정 등록 모드의 그룹 배정</div>
+      <div class="section-desc">수강 신청 설정에서 "관리자 지정 등록"을 선택하면 각 차수에 그룹 배정 UI가 활성화됩니다.</div>
       <div class="screen-wrap">
         <div class="screen-card">
           <img src="../screenshots/admin/offline-builder/07_package_assign_group.png" class="screen-img" style="width:100%" alt="그룹 배정" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="screen-placeholder" style="width:280px;height:200px;display:none">📸 캡처 필요<br>강제 할당 시 그룹 배정 UI</div>
-          <div class="screen-label">그룹 배정 (강제 할당 모드)</div>
+          <div class="screen-placeholder" style="width:280px;height:200px;display:none">📸 캡처 필요<br>지정 등록 시 그룹 배정 UI</div>
+          <div class="screen-label">그룹 배정 (지정 등록 모드)</div>
           <div class="screen-caption">차수별로 배정할 그룹을 드롭다운에서 선택</div>
         </div>
       </div>
@@ -1993,7 +2002,7 @@ function closeMobileSidebar() {
           <div class="text-xs text-slate-500 leading-relaxed space-y-1">
             <div>• 그라디언트 커버 배경</div>
             <div>• 코스명 / 강사 / 위치</div>
-            <div>• 운영방식 배지 (자율/강제할당)</div>
+            <div>• 운영방식 배지 (자율/지정 등록)</div>
           </div>
         </div>
         <div class="border border-slate-200 rounded-xl p-4 bg-white">
@@ -2185,6 +2194,14 @@ function closeMobileSidebar() {
         <div class="section-desc">회차마다 정원을 두면 수강관리 화면에 회차 정원 배지(예: <strong>정원 30석</strong>, 신청이 넘으면 <strong>N명 초과</strong>)가 표시됩니다. 잔여 좌석은 회차 정원에서 인원을 뺀 값으로 계산됩니다.</div>
         <div class="callout callout-blue">
           회차 정원은 <strong>날짜·장소별 물리 좌석 수</strong>를 보여주기 위한 표시입니다. <strong>출석·수료 판정과는 무관</strong>합니다(수료는 위의 출석률 기준으로만 판정).
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <div class="text-base font-bold text-slate-800 mb-2">수강생 등록 — 잔여석 표시 · 정원 상향 <span class="badge badge-blue">2026-06-25</span></div>
+        <div class="section-desc">수강생 등록 모달에서 차수 칩마다 잔여석(<strong>· 잔여 N</strong>)과 선택 차수의 잔여석/정원을 보여줍니다. 신청 방식과 무관하게 관리자는 어느 코스든 직접 배정할 수 있고, 자율 신청분과 관리자 배정분은 <strong>같은 정원·잔여석</strong>을 공유합니다.</div>
+        <div class="callout callout-amber">
+          선택 인원이 잔여석을 넘으면 <strong>"정원을 N명으로 늘려 등록"</strong> 버튼이 뜹니다 — 누르면 그 차수 정원을 새 인원만큼 올려 함께 등록합니다(정원 ≥ 등록자 규칙 유지 — 4장 정원 변경 정책). 정원을 늘리지 않으면 일반 등록 버튼은 비활성이라 <strong>잔여석을 넘기는 초과 등록은 막힙니다</strong>.
         </div>
       </div>
 

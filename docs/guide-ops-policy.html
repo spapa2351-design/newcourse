@@ -172,7 +172,7 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.0 · 2026-06-18</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.2 · 2026-06-25</span>
   <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
@@ -271,8 +271,12 @@ function closeMobileSidebar() {
 
 <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
   <div style="display:flex;gap:10px;align-items:flex-start;">
-    <span style="color:#1d4ed8;font-weight:700;font-size:13px;">2026-06-18 갱신</span>
+    <span style="color:#1d4ed8;font-weight:700;font-size:13px;">2026-06-25 갱신</span>
     <div style="font-size:13px;color:#1e3a8a;line-height:1.7;">
+      <strong>관리자 수강생 등록 정책을 정리했습니다. (v2.2 · 2026-06-25)</strong> 신청 방식 라벨을 빌더와 맞춰 <strong>"관리자 지정 등록"</strong>으로 통일했습니다(이전 "강제 할당"). <strong>공개예약 코스도 수강관리가 활성</strong>이라 공개 전 사전 배정이 가능합니다(임시저장만 비활성). 수강생 등록 시 <strong>선택 인원이 잔여석을 넘으면 정원을 함께 올려 등록</strong>하는 옵션이 뜹니다 — "정원 ≥ 등록자" 규칙을 지키며, 정원을 안 늘리면 초과 등록은 막힙니다. (4장 정원 변경 정책)
+      <div style="height:8px;"></div>
+      <strong>차수별 신청 권한을 추가했습니다. (v2.1 · 2026-06-25)</strong> 자율 수강 시 차수마다 신청 가능한 그룹을 따로 제한할 수 있으며, <strong>코스에서 정한 신청 권한의 하위 그룹만</strong> 지정됩니다(비우면 코스 권한 그대로). 신청 자격 = 코스 권한 ∩ 차수 권한 — 평일반=영업본부 / 주말반=관리본부처럼 차수별 대상 분리에 사용합니다. (FLOW-01 코스 개설 · 4장)
+      <div style="height:8px;"></div>
       오프라인 운영 정책 변경분을 반영했습니다. (v2.0 · 2026-06-18)
       <ul style="margin-top:6px;padding-left:18px;list-style:disc;">
         <li><strong>오프라인 코스는 운영 종료 버튼을 두지 않습니다</strong> — 회차 종료·신청 기간 만료로 자연 종료(이미 종료된 코스는 "조회 전용"으로 표시). 서버 부하 대비 "문 닫기" 종료는 실시간 학습이 있는 온라인 전용 개념입니다. (운영 종료)</li>
@@ -515,7 +519,7 @@ function closeMobileSidebar() {
         <div class="step-num">4</div>
         <div class="step-body">
           <div class="step-action">차수 생성 (약 3분)</div>
-          <div class="step-note">차수명 · 정원 · 차수 강사(선택, 토글 ON·차수 2개 이상일 때) · 그룹 배정(지정 등록 시). 우측 사이드바에서 편집</div>
+          <div class="step-note">차수명 · 정원 · 차수 강사(선택, 토글 ON·차수 2개 이상일 때) · 그룹 배정(지정 등록 시). 우측 사이드바에서 편집. <strong>차수별 신청 권한</strong>(자율 수강 시) — 차수마다 신청 가능한 그룹을 따로 제한할 수 있고, <strong>코스에서 정한 신청 권한의 하위 그룹만</strong> 선택됩니다(비우면 코스 권한 그대로). 평일반=영업본부 / 주말반=관리본부처럼 차수별로 대상을 나눌 때 사용(2026-06-25)</div>
         </div>
       </div>
       <div class="step-row">
@@ -948,7 +952,7 @@ function closeMobileSidebar() {
 
   <!-- ── A. 의무교육 ── -->
   <div class="guide-section">
-    <div class="section-title">A. 법정 의무 교육 (4) <span class="section-tag">강제할당 + 매년 재이수</span></div>
+    <div class="section-title">A. 법정 의무 교육 (4) <span class="section-tag">지정 등록 + 매년 재이수</span></div>
 
     <div class="case-card">
       <div class="case-card-head">
@@ -1299,7 +1303,7 @@ function closeMobileSidebar() {
       </div>
       <div class="case-how">
         <span class="case-how-label">💡 어떻게 운영하나요</span>
-        두 가지 방법이 있어요. (1) <strong>자율 수강 + 부서별 안내 메일</strong> — 우리 회사 기본 패턴. (2) <strong>본부장 단위 강제할당</strong> — 꼭 들어야 한다는 의지가 강하면.
+        두 가지 방법이 있어요. (1) <strong>자율 수강 + 부서별 안내 메일</strong> — 우리 회사 기본 패턴. (2) <strong>본부장 단위 관리자 지정 등록</strong> — 꼭 들어야 한다는 의지가 강하면.
       </div>
     </div>
 
@@ -1571,7 +1575,7 @@ function closeMobileSidebar() {
             <td><strong>임원 단발 특강</strong><br><span class="text-slate-500 text-xs">매번 명단이 바뀌는 ad-hoc</span></td>
             <td>자율 + 안내 별도</td>
             <td><span class="b b-yellow">⚠️ 부분 가능</span></td>
-            <td>임원처럼 ad-hoc 명단은 그룹 단위 강제할당이 안 맞음 → 자율수강으로 열고 임원 명단에 별도 안내 메일/메신저 → 신청 유도</td>
+            <td>임원처럼 ad-hoc 명단은 그룹 단위 지정 등록이 안 맞음 → 자율수강으로 열고 임원 명단에 별도 안내 메일/메신저 → 신청 유도</td>
             <td>FLOW-01 + FLOW-02 (워크어라운드)</td>
           </tr>
         </tbody>
@@ -1622,8 +1626,8 @@ function closeMobileSidebar() {
           <tr>
             <td class="text-center font-bold">⑤</td>
             <td><strong>미수료자 재이수 자동 흐름 없음</strong></td>
-            <td>법정의무 75% 미달자가 다음 차수에 자동 배정되지 않음. "재수강 허용 ON"은 학습자 자율 신청용 토글이고 강제할당 미수료자엔 미적용</td>
-            <td><span class="b b-orange">사이클</span> ① 첫 사이클 마감 → ② 출석률 통계에서 미수료자 명단 추출 → ③ 다음 차수 강제할당 그룹에 수동 추가 → ④ 재이수 운영. 4단계를 운영 매뉴얼화</td>
+            <td>법정의무 75% 미달자가 다음 차수에 자동 배정되지 않음. "재수강 허용 ON"은 학습자 자율 신청용 토글이고 지정 등록 미수료자엔 미적용</td>
+            <td><span class="b b-orange">사이클</span> ① 첫 사이클 마감 → ② 출석률 통계에서 미수료자 명단 추출 → ③ 다음 차수 지정 등록 그룹에 수동 추가 → ④ 재이수 운영. 4단계를 운영 매뉴얼화</td>
           </tr>
         </tbody>
       </table>
@@ -1661,7 +1665,7 @@ function closeMobileSidebar() {
       <div class="step-row">
         <div class="step-num">4</div>
         <div class="step-body">
-          <div class="step-action">다음 차수 강제할당에 미수료 명단 수동 추가 → 재이수 운영</div>
+          <div class="step-action">다음 차수 지정 등록에 미수료 명단 수동 추가 → 재이수 운영</div>
           <div class="step-note">새 코스 개설 시 또는 기존 코스에 추가 차수 만들 때 수강생 관리 화면에서 직접 추가</div>
         </div>
       </div>
@@ -3343,6 +3347,17 @@ function closeMobileSidebar() {
     <p class="text-sm text-slate-700 mt-3">정원을 줄이려면 → <strong>수강생 관리에서 사람 먼저 정리</strong> → 정원 변경.</p>
     <div class="callout callout-amber mt-3">
       시스템이 자동으로 학습자를 취소하지 않습니다. 사람을 빼는 결정은 항상 <strong>운영자가 사유와 함께</strong> 내립니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">관리자 초과 배정 = 정원 자동 상향 <span class="section-tag">2026-06-25</span></div>
+    <div class="callout callout-blue">
+      관리자가 수강관리에서 수강생을 등록할 때 <strong>선택 인원이 잔여석을 넘으면</strong>, "정원을 N명으로 늘려 등록" 버튼으로 <strong>그 차수 정원을 새 인원만큼 올려서 함께 등록</strong>합니다. 정원을 늘리는 방향이라 위의 "정원 ≥ 등록자" 룰을 그대로 지킵니다(줄이는 것만 차단).
+    </div>
+    <p class="text-sm text-slate-700 mt-3">정원을 늘리지 않으면 일반 등록 버튼은 비활성이라 <strong>잔여석을 넘기는 등록은 막힙니다</strong> — 잔여석이 음수가 되는 비정상 상태를 만들지 않습니다.</p>
+    <div class="callout callout-amber mt-3">
+      <strong>신청 방식과 무관</strong>합니다. 자율 수강 코스든 관리자 지정 등록 코스든 관리자는 수강관리에서 직접 배정할 수 있고, 자율 신청분과 관리자 배정분은 <strong>같은 정원·잔여석</strong>을 공유합니다(관리자가 배정하면 학습자 신청 화면의 잔여석도 그만큼 줄어듭니다). <strong>공개예약 코스도 공개 전에 미리 배정</strong>할 수 있습니다.
     </div>
   </div>
 
