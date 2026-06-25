@@ -370,6 +370,19 @@
     .upcoming-detail { font-size: 11px; color: var(--secondary); font-weight: 500; margin-top: 2px; }
     .upcoming-loc { font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 3px; }
     .upcoming-loc .mi { font-size: 14px; }
+    /* 3건 초과는 접어두고 "더 보기"로 인라인 펼침 (새 페이지 X) */
+    .upcoming-item.upc-extra { display: none; }
+    .upcoming-list.expanded .upcoming-item.upc-extra { display: flex; }
+    .upc-more {
+      width: 100%; padding: 11px 16px; background: var(--white);
+      border: none; border-top: 1px solid var(--border);
+      font-size: 12px; font-weight: 700; color: var(--primary);
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      cursor: pointer; transition: background .1s;
+    }
+    .upc-more:hover { background: var(--body-bg); }
+    .upc-more .mi { font-size: 16px; transition: transform .2s; }
+    .upcoming-list.expanded .upc-more .mi { transform: rotate(180deg); }
 
     /* ── 완료 코스 카드 ── */
     .done-card {
@@ -615,9 +628,9 @@
           </div>
         </div>
 
-        <!-- 나머지 4건 컴팩트 리스트 -->
-        <div class="upcoming-list">
-          <div class="upcoming-header"><span class="mi i16">event_available</span> 이번 주 예정 일정 · 4건 더</div>
+        <!-- 컴팩트 리스트: 가까운 3건만 노출, 나머지는 "더 보기"로 인라인 펼침 -->
+        <div class="upcoming-list" id="upcoming-list">
+          <div class="upcoming-header"><span class="mi i16">event_available</span> 이번 주 예정 일정 · 6건</div>
 
           <div class="upcoming-item">
             <div class="upcoming-dday near">
@@ -652,7 +665,7 @@
             <div class="upcoming-loc"><span class="mi">location_on</span> 외부 연수원</div>
           </div>
 
-          <div class="upcoming-item">
+          <div class="upcoming-item upc-extra">
             <div class="upcoming-dday normal">
               <span class="d-label">D</span>6
             </div>
@@ -662,6 +675,30 @@
             </div>
             <div class="upcoming-loc"><span class="mi">location_on</span> 방배 실습실</div>
           </div>
+
+          <div class="upcoming-item upc-extra">
+            <div class="upcoming-dday normal">
+              <span class="d-label">D</span>6
+            </div>
+            <div class="upcoming-info">
+              <div class="upcoming-course">안전보건 법정의무교육</div>
+              <div class="upcoming-detail">1회차 · 4/15(화) 14:00–17:00</div>
+            </div>
+            <div class="upcoming-loc"><span class="mi">location_on</span> 본사 교육장 A</div>
+          </div>
+
+          <div class="upcoming-item upc-extra">
+            <div class="upcoming-dday normal">
+              <span class="d-label">D</span>7
+            </div>
+            <div class="upcoming-info">
+              <div class="upcoming-course">신입사원 온보딩</div>
+              <div class="upcoming-detail">2회차 · 4/16(수) 09:00–18:00</div>
+            </div>
+            <div class="upcoming-loc"><span class="mi">location_on</span> 판교 연수원</div>
+          </div>
+
+          <button class="upc-more" onclick="toggleUpcoming(this)"><span id="upc-more-label">3건 더 보기</span><span class="mi">expand_more</span></button>
         </div>
       </div>
 
@@ -964,6 +1001,14 @@ function setView(view) {
   document.querySelectorAll('.proto-chip').forEach(c => c.classList.remove('active'));
   try { event.target.classList.add('active'); } catch(e) {}
   applyView(view);
+}
+
+/* 이번 주 예정 일정 — 3건 초과분 인라인 펼침/접기 (새 페이지 X) */
+function toggleUpcoming(btn) {
+  const list = document.getElementById('upcoming-list');
+  const expanded = list.classList.toggle('expanded');
+  const hidden = list.querySelectorAll('.upc-extra').length;
+  document.getElementById('upc-more-label').textContent = expanded ? '접기' : hidden + '건 더 보기';
 }
 
 /* ── QR result modals ── */

@@ -837,10 +837,6 @@ const mockData = {
 const REP_INSTRUCTOR = '김민준';  // 대표 강사 (상단 강사 카드)
 // 강사 = 회차 → 차수(opt.instructor) → 대표(REP_INSTRUCTOR) 3단 상속
 const effInstructor = (opt, s) => (s.instructor && s.instructor.trim()) || (opt && opt.instructor && opt.instructor.trim()) || REP_INSTRUCTOR || '';
-const isMixedInstructor = (opt) => {
-  const names = ((opt && opt.sessions) || []).map(s => effInstructor(opt, s));
-  return new Set(names.filter(Boolean)).size > 1;
-};
 
 /* ── State ── */
 let currentMode = 'single';
@@ -1268,9 +1264,10 @@ function renderCurriculumPreview() {
   const data = mockData[currentMode];
   const isAssigned = currentMode === 'assigned';
 
-  // 회차별 강사 상이 — 현재 모드에 강사가 갈리는 옵션이 있으면 대표강사 카드에 칩 표시
+  // 회차별 강사 상이 칩 — 케이스 정의(c.instr.mixed)를 단일 기준으로. 공용 mockData 휴리스틱은 모든 케이스에서 true가 돼(2회차 이서연) 단일강사 케이스에도 칩이 떠서 폐기.
   const chipEl = document.getElementById('mixed-instr-chip');
-  if (chipEl) chipEl.style.display = data.some(o => isMixedInstructor(o)) ? '' : 'none';
+  const caseInstr = (COURSE_CASES[window.__caseIdx || 0] || {}).instr;
+  if (chipEl) chipEl.style.display = (caseInstr && caseInstr.mixed) ? '' : 'none';
 
   // 차수(반)마다 강사가 갈리면 각 차수 카드에 그 차수 강사를 표시 (차수강사 vs 대표강사)
   const cohortInstrMixed = new Set(data.map(o => ((o.instructor || '').trim()) || REP_INSTRUCTOR)).size > 1;
