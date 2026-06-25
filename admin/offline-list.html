@@ -172,7 +172,7 @@
       const FILTER_FIELDS = [
         { key: 'instructor', label: '강사명' },
         { key: 'place',      label: '장소' },
-        { key: 'enrollMethod', label: '수강 방식', options: [{ val:'self',label:'자율 수강' },{ val:'assign',label:'강제 할당' }] },
+        { key: 'enrollMethod', label: '수강 방식', options: [{ val:'self',label:'자율 수강' },{ val:'assign',label:'관리자 지정 등록' }] },
       ];
 
       const addFilter = (field, value) => {
@@ -609,7 +609,7 @@
                   {activeFilters.map(f => (
                     <div key={f.key} className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 border border-indigo-200 rounded-lg text-[12px] font-bold text-indigo-700 animate-fadeIn">
                       <span className="text-indigo-400 text-[10px] font-bold">{f.label}</span>
-                      <span>{f.key === 'enrollMethod' ? (f.value === 'self' ? '자율 수강' : '강제 할당') : f.value}</span>
+                      <span>{f.key === 'enrollMethod' ? (f.value === 'self' ? '자율 수강' : '관리자 지정 등록') : f.value}</span>
                       <button onClick={() => removeFilter(f.key)} className="ml-0.5 text-indigo-300 hover:text-indigo-600 transition-colors"><X size={11}/></button>
                     </div>
                   ))}
@@ -827,7 +827,7 @@
                               </td>
                               {/* 수강관리 */}
                               <td className="px-3 py-3 text-center" data-feature-id="A1-08">
-                                {(isActive || course.status === 'closed') ? (
+                                {(isActive || course.status === 'closed' || course.status === 'scheduled') ? (
                                   <a href={`offline-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
                                     <Users size={10}/> 수강관리
                                   </a>
@@ -936,7 +936,7 @@
                                       <a href={`offline-builder.html?courseId=${course.id}`} className="text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors flex items-center gap-1">
                                         <Edit3 size={10}/> 차수 편집
                                       </a>
-                                      {(isActive || course.status === 'closed') ? (
+                                      {(isActive || course.status === 'closed' || course.status === 'scheduled') ? (
                                         <a href={`offline-view.html?id=${course.id}`} className="text-[11px] font-bold text-white bg-indigo-500 px-3 py-1.5 rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-1 shadow-sm">
                                           <Users size={10}/> 수강관리
                                         </a>
