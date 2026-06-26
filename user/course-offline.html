@@ -474,7 +474,7 @@
     <button class="case-pill" onclick="applyCase(1)">② 단일 하루 특강</button>
     <button class="case-pill" onclick="applyCase(2)">③ 회차별 강사·장소 상이</button>
     <button class="case-pill" onclick="applyCase(3)">④ 관리자 지정 등록</button>
-    <button class="case-pill" onclick="applyCase(4)">⑤ 법정의무 (회차선택형)</button>
+    <button class="case-pill" onclick="applyCase(4)">⑤ 회차선택형</button>
     <button class="case-pill" onclick="applyCase(5)">⑥ 장기 · 다중 조합</button>
     <button class="case-pill" onclick="applyCase(6)">⑦ 신청 마감 · 기한 경과</button>
     <div class="case-switch-desc" id="case-switch-desc">상단 버튼으로 케이스별 화면을 미리볼 수 있습니다.</div>
@@ -699,19 +699,7 @@
 
 </div>
 
-<!-- ── 일정 변경 바텀시트 (수강예정 — 시작 전에만) ── -->
-<div class="change-backdrop" id="change-backdrop" onclick="closeChangeSheet()"></div>
-<div class="change-sheet" id="change-sheet">
-  <div class="change-handle"></div>
-  <div class="change-hdr">
-    <div class="change-title">일정 변경</div>
-    <div class="change-sub" id="change-sub">변경할 차수(반)를 선택하세요</div>
-  </div>
-  <div class="change-body" id="change-body"></div>
-  <div class="change-footer">
-    <button class="change-confirm" id="btn-change-confirm" style="opacity:.4;pointer-events:none;" onclick="confirmChange()">변경 확정</button>
-  </div>
-</div>
+<!-- 일정 변경은 신청 모달(#sheet)을 재사용 — 별도 change-sheet 폼 제거 -->
 
 <!-- ── 수강 취소 확인 모달 ── -->
 <div class="modal-overlay" id="modal-cancel" onclick="if(event.target===this)closeCancelModal()">
@@ -847,6 +835,7 @@ let selectedSessionMap = {}; // { optId: sessionId } — 회차선택형 회차 
 let activeDetailId = null;
 let enrollSim = 'enrolling';
 let myStatus = 'none';
+let isChangeFlow = false;   // 일정 변경 = 신청 모달 재사용 모드
 
 /* ── 나의 수강 상태 ── */
 /* 케이스 헤더 복원 — 미수료(failed) 진입이 제목·강사를 오버라이드하므로 다른 상태로 갈 때 되돌림 */
@@ -1373,7 +1362,7 @@ function renderModalOptions() {
   if (currentMode === 'assigned') return;
 
   document.getElementById('modal-list-title').textContent =
-    currentMode === 'multi' ? `수강할 특강을 ${multiLimit}개 선택하세요.` : '수강할 일정을 1개 선택하세요.';
+    (isChangeFlow ? '변경할 ' : '수강할 ') + (currentMode === 'multi' ? `특강을 ${multiLimit}개 선택하세요.` : '일정을 1개 선택하세요.');
 
   mockData[currentMode].forEach(opt => {
     const isFull = opt.remnant === 0;
@@ -1490,7 +1479,7 @@ function updateNextButton() {
         btn.innerHTML = '회차를 선택하세요 <span class="mi i14">arrow_upward</span>';
       } else {
         btn.disabled = false;
-        btn.innerHTML = '선택 완료 (1개) <span class="mi i14" style="margin-left:4px;">arrow_forward</span>';
+        btn.innerHTML = (isChangeFlow ? '변경 확정' : '선택 완료 (1개)') + ' <span class="mi i14" style="margin-left:4px;">arrow_forward</span>';
       }
     } else {
       btn.disabled = true;
@@ -1499,7 +1488,7 @@ function updateNextButton() {
   } else if (currentMode === 'multi') {
     if (selectedIds.length === multiLimit) {
       btn.disabled = false;
-      btn.innerHTML = `${multiLimit}개 선택 완료 <span class="mi i14" style="margin-left:4px;">arrow_forward</span>`;
+      btn.innerHTML = (isChangeFlow ? '변경 확정' : `${multiLimit}개 선택 완료`) + ' <span class="mi i14" style="margin-left:4px;">arrow_forward</span>';
     } else {
       btn.disabled = true;
       btn.innerHTML = `(${selectedIds.length}/${multiLimit}) 특강을 추가로 선택하세요`;
@@ -1688,21 +1677,26 @@ function switchDetailTab(tab) {
   if (p) p.classList.add('active');
 }
 
-function openModal() {
+function openModal(isChange) {
   if (currentMode === 'assigned') return;
-  if (enrollSim !== 'enrolling') return;
+  if (!isChange && enrollSim !== 'enrolling') return;   // 변경 흐름은 신청기간 게이트 무관
+  isChangeFlow = !!isChange;
+  document.querySelector('#sheet .sheet-title').textContent = isChange ? '일정 변경' : '수강 일정 선택';
   document.getElementById('sheet').classList.add('open');
-  if (activeDetailId && !selectedIds.includes(activeDetailId)) {
+  if (!isChange && activeDetailId && !selectedIds.includes(activeDetailId)) {
     const targetOpt = mockData[currentMode].find(x => x.id === activeDetailId);
     if (targetOpt && targetOpt.remnant > 0) handleModalSelect(activeDetailId);
   }
+  renderModalOptions();   // 열 때마다 타이틀·선택 상태 재반영
 }
 
 function closeModal() {
   document.getElementById('sheet').classList.remove('open');
+  isChangeFlow = false;
 }
 
 function goConfirm() {
+  if (isChangeFlow) { confirmChangeFromModal(); return; }   // 변경은 확인화면 없이 변경완료 모달로
   bindData('conf');
   closeModal();
   goScreen('screen-confirm');
@@ -1730,110 +1724,31 @@ function closeSuccessModal() {
 }
 
 /* ════════ 수강중/예정 현황 액션 — 일정 변경 · 수강 취소 · 장소 길찾기 (course-enrolled 통합) ════════ */
-let enrollType = 'single';
-let selectedOpts = [];
-const CHANGE_FORMS = {
-  // ① 단일 선택형 — 다른 차수(반) 1개로 교체 (라디오)
-  single: {
-    sub: '변경할 차수(반)를 선택하세요', mode: 'radio',
-    options: [
-      { name:'A반 (5월 평일반)', detail:'5/1–5/29 · 매주 토 · 5회차', status:'현재 수강중', sCls:'mine', current:true },
-      { name:'B반 (5월 주말반)', detail:'5/3–5/31 · 매주 토 · 5회차', status:'잔여 8석', sCls:'avail' },
-      { name:'C반 (6월 단일)', detail:'6/1 · 특강 1회차', status:'잔여 14석', sCls:'avail' },
-      { name:'D반 (6월 주말반)', detail:'6/7–6/14 · 매주 토 · 2회차', status:'마감', sCls:'full', disabled:true },
-    ]
-  },
-  // ② 회차 선택형 — 차수 고정, 들을 회차를 다시 선택 (체크박스 + 겹침 가드)
-  session: {
-    sub: '차수는 유지하고, 들을 회차를 다시 선택하세요', mode: 'check',
-    head: 'A반 (5월 평일반) · 차수 고정',
-    guard: '시간이 겹치는 회차는 함께 선택할 수 없어요',
-    options: [
-      { name:'1회차 · PM 기초', detail:'5/3(토) 09:00–12:00', status:'현재 선택', sCls:'mine', current:true },
-      { name:'2회차 · WBS 실습', detail:'5/10(토) 09:00–12:00', status:'잔여 6석', sCls:'avail' },
-      { name:'3회차 · 리스크 관리', detail:'5/17(토) 09:00–12:00', status:'잔여 4석', sCls:'avail' },
-      { name:'3회차(오후) · 리스크 관리', detail:'5/17(토) 13:00–16:00', status:'시간 겹침', sCls:'full', disabled:true },
-      { name:'4회차 · 종합', detail:'5/24(토) 09:00–12:00', status:'잔여 8석', sCls:'avail' },
-    ]
-  },
-  // ③ 다중 조합형 — 여러 차수 재조합 (체크박스 + 겹침 가드)
-  multi: {
-    sub: '함께 들을 차수를 선택하세요 (여러 개 가능)', mode: 'check',
-    guard: '일정이 겹치는 차수는 함께 선택할 수 없어요',
-    options: [
-      { name:'A반 (평일반)', detail:'5/1–5/29 · 5회차', status:'현재 선택', sCls:'mine', current:true },
-      { name:'B반 (주말반)', detail:'5/3–5/31 · 5회차', status:'잔여 8석', sCls:'avail' },
-      { name:'C반 (특강)', detail:'6/1 · 1회차', status:'잔여 14석', sCls:'avail' },
-      { name:'D반 (주말반)', detail:'6/7–6/14 · 2회차', status:'일정 겹침', sCls:'full', disabled:true },
-    ]
-  },
-  // ④ 관리자 지정 — 셀프 변경 불가, 문의 안내
-  admin: { sub: '관리자가 배정하는 코스입니다', mode: 'none', notice: '이 코스는 담당자가 차수를 배정합니다. 일정 변경이 필요하면 담당자에게 문의해 주세요.' }
-};
-
-// 현재 코스 모드에서 변경 시트 형태 결정 (신청 방식과 정합)
-function changeFormKey() {
-  if (currentMode === 'assigned') return 'admin';
-  if (currentMode === 'multi') return 'multi';
-  const o = mockData.single.find(x => x.id === selectedIds[0]);
-  return (o && o.sessionSelect) ? 'session' : 'single';
-}
+/* 일정 변경 = 신청 모달(#sheet) 재사용 — 차수부터 다시 선택, 회차선택형이면 회차까지(신청 UI와 동일) */
 function openChangeSheet() {
-  enrollType = changeFormKey();
-  renderChangeSheet();
-  document.getElementById('change-backdrop').classList.add('open');
-  document.getElementById('change-sheet').classList.add('open');
-}
-function closeChangeSheet() {
-  document.getElementById('change-backdrop').classList.remove('open');
-  document.getElementById('change-sheet').classList.remove('open');
-}
-function setChangeConfirm(on) {
-  const b = document.getElementById('btn-change-confirm');
-  b.style.opacity = on ? '1' : '.4';
-  b.style.pointerEvents = on ? 'auto' : 'none';
-}
-function renderChangeSheet() {
-  const f = CHANGE_FORMS[enrollType];
-  selectedOpts = [];
-  document.getElementById('change-sub').textContent = f.sub;
-  const body = document.getElementById('change-body');
-  const confirmBtn = document.getElementById('btn-change-confirm');
-  if (f.mode === 'none') {
-    body.innerHTML = `<div class="sheet-guard info"><span class="mi" style="font-size:16px;margin-right:6px;">info</span>${f.notice}</div>`;
-    confirmBtn.style.display = 'none';
+  if (currentMode === 'assigned') {   // 관리자 지정 코스는 셀프 변경 불가
+    document.getElementById('change-result-text').textContent = '관리자가 배정하는 코스입니다 — 담당자에게 문의해 주세요.';
+    document.getElementById('modal-change-done').classList.add('open');
     return;
   }
-  confirmBtn.style.display = '';
-  setChangeConfirm(false);
-  let html = f.head ? `<div class="sheet-fix"><span class="mi" style="font-size:13px;margin-right:5px;vertical-align:-2px;">lock</span>${f.head}</div>` : '';
-  html += f.options.map((o, i) => {
-    const cls = 'pkg-option' + (o.current ? ' current' : '') + (o.disabled ? ' disabled' : '');
-    const click = (o.current || o.disabled) ? '' : ` onclick="toggleChangeOpt(this, ${i})"`;
-    const mark = f.mode === 'check'
-      ? `<div class="pkg-check${o.current ? ' cur' : ''}"></div>`
-      : `<div class="pkg-radio"${o.current ? ' style="border-color:var(--n-04);background:var(--n-04);"' : ''}></div>`;
-    return `<div class="${cls}"${click}>${mark}<div class="pkg-info"><div class="pkg-name">${o.name}</div><div class="pkg-detail">${o.detail}</div></div><span class="pkg-status ${o.sCls}">${o.status}</span></div>`;
-  }).join('');
-  if (f.guard) html += `<div class="sheet-guard"><span class="mi" style="font-size:14px;margin-right:5px;">info</span>${f.guard}</div>`;
-  body.innerHTML = html;
+  selectedIds = []; selectedSessionMap = {};   // 변경 = 처음부터 다시 고르기
+  openModal(true);
 }
-function toggleChangeOpt(el, idx) {
-  if (CHANGE_FORMS[enrollType].mode === 'radio') {
-    document.querySelectorAll('#change-body .pkg-option').forEach(p => p.classList.remove('selected'));
-    el.classList.add('selected');
-    selectedOpts = [idx];
-  } else {
-    el.classList.toggle('selected');
-    const i = selectedOpts.indexOf(idx);
-    if (i >= 0) selectedOpts.splice(i, 1); else selectedOpts.push(idx);
+function confirmChangeFromModal() {
+  closeModal();
+  const opt = mockData[currentMode].find(x => x.id === selectedIds[0]);
+  let txt = '';
+  if (currentMode === 'multi') {
+    txt = `차수 ${selectedIds.length}개 조합으로 변경 신청됨`;
+  } else if (opt) {
+    if (opt.sessionSelect && selectedSessionMap[opt.id]) {
+      const s = opt.sessions.find(x => x.id === selectedSessionMap[opt.id]);
+      txt = `${opt.name} · ${s ? s.title : ''} 회차로 변경 신청됨`;
+    } else {
+      txt = `${opt.name}(으)로 변경 신청됨`;
+    }
   }
-  setChangeConfirm(selectedOpts.length > 0);
-}
-function confirmChange() {
-  closeChangeSheet();
-  const labels = { single: '차수', session: '회차', multi: '차수 조합' };
-  document.getElementById('change-result-text').textContent = `${labels[enrollType] || ''} ${selectedOpts.length}개 선택 — 변경 신청됨`;
+  document.getElementById('change-result-text').textContent = txt;
   document.getElementById('modal-change-done').classList.add('open');
 }
 function closeChangeDone() { document.getElementById('modal-change-done').classList.remove('open'); }
