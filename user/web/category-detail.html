@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오픈코스 분류 - TouchClass</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+<link rel="stylesheet" href="./_files/style.css">
+<style>
+  .mi{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .content { padding: 0; display: flex; flex-direction: column; flex: 1; }
+  .content-body { display: flex; flex: 1; }
+  .cat-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; }
+  .cat-header-left { display: flex; align-items: center; gap: 10px; }
+  .cat-header-search { position: relative; }
+  .cat-header-search input { padding: 7px 12px 7px 32px; border: 1px solid #e0e2e5; border-radius: 20px; font-size: 13px; width: 220px; outline: none; }
+  .cat-header-search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #aaa; }
+  /* List view */
+  .list-view .course-grid { display: flex !important; flex-direction: column; gap: 8px; }
+  .list-view .course-card { flex-direction: row !important; align-items: center; gap: 12px; padding: 8px; border: 1px solid #eee; border-radius: 8px; }
+  .list-view .course-thumb { width: 80px !important; height: 60px !important; min-height: 60px !important; flex-shrink: 0; border-radius: 6px; }
+  .list-view .course-info { padding: 0 !important; flex: 1; flex-direction: row; align-items: center; justify-content: space-between; }
+  .list-view .like-btn { display: none; }
+  /* Toggle on state */
+  .toggle-switch.on .toggle { background: var(--primary); }
+  .toggle-switch.on .toggle::after { transform: translateX(14px); }</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img class="logo-img" src="./(주)Spring QA_files/01사이트로고.png" alt="TOUCHCLASS" onerror="this.outerHTML='<span class=\'logo-dot red\'></span><span class=\'logo-dot yellow\'></span><span class=\'logo-dot green\'></span><span class=\'logo-dot blue\'></span><span class=\'logo-text\'>TOUCHCLASS</span>'">
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar"><img src="./(주)Spring QA_files/dog_06.png" alt="" onerror="this.style.display='none'"></div>
+    <div class="user-name">조찬현</div>
+    <div class="user-status">너무 더워너무 더워너무 더워</div>
+    <button class="btn-mychannel"><span class="mi" style="font-size:14px;">person</span> 내 채널</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="home.html" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>홈</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></span>이튜브</a>
+    <a href="my.html" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>MY</a>
+    <a href="category.html" class="nav-item active"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>카테고리</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>학습 보고서</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span>숏클래스</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>Together</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>랭킹</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4"/></svg></span>LIVE</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg></span>공지사항</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span>보관함</a>
+    <a href="#" class="nav-item" style="font-size:12px;"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>산업안전보건교육</a>
+  </nav>
+  <div class="sidebar-footer"><button class="btn-logout">로그아웃</button></div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="어떤 코스를 찾으세요?">
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+      <div class="topbar-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+      <div class="topbar-avatar"><img src="./(주)Spring QA_files/dog_06.png" alt="" onerror="this.style.background='#c9c9c9';this.src=''"></div>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- Category Header -->
+    <div class="cat-header">
+      <div class="cat-header-left">
+        <a href="category.html" class="btn-back">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <h1 id="cat-title" style="font-size:22px;font-weight:700;">오픈코스 분류</h1>
+      </div>
+      <div class="cat-header-search">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="어떤 코스를 찾으세요?">
+      </div>
+    </div>
+
+    <div class="content-body">
+      <!-- Filter Sidebar -->
+      <div class="course-sidebar">
+        <div class="filter-panel">
+          <div class="filter-title">분류 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></div>
+          <ul class="filter-tree" id="cat-tree">
+            <li onclick="setCat(this,'전체')">전체</li>
+            <li class="sub-item" onclick="setCat(this,'WORK')">WORK</li>
+            <li class="sub-item" onclick="setCat(this,'직무 역량')">직무 역량</li>
+            <li class="sub-item" onclick="setCat(this,'게이미피케이션')">게이미피케이션</li>
+            <li class="sub-item" onclick="setCat(this,'마이코스 분류')">마이코스 분류</li>
+            <li class="sub-item active" onclick="setCat(this,'오픈코스 분류')">오픈코스 분류</li>
+            <li class="sub-item" onclick="setCat(this,'오픈코스2')">오픈코스2</li>
+            <li class="sub-item" style="font-size:12px;" onclick="setCat(this,'오픈코스(신청기간아님)')">오픈코스(신청기간아님)</li>
+            <li class="sub-item" onclick="setCat(this,'마이/오픈 혼합')">마이/오픈 혼합</li>
+            <li class="sub-sub" onclick="setCat(this,'2차)마이/오픈 혼합')">2차)마이/오픈 혼합</li>
+            <li class="sub-item" onclick="setCat(this,'DX')">DX</li>
+            <li class="sub-item" onclick="setCat(this,'おすすめコース')">おすすめコース</li>
+            <li class="sub-item" onclick="setCat(this,'🍅 지영QA테스트')">🍅 지영QA테스트</li>
+            <li class="sub-item" onclick="setCat(this,'지영1차분류')">지영1차분류</li>
+            <li class="sub-item" onclick="setCat(this,'이현아1차')">이현아1차</li>
+            <li class="sub-sub" onclick="setCat(this,'이현아2차')">이현아2차</li>
+            <li class="sub-item" onclick="setCat(this,'분류 없음')">분류 없음</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Course Main -->
+      <div class="course-main" id="course-main">
+        <!-- Controls -->
+        <div class="course-controls">
+          <span class="course-count" id="course-count">총 4</span>
+          <div class="controls-right">
+            <div class="toggle-switch" id="req-toggle" onclick="toggleReq()">
+              필수 코스만 보기
+              <div class="toggle"></div>
+            </div>
+            <select class="sort-select" id="sort-sel" onchange="applySort()">
+              <option value="recommend">추천순</option>
+              <option value="newest">최신순</option>
+              <option value="name">이름순</option>
+            </select>
+            <div class="view-toggle">
+              <button class="view-btn active" onclick="setView('grid')">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              </button>
+              <button class="view-btn" onclick="setView('list')">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Course Grid -->
+        <div class="course-grid" id="course-grid">
+          <a href="course-detail.html" style="text-decoration:none;" data-r="true" data-s="available">
+            <div class="course-card">
+              <div class="course-thumb" style="background:linear-gradient(160deg,#42a5f5,#1565c0);">
+                <span class="badge-required">필수</span>
+                <div class="like-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+              </div>
+              <div class="course-info">
+                <div class="course-name">태수 필수 영상 4개</div>
+                <span class="course-status status-available">수강신청가능</span>
+              </div>
+            </div>
+          </a>
+          <div class="course-card" data-r="false" data-s="enrolled">
+            <div class="course-thumb" style="background:#f0e4d4;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;padding:20px;"><div style="font-size:11px;color:#666;font-weight:700;line-height:1.5;">우리를 위한<br>법정의무교육<br><span style="background:#ff5722;color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;">장애인 인식개선교육</span></div></div>
+              <div class="like-btn" style="bottom:8px;left:8px;"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            </div>
+            <div class="course-info">
+              <div class="course-name">수강신청 전의 커리큘럼 테스트</div>
+              <span class="course-status status-enrolled">수강중</span>
+            </div>
+          </div>
+          <div class="course-card" data-r="false" data-s="available">
+            <div class="course-thumb" style="background:linear-gradient(160deg,#80cbc4,#4db6ac);">
+              <div class="like-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            </div>
+            <div class="course-info">
+              <div class="course-name">오픈코스_제한없음</div>
+              <span class="course-status status-available">수강신청가능</span>
+            </div>
+          </div>
+          <div class="course-card" data-r="false" data-s="available">
+            <div class="course-thumb" style="background:linear-gradient(160deg,#64b5f6,#1e88e5);">
+              <div class="like-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            </div>
+            <div class="course-info">
+              <div class="course-name">오픈코스(제한없음)</div>
+              <span class="course-status status-available">수강신청가능</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Proto-bar (RIGHT) -->
+<div class="proto-bar">
+  <div class="proto-bar-header">USER FLOW</div>
+  <div class="proto-chips">
+    <a href="category.html" class="proto-chip">① 목록</a>
+    <span class="proto-chip active">② 분류</span>
+    <a href="course-detail.html" class="proto-chip">③ 상세↗</a>
+  </div>
+  <div class="proto-section">
+    <div class="proto-section-title">코스 필터</div>
+    <div class="proto-radio-group">
+      <div class="proto-radio-item"><input type="radio" name="pb_filter" id="pb-all" value="all" checked onchange="setPbFilter('all')"><label for="pb-all">전체</label></div>
+      <div class="proto-radio-item"><input type="radio" name="pb_filter" id="pb-req" value="required" onchange="setPbFilter('required')"><label for="pb-req">필수 코스만</label></div>
+      <div class="proto-radio-item"><input type="radio" name="pb_filter" id="pb-avail" value="available" onchange="setPbFilter('available')"><label for="pb-avail">수강신청가능</label></div>
+      <div class="proto-radio-item"><input type="radio" name="pb_filter" id="pb-en" value="enrolled" onchange="setPbFilter('enrolled')"><label for="pb-en">수강중</label></div>
+    </div>
+  </div>
+  <div class="proto-section">
+    <div class="proto-section-title">뷰 모드</div>
+    <div class="proto-radio-group">
+      <div class="proto-radio-item"><input type="radio" name="pb_view" id="pb-grid" value="grid" checked onchange="setView('grid')"><label for="pb-grid">그리드 (4열)</label></div>
+      <div class="proto-radio-item"><input type="radio" name="pb_view" id="pb-list" value="list" onchange="setView('list')"><label for="pb-list">리스트</label></div>
+    </div>
+  </div>
+  <div class="proto-section">
+    <div class="proto-section-title">정렬</div>
+    <div class="proto-radio-group">
+      <div class="proto-radio-item"><input type="radio" name="pb_sort" id="pb-rec" value="recommend" checked onchange="setSortPb('recommend')"><label for="pb-rec">추천순</label></div>
+      <div class="proto-radio-item"><input type="radio" name="pb_sort" id="pb-new" value="newest" onchange="setSortPb('newest')"><label for="pb-new">최신순</label></div>
+      <div class="proto-radio-item"><input type="radio" name="pb_sort" id="pb-name" value="name" onchange="setSortPb('name')"><label for="pb-name">이름순</label></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var reqOn = false, pbFilter = 'all';
+
+function setCat(el, name) {
+  document.querySelectorAll('#cat-tree li').forEach(function(li){ li.classList.remove('active'); });
+  el.classList.add('active');
+  var title = document.getElementById('cat-title');
+  if(title && name !== '전체') title.textContent = name;
+  else if(title) title.textContent = '전체 코스';
+}
+
+function toggleReq() {
+  reqOn = !reqOn;
+  var t = document.getElementById('req-toggle');
+  if(t) t.classList.toggle('on', reqOn);
+  var r = document.querySelector('input[name="pb_filter"][value="'+(reqOn?'required':'all')+'"]');
+  if(r) r.checked = true;
+  pbFilter = reqOn ? 'required' : 'all';
+  applyCardFilter();
+}
+
+function setPbFilter(val) {
+  pbFilter = val;
+  if(val === 'required') {
+    reqOn = true;
+    var t = document.getElementById('req-toggle');
+    if(t) t.classList.add('on');
+  } else {
+    reqOn = false;
+    var t = document.getElementById('req-toggle');
+    if(t) t.classList.remove('on');
+  }
+  applyCardFilter();
+}
+
+function applyCardFilter() {
+  var items = document.querySelectorAll('#course-grid > *');
+  var count = 0;
+  items.forEach(function(item){
+    var r = item.dataset.r || (item.querySelector('.course-card') ? 'false' : 'false');
+    var s = item.dataset.s || 'available';
+    var show = true;
+    if(pbFilter === 'required') show = (r === 'true');
+    else if(pbFilter === 'available') show = (s === 'available');
+    else if(pbFilter === 'enrolled') show = (s === 'enrolled');
+    item.style.display = show ? '' : 'none';
+    if(show) count++;
+  });
+  var el = document.getElementById('course-count');
+  if(el) el.textContent = '총 '+count;
+}
+
+function setView(mode) {
+  var main = document.getElementById('course-main');
+  if(main) main.classList.toggle('list-view', mode==='list');
+  document.querySelectorAll('.view-btn').forEach(function(b,i){ b.classList.toggle('active', mode==='grid'?i===0:i===1); });
+  var r = document.querySelector('input[name="pb_view"][value="'+mode+'"]');
+  if(r) r.checked = true;
+}
+
+function setSortPb(val) {
+  var sel = document.getElementById('sort-sel');
+  if(sel) sel.value = val;
+  var r = document.querySelector('input[name="pb_sort"][value="'+val+'"]');
+  if(r) r.checked = true;
+}
+
+function applySort() {
+  var sel = document.getElementById('sort-sel');
+  if(!sel) return;
+  var r = document.querySelector('input[name="pb_sort"][value="'+sel.value+'"]');
+  if(r) r.checked = true;
+}
+</script>
+</body>
+</html>

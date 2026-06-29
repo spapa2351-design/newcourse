@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코스 상세 (오프라인) - TouchClass</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<link rel="stylesheet" href="./_files/style.css">
+<style>
+  /* ════════════════════════════════════════════════
+     2026 Touchclass — 코스 상세 리뉴얼 토큰 (offline_webDESIGN.md)
+     콘텐츠 = 오프라인 코스 (앱 course-offline.html 정본 미러)
+     ════════════════════════════════════════════════ */
+  :root {
+    --cd-brand:#2E84FF; --cd-brand-01:#EBF3FF; --cd-brand-08:#0052C7;
+    --cd-ink:#222222; --cd-n09:#3B3B3B; --cd-n08:#545454; --cd-n07:#6E6E6E;
+    --cd-n06:#878787; --cd-n05:#A1A1A1; --cd-n04:#BABABA; --cd-n03:#D4D4D4;
+    --cd-n02:#E5E5E5; --cd-n01:#F2F2F2; --cd-like:#F21A1A;
+    --cd-purple:#7C3AED; --cd-purple-bg:#F3EEFF; --cd-amber:#D97706;
+    --cd-cover-sh: 0 2px 8px rgba(0,0,0,.10), 0 8px 20px rgba(0,0,0,.10);
+  }
+
+  .mi { font-family:'Material Symbols Rounded'; font-weight:normal; font-style:normal;
+        font-size:20px; line-height:1; vertical-align:middle; -webkit-font-feature-settings:'liga';
+        font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+  /* ── Proto Bar (우측 고정) ── */
+  .proto-bar { position: fixed; top: 50%; right: 20px; transform: translateY(-50%); z-index: 500; width: 180px; }
+  .proto-bar-title { font-size: 10px; font-weight: 800; color: var(--cd-n06); margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  .proto-chips { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .proto-chip { padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; background: #fff; color: var(--cd-n07); box-shadow: 0 2px 10px rgba(34,51,84,.08); transition: all .2s; text-align: left; }
+  .proto-chip:hover { transform: translateX(-3px); color: var(--cd-ink); }
+  .proto-chip.active { background: var(--cd-brand); color: #fff; box-shadow: 0 4px 12px rgba(46,132,255,.3); }
+  .proto-chip:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .proto-panel { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 2px 10px rgba(34,51,84,.08); font-size: 12px; }
+  .proto-panel-title { font-size: 10px; font-weight: 800; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .proto-panel label { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; cursor: pointer; color: #555; }
+  .proto-panel label:last-child { margin-bottom: 0; }
+  .proto-sep { height: 1px; background: #e8eaed; margin: 10px 0; }
+  @media (max-width: 1100px) { .proto-bar { display: none; } }
+
+  /* ── 화면 시스템 ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .content { padding: 32px; max-width: 1040px; margin: 0 auto; font-family:'Pretendard',sans-serif; letter-spacing:-0.6px; color:var(--cd-ink); }
+
+  /* ── 뒤로/타이틀 ── */
+  .cd-back-row { display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+  .cd-back { width:34px; height:34px; border-radius:8px; border:1px solid var(--cd-n02); background:#fff; display:flex; align-items:center; justify-content:center; color:var(--cd-n08); cursor:pointer; text-decoration:none; }
+  .cd-back:hover { background:var(--cd-n01); }
+  .cd-back-row h1 { font-size:20px; font-weight:700; }
+
+  /* ── 수강 상태 배너 ── */
+  .cd-banner { border-radius:12px; padding:14px 18px; margin-bottom:16px; display:none; align-items:center; gap:10px; font-size:14px; }
+  .cd-banner .mi { font-size:22px; }
+  .cd-banner.enrolled { background:var(--cd-brand-01); color:var(--cd-brand-08); }
+  .cd-banner.completed { background:var(--cd-n01); color:var(--cd-n08); }
+  .cd-banner a { font-weight:700; color:inherit; margin-left:auto; white-space:nowrap; text-decoration:none; }
+  .cd-banner a:hover { text-decoration:underline; }
+
+  /* ── 상단 히어로 ── */
+  .cd-hero { display:flex; gap:28px; margin-bottom:24px; align-items:stretch; }
+  .cd-cover { width:264px; flex-shrink:0; aspect-ratio:3/4; border-radius:16px; box-shadow:var(--cd-cover-sh);
+              background:linear-gradient(157deg,#4B3FCB 0%,#1B3FCB 100%); position:relative; overflow:hidden;
+              padding:22px; display:flex; flex-direction:column; color:#fff; }
+  .cd-cover-badge { position:absolute; top:14px; right:14px; background:rgba(255,255,255,.18); color:#fff; font-size:11px; font-weight:800; padding:5px 11px; border-radius:300px; backdrop-filter:blur(4px); }
+  .cd-cover-kicker { font-size:12px; font-weight:700; opacity:.92; margin-bottom:4px; }
+  .cd-cover-title { font-size:30px; font-weight:900; line-height:1.18; letter-spacing:-1px; }
+  .cd-cover-illust { margin-top:auto; display:flex; align-items:center; justify-content:center; }
+  .cd-cover-illust .mi { font-size:96px; opacity:.92; font-variation-settings:'FILL' 1; }
+  .cd-cover-brand { position:absolute; bottom:16px; right:16px; font-size:10px; font-weight:800; letter-spacing:.5px; background:rgba(0,0,0,.35); padding:4px 9px; border-radius:300px; }
+
+  .cd-info { flex:1; background:#fff; border-radius:16px; box-shadow:var(--cd-cover-sh); padding:26px 28px; display:flex; flex-direction:column; }
+
+  .cd-badges { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .cd-type-offline { font-size:12px; font-weight:800; color:var(--cd-purple); background:var(--cd-purple-bg); padding:4px 11px; border-radius:300px; }
+  .cd-badge-open { font-size:14px; font-weight:700; color:var(--cd-brand); }
+  .cd-badge-soon { font-size:14px; font-weight:700; color:var(--cd-like); }
+  .cd-badge-enrolled { font-size:13px; font-weight:700; color:var(--cd-brand); background:var(--cd-brand-01); padding:4px 10px; border-radius:300px; }
+  .cd-badge-closed { font-size:13px; font-weight:700; color:var(--cd-n06); background:var(--cd-n01); padding:4px 10px; border-radius:300px; }
+  .cd-badge-before { font-size:13px; font-weight:700; color:var(--cd-n07); background:var(--cd-n01); padding:4px 10px; border-radius:300px; }
+
+  .cd-title { font-size:22px; font-weight:800; line-height:1.4; margin-bottom:14px; }
+  .cd-tags { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; }
+  .cd-tag { padding:5px 11px; border:1px solid var(--cd-n02); border-radius:6px; font-size:12px; font-weight:600; color:var(--cd-n07); }
+
+  .cd-desc { display:flex; gap:9px; background:var(--cd-n01); border-radius:12px; padding:14px 16px; margin-bottom:14px; font-size:13px; line-height:1.65; color:var(--cd-n08); }
+  .cd-desc .mi { font-size:18px; color:var(--cd-n06); flex-shrink:0; margin-top:1px; }
+
+  /* 강사 카드 (오프라인 — 대표강사) */
+  .cd-instr { display:flex; align-items:center; gap:12px; background:var(--cd-n01); border-radius:12px; padding:12px 14px; margin-bottom:14px; }
+  .cd-instr-avatar { width:44px; height:44px; border-radius:50%; background:var(--cd-ink); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .cd-instr-name { font-size:15px; font-weight:700; }
+  .cd-instr-sub { font-size:12px; color:var(--cd-n07); margin-top:2px; }
+
+  .cd-meta { border:1px solid var(--cd-n02); border-radius:12px; padding:13px 16px; margin-bottom:10px; }
+  .cd-meta-head { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .cd-meta-head .mi { font-size:18px; color:var(--cd-n06); }
+  .cd-meta-label { font-size:13px; font-weight:600; color:var(--cd-n07); }
+  .cd-meta-badge { margin-left:auto; font-size:14px; font-weight:800; color:var(--cd-brand); }
+  .cd-meta-val { font-size:14px; font-weight:700; color:var(--cd-ink); }
+  .cd-meta-val b { color:var(--cd-brand); }
+  .cd-meta.warn { border-color:#FBD7B0; background:#FFF8F0; }
+  .cd-meta.warn .mi { color:var(--cd-amber); }
+  .cd-meta.warn .cd-meta-val { color:var(--cd-amber); font-weight:700; }
+
+  .cd-action { display:flex; gap:10px; margin-top:auto; padding-top:18px; }
+  .cd-like { width:52px; height:52px; flex-shrink:0; border:1px solid var(--cd-n02); border-radius:12px; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+  .cd-like .mi { font-size:24px; color:var(--cd-n04); }
+  .cd-like.liked { border-color:var(--cd-like); }
+  .cd-like.liked .mi { color:var(--cd-like); font-variation-settings:'FILL' 1; }
+  .cd-enroll { flex:1; height:52px; border:none; border-radius:12px; font-family:'Pretendard',sans-serif; font-size:16px; font-weight:700; letter-spacing:-0.6px; cursor:pointer; transition:all .15s; }
+  .cd-enroll.open { background:var(--cd-ink); color:#fff; }
+  .cd-enroll.open:hover { background:#000; }
+  .cd-enroll.enrolled { background:var(--cd-brand-01); color:var(--cd-brand); }
+  .cd-enroll.closed,.cd-enroll.before { background:var(--cd-n01); color:var(--cd-n05); cursor:not-allowed; }
+
+  /* ── 차수 카탈로그 (커리큘럼 = 오프라인 차수/회차, 풀폭) ── */
+  .cd-curriculum { background:#fff; border-radius:16px; box-shadow:var(--cd-cover-sh); padding:24px 26px; }
+  .cd-cur-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .cd-cur-title { font-size:20px; font-weight:800; }
+  .cd-cur-sub { font-size:14px; font-weight:600; color:var(--cd-n05); margin-left:6px; }
+  .cd-cur-sub b { color:var(--cd-brand); }
+  .cd-cur-notice { display:flex; gap:8px; align-items:flex-start; background:#FFF8E1; color:#8A6D1A; border-radius:10px; padding:12px 14px; font-size:13px; font-weight:600; line-height:1.5; margin-bottom:14px; }
+  .cd-cur-notice .mi { font-size:18px; flex-shrink:0; color:var(--cd-amber); }
+  .cd-expand { display:flex; align-items:center; gap:9px; font-size:14px; color:var(--cd-n07); cursor:pointer; user-select:none; }
+  .cd-expand input { display:none; }
+  .cd-switch { width:42px; height:24px; border-radius:300px; background:var(--cd-n03); position:relative; transition:background .2s; }
+  .cd-switch::after { content:''; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+  .cd-expand input:checked + .cd-switch { background:var(--cd-brand); }
+  .cd-expand input:checked + .cd-switch::after { transform:translateX(18px); }
+
+  .cd-cur-search { display:flex; align-items:center; gap:8px; background:var(--cd-n01); border-radius:12px; padding:0 14px; height:46px; margin-bottom:8px; }
+  .cd-cur-search .mi { font-size:20px; color:var(--cd-n05); }
+  .cd-cur-search input { flex:1; border:none; background:transparent; outline:none; font-family:'Pretendard',sans-serif; font-size:14px; letter-spacing:-0.6px; color:var(--cd-ink); }
+
+  .coh-row { border-bottom:1px solid var(--cd-n01); }
+  .coh-row:last-child { border-bottom:none; }
+  .coh-main { display:flex; align-items:center; gap:12px; padding:16px 4px; cursor:pointer; }
+  .coh-main:hover .coh-name { color:var(--cd-brand); }
+  .coh-name { font-size:15px; font-weight:700; flex:1; }
+  .coh-cnt { font-size:13px; color:var(--cd-n06); }
+  .coh-rem { font-size:12px; font-weight:700; padding:3px 10px; border-radius:300px; }
+  .coh-rem.ok { background:var(--cd-brand-01); color:var(--cd-brand); }
+  .coh-rem.few { background:#FEECEC; color:var(--cd-like); }
+  .coh-rem.full { background:var(--cd-n01); color:var(--cd-n05); }
+  .coh-caret { font-size:22px; color:var(--cd-n04); transition:transform .2s; }
+  .coh-row.open .coh-caret { transform:rotate(90deg); }
+  .coh-sessions { display:none; padding:0 4px 14px 8px; }
+  .coh-row.open .coh-sessions { display:block; }
+  .coh-sess { display:flex; gap:12px; padding:11px 12px; background:var(--cd-n01); border-radius:10px; margin-bottom:8px; }
+  .coh-sess:last-child { margin-bottom:0; }
+  .coh-sess-date { text-align:center; flex-shrink:0; min-width:46px; }
+  .coh-sess-d { font-size:15px; font-weight:800; color:var(--cd-ink); }
+  .coh-sess-dow { font-size:11px; color:var(--cd-n06); }
+  .coh-sess-body { flex:1; min-width:0; }
+  .coh-sess-t { font-size:14px; font-weight:700; margin-bottom:3px; }
+  .coh-sess-meta { font-size:12px; color:var(--cd-n07); display:flex; flex-wrap:wrap; gap:4px 12px; }
+  .coh-sess-meta span { display:inline-flex; align-items:center; gap:3px; }
+  .coh-sess-meta .mi { font-size:14px; color:var(--cd-n05); }
+
+  /* ── 내 수강 현황 (수강예정·중·완료 — 앱 single-page 미러) ── */
+  .enr-head { font-size:20px; font-weight:800; display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .enr-head .mi { color:var(--cd-brand); font-size:22px; }
+  .enr-cohort { display:flex; flex-wrap:wrap; gap:4px 12px; align-items:baseline; margin-bottom:18px; }
+  .enr-cohort b { font-size:15px; font-weight:700; }
+  .enr-cohort span { font-size:13px; color:var(--cd-n07); }
+
+  .att-card { border:1px solid var(--cd-n02); border-radius:14px; padding:20px; margin-bottom:16px; }
+  .att-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+  .att-rate-lbl { font-size:13px; font-weight:600; color:var(--cd-n07); }
+  .att-rate-num { font-size:34px; font-weight:900; line-height:1.1; margin:2px 0; }
+  .att-rate-num b { color:var(--cd-brand); }
+  .att-rate-sub { font-size:13px; color:var(--cd-n06); }
+  .att-badge { font-size:13px; font-weight:700; padding:7px 12px; border-radius:300px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+  .att-badge .mi { font-size:16px; }
+  .att-badge.wait { background:var(--cd-n01); color:var(--cd-n07); }
+  .att-badge.pass { background:#E7F7EC; color:#1B9E47; }
+  .att-badge.fail { background:#FEECEC; color:var(--cd-like); }
+  .att-badge.prog { background:var(--cd-brand-01); color:var(--cd-brand); }
+  .att-track { position:relative; height:10px; border-radius:300px; background:var(--cd-n02); margin:4px 0; }
+  .att-fill { height:100%; border-radius:300px; background:var(--cd-brand); }
+  .att-fill.pass { background:#1B9E47; }
+  .att-fill.fail { background:var(--cd-like); }
+  .att-crit { position:absolute; top:-3px; bottom:-3px; left:75%; width:2px; background:var(--cd-n05); }
+  .att-crit-row { font-size:11px; color:var(--cd-n06); text-align:right; margin:4px 0 14px; }
+  .att-bd { display:flex; gap:18px; }
+  .att-bd span { display:inline-flex; align-items:center; gap:5px; font-size:13px; color:var(--cd-n07); font-weight:600; }
+  .att-bd .mi { font-size:16px; }
+  .att-bd .bd-present .mi { color:#1B9E47; }
+  .att-bd .bd-absent .mi { color:var(--cd-like); }
+  .att-bd .bd-remain .mi { color:var(--cd-n05); }
+
+  .enr-map { margin-bottom:16px; }
+  .enr-map-btn { display:flex; align-items:center; gap:6px; width:100%; height:46px; padding:0 14px; border:1px solid var(--cd-n02); border-radius:12px; background:#fff; font-size:14px; font-weight:600; color:var(--cd-ink); cursor:pointer; }
+  .enr-map-btn .mi { color:var(--cd-brand); font-size:18px; }
+  .enr-map-btn .caret { margin-left:auto; color:var(--cd-n05); }
+  .enr-map-box { margin-top:8px; border:1px solid var(--cd-n02); border-radius:12px; overflow:hidden; }
+  .enr-map-ph { height:160px; background:#eef1f4; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--cd-n05); font-size:13px; font-weight:600; }
+  .enr-map-open { width:100%; height:46px; border:none; border-top:1px solid var(--cd-n02); background:#fff; color:var(--cd-brand); font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; }
+
+  .enr-sess-title { font-size:15px; font-weight:800; margin:18px 0 10px; }
+  .att-sess { display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--cd-n01); border-radius:10px; margin-bottom:8px; }
+  .att-sess.cur { border-color:var(--cd-brand); background:var(--cd-brand-01); }
+  .att-sess-date { text-align:center; min-width:46px; flex-shrink:0; }
+  .att-sess-d { font-size:15px; font-weight:800; }
+  .att-sess-dow { font-size:11px; color:var(--cd-n06); }
+  .att-sess-body { flex:1; min-width:0; }
+  .att-sess-t { font-size:14px; font-weight:700; }
+  .att-sess-sub { font-size:12px; color:var(--cd-n07); margin-top:3px; display:flex; gap:4px 12px; flex-wrap:wrap; }
+  .att-sess-sub span { display:inline-flex; align-items:center; gap:3px; }
+  .att-sess-sub .mi { font-size:14px; color:var(--cd-n05); }
+  .att-sess-badge { font-size:12px; font-weight:700; padding:4px 10px; border-radius:300px; white-space:nowrap; flex-shrink:0; }
+  .att-sess-badge.attended { background:var(--cd-brand-01); color:var(--cd-brand); }
+  .att-sess-badge.late { background:#FFF4E0; color:var(--cd-amber); }
+  .att-sess-badge.absent { background:#FEECEC; color:var(--cd-like); }
+  .att-sess-badge.current { background:var(--cd-brand); color:#fff; }
+  .att-sess-badge.pending { background:var(--cd-n01); color:var(--cd-n06); }
+
+  .enr-actions { margin-top:18px; }
+  .enr-act-btns { display:flex; gap:10px; }
+  .enr-act-btn { flex:1; height:48px; border:1px solid var(--cd-n02); border-radius:12px; background:#fff; font-family:'Pretendard',sans-serif; font-size:14px; font-weight:700; letter-spacing:-0.6px; color:var(--cd-ink); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+  .enr-act-btn .mi { font-size:18px; }
+  .enr-act-btn.cancel { color:var(--cd-like); border-color:#F6C9C9; }
+  .enr-act-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .enr-notice { margin-top:10px; padding:11px 14px; border-radius:10px; font-size:13px; font-weight:600; line-height:1.5; }
+  .enr-notice.info { background:var(--cd-brand-01); color:var(--cd-brand-08); }
+  .enr-notice.warn { background:#FFF8F0; color:var(--cd-amber); }
+  .complete-reason { display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:700; padding:12px 16px; border-radius:12px; }
+  .complete-reason.ok { background:#E7F7EC; color:#1B9E47; }
+  .complete-reason.ng { background:#FEECEC; color:var(--cd-like); }
+
+  /* ── 신청 확인 화면 ── */
+  .confirm-card { background:#fff; border-radius:16px; padding:26px; box-shadow:var(--cd-cover-sh); max-width:560px; }
+  .confirm-title { font-size:18px; font-weight:800; margin-bottom:16px; }
+  .confirm-row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--cd-n01); font-size:14px; }
+  .confirm-row:last-of-type { border-bottom:none; }
+  .confirm-label { color:var(--cd-n07); }
+  .confirm-val { font-weight:700; color:var(--cd-ink); }
+  .btn-confirm-enroll { width:100%; height:52px; border:none; border-radius:12px; background:var(--cd-ink); color:#fff; font-size:16px; font-weight:700; letter-spacing:-0.6px; cursor:pointer; margin-top:14px; font-family:'Pretendard',sans-serif; }
+  .btn-confirm-enroll:hover { background:#000; }
+
+  /* ── 완료 모달 ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:300; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal-box { background:#fff; border-radius:16px; padding:34px 30px; text-align:center; max-width:360px; width:90%; font-family:'Pretendard',sans-serif; letter-spacing:-0.6px; }
+  .modal-box .mi { font-size:52px; color:var(--cd-brand); font-variation-settings:'FILL' 1; }
+  .modal-title { font-size:20px; font-weight:800; margin:12px 0 8px; color:var(--cd-ink); }
+  .modal-sub { font-size:14px; color:var(--cd-n07); line-height:1.6; margin-bottom:24px; }
+  .btn-modal-close { padding:13px 34px; border-radius:12px; border:none; background:var(--cd-ink); color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:'Pretendard',sans-serif; }
+
+  /* ── 일정 변경 모달 (차수 선택) ── */
+  .change-card { background:#fff; border-radius:16px; width:100%; max-width:460px; max-height:84vh; display:flex; flex-direction:column; font-family:'Pretendard',sans-serif; letter-spacing:-0.6px; color:var(--cd-ink); overflow:hidden; }
+  .change-hdr { padding:22px 24px 16px; border-bottom:1px solid var(--cd-n01); }
+  .change-title { font-size:18px; font-weight:800; }
+  .change-sub { font-size:13px; color:var(--cd-n07); margin-top:4px; }
+  .change-body { padding:16px 24px; overflow-y:auto; flex:1; }
+  .change-opt { display:block; padding:14px; border:1px solid var(--cd-n02); border-radius:12px; margin-bottom:10px; cursor:pointer; transition:all .15s; }
+  .opt-top { display:flex; align-items:center; gap:12px; }
+  .change-opt:last-child { margin-bottom:0; }
+  .change-opt:hover { border-color:var(--cd-n04); }
+  .change-opt.selected { border-color:var(--cd-brand); background:var(--cd-brand-01); }
+  .change-opt.current, .change-opt.full { cursor:not-allowed; opacity:.65; }
+  .opt-radio { width:20px; height:20px; border-radius:50%; border:2px solid var(--cd-n03); flex-shrink:0; position:relative; }
+  .change-opt.selected .opt-radio { border-color:var(--cd-brand); }
+  .change-opt.selected .opt-radio::after { content:''; position:absolute; inset:3px; border-radius:50%; background:var(--cd-brand); }
+  .change-opt.current .opt-radio { border-color:var(--cd-n04); background:var(--cd-n04); }
+  .opt-info { flex:1; min-width:0; }
+  .opt-name { font-size:14px; font-weight:700; }
+  .opt-detail { font-size:12px; color:var(--cd-n07); margin-top:2px; }
+  .opt-status { font-size:12px; font-weight:700; padding:4px 10px; border-radius:300px; white-space:nowrap; flex-shrink:0; }
+  .opt-status.avail { background:var(--cd-brand-01); color:var(--cd-brand); }
+  .opt-status.few { background:#FEECEC; color:var(--cd-like); }
+  .opt-status.full { background:var(--cd-n01); color:var(--cd-n05); }
+  .opt-status.mine { background:var(--cd-n01); color:var(--cd-n07); }
+  .opt-sessions { margin-top:12px; padding:12px 0 0 32px; border-top:1px dashed var(--cd-n02); display:flex; flex-direction:column; gap:9px; }
+  .opt-sess { display:flex; align-items:baseline; gap:8px; font-size:12px; }
+  .opt-sess .osd { font-weight:800; color:var(--cd-ink); min-width:54px; flex-shrink:0; }
+  .opt-sess .ost { font-weight:700; color:var(--cd-n08); }
+  .opt-sess .osm { color:var(--cd-n06); margin-left:auto; text-align:right; }
+  .change-guard { display:flex; gap:6px; align-items:flex-start; background:#FFF8E1; color:#8A6D1A; border-radius:10px; padding:11px 13px; font-size:12px; font-weight:600; line-height:1.5; margin-top:4px; }
+  .change-guard .mi { font-size:16px; flex-shrink:0; color:var(--cd-amber); }
+  .change-foot { display:flex; gap:10px; padding:16px 24px; border-top:1px solid var(--cd-n01); }
+  .change-keep { flex:0 0 34%; height:50px; border:1px solid var(--cd-n02); border-radius:12px; background:#fff; font-family:'Pretendard',sans-serif; font-size:15px; font-weight:700; color:var(--cd-n08); cursor:pointer; }
+  .change-confirm { flex:1; height:50px; border:none; border-radius:12px; background:var(--cd-ink); color:#fff; font-family:'Pretendard',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .change-confirm:disabled { opacity:.4; cursor:not-allowed; }
+  /* 수강 취소 모달 버튼 */
+  .cancel-btns { display:flex; gap:10px; margin-top:4px; }
+  .cancel-btns button { flex:1; height:48px; border-radius:12px; font-family:'Pretendard',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-keep { border:1px solid var(--cd-n02); background:#fff; color:var(--cd-ink); }
+  .btn-do-cancel { border:none; background:var(--cd-like); color:#fff; }
+
+  /* ── Floating toast ── */
+  .floating-toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:rgba(30,30,30,.88); color:#fff; padding:10px 18px; border-radius:300px; font-size:13px; z-index:200; transition:opacity .3s; font-family:'Pretendard',sans-serif; }
+  .floating-toast.hidden { opacity:0; pointer-events:none; }
+</style>
+</head>
+<body>
+
+<!-- Proto Bar (우측) -->
+<div class="proto-bar">
+  <div class="proto-bar-title">User Flow</div>
+  <div class="proto-chips">
+    <button class="proto-chip active" id="chip-detail" onclick="goScreen('screen-detail')">① 코스 상세</button>
+    <button class="proto-chip" id="chip-confirm" onclick="goScreen('screen-confirm')" disabled>② 신청 확인</button>
+    <button class="proto-chip" id="chip-done" onclick="openSuccessModal()">③ 신청 완료</button>
+  </div>
+  <div class="proto-panel">
+    <div class="proto-panel-title" style="color:var(--cd-brand);">수강 신청 기간</div>
+    <label><input type="radio" name="enroll_period" value="open" checked onchange="updateState()"> 신청 기간 중</label>
+    <label><input type="radio" name="enroll_period" value="before" onchange="updateState()"> 오픈 전</label>
+    <label><input type="radio" name="enroll_period" value="closed" onchange="updateState()"> 신청 마감</label>
+    <div class="proto-sep"></div>
+    <div class="proto-panel-title" style="color:#22c55e;">나의 수강 상태</div>
+    <label><input type="radio" name="my_status" value="none" checked onchange="updateState()"> 미신청</label>
+    <label><input type="radio" name="my_status" value="scheduled" onchange="updateState()"> 수강예정 (시작 전)</label>
+    <label><input type="radio" name="my_status" value="enrolled" onchange="updateState()"> 수강중</label>
+    <label><input type="radio" name="my_status" value="completed" onchange="updateState()"> 수강 완료 (수료)</label>
+    <label><input type="radio" name="my_status" value="failed" onchange="updateState()"> 수강 완료 (미수료)</label>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img class="logo-img" src="./(주)Spring QA_files/01사이트로고.png" alt="TOUCHCLASS" onerror="this.outerHTML='<span class=\'logo-dot red\'></span><span class=\'logo-dot yellow\'></span><span class=\'logo-dot green\'></span><span class=\'logo-dot blue\'></span><span class=\'logo-text\'>TOUCHCLASS</span>'">
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar"><img src="./(주)Spring QA_files/dog_06.png" alt="" onerror="this.style.display='none'"></div>
+    <div class="user-name">조찬현</div>
+    <div class="user-status">너무 더워너무 더워너무 더워</div>
+    <button class="btn-mychannel"><span class="mi" style="font-size:14px;">person</span> 내 채널</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="home.html" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>홈</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></span>이튜브</a>
+    <a href="my.html" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>MY</a>
+    <a href="category.html" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>카테고리</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>학습 보고서</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span>숏클래스</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>Together</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>랭킹</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4"/></svg></span>LIVE</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg></span>공지사항</a>
+    <a href="#" class="nav-item"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span>보관함</a>
+    <a href="#" class="nav-item" style="font-size:12px;"><span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>산업안전보건교육</a>
+  </nav>
+  <div class="sidebar-footer"><button class="btn-logout">로그아웃</button></div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="어떤 코스를 찾으세요?">
+    </div>
+    <div class="floating-toast hidden" id="floating-toast">현장 교육 — 신청 후 차수 일정에 맞춰 참석하세요</div>
+    <div class="topbar-right">
+      <div class="topbar-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+      <div class="topbar-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+      <div class="topbar-avatar" style="background:linear-gradient(135deg,#2E84FF,#61A2FF);"></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ══ SCREEN 1: 코스 상세 (오프라인) ══ -->
+    <div class="screen active content" id="screen-detail">
+      <div class="cd-back-row">
+        <a href="category-detail.html" class="cd-back"><span class="mi">arrow_back</span></a>
+        <h1>코스 상세</h1>
+      </div>
+
+      <!-- (수강 상태 배너 제거 — 별도 페이지 링크 대신 내 수강 현황을 코스상세 안에 인라인) -->
+
+      <!-- 히어로 -->
+      <div class="cd-hero">
+        <div class="cd-cover">
+          <div class="cd-cover-badge">오프라인</div>
+          <div class="cd-cover-kicker">2026 직무교육</div>
+          <div class="cd-cover-title">프로젝트<br>관리 심화</div>
+          <div class="cd-cover-illust"><span class="mi">groups</span></div>
+          <div class="cd-cover-brand">TOUCHCLASS</div>
+        </div>
+
+        <div class="cd-info">
+          <div class="cd-badges">
+            <span class="cd-type-offline">오프라인</span>
+            <span class="cd-badge-open" id="badge-status">수강 신청 가능</span>
+          </div>
+          <div class="cd-title">2026 직무교육 — 프로젝트 관리 심화</div>
+          <div class="cd-tags">
+            <span class="cd-tag">직무교육</span>
+            <span class="cd-tag">리더십</span>
+            <span class="cd-tag">자기경영</span>
+            <span class="cd-tag">특강</span>
+          </div>
+          <div class="cd-desc">
+            <span class="mi">flag</span>
+            <div>PM 직무에서 실제 활용 가능한 프로젝트 관리 방법론과 케이스 스터디를 통해 실전 역량을 강화합니다. 각 회차별 실습과 그룹 과제가 포함됩니다.</div>
+          </div>
+
+          <!-- 대표 강사 -->
+          <div class="cd-instr">
+            <div class="cd-instr-avatar"><span class="mi">person</span></div>
+            <div>
+              <div class="cd-instr-name">김민준</div>
+              <div class="cd-instr-sub">프로젝트 관리 전문가 · A등급 강사</div>
+            </div>
+          </div>
+
+          <div class="cd-meta">
+            <div class="cd-meta-head">
+              <span class="mi">event</span>
+              <span class="cd-meta-label">수강 신청 기간</span>
+            </div>
+            <div class="cd-meta-val" id="meta-enroll">2026.04.15 09:00 — 2026.04.30 18:00</div>
+          </div>
+          <div class="cd-meta">
+            <div class="cd-meta-head">
+              <span class="mi">calendar_month</span>
+              <span class="cd-meta-label">교육 전체 기간</span>
+              <span class="cd-meta-badge">61일</span>
+            </div>
+            <div class="cd-meta-val">2026.05.01 — 2026.06.30</div>
+          </div>
+          <div class="cd-meta">
+            <div class="cd-meta-head">
+              <span class="mi">apartment</span>
+              <span class="cd-meta-label">기본 장소</span>
+            </div>
+            <div class="cd-meta-val">한샘 HQ 대교육장 B동 3층</div>
+          </div>
+          <div class="cd-meta warn">
+            <div class="cd-meta-head">
+              <span class="mi">warning</span>
+              <span class="cd-meta-label" style="color:var(--cd-amber);">취소 · 변경 규정</span>
+            </div>
+            <div class="cd-meta-val">교육 시작 3일 전까지 취소, 5일 전까지 변경 가능</div>
+          </div>
+
+          <div class="cd-action" id="cd-action">
+            <button class="cd-like liked" id="btn-like" onclick="toggleLike(this)"><span class="mi">favorite</span></button>
+            <button class="cd-enroll open" id="btn-main-enroll" onclick="handleEnrollClick()">수강신청 하기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 차수 카탈로그 (커리큘럼) — 미신청 -->
+      <div class="cd-curriculum" id="card-cohorts">
+        <div class="cd-cur-head">
+          <div><span class="cd-cur-title">차수 안내</span><span class="cd-cur-sub"><b id="coh-count">4</b>개 차수 · 총 <b id="coh-sessions">7</b>회차</span></div>
+          <label class="cd-expand"><span>모두 펼치기</span><input type="checkbox" id="expand-all" onchange="toggleExpandAll(this)"><span class="cd-switch"></span></label>
+        </div>
+        <div class="cd-cur-notice">
+          <span class="mi">lightbulb</span>
+          <span>수강 신청 시 원하는 차수(반)를 선택합니다. 차수별 일정·장소·강사를 확인하세요. 회차별 출석으로 수료가 결정됩니다.</span>
+        </div>
+        <div class="cd-cur-search">
+          <span class="mi">search</span>
+          <input type="text" id="cur-search" placeholder="차수·장소 검색" oninput="filterCohorts()">
+        </div>
+        <div id="coh-list"></div>
+      </div>
+
+      <!-- 내 수강 현황 (수강예정·중·완료) — 앱처럼 코스상세 안에 인라인 -->
+      <div class="cd-curriculum" id="card-enrolled" style="display:none;"></div>
+    </div>
+
+    <!-- ══ SCREEN 2: 신청 확인 ══ -->
+    <div class="screen content" id="screen-confirm">
+      <div class="cd-back-row">
+        <button class="cd-back" onclick="goScreen('screen-detail')"><span class="mi">arrow_back</span></button>
+        <h1>신청 확인</h1>
+      </div>
+      <div class="confirm-card">
+        <div class="confirm-title">수강 신청을 확인해 주세요</div>
+        <div class="confirm-row"><span class="confirm-label">코스명</span><span class="confirm-val">프로젝트 관리 심화</span></div>
+        <div class="confirm-row"><span class="confirm-label">선택 차수</span><span class="confirm-val" id="conf-cohort">A반 (5월 평일반)</span></div>
+        <div class="confirm-row"><span class="confirm-label">교육 일정</span><span class="confirm-val" id="conf-date">5/6(수) · 5/13(수)</span></div>
+        <div class="confirm-row"><span class="confirm-label">장소</span><span class="confirm-val" id="conf-loc">본사 대교육장</span></div>
+        <div class="confirm-row"><span class="confirm-label">대표 강사</span><span class="confirm-val" id="conf-instr">김민준</span></div>
+        <button class="btn-confirm-enroll" onclick="openSuccessModal()">수강 신청 완료하기</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 신청 완료 모달 -->
+<div class="modal-overlay" id="success-modal" onclick="closeSuccessModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <span class="mi">check_circle</span>
+    <div class="modal-title">수강 신청 완료!</div>
+    <div class="modal-sub"><b id="succ-cohort">프로젝트 관리 심화 · A반 (5월 평일반)</b><br>수강 신청이 완료되었습니다.<br>교육 당일 현장 출석을 잊지 마세요.</div>
+    <button class="btn-modal-close" onclick="closeSuccessModal()">확인</button>
+  </div>
+</div>
+
+<!-- 일정 변경 모달 (변경할 차수 선택) -->
+<div class="modal-overlay" id="modal-change" onclick="closeChange()">
+  <div class="change-card" onclick="event.stopPropagation()">
+    <div class="change-hdr">
+      <div class="change-title">일정 변경</div>
+      <div class="change-sub">변경할 차수(반)를 선택하세요</div>
+    </div>
+    <div class="change-body" id="change-body"></div>
+    <div class="change-foot">
+      <button class="change-keep" onclick="closeChange()">닫기</button>
+      <button class="change-confirm" id="btn-change-confirm" disabled onclick="confirmChange()">변경 확정</button>
+    </div>
+  </div>
+</div>
+
+<!-- 수강신청 차수 선택 모달 -->
+<div class="modal-overlay" id="modal-enroll" onclick="closeEnroll()">
+  <div class="change-card" onclick="event.stopPropagation()">
+    <div class="change-hdr">
+      <div class="change-title">차수 선택</div>
+      <div class="change-sub">신청할 차수(반)를 선택하세요</div>
+    </div>
+    <div class="change-body" id="enroll-body"></div>
+    <div class="change-foot">
+      <button class="change-keep" onclick="closeEnroll()">닫기</button>
+      <button class="change-confirm" id="btn-enroll-next" disabled onclick="enrollNext()">다음</button>
+    </div>
+  </div>
+</div>
+
+<!-- 수강 취소 확인 모달 -->
+<div class="modal-overlay" id="modal-cancel" onclick="closeCancel()">
+  <div class="modal-box" onclick="event.stopPropagation()" style="text-align:left;">
+    <div style="text-align:center;"><span class="mi" style="color:var(--cd-like);">warning</span></div>
+    <div class="modal-title" style="text-align:center;">수강을 취소할까요?</div>
+    <div class="modal-sub">신청하신 차수의 수강이 취소됩니다.<br>교육 시작 <b>3일 전</b>까지만 가능하며, 환불 규정이 적용됩니다.</div>
+    <div class="cancel-btns">
+      <button class="btn-keep" onclick="closeCancel()">유지</button>
+      <button class="btn-do-cancel" onclick="confirmCancel()">수강 취소하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var isLiked = true;
+  var currentScreen = 'screen-detail';
+  var REP_INSTRUCTOR = '김민준';
+
+  /* ── 차수(반)/회차 데이터 — 앱 course-offline.html mockData.single 미러 ── */
+  var COHORTS = [
+    { name:'A반 (5월 평일반)', remnant:20, sessions:[
+        { t:'1회차 (OT)',  d:'05.06', dow:'수', time:'09:00–18:00', loc:'본사 대교육장' },
+        { t:'2회차 (실무)', d:'05.13', dow:'수', time:'09:00–18:00', loc:'본사 대교육장', instr:'이서연' }
+    ]},
+    { name:'B반 (5월 주말반)', remnant:5, instr:'박서준', sessions:[
+        { t:'1회차 (OT)',  d:'05.10', dow:'토', time:'09:00–18:00', loc:'방배 실습실' },
+        { t:'2회차 (실무)', d:'05.17', dow:'토', time:'09:00–18:00', loc:'방배 실습실' }
+    ]},
+    { name:'C반 (6월 단일)', remnant:14, sessions:[
+        { t:'특강', d:'06.01', dow:'월', time:'09:00–17:00', loc:'본사 대교육장' }
+    ]},
+    { name:'D반 (6월 주말반)', remnant:0, sessions:[
+        { t:'1회차', d:'06.07', dow:'토', time:'09:00–18:00', loc:'방배 실습실' },
+        { t:'2회차', d:'06.14', dow:'토', time:'09:00–18:00', loc:'방배 실습실' }
+    ]}
+  ];
+
+  /* 강사 3단 상속: 회차 → 차수 → 대표 */
+  function effInstr(s, coh) { return (s.instr && s.instr.trim()) || (coh.instr && coh.instr.trim()) || REP_INSTRUCTOR; }
+
+  /* 차수 선택지 안에 회차(날짜·시간·장소) 펼쳐 보이기 — 신청/변경 모달 공용 */
+  function sessionsHTML(c) {
+    return '<div class="opt-sessions">' + c.sessions.map(function(s) {
+      return '<div class="opt-sess"><span class="osd">' + s.d + '(' + s.dow + ')</span>' +
+        '<span class="ost">' + s.t + '</span>' +
+        '<span class="osm">' + s.time + ' · ' + s.loc + '</span></div>';
+    }).join('') + '</div>';
+  }
+
+  function remnantBadge(r) {
+    if (r <= 0)  return '<span class="coh-rem full">마감</span>';
+    if (r <= 5)  return '<span class="coh-rem few">마감임박 · 잔여 ' + r + '석</span>';
+    return '<span class="coh-rem ok">잔여 ' + r + '석</span>';
+  }
+
+  function renderCohorts() {
+    var list = document.getElementById('coh-list');
+    var totalSess = 0;
+    list.innerHTML = COHORTS.map(function(c) {
+      totalSess += c.sessions.length;
+      var sess = c.sessions.map(function(s) {
+        return '<div class="coh-sess">' +
+          '<div class="coh-sess-date"><div class="coh-sess-d">' + s.d + '</div><div class="coh-sess-dow">(' + s.dow + ')</div></div>' +
+          '<div class="coh-sess-body">' +
+            '<div class="coh-sess-t">' + s.t + '</div>' +
+            '<div class="coh-sess-meta">' +
+              '<span><span class="mi">schedule</span>' + s.time + '</span>' +
+              '<span><span class="mi">location_on</span>' + s.loc + '</span>' +
+              '<span><span class="mi">person</span>' + effInstr(s, c) + ' 강사</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="coh-row" data-key="' + (c.name + ' ' + c.sessions.map(function(s){return s.loc;}).join(' ')) + '">' +
+        '<div class="coh-main" onclick="toggleCohort(this)">' +
+          '<span class="coh-name">' + c.name + '</span>' +
+          remnantBadge(c.remnant) +
+          '<span class="coh-cnt">' + c.sessions.length + '회차</span>' +
+          '<span class="mi coh-caret">chevron_right</span>' +
+        '</div>' +
+        '<div class="coh-sessions">' + sess + '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('coh-count').textContent = COHORTS.length;
+    document.getElementById('coh-sessions').textContent = totalSess;
+  }
+
+  function toggleCohort(el) { el.parentElement.classList.toggle('open'); }
+  function toggleExpandAll(cb) {
+    document.querySelectorAll('#coh-list .coh-row').forEach(function(r) { r.classList.toggle('open', cb.checked); });
+  }
+  function filterCohorts() {
+    var q = document.getElementById('cur-search').value.trim().toLowerCase();
+    document.querySelectorAll('#coh-list .coh-row').forEach(function(r) {
+      r.style.display = r.getAttribute('data-key').toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+    });
+  }
+
+  function goScreen(id) {
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    currentScreen = id;
+    document.getElementById('chip-detail').classList.toggle('active', id === 'screen-detail');
+    document.getElementById('chip-confirm').classList.toggle('active', id === 'screen-confirm');
+  }
+
+  function handleEnrollClick() {
+    var period = document.querySelector('input[name="enroll_period"]:checked').value;
+    var status = document.querySelector('input[name="my_status"]:checked').value;
+    if (period === 'open' && status === 'none') openEnrollModal();
+  }
+
+  /* ── 수강신청 차수 선택 → 신청 확인 ── */
+  var enrollSel = -1;
+  function openEnrollModal() {
+    enrollSel = -1;
+    document.getElementById('enroll-body').innerHTML = COHORTS.map(function(c, i) {
+      var isFull = c.remnant <= 0;
+      var first = c.sessions[0], last = c.sessions[c.sessions.length - 1];
+      var detail = first.d + (c.sessions.length > 1 ? '–' + last.d : '') + ' · ' + c.sessions.length + '회차';
+      var st, stCls;
+      if (isFull)              { st = '마감';                 stCls = 'full'; }
+      else if (c.remnant <= 5) { st = '마감임박 ' + c.remnant + '석'; stCls = 'few'; }
+      else                     { st = '잔여 ' + c.remnant + '석'; stCls = 'avail'; }
+      return '<div class="change-opt' + (isFull ? ' full' : '') + '"' + (isFull ? '' : ' onclick="selectEnroll(this,' + i + ')"') + '>' +
+        '<div class="opt-top"><div class="opt-radio"></div>' +
+        '<div class="opt-info"><div class="opt-name">' + c.name + '</div><div class="opt-detail">' + detail + '</div></div>' +
+        '<span class="opt-status ' + stCls + '">' + st + '</span></div>' +
+        sessionsHTML(c) + '</div>';
+    }).join('');
+    document.getElementById('btn-enroll-next').disabled = true;
+    document.getElementById('modal-enroll').classList.add('open');
+  }
+  function selectEnroll(el, i) {
+    document.querySelectorAll('#enroll-body .change-opt').forEach(function(o){ o.classList.remove('selected'); });
+    el.classList.add('selected');
+    enrollSel = i;
+    document.getElementById('btn-enroll-next').disabled = false;
+  }
+  function closeEnroll() { document.getElementById('modal-enroll').classList.remove('open'); }
+  function enrollNext() {
+    if (enrollSel < 0) return;
+    var c = COHORTS[enrollSel];
+    document.getElementById('conf-cohort').textContent = c.name;
+    document.getElementById('conf-date').textContent = c.sessions.map(function(s){ return s.d + '(' + s.dow + ')'; }).join(' · ');
+    document.getElementById('conf-loc').textContent = c.sessions[0].loc;
+    document.getElementById('conf-instr').textContent = effInstr(c.sessions[0], c);
+    closeEnroll();
+    document.getElementById('chip-confirm').disabled = false;
+    goScreen('screen-confirm');
+  }
+
+  function openSuccessModal() {
+    var c = COHORTS[enrollSel >= 0 ? enrollSel : 0];
+    var sc = document.getElementById('succ-cohort'); if (sc) sc.textContent = '프로젝트 관리 심화 · ' + c.name;
+    document.getElementById('success-modal').classList.add('open');
+  }
+  function closeSuccessModal() {
+    document.getElementById('success-modal').classList.remove('open');
+    // 선택한 차수를 '수강예정'(시작 전)으로 반영 — 갓 신청 = 예정 상태, 일정 변경·취소 가능
+    var c = COHORTS[enrollSel >= 0 ? enrollSel : 0];
+    MY_ENROLLMENT.scheduled.cohort = c.name;
+    MY_ENROLLMENT.scheduled.meta = effInstr(c.sessions[0], c) + ' 강사 · ' + c.sessions[0].loc;
+    MY_ENROLLMENT.scheduled.sessions = c.sessions.map(function(s){ return { d:s.d, dow:s.dow, n:s.t, t:s.time, p:s.loc, st:'pending' }; });
+    document.querySelector('input[name="my_status"][value="scheduled"]').checked = true;
+    updateState();
+    goScreen('screen-detail');
+  }
+
+  function toggleLike(btn) { isLiked = !isLiked; btn.classList.toggle('liked', isLiked); }
+
+  /* ── 내 수강 현황 mock — 앱 course-offline.html MY_ENROLLMENT 미러 ── */
+  var MY_ENROLLMENT = {
+    scheduled: { cohort:'B반 (6월반)', meta:'이서연 강사 · 방배 실습실', sessions:[
+      { d:'6/10', dow:'화', n:'1회차 · 오리엔테이션', t:'09:00–18:00', p:'방배 실습실', st:'pending' },
+      { d:'6/17', dow:'화', n:'2회차 · 핵심 실습', t:'09:00–18:00', p:'방배 실습실', st:'pending' },
+      { d:'6/24', dow:'화', n:'3회차 · 종합 평가', t:'09:00–18:00', p:'방배 실습실', st:'pending' }
+    ]},
+    enrolled: { cohort:'A반 (5월 평일반)', meta:'김민준 강사 · 본사 대교육장', sessions:[
+      { d:'5/6',  dow:'수', n:'1회차 · PM 기초와 프레임워크', t:'09:00–18:00', p:'본사 대교육장', st:'attended' },
+      { d:'5/13', dow:'수', n:'2회차 · WBS와 일정 관리', t:'09:00–18:00', p:'본사 대교육장', st:'absent' },
+      { d:'5/20', dow:'수', n:'3회차 · 리스크 관리 실습', t:'09:00–18:00', p:'본사 대교육장', st:'current' },
+      { d:'5/27', dow:'수', n:'4회차 · 이해관계자 커뮤니케이션', t:'09:00–18:00', p:'본사 대교육장', st:'pending' },
+      { d:'6/3',  dow:'수', n:'5회차 · 종합 케이스 스터디', t:'09:00–18:00', p:'본사 대교육장', st:'pending' }
+    ]},
+    completed: { cohort:'A반 (5월 평일반)', meta:'김민준 강사 · 본사 대교육장', sessions:[
+      { d:'5/6',  dow:'수', n:'1회차 · PM 기초와 프레임워크', t:'09:00–18:00', p:'본사 대교육장', st:'attended' },
+      { d:'5/13', dow:'수', n:'2회차 · WBS와 일정 관리', t:'09:00–18:00', p:'본사 대교육장', st:'attended' },
+      { d:'5/20', dow:'수', n:'3회차 · 리스크 관리 실습', t:'09:00–18:00', p:'본사 대교육장', st:'attended' },
+      { d:'5/27', dow:'수', n:'4회차 · 이해관계자 커뮤니케이션', t:'09:00–18:00', p:'본사 대교육장', st:'attended' },
+      { d:'6/3',  dow:'수', n:'5회차 · 종합 케이스 스터디', t:'09:00–18:00', p:'본사 대교육장', st:'attended' }
+    ]},
+    failed: { cohort:'의무 차수', meta:'한보안 강사 · 본사 교육장', sessions:[
+      { d:'6/3', dow:'화', n:'1회차 · 정보보호 개요와 법령', t:'09:00–12:00', p:'본사 교육장', st:'attended' },
+      { d:'6/4', dow:'수', n:'2회차 · 개인정보 수집·처리',   t:'09:00–12:00', p:'본사 교육장', st:'absent' },
+      { d:'6/5', dow:'목', n:'3회차 · 보안 사고 대응',       t:'09:00–12:00', p:'본사 교육장', st:'attended' },
+      { d:'6/6', dow:'금', n:'4회차 · 점검과 자가 평가',     t:'09:00–12:00', p:'본사 교육장', st:'absent' }
+    ]}
+  };
+  var ATT_BADGE = { attended:['출석','attended'], late:['지각','late'], absent:['결석','absent'], current:['진행중','current'], pending:['예정','pending'] };
+
+  function renderEnrolled(status) {
+    var e = MY_ENROLLMENT[status]; if (!e) return;
+    var sess = e.sessions;
+    var present = sess.filter(function(s){ return s.st==='attended'||s.st==='late'; }).length;
+    var absent  = sess.filter(function(s){ return s.st==='absent'; }).length;
+    var held    = present + absent;
+    var remain  = sess.length - held;
+    var pct     = held > 0 ? Math.round(present / held * 100) : 0;
+    var passed  = pct >= 75;
+
+    var bCls, bIcon, bTxt;
+    if (held === 0)        { bCls='wait'; bIcon='schedule';     bTxt='출석 전'; }
+    else if (passed)       { bCls='pass'; bIcon='check_circle'; bTxt='수료 기준 충족'; }
+    else if (remain === 0) { bCls='fail'; bIcon='cancel';       bTxt='미수료'; }
+    else                   { bCls='prog'; bIcon='trending_up';  bTxt='수료까지 '+(75-pct)+'%p'; }
+
+    var subTxt = held === 0 ? '전체 '+sess.length+'회 · 아직 시작 전이에요'
+      : remain === 0 ? '전체 '+sess.length+'회 중 '+present+'회 출석'
+      : '지금까지 진행된 '+held+'회 중 '+present+'회 출석';
+    var place = (e.meta.split('·')[1] || '').trim() || e.meta;
+    var fillCls = passed ? 'pass' : (remain === 0 ? 'fail' : '');
+
+    var sessHtml = sess.map(function(s) {
+      var b = ATT_BADGE[s.st] || ['예정','pending'];
+      return '<div class="att-sess'+(s.st==='current'?' cur':'')+'">'+
+        '<div class="att-sess-date"><div class="att-sess-d">'+s.d+'</div><div class="att-sess-dow">('+s.dow+')</div></div>'+
+        '<div class="att-sess-body"><div class="att-sess-t">'+s.n+'</div>'+
+          '<div class="att-sess-sub"><span><span class="mi">schedule</span>'+s.t+'</span><span><span class="mi">location_on</span>'+s.p+'</span></div></div>'+
+        '<span class="att-sess-badge '+b[1]+'">'+b[0]+'</span></div>';
+    }).join('');
+
+    var canAction = (status === 'scheduled');
+    var actionHtml;
+    if (status === 'completed' || status === 'failed') {
+      actionHtml = '<div style="margin-top:14px;"><span class="complete-reason '+(passed?'ok':'ng')+'"><span class="mi">'+(passed?'verified':'cancel')+'</span> 출석률 '+pct+'% — 수료 기준(75%) '+(passed?'충족':'미달')+'</span></div>';
+    } else {
+      actionHtml = '<div class="enr-actions"><div class="enr-act-btns">'+
+        '<button class="enr-act-btn change" '+(canAction?'':'disabled')+' onclick="enrAction(\'change\')"><span class="mi">swap_horiz</span> 일정 변경</button>'+
+        '<button class="enr-act-btn cancel" '+(canAction?'':'disabled')+' onclick="enrAction(\'cancel\')"><span class="mi">close</span> 수강 취소</button>'+
+        '</div><div class="enr-notice '+(canAction?'info':'warn')+'">'+(canAction
+          ? '교육 시작 <b>5일 전</b>까지 변경, <b>3일 전</b>까지 취소할 수 있어요.'
+          : '교육이 시작되어 변경·취소가 불가합니다. 필요 시 <b>담당자에게 문의</b>해 주세요.')+'</div></div>';
+    }
+
+    document.getElementById('card-enrolled').innerHTML =
+      '<div class="enr-head"><span class="mi">school</span> 내 수강 현황</div>'+
+      '<div class="enr-cohort"><b>'+e.cohort+'</b><span>'+e.meta+'</span></div>'+
+      '<div class="att-card">'+
+        '<div class="att-top"><div><div class="att-rate-lbl">출석률</div><div class="att-rate-num"><b>'+pct+'%</b></div><div class="att-rate-sub">'+subTxt+'</div></div>'+
+          '<span class="att-badge '+bCls+'"><span class="mi">'+bIcon+'</span>'+bTxt+'</span></div>'+
+        '<div class="att-track"><div class="att-fill '+fillCls+'" style="width:'+pct+'%"></div><div class="att-crit"></div></div>'+
+        '<div class="att-crit-row">수료 기준 75%</div>'+
+        '<div class="att-bd"><span class="bd-present"><span class="mi">check_circle</span> 출석 <b>'+present+'</b></span>'+
+          '<span class="bd-absent"><span class="mi">cancel</span> 결석 <b>'+absent+'</b></span>'+
+          '<span class="bd-remain"><span class="mi">schedule</span> 남은 회차 <b>'+remain+'</b></span></div>'+
+      '</div>'+
+      '<div class="enr-map"><button class="enr-map-btn" onclick="toggleEnrMap()"><span class="mi">place</span> '+place+' <span class="mi caret" id="enr-map-caret">expand_more</span></button>'+
+        '<div class="enr-map-box" id="enr-map-box" style="display:none;"><div class="enr-map-ph"><span class="mi">map</span> 지도 미리보기 (시연용)</div>'+
+        '<button class="enr-map-open" onclick="openMap(\''+place+'\')"><span class="mi">directions</span> 카카오맵에서 길찾기</button></div></div>'+
+      '<div class="enr-sess-title">회차별 출석</div>'+sessHtml+actionHtml;
+  }
+
+  function toggleEnrMap() {
+    var b = document.getElementById('enr-map-box'), c = document.getElementById('enr-map-caret');
+    var open = b.style.display === 'none';
+    b.style.display = open ? 'block' : 'none';
+    c.textContent = open ? 'expand_less' : 'expand_more';
+  }
+  function openMap(p) { window.open('https://map.kakao.com/?q=' + encodeURIComponent(p), '_blank'); }
+  function enrAction(kind) { if (kind === 'change') openChange(); else openCancel(); }
+
+  /* ── 일정 변경 (변경할 차수 선택 → 확정) — 앱 single 폼 미러 ── */
+  var changeSel = -1;
+  function openChange() {
+    var status = document.querySelector('input[name="my_status"]:checked').value;
+    var curKey = (MY_ENROLLMENT[status].cohort.split(' ')[0]) || '';
+    changeSel = -1;
+    document.getElementById('change-body').innerHTML = COHORTS.map(function(c, i) {
+      var isCur = c.name.split(' ')[0] === curKey;
+      var isFull = c.remnant <= 0;
+      var first = c.sessions[0], last = c.sessions[c.sessions.length - 1];
+      var detail = first.d + (c.sessions.length > 1 ? '–' + last.d : '') + ' · ' + c.sessions.length + '회차';
+      var st, stCls;
+      if (isCur)            { st = '현재 차수';            stCls = 'mine'; }
+      else if (isFull)      { st = '마감';                 stCls = 'full'; }
+      else if (c.remnant <= 5) { st = '마감임박 ' + c.remnant + '석'; stCls = 'few'; }
+      else                  { st = '잔여 ' + c.remnant + '석'; stCls = 'avail'; }
+      var dis = isCur || isFull;
+      return '<div class="change-opt' + (isCur ? ' current' : '') + (isFull ? ' full' : '') + '"' +
+        (dis ? '' : ' onclick="selectChange(this,' + i + ')"') + '>' +
+        '<div class="opt-top"><div class="opt-radio"></div>' +
+        '<div class="opt-info"><div class="opt-name">' + c.name + '</div><div class="opt-detail">' + detail + '</div></div>' +
+        '<span class="opt-status ' + stCls + '">' + st + '</span></div>' +
+        sessionsHTML(c) + '</div>';
+    }).join('') + '<div class="change-guard"><span class="mi">info</span>일정이 겹치는 차수로는 변경할 수 없어요. 교육 시작 전까지만 변경 가능합니다.</div>';
+    document.getElementById('btn-change-confirm').disabled = true;
+    document.getElementById('modal-change').classList.add('open');
+  }
+  function selectChange(el, i) {
+    document.querySelectorAll('#change-body .change-opt').forEach(function(o){ o.classList.remove('selected'); });
+    el.classList.add('selected');
+    changeSel = i;
+    document.getElementById('btn-change-confirm').disabled = false;
+  }
+  function closeChange() { document.getElementById('modal-change').classList.remove('open'); }
+  function confirmChange() {
+    if (changeSel < 0) return;
+    var status = document.querySelector('input[name="my_status"]:checked').value;
+    var c = COHORTS[changeSel];
+    MY_ENROLLMENT[status].cohort = c.name;
+    MY_ENROLLMENT[status].meta = effInstr(c.sessions[0], c) + ' 강사 · ' + c.sessions[0].loc;
+    MY_ENROLLMENT[status].sessions = c.sessions.map(function(s){ return { d:s.d, dow:s.dow, n:s.t, t:s.time, p:s.loc, st:'pending' }; });
+    closeChange();
+    renderEnrolled(status);
+    showToast('일정이 ' + c.name + '(으)로 변경되었습니다');
+  }
+
+  /* ── 수강 취소 ── */
+  function openCancel() { document.getElementById('modal-cancel').classList.add('open'); }
+  function closeCancel() { document.getElementById('modal-cancel').classList.remove('open'); }
+  function confirmCancel() {
+    closeCancel();
+    var r = document.querySelector('input[name="my_status"][value="none"]'); if (r) r.checked = true;
+    updateState();
+    showToast('수강이 취소되었습니다');
+  }
+  function showToast(msg) {
+    var t = document.getElementById('floating-toast');
+    t.textContent = msg; t.classList.remove('hidden');
+    clearTimeout(window.__tt); window.__tt = setTimeout(function(){ t.classList.add('hidden'); }, 2400);
+  }
+
+  function updateState() {
+    var period = document.querySelector('input[name="enroll_period"]:checked').value;
+    var status = document.querySelector('input[name="my_status"]:checked').value;
+    var enrolledLike = (status === 'scheduled' || status === 'enrolled' || status === 'completed' || status === 'failed');
+
+    var badgeEl  = document.getElementById('badge-status');
+    var actionEl = document.getElementById('cd-action');
+    var cardCoh  = document.getElementById('card-cohorts');
+    var cardEnr  = document.getElementById('card-enrolled');
+    var toastEl  = document.getElementById('floating-toast');
+    var enrollEl = document.getElementById('meta-enroll');
+
+    // 수강 후엔 신청 영역(차수 카탈로그·CTA) 숨기고 내 현황을 코스상세 안에 인라인 (앱 single-page 패턴)
+    cardCoh.style.display  = enrolledLike ? 'none' : '';
+    cardEnr.style.display  = enrolledLike ? '' : 'none';
+    actionEl.style.display = enrolledLike ? 'none' : 'flex';
+    enrollEl.textContent = '2026.04.15 09:00 — 2026.04.30 18:00';
+
+    if (enrolledLike) {
+      renderEnrolled(status);
+      if (status === 'scheduled')     { badgeEl.textContent = '수강예정'; badgeEl.className = 'cd-badge-enrolled'; }
+      else if (status === 'enrolled') { badgeEl.textContent = '수강중';   badgeEl.className = 'cd-badge-enrolled'; }
+      else if (status === 'failed')   { badgeEl.textContent = '미수료';   badgeEl.className = 'cd-badge-closed'; }
+      else                            { badgeEl.textContent = '학습 완료'; badgeEl.className = 'cd-badge-closed'; }
+      toastEl.classList.add('hidden');
+    } else {
+      var btnEl = document.getElementById('btn-main-enroll');
+      btnEl.onclick = handleEnrollClick;
+      if (period === 'open') {
+        badgeEl.textContent = '수강 신청 가능'; badgeEl.className = 'cd-badge-open';
+        btnEl.textContent = '수강신청 하기'; btnEl.className = 'cd-enroll open';
+        toastEl.classList.remove('hidden');
+      } else if (period === 'before') {
+        badgeEl.textContent = '오픈 예정'; badgeEl.className = 'cd-badge-before';
+        btnEl.textContent = '신청 기간 전입니다'; btnEl.className = 'cd-enroll before';
+        enrollEl.textContent = '2026.04.15 오픈 예정';
+        toastEl.classList.add('hidden');
+      } else {
+        badgeEl.textContent = '신청 마감'; badgeEl.className = 'cd-badge-closed';
+        btnEl.textContent = '신청이 마감되었습니다'; btnEl.className = 'cd-enroll closed';
+        enrollEl.textContent = '신청이 마감되었습니다';
+        toastEl.classList.add('hidden');
+      }
+    }
+    document.getElementById('chip-confirm').disabled = !(period === 'open' && status === 'none');
+  }
+
+  renderCohorts();
+  // MY 등에서 ?status=enrolled/scheduled/completed/failed 딥링크 진입
+  (function(){ var m = location.search.match(/[?&]status=([a-z]+)/); if (m) { var r = document.querySelector('input[name="my_status"][value="' + m[1] + '"]'); if (r) r.checked = true; } })();
+  updateState();
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>홈 - TouchClass</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+<link rel="stylesheet" href="./_files/style.css">
+<style>
+  body { font-family:'Pretendard Variable','Pretendard',-apple-system,'Noto Sans KR',sans-serif; letter-spacing:-0.4px; }
+  .mi{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:20px;line-height:1;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+
+  .content { padding: 28px 32px; }
+  .home-section { margin-bottom: 36px; }
+  .home-section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .home-section-header h3 { font-size:17px; font-weight:700; color:var(--tx1); display:flex; align-items:center; gap:8px; letter-spacing:-.3px; }
+  .home-section-header .count { font-size:13px; font-weight:700; color:var(--primary); }
+  .home-section-header .icon-wrap { width:24px;height:24px;border-radius:7px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center; }
+  .icon-wrap .mi{font-size:15px;}
+  .more { font-size:12.5px; font-weight:600; color:var(--tx3); background:none; border:none; cursor:pointer; font-family:inherit; }
+  .more:hover{color:var(--primary);}
+
+  /* 최근 수강 (정사각 썸네일) */
+  .recent-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:16px; }
+  .recent-card{cursor:pointer;}
+  .recent-thumb{width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#eee;margin-bottom:10px;position:relative;}
+  .recent-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .recent-thumb .offline-dot{position:absolute;top:9px;left:9px;width:9px;height:9px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 2px #fff;}
+  .recent-name{font-size:13px;font-weight:700;color:var(--tx1);line-height:1.4;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .recent-bottom{display:flex;align-items:center;gap:6px;}
+  .status-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+  .status-badge.in-progress,.status-badge.enrollable,.status-badge.completed{color:var(--primary);background:var(--primary-lt);}
+  .status-badge.not-started,.status-badge.scheduled,.status-badge.ended{color:var(--tx2);background:var(--surface-2);}
+  .info-btn{width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+  .info-btn .mi{font-size:13px;}
+
+  /* 오프라인 넷플릭스 카드 */
+  .offline-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;}
+  .offline-card{cursor:pointer;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;box-shadow:var(--sh-xs);transition:all var(--t);display:flex;flex-direction:column;}
+  .offline-card:hover{transform:translateY(-3px);box-shadow:var(--sh-card-hover);border-color:rgba(46,132,255,.2);}
+  .offline-cover{width:100%;aspect-ratio:4/3;position:relative;overflow:hidden;}
+  .offline-cover img{width:100%;height:100%;object-fit:cover;display:block;}
+  .offline-cover .gradient{position:absolute;inset:auto 0 0 0;height:50%;background:linear-gradient(to top,rgba(0,0,0,.45),transparent);}
+  .cover-badge{position:absolute;top:9px;right:9px;display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+  .cover-badge.badge-enrollable,.cover-badge.badge-completed{background:rgba(255,255,255,.92);color:var(--primary);}
+  .cover-badge.badge-in-progress{background:rgba(46,132,255,.92);color:#fff;}
+  .cover-badge.badge-not-started{background:rgba(0,0,0,.55);color:#fff;}
+  .cover-badge.badge-scheduled{background:rgba(34,34,34,.6);color:#fff;}
+  .cover-badge.badge-ended{background:rgba(0,0,0,.45);color:rgba(255,255,255,.8);}
+  .offline-body{padding:12px 14px 12px;flex:1;}
+  .offline-body .cat-tag{font-size:10.5px;font-weight:600;color:var(--primary);margin-bottom:5px;}
+  .offline-body .title{font-size:13px;font-weight:700;color:var(--tx1);line-height:1.4;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px;}
+  .offline-body .meta{font-size:11.5px;color:var(--tx2);font-weight:500;display:flex;align-items:center;gap:4px;}
+  .offline-body .meta .mi{font-size:14px;color:var(--tx3);}
+  .offline-progress{padding:0 14px 14px;}
+  .offline-progress .bar-label{display:flex;justify-content:space-between;font-size:10.5px;font-weight:600;color:var(--tx2);margin-bottom:5px;}
+  .offline-progress .bar-label .val{color:var(--primary);}
+  .offline-progress .bar{height:5px;background:var(--surface-2);border-radius:20px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:20px;}
+  .bar-fill.blue{background:var(--primary);}.bar-fill.green{background:var(--ok);}.bar-fill.red{background:var(--err);}
+
+  /* 추천 카드 (세로 썸네일) */
+  .recommend-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;}
+  .recommend-card{cursor:pointer;}
+  .recommend-thumb{width:100%;aspect-ratio:3/4;border-radius:12px;overflow:hidden;margin-bottom:9px;}
+  .recommend-name{font-size:12.5px;font-weight:700;color:var(--tx1);line-height:1.4;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .recommend-sub{font-size:11.5px;color:var(--tx3);}
+
+  .home-divider{height:1px;background:var(--border);margin:0 0 36px;}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img class="logo-img" src="./(주)Spring QA_files/01사이트로고.png" alt="TOUCHCLASS" onerror="this.outerHTML='<span class=\'logo-dot red\'></span><span class=\'logo-dot yellow\'></span><span class=\'logo-dot green\'></span><span class=\'logo-dot blue\'></span><span class=\'logo-text\'>TOUCHCLASS</span>'">
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar"><img src="./(주)Spring QA_files/dog_06.png" alt="" onerror="this.style.display='none'"></div>
+    <div class="user-name">조찬현</div>
+    <div class="user-status">너무 더워너무 더워너무 더워</div>
+    <button class="btn-mychannel"><span class="mi" style="font-size:14px;">person</span> 내 채널</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="home.html" class="nav-item active">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>홈
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></span>이튜브
+    </a>
+    <a href="my.html" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>MY
+    </a>
+    <a href="category.html" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>카테고리
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>학습 보고서
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span>숏클래스
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>Together
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>랭킹
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4"/></svg></span>LIVE
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg></span>공지사항
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span>보관함
+    </a>
+    <a href="#" class="nav-item" style="font-size:12px;">
+      <span class="nav-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>산업안전보건교육
+    </a>
+  </nav>
+  <div class="sidebar-footer"><button class="btn-logout">로그아웃</button></div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <div class="topbar-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="어떤 코스를 찾으세요?">
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+      <div class="topbar-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+      <div class="topbar-avatar"><img src="./(주)Spring QA_files/dog_06.png" alt="" onerror="this.style.display='none'"></div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- 최근 수강 코스 -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <h3>최근 수강 코스</h3>
+        <button class="more" onclick="location.href='my.html'">전체 보기 ›</button>
+      </div>
+      <div class="recent-grid">
+        <div class="recent-card">
+          <div class="recent-thumb"><img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=300&h=300&fit=crop" alt=""></div>
+          <div class="recent-name">[2023 법정의무교육] 개인정보보호...</div>
+          <div class="recent-bottom"><span class="status-badge in-progress">학습 중</span><button class="info-btn"><span class="mi">info</span></button></div>
+        </div>
+        <div class="recent-card" onclick="location.href='course-detail.html'">
+          <div class="recent-thumb"><img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=300&fit=crop" alt=""><div class="offline-dot"></div></div>
+          <div class="recent-name">2026 직무교육 — 프로젝트 관리 심화</div>
+          <div class="recent-bottom"><span class="status-badge not-started">시작전</span><button class="info-btn"><span class="mi">info</span></button></div>
+        </div>
+        <div class="recent-card">
+          <div class="recent-thumb"><img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop" alt=""></div>
+          <div class="recent-name">[2023 법정의무교육] 교육 계획수립...</div>
+          <div class="recent-bottom"><span class="status-badge in-progress">학습 중</span><button class="info-btn"><span class="mi">info</span></button></div>
+        </div>
+        <div class="recent-card" onclick="location.href='course-detail.html?status=enrolled'">
+          <div class="recent-thumb"><img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=300&fit=crop" alt=""><div class="offline-dot"></div></div>
+          <div class="recent-name">ESG 실무 워크숍</div>
+          <div class="recent-bottom"><span class="status-badge in-progress">수강중</span><button class="info-btn"><span class="mi">info</span></button></div>
+        </div>
+        <div class="recent-card" onclick="location.href='course-detail.html?status=enrolled'">
+          <div class="recent-thumb"><img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=300&h=300&fit=crop" alt=""><div class="offline-dot"></div></div>
+          <div class="recent-name">글로벌 비즈니스 매너</div>
+          <div class="recent-bottom"><span class="status-badge scheduled">수강예정</span><button class="info-btn"><span class="mi">info</span></button></div>
+        </div>
+        <div class="recent-card" onclick="location.href='course-detail.html?status=completed'">
+          <div class="recent-thumb"><img src="https://images.unsplash.com/photo-1560439514-4e9645039924?w=300&h=300&fit=crop" alt=""><div class="offline-dot"></div></div>
+          <div class="recent-name">2025 하반기 리더십 심화</div>
+          <div class="recent-bottom"><span class="status-badge completed">학습 완료</span><button class="info-btn"><span class="mi">info</span></button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-divider"></div>
+
+    <!-- 오프라인 코스 -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <h3><span class="icon-wrap"><span class="mi">place</span></span> 오프라인 코스 <span class="count">6</span></h3>
+        <button class="more" onclick="location.href='category.html?filter=offline'">전체보기 ›</button>
+      </div>
+      <div class="offline-grid">
+        <div class="offline-card" onclick="location.href='course-detail.html'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-enrollable"><span class="mi" style="font-size:13px;">check</span> 신청 가능</span></div>
+          <div class="offline-body"><div class="cat-tag">직무교육</div><div class="title">2026 직무교육 — 프로젝트 관리 심화</div><div class="meta"><span class="mi">calendar_today</span> 5/10 ~ 6/14 · 5회차</div></div>
+        </div>
+        <div class="offline-card" onclick="location.href='course-detail.html?status=enrolled'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-in-progress">수강중</span></div>
+          <div class="offline-body"><div class="cat-tag">워크숍</div><div class="title">ESG 실무 워크숍</div><div class="meta"><span class="mi">location_on</span> 방배 실습실</div></div>
+          <div class="offline-progress"><div class="bar-label"><span>출석 2/3</span><span class="val">66%</span></div><div class="bar"><div class="bar-fill blue" style="width:66%"></div></div></div>
+        </div>
+        <div class="offline-card" onclick="location.href='course-detail.html'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-not-started">시작전</span></div>
+          <div class="offline-body"><div class="cat-tag">신입사원</div><div class="title">신입사원 OJT 과정</div><div class="meta"><span class="mi">calendar_today</span> 5/1 시작 · 8회차</div></div>
+        </div>
+        <div class="offline-card" onclick="location.href='course-detail.html?status=enrolled'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-scheduled">수강예정</span></div>
+          <div class="offline-body"><div class="cat-tag">리더십</div><div class="title">글로벌 비즈니스 매너</div><div class="meta"><span class="mi">calendar_today</span> 6/15 시작 · 2회차</div></div>
+        </div>
+        <div class="offline-card" onclick="location.href='course-detail.html?status=completed'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-ended">수강종료</span></div>
+          <div class="offline-body"><div class="cat-tag">법정의무교육</div><div class="title">2025 법정의무교육</div><div class="meta"><span class="mi">calendar_today</span> 종료 · 3회차</div></div>
+          <div class="offline-progress"><div class="bar-label"><span>출석 1/3</span><span style="color:var(--err);">33%</span></div><div class="bar"><div class="bar-fill red" style="width:33%"></div></div></div>
+        </div>
+        <div class="offline-card" onclick="location.href='course-detail.html?status=completed'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1560439514-4e9645039924?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-completed"><span class="mi" style="font-size:13px;">check</span> 학습 완료</span></div>
+          <div class="offline-body"><div class="cat-tag">리더십</div><div class="title">2025 하반기 리더십 심화</div><div class="meta"><span class="mi" style="color:#f5a623;">emoji_events</span> 수료 · 출석 100%</div></div>
+          <div class="offline-progress"><div class="bar-label"><span>출석 4/4</span><span class="val">100%</span></div><div class="bar"><div class="bar-fill green" style="width:100%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-divider"></div>
+
+    <!-- 직무교육 (오프라인 카테고리) -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <h3><span class="icon-wrap"><span class="mi">place</span></span> 직무교육</h3>
+        <button class="more" onclick="location.href='category.html?filter=offline'">더보기 ›</button>
+      </div>
+      <div class="offline-grid">
+        <div class="offline-card" onclick="location.href='course-detail.html'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-enrollable"><span class="mi" style="font-size:13px;">check</span> 신청 가능</span></div>
+          <div class="offline-body"><div class="cat-tag">직무교육</div><div class="title">2026 직무교육 — 프로젝트 관리 심화</div><div class="meta"><span class="mi">calendar_today</span> 5/10 ~ 6/14</div></div>
+        </div>
+        <div class="offline-card" onclick="location.href='course-detail.html'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-enrollable"><span class="mi" style="font-size:13px;">check</span> 신청 가능</span></div>
+          <div class="offline-body"><div class="cat-tag">직무교육</div><div class="title">데이터 기반 의사결정 실습</div><div class="meta"><span class="mi">calendar_today</span> 5/20 ~ 7/10</div></div>
+        </div>
+        <div class="offline-card" onclick="location.href='course-detail.html'">
+          <div class="offline-cover"><img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&h=220&fit=crop" alt=""><div class="gradient"></div><span class="cover-badge badge-enrollable"><span class="mi" style="font-size:13px;">check</span> 신청 가능</span></div>
+          <div class="offline-body"><div class="cat-tag">직무교육</div><div class="title">커뮤니케이션 스킬 강화</div><div class="meta"><span class="mi">calendar_today</span> 6/1 ~ 6/30</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-divider"></div>
+
+    <!-- 추천 코스 (온라인) -->
+    <div class="home-section">
+      <div class="home-section-header">
+        <h3>추천 코스</h3>
+        <button class="more" onclick="location.href='course-list.html'">더보기 ›</button>
+      </div>
+      <div class="recommend-grid">
+        <div class="recommend-card"><div class="recommend-thumb" style="background:linear-gradient(135deg,#EC4899,#F472B6);"></div><div class="recommend-name">[2023 법정의무교육] 직장 내 괴롭힘 예방</div><div class="recommend-sub">온라인 · 미수강</div></div>
+        <div class="recommend-card"><div class="recommend-thumb" style="background:linear-gradient(135deg,#14B8A6,#2DD4BF);"></div><div class="recommend-name">[2023 법정의무교육] 장애인 인식개선</div><div class="recommend-sub">온라인 · 100%</div></div>
+        <div class="recommend-card"><div class="recommend-thumb" style="background:linear-gradient(135deg,#F97316,#FB923C);"></div><div class="recommend-name">[2023 법정의무교육] 산업안전보건</div><div class="recommend-sub">온라인 · 미수강</div></div>
+        <div class="recommend-card"><div class="recommend-thumb" style="background:linear-gradient(135deg,#6366F1,#818CF8);"></div><div class="recommend-name">데이터 리터러시 입문</div><div class="recommend-sub">온라인 · 미수강</div></div>
+        <div class="recommend-card"><div class="recommend-thumb" style="background:linear-gradient(135deg,#0EA5E9,#38BDF8);"></div><div class="recommend-name">실무자를 위한 보고서 작성법</div><div class="recommend-sub">온라인 · 학습 중</div></div>
+        <div class="recommend-card"><div class="recommend-thumb" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);"></div><div class="recommend-name">생성형 AI 업무 활용</div><div class="recommend-sub">온라인 · 미수강</div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Proto-bar (RIGHT) -->
+<div class="proto-bar">
+  <div class="proto-bar-header">USER FLOW</div>
+  <div class="proto-chips">
+    <span class="proto-chip active">① 홈</span>
+    <a href="my.html" class="proto-chip">② MY</a>
+    <a href="category.html" class="proto-chip">③ 카테고리</a>
+    <a href="course-detail.html" class="proto-chip">④ 코스상세↗</a>
+  </div>
+  <div class="proto-section">
+    <div class="proto-section-title">화면 안내</div>
+    <div style="font-size:11px;color:#475569;line-height:1.5;">실제 TouchClass web 셸 + 모바일(앱) 확정 콘텐츠를 데스크탑으로 옮긴 홈입니다.</div>
+  </div>
+</div>
+
+</body>
+</html>
