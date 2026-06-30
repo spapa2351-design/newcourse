@@ -131,12 +131,12 @@
     <!-- MY Tabs -->
     <div class="my-tabs-wrapper">
       <div class="my-tabs">
-        <div class="my-tab active" onclick="switchTab(0)">코스</div>
-        <div class="my-tab" onclick="switchTab(1)">오프라인코스</div>
-        <div class="my-tab" onclick="switchTab(2)">PLUS 코스</div>
-        <div class="my-tab" onclick="switchTab(3)">찜한 코스</div>
-        <div class="my-tab" onclick="switchTab(4)">수료중</div>
-        <div class="my-tab" onclick="switchTab(5)">서명</div>
+        <div class="my-tab" style="display:none;" onclick="switchTab(0)">코스</div>
+        <div class="my-tab active" onclick="switchTab(1)">오프라인코스</div>
+        <div class="my-tab" style="display:none;" onclick="switchTab(2)">PLUS 코스</div>
+        <div class="my-tab" style="display:none;" onclick="switchTab(3)">찜한 코스</div>
+        <div class="my-tab" style="display:none;" onclick="switchTab(4)">수료중</div>
+        <div class="my-tab" style="display:none;" onclick="switchTab(5)">서명</div>
         <div class="my-tab-right">
           <div class="view-toggle">
             <button class="view-btn active" onclick="setViewMode('grid')">
@@ -436,44 +436,8 @@
 <div class="proto-bar">
   <div class="proto-bar-header">USER FLOW</div>
   <div class="proto-chips">
-    <span class="proto-chip active" data-tab="0" onclick="switchTab(0)">① 코스</span>
-    <span class="proto-chip" data-tab="1" onclick="switchTab(1)">② 오프</span>
-    <span class="proto-chip" data-tab="2" onclick="switchTab(2)">③ PLUS</span>
-    <span class="proto-chip" data-tab="3" onclick="switchTab(3)">④ 찜</span>
-    <a href="course-detail.html" class="proto-chip">⑤ 상세↗</a>
-  </div>
-  <div class="proto-section">
-    <div class="proto-section-title">탭 선택</div>
-    <div class="proto-radio-group">
-      <div class="proto-radio-item"><input type="radio" name="pb_tab" id="pb-cos" value="0" checked onchange="switchTab(0)"><label for="pb-cos">코스</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_tab" id="pb-offline" value="1" onchange="switchTab(1)"><label for="pb-offline">오프라인코스</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_tab" id="pb-plus" value="2" onchange="switchTab(2)"><label for="pb-plus">PLUS 코스</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_tab" id="pb-jjim" value="3" onchange="switchTab(3)"><label for="pb-jjim">찜한 코스</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_tab" id="pb-suryo" value="4" onchange="switchTab(4)"><label for="pb-suryo">수료중</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_tab" id="pb-seomyung" value="5" onchange="switchTab(5)"><label for="pb-seomyung">서명</label></div>
-    </div>
-  </div>
-  <div class="proto-section" id="proto-status-sec">
-    <div class="proto-section-title">수강 상태</div>
-    <div class="proto-radio-group">
-      <div class="proto-radio-item"><input type="radio" name="pb_st" id="pb-all" value="all" checked onchange="setStatus('all',null)"><label for="pb-all">전체</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_st" id="pb-en" value="enrolled" onchange="setStatus('enrolled',null)"><label for="pb-en">수강 중</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_st" id="pb-up" value="upcoming" onchange="setStatus('upcoming',null)"><label for="pb-up">수강 예정</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_st" id="pb-co" value="complete" onchange="setStatus('complete',null)"><label for="pb-co">수강 종료</label></div>
-    </div>
-  </div>
-  <div class="proto-section">
-    <div class="proto-section-title">뷰 모드</div>
-    <div class="proto-radio-group">
-      <div class="proto-radio-item"><input type="radio" name="pb_view" id="pb-grid" value="grid" checked onchange="setViewMode('grid')"><label for="pb-grid">그리드</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_view" id="pb-list" value="list" onchange="setViewMode('list')"><label for="pb-list">리스트</label></div>
-    </div>
-  </div>
-  <div class="proto-section">
-    <div class="proto-section-title">필수 코스</div>
-    <div class="proto-radio-group">
-      <div class="proto-radio-item"><input type="checkbox" id="pb-req" onchange="toggleReq()"><label for="pb-req">필수 코스만 보기</label></div>
-    </div>
+    <span class="proto-chip active" data-tab="1" onclick="switchTab(1)">① 오프라인코스</span>
+    <a href="course-detail.html" class="proto-chip">② 상세↗</a>
   </div>
 </div>
 
@@ -579,8 +543,8 @@ function setCat(el) {
   el.classList.add('active');
 }
 
-// Init: show first screen only
-document.querySelectorAll('.tab-screen').forEach(function(s,i){ s.style.display = i===0?'block':'none'; });
+// Init: 오프라인코스 탭만 노출
+switchTab(1);
 </script>
 </body>
 </html>

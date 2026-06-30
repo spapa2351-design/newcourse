@@ -115,6 +115,13 @@
   .cd-enroll.open:hover { background:#000; }
   .cd-enroll.enrolled { background:var(--cd-brand-01); color:var(--cd-brand); }
   .cd-enroll.closed,.cd-enroll.before { background:var(--cd-n01); color:var(--cd-n05); cursor:not-allowed; }
+  .cd-enroll.change { background:#fff; border:1px solid var(--cd-n02); color:var(--cd-ink); }
+  .cd-enroll.change:hover { background:var(--cd-n01); }
+  .cd-enroll.cancel { background:#fff; border:1px solid #F6C9C9; color:var(--cd-like); }
+  .cd-enroll.cancel:hover { background:#FEF2F2; }
+  .cd-enroll.inquiry { background:var(--cd-n01); color:var(--cd-n06); }
+  .cd-enroll.inquiry:hover { background:var(--cd-n02); }
+  .cd-action-btns { display:flex; gap:10px; flex:1; }
 
   /* ── 차수 카탈로그 (커리큘럼 = 오프라인 차수/회차, 풀폭) ── */
   .cd-curriculum { background:#fff; border-radius:16px; box-shadow:var(--cd-cover-sh); padding:24px 26px; }
@@ -166,6 +173,22 @@
   .enr-cohort { display:flex; flex-wrap:wrap; gap:4px 12px; align-items:baseline; margin-bottom:18px; }
   .enr-cohort b { font-size:15px; font-weight:700; }
   .enr-cohort span { font-size:13px; color:var(--cd-n07); }
+
+  /* 2단(차수정보·출석률) + 회차 풀폭 */
+  .enr-coh-count { font-size:13px; font-weight:700; color:var(--cd-brand); }
+  .enr-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; margin-bottom:16px; }
+  .enr-grid .att-card { margin-bottom:0; height:100%; }
+  .enr-coh-strip { background:var(--cd-brand-01); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .enr-coh-strip b { color:var(--cd-brand); font-size:15px; font-weight:800; }
+  .enr-coh-strip div { font-size:13px; color:var(--cd-n07); margin-top:3px; }
+  .enr-info { border:1px solid var(--cd-n02); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .enr-info:last-child { margin-bottom:0; }
+  .enr-info .lbl { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--cd-n06); }
+  .enr-info .val { font-size:14px; font-weight:700; color:var(--cd-ink); margin-top:4px; }
+  .enr-map-link { border:none; background:none; cursor:pointer; color:var(--cd-n06); font-size:12px; display:inline-flex; align-items:center; gap:2px; font-family:'Pretendard',sans-serif; letter-spacing:-0.6px; }
+  .enr-map-link .caret { font-size:16px; color:var(--cd-n05); }
+  .enr-sess-card { border:1px solid var(--cd-n02); border-radius:14px; padding:20px; }
+  @media (max-width: 920px) { .enr-grid { grid-template-columns:1fr; } }
 
   .att-card { border:1px solid var(--cd-n02); border-radius:14px; padding:20px; margin-bottom:16px; }
   .att-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
@@ -414,14 +437,14 @@
             </div>
           </div>
 
-          <div class="cd-meta">
+          <div class="cd-meta" id="meta-enroll-block">
             <div class="cd-meta-head">
               <span class="mi">event</span>
               <span class="cd-meta-label">수강 신청 기간</span>
             </div>
             <div class="cd-meta-val" id="meta-enroll">2026.04.15 09:00 — 2026.04.30 18:00</div>
           </div>
-          <div class="cd-meta">
+          <div class="cd-meta" id="meta-period-block">
             <div class="cd-meta-head">
               <span class="mi">calendar_month</span>
               <span class="cd-meta-label">교육 전체 기간</span>
@@ -429,7 +452,7 @@
             </div>
             <div class="cd-meta-val">2026.05.01 — 2026.06.30</div>
           </div>
-          <div class="cd-meta">
+          <div class="cd-meta" id="meta-place-block">
             <div class="cd-meta-head">
               <span class="mi">apartment</span>
               <span class="cd-meta-label">기본 장소</span>
@@ -446,7 +469,9 @@
 
           <div class="cd-action" id="cd-action">
             <button class="cd-like liked" id="btn-like" onclick="toggleLike(this)"><span class="mi">favorite</span></button>
-            <button class="cd-enroll open" id="btn-main-enroll" onclick="handleEnrollClick()">수강신청 하기</button>
+            <div class="cd-action-btns" id="cd-action-btns">
+              <button class="cd-enroll open" onclick="handleEnrollClick()">수강신청 하기</button>
+            </div>
           </div>
         </div>
       </div>
@@ -771,22 +796,15 @@
         '<span class="att-sess-badge '+b[1]+'">'+b[0]+'</span></div>';
     }).join('');
 
-    var canAction = (status === 'scheduled');
-    var actionHtml;
-    if (status === 'completed' || status === 'failed') {
-      actionHtml = '<div style="margin-top:14px;"><span class="complete-reason '+(passed?'ok':'ng')+'"><span class="mi">'+(passed?'verified':'cancel')+'</span> 출석률 '+pct+'% — 수료 기준(75%) '+(passed?'충족':'미달')+'</span></div>';
-    } else {
-      actionHtml = '<div class="enr-actions"><div class="enr-act-btns">'+
-        '<button class="enr-act-btn change" '+(canAction?'':'disabled')+' onclick="enrAction(\'change\')"><span class="mi">swap_horiz</span> 일정 변경</button>'+
-        '<button class="enr-act-btn cancel" '+(canAction?'':'disabled')+' onclick="enrAction(\'cancel\')"><span class="mi">close</span> 수강 취소</button>'+
-        '</div><div class="enr-notice '+(canAction?'info':'warn')+'">'+(canAction
-          ? '교육 시작 <b>5일 전</b>까지 변경, <b>3일 전</b>까지 취소할 수 있어요.'
-          : '교육이 시작되어 변경·취소가 불가합니다. 필요 시 <b>담당자에게 문의</b>해 주세요.')+'</div></div>';
-    }
+    // 완료/미수료만 수료 결과 칩 표시 (변경·취소·문의 액션은 상단 액션바)
+    var actionHtml = (status === 'completed' || status === 'failed')
+      ? '<div style="margin-top:14px;"><span class="complete-reason '+(passed?'ok':'ng')+'"><span class="mi">'+(passed?'verified':'cancel')+'</span> 출석률 '+pct+'% — 수료 기준(75%) '+(passed?'충족':'미달')+'</span></div>'
+      : '';
 
-    document.getElementById('card-enrolled').innerHTML =
-      '<div class="enr-head"><span class="mi">school</span> 내 수강 현황</div>'+
-      '<div class="enr-cohort"><b>'+e.cohort+'</b><span>'+e.meta+'</span></div>'+
+    var first = sess[0], last = sess[sess.length - 1];
+    var period = first.d + '(' + first.dow + ') ' + first.t.split('–')[0] + ' ~ ' + last.d + '(' + last.dow + ') ' + last.t.split('–')[1];
+
+    var attCard =
       '<div class="att-card">'+
         '<div class="att-top"><div><div class="att-rate-lbl">출석률</div><div class="att-rate-num"><b>'+pct+'%</b></div><div class="att-rate-sub">'+subTxt+'</div></div>'+
           '<span class="att-badge '+bCls+'"><span class="mi">'+bIcon+'</span>'+bTxt+'</span></div>'+
@@ -795,11 +813,26 @@
         '<div class="att-bd"><span class="bd-present"><span class="mi">check_circle</span> 출석 <b>'+present+'</b></span>'+
           '<span class="bd-absent"><span class="mi">cancel</span> 결석 <b>'+absent+'</b></span>'+
           '<span class="bd-remain"><span class="mi">schedule</span> 남은 회차 <b>'+remain+'</b></span></div>'+
+      '</div>';
+
+    document.getElementById('card-enrolled').innerHTML =
+      '<div class="enr-head"><span class="mi">school</span> 내 수강 현황 <span class="enr-coh-count">'+COHORTS.length+'차수</span></div>'+
+      '<div class="enr-grid">'+
+        '<div class="enr-left">'+
+          '<div class="enr-coh-strip"><b>'+e.cohort+'</b><div>'+e.meta+'</div></div>'+
+          '<div class="enr-info"><div class="lbl">교육 전체 기간</div><div class="val">'+period+'</div></div>'+
+          '<div class="enr-info"><div class="lbl"><span>장소</span>'+
+            '<button class="enr-map-link" onclick="toggleEnrMap()">지도 보기 <span class="mi caret" id="enr-map-caret">expand_more</span></button></div>'+
+            '<div class="val">'+place+'</div>'+
+            '<div class="enr-map-box" id="enr-map-box" style="display:none;margin-top:10px;"><div class="enr-map-ph"><span class="mi">map</span> 지도 미리보기 (시연용)</div>'+
+            '<button class="enr-map-open" onclick="openMap(\''+place+'\')"><span class="mi">directions</span> 카카오맵에서 길찾기</button></div></div>'+
+        '</div>'+
+        '<div class="enr-right">'+attCard+'</div>'+
       '</div>'+
-      '<div class="enr-map"><button class="enr-map-btn" onclick="toggleEnrMap()"><span class="mi">place</span> '+place+' <span class="mi caret" id="enr-map-caret">expand_more</span></button>'+
-        '<div class="enr-map-box" id="enr-map-box" style="display:none;"><div class="enr-map-ph"><span class="mi">map</span> 지도 미리보기 (시연용)</div>'+
-        '<button class="enr-map-open" onclick="openMap(\''+place+'\')"><span class="mi">directions</span> 카카오맵에서 길찾기</button></div></div>'+
-      '<div class="enr-sess-title">회차별 출석</div>'+sessHtml+actionHtml;
+      '<div class="enr-sess-card">'+
+        '<div class="enr-sess-title" style="margin-top:0;">회차별 커리큘럼 <span class="enr-coh-count">'+sess.length+'회차</span></div>'+
+        sessHtml+
+      '</div>'+actionHtml;
   }
 
   function toggleEnrMap() {
@@ -884,34 +917,46 @@
     var toastEl  = document.getElementById('floating-toast');
     var enrollEl = document.getElementById('meta-enroll');
 
-    // 수강 후엔 신청 영역(차수 카탈로그·CTA) 숨기고 내 현황을 코스상세 안에 인라인 (앱 single-page 패턴)
+    // 수강 후엔 신청 영역(차수 카탈로그) 숨기고 내 현황 인라인. 액션바(하트+버튼)는 항상 노출.
     cardCoh.style.display  = enrolledLike ? 'none' : '';
     cardEnr.style.display  = enrolledLike ? '' : 'none';
-    actionEl.style.display = enrolledLike ? 'none' : 'flex';
+    actionEl.style.display = 'flex';
+    document.getElementById('meta-enroll-block').style.display = enrolledLike ? 'none' : '';
+    document.getElementById('meta-period-block').style.display = enrolledLike ? 'none' : '';
+    document.getElementById('meta-place-block').style.display  = enrolledLike ? 'none' : '';
     enrollEl.textContent = '2026.04.15 09:00 — 2026.04.30 18:00';
 
+    var btns = document.getElementById('cd-action-btns');
     if (enrolledLike) {
       renderEnrolled(status);
-      if (status === 'scheduled')     { badgeEl.textContent = '수강예정'; badgeEl.className = 'cd-badge-enrolled'; }
-      else if (status === 'enrolled') { badgeEl.textContent = '수강중';   badgeEl.className = 'cd-badge-enrolled'; }
-      else if (status === 'failed')   { badgeEl.textContent = '미수료';   badgeEl.className = 'cd-badge-closed'; }
-      else                            { badgeEl.textContent = '학습 완료'; badgeEl.className = 'cd-badge-closed'; }
       toastEl.classList.add('hidden');
+      if (status === 'scheduled') {
+        badgeEl.textContent = '수강예정'; badgeEl.className = 'cd-badge-enrolled';
+        btns.innerHTML = '<button class="cd-enroll change" onclick="openChange()">일정 변경</button>'+
+                         '<button class="cd-enroll cancel" onclick="openCancel()">수강 취소</button>';
+      } else if (status === 'enrolled') {
+        badgeEl.textContent = '수강중'; badgeEl.className = 'cd-badge-enrolled';
+        btns.innerHTML = '<button class="cd-enroll inquiry" onclick="alert(\'교육이 시작되어 일정 변경·수강 취소가 불가합니다.\\n필요 시 담당자에게 문의해 주세요.\')">담당자 문의</button>';
+      } else if (status === 'failed') {
+        badgeEl.textContent = '미수료'; badgeEl.className = 'cd-badge-closed';
+        btns.innerHTML = '<button class="cd-enroll closed" disabled>수강이 종료되었습니다</button>';
+      } else {
+        badgeEl.textContent = '학습 완료'; badgeEl.className = 'cd-badge-closed';
+        btns.innerHTML = '<button class="cd-enroll closed" disabled>수강이 종료되었습니다</button>';
+      }
     } else {
-      var btnEl = document.getElementById('btn-main-enroll');
-      btnEl.onclick = handleEnrollClick;
       if (period === 'open') {
         badgeEl.textContent = '수강 신청 가능'; badgeEl.className = 'cd-badge-open';
-        btnEl.textContent = '수강신청 하기'; btnEl.className = 'cd-enroll open';
+        btns.innerHTML = '<button class="cd-enroll open" onclick="handleEnrollClick()">수강신청 하기</button>';
         toastEl.classList.remove('hidden');
       } else if (period === 'before') {
         badgeEl.textContent = '오픈 예정'; badgeEl.className = 'cd-badge-before';
-        btnEl.textContent = '신청 기간 전입니다'; btnEl.className = 'cd-enroll before';
+        btns.innerHTML = '<button class="cd-enroll before" disabled>신청 기간 전입니다</button>';
         enrollEl.textContent = '2026.04.15 오픈 예정';
         toastEl.classList.add('hidden');
       } else {
         badgeEl.textContent = '신청 마감'; badgeEl.className = 'cd-badge-closed';
-        btnEl.textContent = '신청이 마감되었습니다'; btnEl.className = 'cd-enroll closed';
+        btns.innerHTML = '<button class="cd-enroll closed" disabled>신청이 마감되었습니다</button>';
         enrollEl.textContent = '신청이 마감되었습니다';
         toastEl.classList.add('hidden');
       }
