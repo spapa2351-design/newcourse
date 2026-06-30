@@ -43,7 +43,7 @@
   /* ── 화면 시스템 ── */
   .screen { display: none; }
   .screen.active { display: block; }
-  .content { padding: 32px; max-width: 1040px; margin: 0 auto; font-family:'Pretendard',sans-serif; letter-spacing:-0.6px; color:var(--cd-ink); }
+  .content { padding: 32px; max-width: 1200px; margin: 0 auto; font-family:'Pretendard',sans-serif; letter-spacing:-0.6px; color:var(--cd-ink); }
 
   /* ── 뒤로/타이틀 ── */
   .cd-back-row { display:flex; align-items:center; gap:10px; margin-bottom:22px; }
@@ -231,9 +231,12 @@
   .complete-reason.ok { background:#E7F7EC; color:#1B9E47; }
   .complete-reason.ng { background:#FEECEC; color:var(--cd-like); }
 
-  /* ── 신청 확인 화면 ── */
-  .confirm-card { background:#fff; border-radius:16px; padding:26px; box-shadow:var(--cd-cover-sh); max-width:560px; }
-  .confirm-title { font-size:18px; font-weight:800; margin-bottom:16px; }
+  /* ── 신청 확인 모달 ── */
+  .confirm-card { background:#fff; border-radius:16px; padding:26px; max-width:420px; width:90%; font-family:'Pretendard',sans-serif; letter-spacing:-0.6px; }
+  .confirm-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .confirm-close { width:32px; height:32px; border:none; background:transparent; cursor:pointer; color:var(--cd-n07); display:flex; align-items:center; justify-content:center; border-radius:8px; }
+  .confirm-close:hover { background:var(--cd-n01); color:var(--cd-ink); }
+  .confirm-title { font-size:18px; font-weight:800; }
   .confirm-row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--cd-n01); font-size:14px; }
   .confirm-row:last-of-type { border-bottom:none; }
   .confirm-label { color:var(--cd-n07); }
@@ -303,7 +306,7 @@
   <div class="proto-bar-title">User Flow</div>
   <div class="proto-chips">
     <button class="proto-chip active" id="chip-detail" onclick="goScreen('screen-detail')">① 코스 상세</button>
-    <button class="proto-chip" id="chip-confirm" onclick="goScreen('screen-confirm')" disabled>② 신청 확인</button>
+    <button class="proto-chip" id="chip-confirm" onclick="openConfirm()" disabled>② 신청 확인</button>
     <button class="proto-chip" id="chip-done" onclick="openSuccessModal()">③ 신청 완료</button>
   </div>
   <div class="proto-panel">
@@ -469,22 +472,6 @@
       <div class="cd-curriculum" id="card-enrolled" style="display:none;"></div>
     </div>
 
-    <!-- ══ SCREEN 2: 신청 확인 ══ -->
-    <div class="screen content" id="screen-confirm">
-      <div class="cd-back-row">
-        <button class="cd-back" onclick="goScreen('screen-detail')"><span class="mi">arrow_back</span></button>
-        <h1>신청 확인</h1>
-      </div>
-      <div class="confirm-card">
-        <div class="confirm-title">수강 신청을 확인해 주세요</div>
-        <div class="confirm-row"><span class="confirm-label">코스명</span><span class="confirm-val">프로젝트 관리 심화</span></div>
-        <div class="confirm-row"><span class="confirm-label">선택 차수</span><span class="confirm-val" id="conf-cohort">A반 (5월 평일반)</span></div>
-        <div class="confirm-row"><span class="confirm-label">교육 일정</span><span class="confirm-val" id="conf-date">5/6(수) · 5/13(수)</span></div>
-        <div class="confirm-row"><span class="confirm-label">장소</span><span class="confirm-val" id="conf-loc">본사 대교육장</span></div>
-        <div class="confirm-row"><span class="confirm-label">대표 강사</span><span class="confirm-val" id="conf-instr">김민준</span></div>
-        <button class="btn-confirm-enroll" onclick="openSuccessModal()">수강 신청 완료하기</button>
-      </div>
-    </div>
   </main>
 </div>
 
@@ -525,6 +512,22 @@
       <button class="change-keep" onclick="closeEnroll()">닫기</button>
       <button class="change-confirm" id="btn-enroll-next" disabled onclick="enrollNext()">다음</button>
     </div>
+  </div>
+</div>
+
+<!-- 신청 확인 모달 -->
+<div class="modal-overlay" id="modal-confirm" onclick="closeConfirm()">
+  <div class="confirm-card" onclick="event.stopPropagation()">
+    <div class="confirm-hdr">
+      <div class="confirm-title">수강 신청을 확인해 주세요</div>
+      <button class="confirm-close" onclick="closeConfirm()"><span class="mi">close</span></button>
+    </div>
+    <div class="confirm-row"><span class="confirm-label">코스명</span><span class="confirm-val">프로젝트 관리 심화</span></div>
+    <div class="confirm-row"><span class="confirm-label">선택 차수</span><span class="confirm-val" id="conf-cohort">A반 (5월 평일반)</span></div>
+    <div class="confirm-row"><span class="confirm-label">교육 일정</span><span class="confirm-val" id="conf-date">5/6(수) · 5/13(수)</span></div>
+    <div class="confirm-row"><span class="confirm-label">장소</span><span class="confirm-val" id="conf-loc">본사 대교육장</span></div>
+    <div class="confirm-row"><span class="confirm-label">대표 강사</span><span class="confirm-val" id="conf-instr">김민준</span></div>
+    <button class="btn-confirm-enroll" onclick="closeConfirm(); openSuccessModal();">수강 신청 완료하기</button>
   </div>
 </div>
 
@@ -631,7 +634,6 @@
     document.getElementById(id).classList.add('active');
     currentScreen = id;
     document.getElementById('chip-detail').classList.toggle('active', id === 'screen-detail');
-    document.getElementById('chip-confirm').classList.toggle('active', id === 'screen-confirm');
   }
 
   function handleEnrollClick() {
@@ -677,7 +679,16 @@
     document.getElementById('conf-instr').textContent = effInstr(c.sessions[0], c);
     closeEnroll();
     document.getElementById('chip-confirm').disabled = false;
-    goScreen('screen-confirm');
+    openConfirm();
+  }
+
+  function openConfirm() {
+    document.getElementById('modal-confirm').classList.add('open');
+    document.getElementById('chip-confirm').classList.add('active');
+  }
+  function closeConfirm() {
+    document.getElementById('modal-confirm').classList.remove('open');
+    document.getElementById('chip-confirm').classList.remove('active');
   }
 
   function openSuccessModal() {
