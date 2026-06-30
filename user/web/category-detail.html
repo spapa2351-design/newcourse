@@ -107,10 +107,6 @@
         <div class="course-controls">
           <span class="course-count" id="course-count">총 6</span>
           <div class="controls-right">
-            <div class="toggle-switch" id="req-toggle" onclick="toggleReq()">
-              필수 코스만 보기
-              <div class="toggle"></div>
-            </div>
             <select class="sort-select" id="sort-sel" onchange="applySort()">
               <option value="recommend">추천순</option>
               <option value="newest">최신순</option>
@@ -129,10 +125,9 @@
 
         <!-- Course Grid -->
         <div class="course-grid" id="course-grid">
-          <a href="course-detail.html" style="text-decoration:none;" data-r="true" data-s="available">
+          <a href="course-detail.html" style="text-decoration:none;" data-r="false" data-s="available">
             <div class="course-card">
               <div class="course-thumb" style="background:linear-gradient(160deg,#42a5f5,#1565c0);">
-                <span class="badge-required">필수</span>
                 <div class="like-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
               </div>
               <div class="course-info">
@@ -214,7 +209,6 @@
     <div class="proto-section-title">코스 필터</div>
     <div class="proto-radio-group">
       <div class="proto-radio-item"><input type="radio" name="pb_filter" id="pb-all" value="all" checked onchange="setPbFilter('all')"><label for="pb-all">전체</label></div>
-      <div class="proto-radio-item"><input type="radio" name="pb_filter" id="pb-req" value="required" onchange="setPbFilter('required')"><label for="pb-req">필수 코스만</label></div>
       <div class="proto-radio-item"><input type="radio" name="pb_filter" id="pb-avail" value="available" onchange="setPbFilter('available')"><label for="pb-avail">수강신청가능</label></div>
       <div class="proto-radio-item"><input type="radio" name="pb_filter" id="pb-en" value="enrolled" onchange="setPbFilter('enrolled')"><label for="pb-en">수강중</label></div>
     </div>
