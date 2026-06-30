@@ -106,7 +106,7 @@
     { id:'A2-10', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차 일괄 생성', desc:'기간+요일+시간 설정으로 회차 자동 생성', input:'bulk-generate 폼', output:'sessions[] 자동 추가', note:'', pri:'P2', phase:1, status:'todo' },
     { id:'A2-11', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'패키지/회차 DnD', desc:'GripVertical 핸들로 패키지 간, 패키지 내 회차 드래그 순서 변경', input:'draggable', output:'배열 순서 업데이트', note:'', pri:'P2', phase:1, status:'todo' },
     { id:'A2-11a', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차 시간 겹침 경고', desc:'같은 차수 안에서 시간대가 겹치는 회차를 감지해 경고 표시. 차수당 QR이 1개라 같은 시간 회차는 출석 식별이 불가능하므로 운영자에게 알림. 병렬 분반(같은 시간 다른 강의실) + 회차별 QR 분리는 Phase 2', input:'회차 시작/종료 시간 입력', output:'겹침 회차 경고 배지', note:'2026-06-16 추가. 차수=QR 1개 전제. 병렬 분반은 A2-33(Phase 2)', pri:'P2', phase:1, status:'todo' },
-    { id:'A2-12', screen:'A2', screenName:'코스 빌더', group:'수료조건', feature:'수료 조건 설정', desc:'섹션 3(수료 조건 설정): 오프라인 출석 슬롯 — 전체 회차 필수 or 최소 N회 이상 출석 라디오 선택', input:'라디오 선택 + 숫자 입력', output:'completionRules[] minType/minCount 업데이트', note:'', pri:'P1', phase:1, status:'todo' },
+    { id:'A2-12', screen:'A2', screenName:'코스 빌더', group:'수료조건', feature:'수료 조건 설정', desc:'섹션 3(수료 조건 설정): 출석률 % 기준 — 차수 내 회차 출석 합산이 설정 출석률(기본 75%) 이상이면 수료. 절대횟수·전체합 폐기', input:'출석률 % 숫자 입력', output:"completionRules[] {type:'attendance_rate', minRate} 업데이트", note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A2-17', screen:'A2', screenName:'코스 빌더', group:'수료조건', feature:'출석 정책 — 지각기준 글로벌 설정', desc:'섹션 3 하단 "출석 정책" 블록. 코스 전체에 적용되는 글로벌 지각기준. "지각: N분 이내 출석 → 지각 처리". 기본값 10분, 0~60 범위', input:'숫자 input (0~60)', output:'lateMinutes useState (글로벌) 업데이트', note:'차수별 개별 설정이 아닌 코스 레벨 단일 값. 2026-04-28 추가', pri:'P1', phase:1, status:'todo' },
     { id:'A2-13', screen:'A2', screenName:'코스 빌더', group:'퍼블리싱', feature:'임시저장', desc:'언제든 클릭 가능. courseStatus → saved 전환', input:'임시저장 버튼', output:'courseStatus=saved', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'A2-14', screen:'A2', screenName:'코스 빌더', group:'퍼블리싱', feature:'퍼블리싱 요건 체크', desc:'8개 항목 자동 검증: 코스명/강사/장소/신청기간/패키지/회차/날짜시간/수료조건', input:'퍼블리싱 버튼 클릭', output:'체크리스트 모달', note:'미충족 시 퍼블리싱 버튼 비활성', pri:'P1', phase:1, status:'todo' },
@@ -145,7 +145,7 @@
     { id:'A4-06', screen:'A4', screenName:'출석상태', group:'정책', feature:'학습 시간 집계·표시', desc:'학습시간=출석/지각/조퇴 회차 수업시간 합. 회차 테이블 칸·차수 헤더 합계·좌측 코스정보·평균 학습시간 KPI로 표시. 개인별 명단 컬럼은 출석률과 중복이라 생략', input:'-', output:'sessionStudyMin/pkgStudyMin/avgStudyMin', note:'2026-05-27. Phase 1 표시 전용(수료 기준은 출석률 75%). 국비 시수 수료 연동은 Phase 3', pri:'P2', phase:1, status:'todo' },
 
     /* ── A2 Phase 2: 코스 빌더 추가 기능 ── */
-    { id:'A2-18', screen:'A2', screenName:'코스 빌더', group:'출석정책', feature:'지각 환산 설정', desc:'지각 N회 = 결석 1회. 차수별 ON/OFF. 기본값: 환산 없음(지각=출석). 업계 관행 3회 권장. 고객사 요청 시 활성화', input:'숫자 input + 토글', output:'lateConversion state', note:'기본값: OFF', pri:'P2', phase:2, status:'phase2' },
+    { id:'A2-23', screen:'A2', screenName:'코스 빌더', group:'출석정책', feature:'지각 환산 설정', desc:'지각 N회 = 결석 1회. 차수별 ON/OFF. 기본값: 환산 없음(지각=출석). 업계 관행 3회 권장. 고객사 요청 시 활성화', input:'숫자 input + 토글', output:'lateConversion state', note:'기본값: OFF', pri:'P2', phase:2, status:'phase2' },
     { id:'A2-19', screen:'A2', screenName:'코스 빌더', group:'출석정책', feature:'조퇴 환산 설정', desc:'조퇴 N회 = 결석 1회. 차수별 ON/OFF. 기본값: 환산 없음(조퇴=출석). 법정의무교육 이수 시간 부족 시 연계', input:'숫자 input + 토글', output:'earlyLeaveConversion state', note:'기본값: OFF', pri:'P2', phase:2, status:'phase2' },
     { id:'A2-20', screen:'A2', screenName:'코스 빌더', group:'알림', feature:'알림 채널 설정', desc:'이메일 vs 앱 푸시 선택. 수강 확정·D-day 리마인더·수료 완료 알림 자동 발송 채널 설정', input:'라디오 선택', output:'notifyChannel state', note:'채널 미결정 시 오픈 불가', pri:'P1', phase:2, status:'phase2' },
     { id:'A2-21', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차별 학습 시간', desc:'회차 시간(종료−시작)으로 학습시간 자동 계산. "직접 입력" 체크 시 회차별 시간/분 수정(override) → "직접 입력" 배지(구 "수정됨", 2026-06-25 변경). studyMinOverride(null=자동)', input:'체크박스 + 시간/분 input', output:'sessions[].studyMinOverride', note:'2026-05-27 브레인스토밍 확정. 자동 기본, override 예외', pri:'P2', phase:1, status:'todo' },
@@ -210,6 +210,7 @@
     { id:'U4-01', screen:'U4', screenName:'MY학습', group:'탭', feature:'진행중/완료/신청내역 탭', desc:'학습 상태별 탭 전환. 각 탭에 코스 카드 목록', input:'탭 클릭', output:'myTab 변경', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'U4-02', screen:'U4', screenName:'MY학습', group:'카드', feature:'MY 코스 카드', desc:'코스명, 차수/회차, 다음 교육일, 출석률 미니 바. 오늘 교육 뱃지', input:'-', output:'MY 코스 렌더', note:'', pri:'P1', phase:1, status:'todo' },
     { id:'U4-03', screen:'U4', screenName:'MY학습', group:'출석', feature:'출석 내역 확인', desc:'MY 코스에서 회차별 본인 출석 상태 확인 (출석/지각/결석/미확인)', input:'-', output:'attendance 데이터 렌더', note:'', pri:'P1', phase:1, status:'todo' },
+    { id:'U4-03a', screen:'U4', screenName:'MY학습', group:'예정일정', feature:'이번 주 예정 일정 위젯 (히어로 + 컴팩트 리스트)', desc:'다가오는 회차를 임박순으로 노출. 가장 가까운 1건=히어로 카드, 나머지=컴팩트 리스트. 리스트는 가까운 3건만 노출하고 초과분은 "N건 더 보기"로 같은 자리 인라인 펼침/접기(새 페이지·모달 없음). 정렬 1차=D-day 오름차순, 2차=시작시각(동률 시). 회차(세션) 단위 — 수강중 코스 카드(코스 단위)와 별개 뷰', input:'더 보기/접기 토글', output:'upcoming-list.expanded 클래스 토글', note:'2026-06-25 추가. 3건 cap + toggleUpcoming(). 정렬·D-day 계산은 백엔드', pri:'P2', phase:1, status:'todo' },
     { id:'U4-04', screen:'U4', screenName:'MY학습', group:'수료', feature:'수료증 발급 (미리보기·인쇄)', desc:'수료 처리된 코스에서 "수료증" 버튼 → 수료증 미리보기 모달. 코스명·이름·수료일 렌더 + 인쇄 동작(window.print). PDF 자동 발급·이메일 송부는 Phase 2(A3-26)', input:'수료증 버튼', output:'수료증 미리보기 모달 + 인쇄', note:'2026-06-16 미리보기·인쇄 동작 추가(Phase 1). 자동 PDF/이메일은 Phase 2', pri:'P2', phase:1, status:'todo' },
     { id:'U4-05', screen:'U4', screenName:'MY학습', group:'신청', feature:'신청 취소', desc:'자율 수강 코스, 취소 정책 범위 내에서 신청 취소. 지정 등록은 취소 불가. 확인 모달 → 취소 확정', input:'취소 버튼', output:'신청 취소 처리', note:'취소 정책(cancelPolicy) 연동', pri:'P1', phase:1, status:'todo' },
     { id:'U4-06', screen:'U4', screenName:'MY학습', group:'신청', feature:'취소 사유 입력', desc:'수강 취소 모달에서 사유 텍스트 입력 (선택 항목). 입력값 서버 저장 및 관리자 조회', input:'textarea 입력', output:'취소 사유 저장 API', note:'Phase 1 프로토에서 제거 완료 — textarea 없이 취소 확정만', pri:'P2', phase:2, status:'phase2' },
@@ -443,7 +444,7 @@
               <div className="flex items-center gap-2">
                 <FileSpreadsheet size={18} className="text-indigo-500"/>
                 <h1 className="text-[16px] font-black text-slate-900">기능명세서</h1>
-                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.7</span>
+                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.8</span>
                 <span className="text-[10px] font-black text-violet-700 bg-violet-100 border border-violet-300 px-2 py-0.5 rounded-full ml-1">📍 기능 라인 SSOT</span>
               </div>
               <div className="flex items-center gap-2">
