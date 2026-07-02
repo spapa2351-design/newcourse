@@ -783,6 +783,15 @@
         showToast(`다중 선택 방식에선 회차선택형을 쓸 수 없어 ${converted.length}개 차수를 전체일정으로 변경했습니다`, '📅');
       }, [selectionRule]);
 
+      // 관리자배정 ON 시 회차선택형 사용 불가(배정 시 회차까지 지정 불가 → 차수 분리로 표현).
+      useEffect(() => {
+        if (!adminAssign) return;
+        const converted = options.filter(o => o.sessionSelect);
+        if (converted.length === 0) return;
+        setOptions(prev => prev.map(o => o.sessionSelect ? { ...o, sessionSelect: false } : o));
+        showToast(`관리자배정에선 회차선택형을 쓸 수 없어 ${converted.length}개 차수를 전체일정으로 변경했습니다`, '📅');
+      }, [adminAssign]);
+
       const [activeOptionId, setActiveOptionId] = useState(1);
       const [showBatchForm, setShowBatchForm] = useState(null); // null | optId
       const [batchData, setBatchData] = useState({ startDate: '', endDate: '', days: [], startTime: '09:00', endTime: '18:00', place: '' });
@@ -1855,12 +1864,13 @@
 
                             {/* 수강 유형 */}
                             <button
-                              onClick={() => setOptionSettingsId(opt.id)}
+                              onClick={() => { if (!adminAssign) setOptionSettingsId(opt.id); }}
+                              title={adminAssign ? '관리자배정에선 회차선택형을 쓸 수 없습니다' : undefined}
                               className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors shrink-0
-                                ${opt.sessionSelect ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white'}`}
+                                ${adminAssign ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : opt.sessionSelect ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white'}`}
                             >
-                              {opt.sessionSelect ? <CalendarCheck size={10}/> : <CalendarDays size={10}/>}
-                              {opt.sessionSelect ? '회차선택형' : '전체일정'}
+                              <CalendarDays size={10}/>
+                              {adminAssign ? '전체일정' : opt.sessionSelect ? '회차선택형' : '전체일정'}
                             </button>
 
                             {/* 스페이서 */}
@@ -2095,7 +2105,7 @@
                                           onChange={e => handleSessionChange(sess.id, 'studyMinOverride', Math.floor(sess.studyMinOverride/60)*60 + Math.min(59,Math.max(0,parseInt(e.target.value)||0)), opt.id)}
                                           className="w-14 border border-indigo-300 rounded p-1.5 text-[12px] text-center outline-none focus:border-indigo-500 bg-indigo-50"/>
                                         <span className="text-[12px] text-slate-500">분</span>
-                                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded ml-auto shrink-0">수정됨</span>
+                                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded ml-auto shrink-0">직접 입력</span>
                                       </div>
                                     ) : (
                                       <div className="flex-1 text-[12px] text-slate-500">자동 <strong className="text-slate-700">{fmtDurB(sessMin(sess))}</strong> <span className="text-slate-400 text-[11px]">(시작~종료)</span></div>
@@ -2475,11 +2485,11 @@
                         <p className="text-[12px] text-slate-500 leading-relaxed">신청 시 모든 회차에 자동 등록됩니다.<br/><span className="text-slate-400">예: 5일 연속 교육, 격주 심화 과정</span></p>
                       </div>
                     </button>
-                    {/* 회차 선택형 — 다중 조합형에선 사용 불가(A안) */}
-                    {selectionRule === 'multiple' ? (
+                    {/* 회차 선택형 — 다중 조합형·관리자배정에선 사용 불가(A안) */}
+                    {(selectionRule === 'multiple' || adminAssign) ? (
                       <div
                         className="w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-slate-50 flex gap-4 items-start opacity-70 cursor-not-allowed"
-                        title="다중 선택 방식에선 회차선택형을 쓸 수 없습니다"
+                        title={adminAssign ? '관리자배정에선 회차선택형을 쓸 수 없습니다' : '다중 선택 방식에선 회차선택형을 쓸 수 없습니다'}
                       >
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-slate-100">
                           <CalendarCheck size={18} className="text-slate-300"/>
@@ -2489,7 +2499,9 @@
                             <span className="text-[14px] font-bold text-slate-400">회차 선택형</span>
                             <span className="text-[10px] font-bold text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded-full flex items-center gap-1"><Lock size={9}/> 사용 불가</span>
                           </div>
-                          <p className="text-[12px] text-slate-400 leading-relaxed">"회원이 여러 차수 선택" 방식에선 쓸 수 없습니다.<br/><span className="text-slate-400">회차별로 나누려면 차수를 분리해 주세요.</span></p>
+                          <p className="text-[12px] text-slate-400 leading-relaxed">
+                            {adminAssign ? <>관리자배정에선 쓸 수 없습니다.<br/><span className="text-slate-400">회차별로 나누려면 차수를 분리해 주세요.</span></> : <>"회원이 여러 차수 선택" 방식에선 쓸 수 없습니다.<br/><span className="text-slate-400">회차별로 나누려면 차수를 분리해 주세요.</span></>}
+                          </p>
                         </div>
                       </div>
                     ) : (
