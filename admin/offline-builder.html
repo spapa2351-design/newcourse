@@ -94,6 +94,18 @@
     const courseId = urlParams.get('courseId');
     const isEditMode = !!courseId;
 
+    /* ── 회차 잠금 판정 ──
+       배포(published)되어 수강중인 코스에서, 종료 일시가 이미 지난 회차는 수정 불가.
+       ※ 프로토타입은 "시간 경과" 기준으로 판정한다.
+          실제 백엔드는 시간이 아니라 "출결 데이터 존재 여부"로 잠그는 것을 권장한다
+          (시작 직전 vs 시작 후 경계 애매함 제거 + 데이터 정합성). — 이팀장 협의 */
+    const isSessionPast = (s) => {
+      if (!s || !s.date) return false;
+      const t = s.endTime || s.startTime || '23:59';
+      const dt = new Date(`${s.date}T${t}`);
+      return !isNaN(dt.getTime()) && dt < new Date();
+    };
+
     const COURSE_EDIT_DATA = {
       1: {
         status: 'published',
@@ -106,6 +118,11 @@
           { id:2, name:'B반 (5/12)', capacity:30, enrolled:27, startDate:'2026-05-12', endDate:'2026-05-12', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
             {id:103,name:'1회차',date:'2026-05-12',startTime:'09:00',endTime:'12:30',place:'',capacity:null,groups:null},
             {id:104,name:'2회차',date:'2026-05-12',startTime:'13:30',endTime:'18:00',place:'',capacity:null,groups:null},
+          ]},
+          // 수강중(진행 중) 차수 데모 — 1회차는 이미 종료(잠금), 2회차는 미도래(수정 가능). 이팀장 협의 케이스.
+          { id:3, name:'C반 (수강중)', capacity:30, enrolled:25, startDate:'2026-07-01', endDate:'2026-07-10', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
+            {id:105,name:'1회차',date:'2026-07-01',startTime:'10:00',endTime:'13:00',place:'',capacity:null,groups:null},
+            {id:106,name:'2회차',date:'2026-07-10',startTime:'10:00',endTime:'13:00',place:'',capacity:null,groups:null},
           ]},
         ]
       },
@@ -260,7 +277,7 @@
     ];
 
     /* ── 캘린더 모드 모달 ── */
-    const CalendarModeModal = ({ opt, options, onClose, onSessionChange, onAddSession, onRemoveSession }) => {
+    const CalendarModeModal = ({ opt, options, courseStatus, onClose, onSessionChange, onAddSession, onRemoveSession }) => {
       const [mcDate, setMcDate] = React.useState(() => {
         const first = opt.sessions.find(s => s.date);
         if (first) { const [y,m] = first.date.split('-').map(Number); return { year:y, month:m-1 }; }
@@ -376,17 +393,22 @@
                       <div className="mt-0.5">+ 회차 추가 버튼을 누르세요</div>
                     </div>
                   ) : opt.sessions.map((s,idx) => {
-                    const isEd = editId===s.id;
+                    const locked = courseStatus === 'published' && isSessionPast(s);   // 종료된 회차 수정 불가
+                    const isEd = editId===s.id && !locked;
                     return (
-                      <div key={s.id} className={`border rounded-xl overflow-hidden transition-all ${isEd?'border-indigo-300 shadow-sm':'border-slate-200'}`}>
-                        <div className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${isEd?'bg-indigo-50':'bg-white hover:bg-slate-50'}`}
-                          onClick={()=>setEditId(isEd?null:s.id)}>
-                          <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold shrink-0 ${isEd?'bg-indigo-500 text-white':'bg-indigo-100 text-indigo-600'}`}>{idx+1}</div>
+                      <div key={s.id} className={`border rounded-xl overflow-hidden transition-all ${isEd?'border-indigo-300 shadow-sm':locked?'border-slate-200 bg-slate-50':'border-slate-200'}`}>
+                        <div className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${locked?'bg-slate-50 cursor-default':isEd?'bg-indigo-50 cursor-pointer':'bg-white hover:bg-slate-50 cursor-pointer'}`}
+                          onClick={()=>{ if(locked) return; setEditId(isEd?null:s.id); }}>
+                          <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold shrink-0 ${locked?'bg-slate-300 text-white':isEd?'bg-indigo-500 text-white':'bg-indigo-100 text-indigo-600'}`}>{idx+1}</div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-[13px] font-bold text-slate-800">{s.name||`${idx+1}회차`}</div>
+                            <div className={`text-[13px] font-bold ${locked?'text-slate-500':'text-slate-800'}`}>{s.name||`${idx+1}회차`}</div>
                             <div className="text-[11px] text-slate-500 mt-0.5">{s.date||'날짜 미설정'}{s.startTime&&` · ${s.startTime}~${s.endTime}`}</div>
                           </div>
-                          <button onClick={e=>{e.stopPropagation();onRemoveSession(s.id,opt.id);}} className="p-1 rounded text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={13}/></button>
+                          {locked ? (
+                            <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-200 border border-slate-300 px-2 py-0.5 rounded whitespace-nowrap"><Lock size={9}/> 종료 · 수정 불가</span>
+                          ) : (
+                            <button onClick={e=>{e.stopPropagation();onRemoveSession(s.id,opt.id);}} className="p-1 rounded text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={13}/></button>
+                          )}
                         </div>
                         {isEd && (
                           <div className="px-4 pb-4 pt-3 bg-indigo-50 border-t border-indigo-100 space-y-2.5">
@@ -885,13 +907,24 @@
           return { ...opt, sessions: [...opt.sessions, { id: Date.now(), name: `${opt.sessions.length+1}회차`, date: dateStr, startTime: last?.startTime||'09:00', endTime: last?.endTime||'18:00', place:'', capacity:null, groups:null }]};
         }));
       };
+      // 배포된 코스에서 지난 회차는 잠금 — 편집/삭제 데이터 변경을 원천 차단(방어선). UI도 함께 비활성.
+      const isSessLocked = (sid, optId) => {
+        if (courseStatus !== 'published') return false;
+        const opt = options.find(o => o.id === optId);
+        const sess = opt?.sessions.find(s => s.id === sid);
+        return !!sess && isSessionPast(sess);
+      };
       const handleRemoveSession = (sid, optId) => {
+        if (isSessLocked(sid, optId)) { showToast('이미 종료된 회차는 삭제할 수 없습니다', '🔒'); return; }
         const opt = options.find(o => o.id === optId);
         const sess = opt?.sessions.find(s => s.id === sid);
         setOptions(options.map(o => o.id === optId ? { ...o, sessions: o.sessions.filter(s => s.id !== sid) } : o));
         showToast(`"${sess?.name || '회차'}"가 삭제됐습니다`, '🗑');
       };
-      const handleSessionChange = (sid, field, val, optId) => setOptions(options.map(opt => opt.id === optId ? { ...opt, sessions: opt.sessions.map(s => s.id === sid ? { ...s, [field]: val } : s) } : opt));
+      const handleSessionChange = (sid, field, val, optId) => {
+        if (isSessLocked(sid, optId)) return;   // 지난 회차 수정 불가
+        setOptions(options.map(opt => opt.id === optId ? { ...opt, sessions: opt.sessions.map(s => s.id === sid ? { ...s, [field]: val } : s) } : opt));
+      };
       /* ── 강사 상속 (대표 → 차수 → 회차) ── */
       // 차수가 2개 이상일 때만 차수 강사 칸을 노출/적용한다. 1개면 대표 → 회차 2단으로 동작.
       const cohortInstrOn = options.length > 1;
@@ -915,17 +948,20 @@
 
       /* ── 회차별 정원·그룹 오버라이드 ── */
       const handleSessionGroupsInit = (sessId, optId, defaultGroups, defaultCap) => {
+        if (isSessLocked(sessId, optId)) return;
         // groups: [] = 개별 정원 ON 플래그(hasIndividual). 그룹별 좌석지정은 회원별 배정(명단 관리)으로 대체되어 제거
         setOptions(options.map(opt => opt.id !== optId ? opt : {
           ...opt, sessions: opt.sessions.map(s => s.id !== sessId ? s : { ...s, capacity: defaultCap, groups: [] })
         }));
       };
       const handleSessionGroupsReset = (sessId, optId) => {
+        if (isSessLocked(sessId, optId)) return;
         setOptions(options.map(opt => opt.id !== optId ? opt : {
           ...opt, sessions: opt.sessions.map(s => s.id !== sessId ? s : { ...s, capacity: null, groups: null })
         }));
       };
       const handleSessionCapacityChange = (sessId, optId, val) => {
+        if (isSessLocked(sessId, optId)) return;
         setOptions(options.map(opt => opt.id !== optId ? opt : {
           ...opt, sessions: opt.sessions.map(s => s.id !== sessId ? s : { ...s, capacity: Math.max(0, parseInt(val)||0) })
         }));
@@ -1812,6 +1848,17 @@
 
               <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f4f7fc]">
 
+                {/* 수강중(배포) 코스 편집 시 — 이미 종료된 회차는 잠금 안내 */}
+                {courseStatus === 'published' && options.some(o => o.sessions.some(s => isSessionPast(s))) && (
+                  <div className="mx-5 mt-4 px-3.5 py-2.5 bg-slate-100 border border-slate-300 rounded-lg flex items-start gap-2">
+                    <Lock size={13} className="text-slate-500 mt-0.5 shrink-0"/>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      <strong className="text-slate-700">수강중 코스</strong> — 이미 <strong>종료된 회차</strong>는 출결 기록 보호를 위해 수정·삭제할 수 없습니다. 아직 진행되지 않은 회차만 일정·장소를 변경할 수 있습니다.
+                      <span className="block text-slate-400 mt-0.5">변경 후에는 등록자에게 재통보가 필요합니다.</span>
+                    </p>
+                  </div>
+                )}
+
                 {/* ── 커리큘럼 인덱스: 전체 차수 + 회차 나열 ── */}
                 <div className="px-5 pt-4 pb-6 space-y-4">
                   {options.map((opt, optIdx) => {
@@ -2042,6 +2089,7 @@
                           {opt.sessions.length > 0 ? opt.sessions.map((sess, idx) => {
                             const isDraggingThis = draggingSess === sess.id;
                             const isDragOver = dragOverSess === sess.id && draggingSess !== sess.id;
+                            const locked = courseStatus === 'published' && isSessionPast(sess);   // 배포·수강중 + 종료된 회차 → 수정 불가
                             const sameDateCount = sess.date ? opt.sessions.filter(s => s.date === sess.date).length : 0;
                             const hasIndividual = sess.groups !== null && sess.groups !== undefined;
                             // 차수 내 회차 시간 겹침 — 같은 시간대 회차는 QR 출석 코드(차수당 1개)로 구분 불가
@@ -2049,29 +2097,36 @@
                             return (
                               <div
                                 key={sess.id}
-                                draggable
-                                onDragStart={e => onSessDragStart(e, sess.id, opt.id)}
+                                draggable={!locked}
+                                onDragStart={e => { if (locked) { e.preventDefault(); return; } onSessDragStart(e, sess.id, opt.id); }}
                                 onDragOver={e => onSessDragOver(e, sess.id)}
                                 onDrop={e => onSessDrop(e, opt.id)}
                                 onDragEnd={onSessDragEnd}
                                 className={`border rounded-lg p-3 transition-all select-none
-                                  ${hasIndividual ? 'bg-violet-50 border-violet-300' : 'bg-slate-50 border-slate-200'}
+                                  ${locked ? 'bg-slate-100 border-slate-200' : hasIndividual ? 'bg-violet-50 border-violet-300' : 'bg-slate-50 border-slate-200'}
                                   ${isDraggingThis ? 'drag-ghost' : ''}
                                   ${isDragOver ? 'drag-over-sess' : ''}`}
                               >
                                 <div className={`flex items-center gap-2 mb-2.5 pb-2 border-b ${hasIndividual ? 'border-violet-200' : 'border-slate-100'}`}>
-                                  <div className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0"><GripVertical size={13}/></div>
-                                  <div className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0 ${hasIndividual ? 'bg-violet-200 text-violet-700' : 'bg-indigo-100 text-indigo-600'}`}>{idx + 1}</div>
+                                  {!locked && <div className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0"><GripVertical size={13}/></div>}
+                                  <div className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0 ${locked ? 'bg-slate-300 text-white' : hasIndividual ? 'bg-violet-200 text-violet-700' : 'bg-indigo-100 text-indigo-600'}`}>{idx + 1}</div>
                                   <input
                                     type="text"
                                     value={sess.name || ''}
                                     onChange={e => handleSessionChange(sess.id, 'name', e.target.value, opt.id)}
+                                    disabled={locked}
                                     placeholder="회차명"
-                                    className="flex-1 text-[13px] font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-400 outline-none px-1 min-w-0"
+                                    className={`flex-1 text-[13px] font-bold bg-transparent border-b border-transparent outline-none px-1 min-w-0 ${locked ? 'text-slate-500 cursor-not-allowed' : 'text-slate-800 hover:border-slate-300 focus:border-indigo-400'}`}
                                   />
-                                  <button onClick={() => handleRemoveSession(sess.id, opt.id)} className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={13}/></button>
+                                  {locked ? (
+                                    <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-200 border border-slate-300 px-2 py-0.5 rounded whitespace-nowrap">
+                                      <Lock size={9}/> 종료 · 수정 불가
+                                    </span>
+                                  ) : (
+                                    <button onClick={() => handleRemoveSession(sess.id, opt.id)} className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={13}/></button>
+                                  )}
                                 </div>
-                                <div className="space-y-2">
+                                <div className={`space-y-2 ${locked ? 'opacity-60 pointer-events-none select-none' : ''}`}>
                                   <div className="flex items-center gap-2">
                                     <div className="w-12 text-[11px] font-bold text-slate-500 shrink-0">날짜</div>
                                     <input type="date" value={sess.date} onChange={e => handleSessionChange(sess.id, 'date', e.target.value, opt.id)} className="flex-1 border border-slate-300 rounded p-1.5 text-[12px] outline-none focus:border-indigo-500 bg-white font-medium"/>
@@ -2638,6 +2693,7 @@
                 key={calModeOptId}
                 opt={calOpt}
                 options={options}
+                courseStatus={courseStatus}
                 onClose={() => setCalModeOptId(null)}
                 onSessionChange={handleSessionChange}
                 onAddSession={handleAddSessionWithDate}
