@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>스텝 학습 데모 v2 — 영상+퀴즈</title>
+<title>스텝 학습 데모 v3 — 영상+퀴즈+설문</title>
 <style>
 :root{
   --blue:#1E7CFF; --blue-dark:#1257C4;
   --green:#2ECB6E; --green-dark:#1FA355;
   --red:#FF5A5A; --red-dark:#D93B3B;
   --gold:#FFC61A; --gold-dark:#D9A400;
-  --purple:#8B5CF6;
+  --purple:#8B5CF6; --purple-dark:#6D3FD6;
+  --teal:#14B8A6; --teal-dark:#0E8E80;
   --ink:#252E3D; --sub:#7A8699;
   --bg:#F5F7FB; --line:#E4E9F1;
 }
@@ -66,17 +67,20 @@ body{
 .node:active{transform:scale(.93) translateY(3px)}
 .node.done{background:var(--gold);box-shadow:0 6px 0 var(--gold-dark)}
 .node.current{background:var(--blue);box-shadow:0 6px 0 var(--blue-dark);animation:breathe 1.6s ease-in-out infinite}
-.node.current.videoNode{background:var(--purple);box-shadow:0 6px 0 #6D3FD6}
+.node.current.videoNode{background:var(--purple);box-shadow:0 6px 0 var(--purple-dark)}
+.node.current.surveyNode{background:var(--teal);box-shadow:0 6px 0 var(--teal-dark)}
 .node.locked{background:#DCE2EC;box-shadow:0 6px 0 #C2CAD8;cursor:default;filter:grayscale(1);opacity:.7}
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 .node .label{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);
   white-space:nowrap;font-size:12px;font-weight:700;color:var(--sub)}
 .node.current .label{color:var(--blue)}
 .node.current.videoNode .label{color:var(--purple)}
+.node.current.surveyNode .label{color:var(--teal-dark)}
 .start-bubble{position:absolute;top:-42px;left:50%;transform:translateX(-50%);
   background:#fff;border:2px solid var(--line);border-radius:12px;padding:5px 13px;
   font-size:12.5px;font-weight:800;color:var(--blue);animation:bob 1.2s ease-in-out infinite;z-index:2}
 .videoNode .start-bubble{color:var(--purple)}
+.surveyNode .start-bubble{color:var(--teal-dark)}
 .start-bubble::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
   border:7px solid transparent;border-top-color:#fff}
 @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-6px)}}
@@ -90,6 +94,7 @@ body{
 .progress-fill::after{content:'';position:absolute;top:3px;left:8px;right:8px;height:4px;
   background:rgba(255,255,255,.4);border-radius:99px}
 .progress-fill.vfill{background:var(--purple)}
+.progress-fill.sfill{background:var(--teal)}
 .hearts{font-size:14px;font-weight:800;color:var(--red);display:flex;align-items:center;gap:3px}
 
 /* ---------- 영상 레슨 ---------- */
@@ -160,13 +165,43 @@ body{
 .ox-row .choice:nth-child(1) .big{color:var(--blue)}
 .ox-row .choice:nth-child(2) .big{color:var(--red)}
 
+/* ---------- 설문 ---------- */
+.s-area{flex:1;padding:4px 22px 0;display:flex;flex-direction:column;overflow-y:auto}
+.s-type{font-size:12px;font-weight:800;color:var(--teal-dark);letter-spacing:.5px;margin-bottom:8px}
+.s-title{font-size:19px;font-weight:800;line-height:1.4;letter-spacing:-.4px;margin-bottom:4px}
+.s-sub{font-size:13px;color:var(--sub);font-weight:600;margin-bottom:20px}
+.sv-q{margin-bottom:22px;opacity:.45;transition:opacity .3s;pointer-events:none}
+.sv-q.active{opacity:1;pointer-events:auto}
+.sv-q.answered{opacity:1;pointer-events:auto}
+.sv-label{font-size:14px;font-weight:800;margin-bottom:11px;display:flex;align-items:center;gap:8px}
+.sv-label .n{width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;
+  font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.emoji-row{display:flex;gap:8px;justify-content:space-between}
+.emo{flex:1;background:#fff;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+  padding:12px 0 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:26px;transition:all .12s;font-family:inherit}
+.emo small{font-size:10.5px;font-weight:700;color:var(--sub)}
+.emo:active{transform:translateY(2px);border-bottom-width:2px}
+.emo.sel{border-color:var(--teal);background:#E6FAF7;transform:scale(1.06);animation:pop .3s}
+.emo.sel small{color:var(--teal-dark)}
+.chip-row{display:flex;flex-wrap:wrap;gap:9px}
+.chip{background:#fff;border:2px solid var(--line);border-radius:99px;padding:9px 15px;
+  font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);transition:all .12s;font-family:inherit}
+.chip:active{transform:scale(.95)}
+.chip.sel{border-color:var(--teal);background:var(--teal);color:#fff;animation:pop .25s}
+.sv-text{width:100%;border:2px solid var(--line);border-radius:14px;padding:13px 15px;
+  font-size:14px;font-family:inherit;resize:none;height:76px;background:#fff;color:var(--ink)}
+.sv-text:focus{outline:none;border-color:var(--teal)}
+.sv-text::placeholder{color:#AEB8C6}
+.btn-check.on.s{background:var(--teal);box-shadow:0 4px 0 var(--teal-dark)}
+
 .foot{padding:16px 22px 24px}
 .btn-check{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:800;
   font-family:inherit;letter-spacing:1px;cursor:pointer;transition:all .1s;
   background:#DCE2EC;color:#9AA6B8;box-shadow:0 4px 0 #C2CAD8}
 .btn-check.on{background:var(--green);color:#fff;box-shadow:0 4px 0 var(--green-dark)}
-.btn-check.on.v{background:var(--purple);box-shadow:0 4px 0 #6D3FD6}
-.btn-check.on:active{transform:translateY(3px);box-shadow:0 1px 0 var(--green-dark)}
+.btn-check.on.v{background:var(--purple);box-shadow:0 4px 0 var(--purple-dark)}
+.btn-check.on:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
 
 /* 피드백 시트 */
 .sheet{position:absolute;left:0;right:0;bottom:0;padding:20px 22px 26px;border-radius:22px 22px 0 0;
@@ -175,42 +210,48 @@ body{
 .sheet.ok{background:#D9F6E5}
 .sheet.no{background:#FFE3E3}
 .sheet.vp{background:#EBE3FD}
+.sheet.tl{background:#D9F5F1}
 .sheet .s-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .sheet .s-icon{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;
   align-items:center;justify-content:center;font-size:20px;animation:pop .35s}
-.sheet .s-title{font-size:18px;font-weight:900}
-.sheet.ok .s-title{color:var(--green-dark)}
-.sheet.no .s-title{color:var(--red-dark)}
-.sheet.vp .s-title{color:#6D3FD6}
+.sheet .s-titl{font-size:18px;font-weight:900}
+.sheet.ok .s-titl{color:var(--green-dark)}
+.sheet.no .s-titl{color:var(--red-dark)}
+.sheet.vp .s-titl{color:var(--purple-dark)}
+.sheet.tl .s-titl{color:var(--teal-dark)}
 .sheet .s-desc{font-size:13.5px;line-height:1.55;color:var(--ink);opacity:.85;margin-bottom:14px}
 .sheet .btn-next{box-shadow:none}
 .sheet.ok .btn-next{background:var(--green);color:#fff;box-shadow:0 4px 0 var(--green-dark)}
 .sheet.no .btn-next{background:var(--red);color:#fff;box-shadow:0 4px 0 var(--red-dark)}
-.sheet.vp .btn-next{background:var(--purple);color:#fff;box-shadow:0 4px 0 #6D3FD6}
+.sheet.vp .btn-next{background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark)}
+.sheet.tl .btn-next{background:var(--teal);color:#fff;box-shadow:0 4px 0 var(--teal-dark)}
 
 .fly-xp{position:absolute;font-size:20px;font-weight:900;color:var(--gold);z-index:9;
   pointer-events:none;animation:flyUp .8s ease-out forwards;text-shadow:0 1px 0 #fff}
 @keyframes flyUp{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.3)}}
 
 /* ---------- 완료 ---------- */
-.done-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 30px;position:relative}
+.done-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 26px;position:relative}
 .trophy{font-size:84px;animation:trophyIn .6s cubic-bezier(.2,1.4,.4,1)}
 @keyframes trophyIn{0%{transform:scale(0) rotate(-30deg)}100%{transform:scale(1) rotate(0)}}
 .done-title{font-size:24px;font-weight:900;margin:18px 0 6px;letter-spacing:-.5px}
 .done-sub{font-size:14px;color:var(--sub);font-weight:600;margin-bottom:28px}
-.result-cards{display:flex;gap:12px;width:100%}
+.result-cards{display:flex;gap:10px;width:100%}
 .r-card{flex:1;border-radius:16px;padding:3px;overflow:hidden;opacity:0;animation:cardIn .4s .3s forwards}
 .r-card:nth-child(2){animation-delay:.45s}
 .r-card:nth-child(3){animation-delay:.6s}
+.r-card:nth-child(4){animation-delay:.75s}
 @keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .r-card.gold{background:var(--gold)}
 .r-card.blue{background:var(--blue)}
 .r-card.purple{background:var(--purple)}
-.r-card .r-label{font-size:11px;font-weight:800;color:#fff;text-align:center;padding:5px 0;letter-spacing:1px}
-.r-card .r-val{background:#fff;border-radius:13px;padding:13px 0;text-align:center;font-size:20px;font-weight:900}
+.r-card.teal{background:var(--teal)}
+.r-card .r-label{font-size:10.5px;font-weight:800;color:#fff;text-align:center;padding:5px 0;letter-spacing:.5px}
+.r-card .r-val{background:#fff;border-radius:13px;padding:13px 0;text-align:center;font-size:19px;font-weight:900}
 .r-card.gold .r-val{color:var(--gold-dark)}
 .r-card.blue .r-val{color:var(--blue)}
 .r-card.purple .r-val{color:var(--purple)}
+.r-card.teal .r-val{color:var(--teal-dark)}
 .confetti{position:absolute;width:10px;height:10px;top:-10px;animation:fall linear forwards;z-index:1}
 @keyframes fall{to{transform:translateY(820px) rotate(720deg)}}
 
@@ -242,26 +283,29 @@ body{
       <!-- 커리큘럼 1 -->
       <div class="unit-divider">
         <span class="u-line"></span>
-        <span class="u-label"><span class="u-name">커리큘럼 1 · 이미지 ai 😍</span><span class="u-pages">3 페이지</span></span>
+        <span class="u-label"><span class="u-name">커리큘럼 1 · 이미지 ai 😍</span><span class="u-pages">4 스텝</span></span>
         <span class="u-line"></span>
       </div>
       <div class="path">
         <div class="node-row" data-off="0">
-          <button class="node done" data-step="0">✓<span class="label">AI 이미지란?</span></button>
+          <button class="node done">✓<span class="label">AI 이미지란?</span></button>
         </div>
         <div class="node-row" data-off="-1">
-          <button class="node current videoNode" data-step="1" id="nodeVideo">
+          <button class="node current videoNode" id="nodeVideo">
             <div class="start-bubble">영상 학습!</div>
             ▶<span class="label">프롬프트 기초</span>
           </button>
         </div>
         <div class="node-row" data-off="1">
-          <button class="node locked" data-step="2" id="nodeQuiz">🔒<span class="label">확인 퀴즈</span></button>
+          <button class="node locked" id="nodeQuiz">🔒<span class="label">확인 퀴즈</span></button>
+        </div>
+        <div class="node-row" data-off="0">
+          <button class="node locked" id="nodeSurvey">🔒<span class="label">학습 설문</span></button>
         </div>
       </div>
 
       <!-- 커리큘럼 2 -->
-      <div class="unit-divider locked">
+      <div class="unit-divider locked" id="u2divider">
         <span class="u-line"></span>
         <span class="u-label"><span class="u-name">커리큘럼 2 · 커리큘럼</span><span class="u-pages">8 페이지</span></span>
         <span class="u-line"></span>
@@ -304,12 +348,12 @@ body{
       </div>
     </div>
     <div class="foot">
-      <button class="btn-check" id="btnVDone" disabled>끝까지 시청하면 완료돼요</button>
+      <button class="btn-check" disabled>끝까지 시청하면 완료돼요</button>
     </div>
     <div class="sheet vp" id="vSheet">
       <div class="s-head">
         <div class="s-icon">🎉</div>
-        <div class="s-title">시청 완료! +10 XP</div>
+        <div class="s-titl">시청 완료! +10 XP</div>
       </div>
       <div class="s-desc">영상 시청 데이터가 진도율에 반영됐어요. 다음 스텝 '확인 퀴즈'가 열렸습니다.</div>
       <button class="btn-check btn-next" id="btnVNext">다음 스텝으로</button>
@@ -330,23 +374,76 @@ body{
     <div class="sheet" id="sheet">
       <div class="s-head">
         <div class="s-icon" id="sIcon">✓</div>
-        <div class="s-title" id="sTitle">정답입니다!</div>
+        <div class="s-titl" id="sTitle">정답입니다!</div>
       </div>
       <div class="s-desc" id="sDesc"></div>
       <button class="btn-check btn-next" id="btnNext">계속하기</button>
     </div>
   </div>
 
-  <!-- 화면 4: 완료 -->
+  <!-- 화면 4: 설문 -->
+  <div class="screen" id="scrSurvey">
+    <div class="lesson-head">
+      <button class="btn-close" data-back="scrSurvey">✕</button>
+      <div class="progress-track"><div class="progress-fill sfill" id="svProg" style="width:5%"></div></div>
+      <span class="hearts">📋</span>
+    </div>
+    <div class="s-area">
+      <div class="s-type">STEP 4 · 학습 설문</div>
+      <div class="s-title">이번 커리큘럼, 어땠나요?</div>
+      <div class="s-sub">30초면 충분해요 · 응답하면 +5 XP</div>
+
+      <div class="sv-q active" id="svq1">
+        <div class="sv-label"><span class="n">1</span>전체적인 만족도를 알려주세요</div>
+        <div class="emoji-row" id="emoRow">
+          <button class="emo" data-v="1">😫<small>별로예요</small></button>
+          <button class="emo" data-v="2">😕<small>아쉬워요</small></button>
+          <button class="emo" data-v="3">🙂<small>보통이에요</small></button>
+          <button class="emo" data-v="4">😄<small>좋아요</small></button>
+          <button class="emo" data-v="5">🤩<small>최고예요</small></button>
+        </div>
+      </div>
+
+      <div class="sv-q" id="svq2">
+        <div class="sv-label"><span class="n">2</span>어떤 점이 도움이 됐나요? <span style="font-weight:600;color:var(--sub);font-size:12px">(복수 선택)</span></div>
+        <div class="chip-row" id="chipRow">
+          <button class="chip">영상 설명이 쉬웠어요</button>
+          <button class="chip">퀴즈로 복습이 됐어요</button>
+          <button class="chip">분량이 적당했어요</button>
+          <button class="chip">실무에 바로 쓸 수 있어요</button>
+          <button class="chip">진행 속도가 빨라요</button>
+        </div>
+      </div>
+
+      <div class="sv-q" id="svq3">
+        <div class="sv-label"><span class="n">3</span>한 줄 의견이 있다면? <span style="font-weight:600;color:var(--sub);font-size:12px">(선택)</span></div>
+        <textarea class="sv-text" id="svText" placeholder="자유롭게 남겨주세요" maxlength="200"></textarea>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn-check" id="btnSvSubmit" disabled>제출하기</button>
+    </div>
+    <div class="sheet tl" id="svSheet">
+      <div class="s-head">
+        <div class="s-icon">💚</div>
+        <div class="s-titl">설문 제출 완료! +5 XP</div>
+      </div>
+      <div class="s-desc">소중한 의견 감사해요. 응답 데이터는 코스 개선에 활용됩니다.</div>
+      <button class="btn-check btn-next" id="btnSvNext">커리큘럼 완료 보기</button>
+    </div>
+  </div>
+
+  <!-- 화면 5: 완료 -->
   <div class="screen" id="scrDone">
     <div class="done-body" id="doneBody">
       <div class="trophy">🏆</div>
       <div class="done-title">커리큘럼 1 완료!</div>
-      <div class="done-sub">이미지 ai 😍 · 3페이지를 모두 마쳤어요</div>
+      <div class="done-sub">이미지 ai 😍 · 영상·퀴즈·설문을 모두 마쳤어요</div>
       <div class="result-cards">
         <div class="r-card gold"><div class="r-label">획득 XP</div><div class="r-val" id="xpVal">0</div></div>
-        <div class="r-card purple"><div class="r-label">시청 완료</div><div class="r-val">1편</div></div>
+        <div class="r-card purple"><div class="r-label">시청</div><div class="r-val">1편</div></div>
         <div class="r-card blue"><div class="r-label">정확도</div><div class="r-val" id="accVal">0%</div></div>
+        <div class="r-card teal"><div class="r-label">설문</div><div class="r-val">✓</div></div>
       </div>
     </div>
     <div class="foot">
@@ -390,9 +487,35 @@ function addXp(n){
   earnedXp+=n; totalXp+=n;
   $('totalXp').textContent = totalXp;
 }
+function completeNode(node){
+  node.classList.remove('current','videoNode','surveyNode');
+  node.classList.add('done');
+  const bub = node.querySelector('.start-bubble'); if(bub) bub.remove();
+  // 텍스트 노드를 ✓로
+  for(const n of node.childNodes){
+    if(n.nodeType===3 && n.textContent.trim()){ n.textContent='✓'; break; }
+  }
+}
+function unlockNode(node, cls, icon, bubbleText){
+  node.classList.remove('locked');
+  node.classList.add('current');
+  if(cls) node.classList.add(cls);
+  for(const n of node.childNodes){
+    if(n.nodeType===3 && n.textContent.trim()){ n.textContent=icon; break; }
+  }
+  const b=document.createElement('div');
+  b.className='start-bubble'; b.textContent=bubbleText;
+  b.style.animation='bob 1.2s ease-in-out infinite, pop .3s';
+  node.prepend(b);
+}
+function updateCourseProg(pagesDone){ // 총 11페이지 기준 (설문은 스텝이라 페이지 수 동일 유지)
+  const val = Math.round(pagesDone/11*100);
+  $('progNum').textContent = val+'%';
+  $('progBar').style.width = val+'%';
+}
 
 /* ---------- 영상 플레이어 (시뮬레이션) ---------- */
-const V_DUR = 15; // 데모용 15초
+const V_DUR = 15;
 const CAPTIONS = [
   [0,  '🎨','AI 이미지는 텍스트 프롬프트로 만들어집니다'],
   [4,  '✍️','좋은 프롬프트 = 대상 + 스타일 + 구도'],
@@ -451,36 +574,18 @@ $('btnSpeed').onclick = e=>{
   $('btnSpeed').textContent = vSpeed+'x';
   $('btnSpeed').classList.toggle('on', vSpeed===2);
 };
-$('vBar').onclick = e=>{ // 시청한 지점까지만 이동 허용(간단 처리: 앞으로 스킵 불가)
+$('vBar').onclick = e=>{ // 앞으로 스킵 불가
   const r = e.currentTarget.getBoundingClientRect();
   const t = (e.clientX-r.left)/r.width*V_DUR;
   if(t <= vTime){ vTime = Math.max(0,t); vRender(); }
 };
 $('btnVNext').onclick = ()=>{
   $('vSheet').classList.remove('show');
-  // 맵 갱신: 영상 노드 완료, 퀴즈 노드 해제
-  completeNode($('nodeVideo'), '영상 학습!');
-  const q = $('nodeQuiz');
-  q.classList.remove('locked'); q.classList.add('current');
-  q.childNodes[0].textContent = '⭐';
-  const b = document.createElement('div');
-  b.className='start-bubble'; b.textContent='퀴즈 풀기!';
-  q.prepend(b);
+  completeNode($('nodeVideo'));
+  unlockNode($('nodeQuiz'), null, '⭐', '퀴즈 풀기!');
   updateCourseProg(2);
   go('scrVideo','scrMap');
 };
-function completeNode(node){
-  node.classList.remove('current','videoNode');
-  node.classList.add('done');
-  const bub = node.querySelector('.start-bubble'); if(bub) bub.remove();
-  node.childNodes[node.querySelector('.start-bubble')?1:0].textContent='✓';
-}
-function updateCourseProg(pagesDone){ // 총 11페이지 기준
-  const pct = Math.round((1+pagesDone-1)/11*100) + 9 - 9; // 기존 1p 완료 + 신규
-  const val = Math.round((1+ (pagesDone-1)) / 11 * 100);
-  $('progNum').textContent = val+'%';
-  $('progBar').style.width = val+'%';
-}
 
 /* ---------- 퀴즈 ---------- */
 const QUESTIONS = [
@@ -496,6 +601,13 @@ const QUESTIONS = [
     title:'프롬프트는 짧을수록 항상 더 좋은 결과가 나온다.',
     choices:['맞다','아니다'], big:['O','X'], answer:1,
     desc:'짧은 프롬프트는 해석의 여지가 커서 의도와 다른 결과가 나오기 쉽습니다. 핵심 요소는 구체적으로 적는 것이 좋습니다.'
+  },
+  {
+    type:'choice', typeLabel:'Q3 · 활용 판단',
+    title:'업무용 이미지 생성 시 가장 먼저 확인해야 할 것은?',
+    choices:['가장 화려한 스타일인지','저작권·회사 가이드라인에 맞는지','다른 팀도 쓰는 도구인지','생성 속도가 빠른지'],
+    answer:1,
+    desc:'업무 활용의 전제는 저작권과 사내 보안·브랜드 가이드라인 준수입니다. 스타일과 속도는 그다음 문제입니다.'
   }
 ];
 let qIdx=0, selected=-1, correctCnt=0, hearts=3;
@@ -545,16 +657,69 @@ $('btnNext').onclick=()=>{
   $('btnCheck').style.visibility='visible';
   qIdx++;
   $('pFill').style.width=(qIdx/QUESTIONS.length*100)+'%';
-  if(qIdx>=QUESTIONS.length){ setTimeout(finish,350); }
+  if(qIdx>=QUESTIONS.length){
+    // 퀴즈 완료 → 맵으로, 설문 노드 해제
+    setTimeout(()=>{
+      completeNode($('nodeQuiz'));
+      unlockNode($('nodeSurvey'), 'surveyNode', '📋', '설문 30초!');
+      updateCourseProg(3);
+      go('scrLesson','scrMap');
+    }, 300);
+  }
   else{
     document.querySelector('.q-wrap').classList.add('out');
     setTimeout(renderQ,200);
   }
 };
 
+/* ---------- 설문 ---------- */
+let svEmo=0, svChips=0;
+$('emoRow').querySelectorAll('.emo').forEach(btn=>{
+  btn.onclick=()=>{
+    sndTap();
+    $('emoRow').querySelectorAll('.emo').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    svEmo=+btn.dataset.v;
+    $('svq1').classList.add('answered');
+    $('svq2').classList.add('active');
+    $('svProg').style.width='40%';
+    svValidate();
+  };
+});
+$('chipRow').querySelectorAll('.chip').forEach(btn=>{
+  btn.onclick=()=>{
+    sndTap();
+    btn.classList.toggle('sel');
+    svChips=$('chipRow').querySelectorAll('.sel').length;
+    if(svChips>0){
+      $('svq2').classList.add('answered');
+      $('svq3').classList.add('active');
+      $('svProg').style.width='75%';
+    }
+    svValidate();
+  };
+});
+function svValidate(){
+  const ok = svEmo>0 && svChips>0; // 3번은 선택 항목
+  $('btnSvSubmit').classList.toggle('on', ok);
+  $('btnSvSubmit').classList.toggle('s', ok);
+  $('btnSvSubmit').disabled = !ok;
+}
+$('btnSvSubmit').onclick=()=>{
+  addXp(5); flyXP('+5 XP'); sndOk();
+  $('svProg').style.width='100%';
+  $('svSheet').classList.add('show');
+};
+$('btnSvNext').onclick=()=>{
+  $('svSheet').classList.remove('show');
+  completeNode($('nodeSurvey'));
+  updateCourseProg(4);
+  finish();
+};
+
 /* ---------- 완료 ---------- */
 function finish(){
-  go('scrLesson','scrDone');
+  go('scrSurvey','scrDone');
   confetti(); beep([523,659,784,1047],.11);
   countUp('xpVal', earnedXp, '');
   countUp('accVal', Math.round(correctCnt/QUESTIONS.length*100), '%');
@@ -568,7 +733,7 @@ function countUp(id,target,suffix){
   },30);
 }
 function confetti(){
-  const colors=['#FFC61A','#1E7CFF','#2ECB6E','#FF5A5A','#8B5CF6'];
+  const colors=['#FFC61A','#1E7CFF','#2ECB6E','#FF5A5A','#8B5CF6','#14B8A6'];
   for(let i=0;i<50;i++){
     const c=document.createElement('div');
     c.className='confetti';
@@ -595,26 +760,24 @@ $('nodeQuiz').onclick=()=>{
   go('scrMap','scrLesson');
   renderQ();
 };
+$('nodeSurvey').onclick=()=>{
+  if(!$('nodeSurvey').classList.contains('current')) return;
+  go('scrMap','scrSurvey');
+};
 document.querySelectorAll('.btn-close').forEach(btn=>{
   btn.onclick=()=>{
     $('sheet').classList.remove('show');
     $('vSheet').classList.remove('show');
+    $('svSheet').classList.remove('show');
     $('btnCheck').style.visibility='visible';
     if(vPlaying) vPause();
     go(btn.dataset.back,'scrMap');
   };
 });
 $('btnDone').onclick=()=>{
-  completeNode($('nodeQuiz'));
   // 커리큘럼 2 첫 노드 해제
-  const u2=$('u2first');
-  u2.classList.remove('locked'); u2.classList.add('current');
-  u2.childNodes[0].textContent='⭐';
-  const b=document.createElement('div');
-  b.className='start-bubble'; b.textContent='다음 커리큘럼!';
-  u2.prepend(b);
-  document.querySelector('.unit-divider.locked')?.classList.remove('locked');
-  updateCourseProg(3);
+  unlockNode($('u2first'), null, '⭐', '다음 커리큘럼!');
+  $('u2divider').classList.remove('locked');
   go('scrDone','scrMap');
 };
 </script>
