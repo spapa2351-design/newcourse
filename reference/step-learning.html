@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>스텝 학습 데모 v2 — 영상+퀴즈</title>
+<style>
+:root{
+  --blue:#1E7CFF; --blue-dark:#1257C4;
+  --green:#2ECB6E; --green-dark:#1FA355;
+  --red:#FF5A5A; --red-dark:#D93B3B;
+  --gold:#FFC61A; --gold-dark:#D9A400;
+  --purple:#8B5CF6;
+  --ink:#252E3D; --sub:#7A8699;
+  --bg:#F5F7FB; --line:#E4E9F1;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  background:#DDE4EE;display:flex;justify-content:center;align-items:center;
+  color:var(--ink);overflow:hidden;
+}
+.phone{
+  width:390px;height:780px;max-height:100vh;background:var(--bg);
+  border-radius:28px;overflow:hidden;position:relative;
+  box-shadow:0 24px 60px rgba(30,50,90,.25);
+}
+@media(max-width:420px){body{background:var(--bg)}.phone{width:100%;height:100vh;border-radius:0;box-shadow:none}}
+
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.9,.3,1);background:var(--bg)}
+.screen.active{transform:translateX(0)}
+.screen.left{transform:translateX(-30%)}
+
+/* ---------- 스텝 맵 ---------- */
+.map-head{padding:18px 20px 14px;background:#fff;border-bottom:1px solid var(--line)}
+.badge-row{display:flex;gap:6px;margin-bottom:7px}
+.badge{font-size:11px;font-weight:700;border-radius:6px;padding:3px 8px}
+.badge.b1{color:var(--blue);background:#E7F0FF}
+.badge.b2{color:var(--sub);background:#F0F3F8}
+.map-head h1{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.35}
+.map-head .stats{display:flex;gap:14px;margin-top:10px;font-size:13px;font-weight:700;align-items:center}
+.stat{display:flex;align-items:center;gap:4px}
+.stat .fire{color:#FF7A1A}.stat .xp{color:var(--gold)}
+.course-prog{flex:1;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
+.course-prog .bar{flex:1;height:8px;background:#E2E8F2;border-radius:99px;overflow:hidden}
+.course-prog .bar i{display:block;height:100%;background:var(--blue);border-radius:99px;transition:width .5s}
+
+.map-body{flex:1;overflow-y:auto;padding:24px 0 50px;position:relative}
+.unit-divider{display:flex;align-items:center;gap:12px;padding:6px 24px;margin:6px 0 22px}
+.unit-divider .u-line{flex:1;height:2px;background:var(--line);border-radius:2px}
+.unit-divider .u-label{font-size:12px;font-weight:800;color:var(--sub);white-space:nowrap;
+  display:flex;flex-direction:column;align-items:center;gap:2px}
+.unit-divider .u-name{font-size:14px;color:var(--ink)}
+.unit-divider.locked .u-name{color:var(--sub)}
+.unit-divider .u-pages{font-size:11px;font-weight:700;color:var(--sub)}
+
+.path{position:relative;width:230px;margin:0 auto}
+.node-row{display:flex;justify-content:center;margin-bottom:36px;position:relative}
+.node-row[data-off="-1"]{transform:translateX(-58px)}
+.node-row[data-off="1"]{transform:translateX(58px)}
+.node{width:74px;height:68px;border-radius:50%/46%;position:relative;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  transition:transform .12s;border:none;font-family:inherit}
+.node:active{transform:scale(.93) translateY(3px)}
+.node.done{background:var(--gold);box-shadow:0 6px 0 var(--gold-dark)}
+.node.current{background:var(--blue);box-shadow:0 6px 0 var(--blue-dark);animation:breathe 1.6s ease-in-out infinite}
+.node.current.videoNode{background:var(--purple);box-shadow:0 6px 0 #6D3FD6}
+.node.locked{background:#DCE2EC;box-shadow:0 6px 0 #C2CAD8;cursor:default;filter:grayscale(1);opacity:.7}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.node .label{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);
+  white-space:nowrap;font-size:12px;font-weight:700;color:var(--sub)}
+.node.current .label{color:var(--blue)}
+.node.current.videoNode .label{color:var(--purple)}
+.start-bubble{position:absolute;top:-42px;left:50%;transform:translateX(-50%);
+  background:#fff;border:2px solid var(--line);border-radius:12px;padding:5px 13px;
+  font-size:12.5px;font-weight:800;color:var(--blue);animation:bob 1.2s ease-in-out infinite;z-index:2}
+.videoNode .start-bubble{color:var(--purple)}
+.start-bubble::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:7px solid transparent;border-top-color:#fff}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-6px)}}
+
+/* ---------- 공통 레슨 헤더 ---------- */
+.lesson-head{display:flex;align-items:center;gap:12px;padding:16px 18px}
+.btn-close{width:32px;height:32px;border:none;background:none;font-size:20px;color:var(--sub);cursor:pointer;font-weight:700}
+.progress-track{flex:1;height:14px;background:#E2E8F2;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;width:4%;background:var(--green);border-radius:99px;
+  transition:width .4s cubic-bezier(.2,.9,.3,1);position:relative}
+.progress-fill::after{content:'';position:absolute;top:3px;left:8px;right:8px;height:4px;
+  background:rgba(255,255,255,.4);border-radius:99px}
+.progress-fill.vfill{background:var(--purple)}
+.hearts{font-size:14px;font-weight:800;color:var(--red);display:flex;align-items:center;gap:3px}
+
+/* ---------- 영상 레슨 ---------- */
+.v-area{flex:1;padding:4px 22px 0;display:flex;flex-direction:column}
+.v-type{font-size:12px;font-weight:800;color:var(--purple);letter-spacing:.5px;margin-bottom:8px}
+.v-title{font-size:19px;font-weight:800;line-height:1.4;letter-spacing:-.4px;margin-bottom:18px}
+.player{border-radius:18px;overflow:hidden;background:#1A2030;aspect-ratio:16/10;position:relative;
+  box-shadow:0 10px 26px rgba(26,32,48,.3)}
+.v-visual{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#3B2F7D,#8B5CF6 45%,#1E7CFF);background-size:250% 250%;overflow:hidden}
+.v-visual.playing{animation:gradMove 5s ease-in-out infinite}
+@keyframes gradMove{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.v-emoji{font-size:52px;transition:transform .3s;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+.v-visual.playing .v-emoji{animation:vfloat 2.2s ease-in-out infinite}
+@keyframes vfloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-12px) rotate(3deg)}}
+.v-caption{position:absolute;bottom:46px;left:0;right:0;text-align:center;color:#fff;
+  font-size:13px;font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,.5);padding:0 20px;
+  opacity:0;transform:translateY(8px);transition:all .3s}
+.v-caption.show{opacity:1;transform:translateY(0)}
+.btn-bigplay{position:absolute;inset:0;margin:auto;width:70px;height:70px;border-radius:50%;
+  border:none;background:rgba(255,255,255,.95);font-size:26px;cursor:pointer;color:var(--purple);
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.btn-bigplay:active{transform:scale(.9)}
+.btn-bigplay.hide{opacity:0;pointer-events:none;transform:scale(1.4)}
+.v-controls{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;
+  background:linear-gradient(transparent,rgba(0,0,0,.55));display:flex;align-items:center;gap:10px}
+.v-bar{flex:1;height:6px;background:rgba(255,255,255,.3);border-radius:99px;overflow:hidden;cursor:pointer}
+.v-bar i{display:block;height:100%;width:0%;background:var(--gold);border-radius:99px}
+.v-time{font-size:11px;font-weight:700;color:#fff;min-width:66px;text-align:right;font-variant-numeric:tabular-nums}
+.btn-speed{border:none;background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:800;
+  border-radius:8px;padding:4px 8px;cursor:pointer;font-family:inherit}
+.btn-speed.on{background:var(--gold);color:#4a3800}
+.v-check{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+.v-check .chk{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);
+  border-radius:13px;padding:13px 16px;font-size:13.5px;font-weight:600;color:var(--sub);
+  transition:all .3s;opacity:.55}
+.v-check .chk .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.v-check .chk.ok{opacity:1;border-color:var(--green);color:var(--ink);animation:pop .3s}
+.v-check .chk.ok .dot{background:var(--green);border-color:var(--green)}
+
+/* ---------- 퀴즈 ---------- */
+.q-area{flex:1;padding:8px 22px 0;display:flex;flex-direction:column;overflow:hidden}
+.q-type{font-size:12px;font-weight:800;color:var(--blue);letter-spacing:.5px;margin-bottom:8px}
+.q-title{font-size:19px;font-weight:800;line-height:1.45;letter-spacing:-.4px;margin-bottom:20px}
+.q-wrap{animation:slideIn .3s cubic-bezier(.2,.9,.3,1)}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.q-wrap.out{animation:slideOut .22s ease forwards}
+@keyframes slideOut{to{opacity:0;transform:translateX(-40px)}}
+.choices{display:flex;flex-direction:column;gap:11px}
+.choice{background:#fff;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+  padding:15px 17px;font-size:14.5px;font-weight:600;text-align:left;cursor:pointer;
+  transition:all .1s;display:flex;align-items:center;gap:12px;color:var(--ink);font-family:inherit}
+.choice .key{width:26px;height:26px;border:2px solid var(--line);border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--sub)}
+.choice:active{transform:translateY(2px);border-bottom-width:2px}
+.choice.selected{border-color:var(--blue);background:#EDF4FF;color:var(--blue)}
+.choice.selected .key{border-color:var(--blue);color:var(--blue)}
+.choice.correct{border-color:var(--green);background:#E9FAF0;color:var(--green-dark);animation:pop .3s}
+.choice.wrong{border-color:var(--red);background:#FFEFEF;color:var(--red-dark);animation:shake .35s}
+.choice:disabled{cursor:default}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.ox-row{display:flex;gap:14px}
+.ox-row .choice{flex:1;flex-direction:column;justify-content:center;padding:24px 0;font-size:15px;gap:8px}
+.ox-row .big{font-size:38px;font-weight:900;line-height:1}
+.ox-row .choice:nth-child(1) .big{color:var(--blue)}
+.ox-row .choice:nth-child(2) .big{color:var(--red)}
+
+.foot{padding:16px 22px 24px}
+.btn-check{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:800;
+  font-family:inherit;letter-spacing:1px;cursor:pointer;transition:all .1s;
+  background:#DCE2EC;color:#9AA6B8;box-shadow:0 4px 0 #C2CAD8}
+.btn-check.on{background:var(--green);color:#fff;box-shadow:0 4px 0 var(--green-dark)}
+.btn-check.on.v{background:var(--purple);box-shadow:0 4px 0 #6D3FD6}
+.btn-check.on:active{transform:translateY(3px);box-shadow:0 1px 0 var(--green-dark)}
+
+/* 피드백 시트 */
+.sheet{position:absolute;left:0;right:0;bottom:0;padding:20px 22px 26px;border-radius:22px 22px 0 0;
+  transform:translateY(110%);transition:transform .26s cubic-bezier(.2,.9,.3,1);z-index:5}
+.sheet.show{transform:translateY(0)}
+.sheet.ok{background:#D9F6E5}
+.sheet.no{background:#FFE3E3}
+.sheet.vp{background:#EBE3FD}
+.sheet .s-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sheet .s-icon{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:20px;animation:pop .35s}
+.sheet .s-title{font-size:18px;font-weight:900}
+.sheet.ok .s-title{color:var(--green-dark)}
+.sheet.no .s-title{color:var(--red-dark)}
+.sheet.vp .s-title{color:#6D3FD6}
+.sheet .s-desc{font-size:13.5px;line-height:1.55;color:var(--ink);opacity:.85;margin-bottom:14px}
+.sheet .btn-next{box-shadow:none}
+.sheet.ok .btn-next{background:var(--green);color:#fff;box-shadow:0 4px 0 var(--green-dark)}
+.sheet.no .btn-next{background:var(--red);color:#fff;box-shadow:0 4px 0 var(--red-dark)}
+.sheet.vp .btn-next{background:var(--purple);color:#fff;box-shadow:0 4px 0 #6D3FD6}
+
+.fly-xp{position:absolute;font-size:20px;font-weight:900;color:var(--gold);z-index:9;
+  pointer-events:none;animation:flyUp .8s ease-out forwards;text-shadow:0 1px 0 #fff}
+@keyframes flyUp{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.3)}}
+
+/* ---------- 완료 ---------- */
+.done-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 30px;position:relative}
+.trophy{font-size:84px;animation:trophyIn .6s cubic-bezier(.2,1.4,.4,1)}
+@keyframes trophyIn{0%{transform:scale(0) rotate(-30deg)}100%{transform:scale(1) rotate(0)}}
+.done-title{font-size:24px;font-weight:900;margin:18px 0 6px;letter-spacing:-.5px}
+.done-sub{font-size:14px;color:var(--sub);font-weight:600;margin-bottom:28px}
+.result-cards{display:flex;gap:12px;width:100%}
+.r-card{flex:1;border-radius:16px;padding:3px;overflow:hidden;opacity:0;animation:cardIn .4s .3s forwards}
+.r-card:nth-child(2){animation-delay:.45s}
+.r-card:nth-child(3){animation-delay:.6s}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.r-card.gold{background:var(--gold)}
+.r-card.blue{background:var(--blue)}
+.r-card.purple{background:var(--purple)}
+.r-card .r-label{font-size:11px;font-weight:800;color:#fff;text-align:center;padding:5px 0;letter-spacing:1px}
+.r-card .r-val{background:#fff;border-radius:13px;padding:13px 0;text-align:center;font-size:20px;font-weight:900}
+.r-card.gold .r-val{color:var(--gold-dark)}
+.r-card.blue .r-val{color:var(--blue)}
+.r-card.purple .r-val{color:var(--purple)}
+.confetti{position:absolute;width:10px;height:10px;top:-10px;animation:fall linear forwards;z-index:1}
+@keyframes fall{to{transform:translateY(820px) rotate(720deg)}}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- 화면 1: 스텝 맵 -->
+  <div class="screen active" id="scrMap">
+    <div class="map-head">
+      <div class="badge-row">
+        <span class="badge b1">수강중</span>
+        <span class="badge b2">업무 역량</span>
+        <span class="badge b2">WORK</span>
+      </div>
+      <h1>내부링크 테스트-조찬현_copy</h1>
+      <div class="stats">
+        <span class="stat"><span class="fire">🔥</span> 5일</span>
+        <span class="stat"><span class="xp">⚡</span> <span id="totalXp">340</span> XP</span>
+        <span class="course-prog">진도율 <span id="progNum">9%</span>
+          <span class="bar"><i id="progBar" style="width:9%"></i></span>
+        </span>
+      </div>
+    </div>
+
+    <div class="map-body">
+      <!-- 커리큘럼 1 -->
+      <div class="unit-divider">
+        <span class="u-line"></span>
+        <span class="u-label"><span class="u-name">커리큘럼 1 · 이미지 ai 😍</span><span class="u-pages">3 페이지</span></span>
+        <span class="u-line"></span>
+      </div>
+      <div class="path">
+        <div class="node-row" data-off="0">
+          <button class="node done" data-step="0">✓<span class="label">AI 이미지란?</span></button>
+        </div>
+        <div class="node-row" data-off="-1">
+          <button class="node current videoNode" data-step="1" id="nodeVideo">
+            <div class="start-bubble">영상 학습!</div>
+            ▶<span class="label">프롬프트 기초</span>
+          </button>
+        </div>
+        <div class="node-row" data-off="1">
+          <button class="node locked" data-step="2" id="nodeQuiz">🔒<span class="label">확인 퀴즈</span></button>
+        </div>
+      </div>
+
+      <!-- 커리큘럼 2 -->
+      <div class="unit-divider locked">
+        <span class="u-line"></span>
+        <span class="u-label"><span class="u-name">커리큘럼 2 · 커리큘럼</span><span class="u-pages">8 페이지</span></span>
+        <span class="u-line"></span>
+      </div>
+      <div class="path">
+        <div class="node-row" data-off="0"><button class="node locked" id="u2first">🔒<span class="label">페이지 1</span></button></div>
+        <div class="node-row" data-off="1"><button class="node locked">🔒<span class="label">페이지 2</span></button></div>
+        <div class="node-row" data-off="-1"><button class="node locked">🔒<span class="label">페이지 3</span></button></div>
+        <div class="node-row" data-off="0"><button class="node locked">🔒<span class="label">페이지 4</span></button></div>
+        <div class="node-row" data-off="1"><button class="node locked">🏆<span class="label">···  8 페이지</span></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 화면 2: 영상 레슨 -->
+  <div class="screen" id="scrVideo">
+    <div class="lesson-head">
+      <button class="btn-close" data-back="scrVideo">✕</button>
+      <div class="progress-track"><div class="progress-fill vfill" id="vProg" style="width:4%"></div></div>
+      <span class="hearts">⚡ <span id="vXp">+0</span></span>
+    </div>
+    <div class="v-area">
+      <div class="v-type">STEP 2 · 영상 학습</div>
+      <div class="v-title">이미지 AI 프롬프트 작성 기초</div>
+      <div class="player">
+        <div class="v-visual" id="vVisual">
+          <div class="v-emoji" id="vEmoji">🎨</div>
+          <div class="v-caption" id="vCaption"></div>
+        </div>
+        <button class="btn-bigplay" id="btnPlay">▶</button>
+        <div class="v-controls">
+          <div class="v-bar" id="vBar"><i id="vBarFill"></i></div>
+          <span class="v-time" id="vTime">0:00 / 0:15</span>
+          <button class="btn-speed" id="btnSpeed">1x</button>
+        </div>
+      </div>
+      <div class="v-check">
+        <div class="chk" id="chk1"><span class="dot">✓</span>영상 50% 시청 — 중간 체크포인트</div>
+        <div class="chk" id="chk2"><span class="dot">✓</span>영상 100% 시청 — 스텝 완료 조건</div>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn-check" id="btnVDone" disabled>끝까지 시청하면 완료돼요</button>
+    </div>
+    <div class="sheet vp" id="vSheet">
+      <div class="s-head">
+        <div class="s-icon">🎉</div>
+        <div class="s-title">시청 완료! +10 XP</div>
+      </div>
+      <div class="s-desc">영상 시청 데이터가 진도율에 반영됐어요. 다음 스텝 '확인 퀴즈'가 열렸습니다.</div>
+      <button class="btn-check btn-next" id="btnVNext">다음 스텝으로</button>
+    </div>
+  </div>
+
+  <!-- 화면 3: 퀴즈 레슨 -->
+  <div class="screen" id="scrLesson">
+    <div class="lesson-head">
+      <button class="btn-close" data-back="scrLesson">✕</button>
+      <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+      <span class="hearts">❤️ <span id="heartNum">3</span></span>
+    </div>
+    <div class="q-area" id="qArea"></div>
+    <div class="foot">
+      <button class="btn-check" id="btnCheck" disabled>확인</button>
+    </div>
+    <div class="sheet" id="sheet">
+      <div class="s-head">
+        <div class="s-icon" id="sIcon">✓</div>
+        <div class="s-title" id="sTitle">정답입니다!</div>
+      </div>
+      <div class="s-desc" id="sDesc"></div>
+      <button class="btn-check btn-next" id="btnNext">계속하기</button>
+    </div>
+  </div>
+
+  <!-- 화면 4: 완료 -->
+  <div class="screen" id="scrDone">
+    <div class="done-body" id="doneBody">
+      <div class="trophy">🏆</div>
+      <div class="done-title">커리큘럼 1 완료!</div>
+      <div class="done-sub">이미지 ai 😍 · 3페이지를 모두 마쳤어요</div>
+      <div class="result-cards">
+        <div class="r-card gold"><div class="r-label">획득 XP</div><div class="r-val" id="xpVal">0</div></div>
+        <div class="r-card purple"><div class="r-label">시청 완료</div><div class="r-val">1편</div></div>
+        <div class="r-card blue"><div class="r-label">정확도</div><div class="r-val" id="accVal">0%</div></div>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn-check on" id="btnDone">코스로 돌아가기</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let earnedXp = 0, totalXp = 340;
+
+/* ---------- 공통 ---------- */
+function go(from, to){
+  $(from).classList.remove('active'); $(from).classList.add('left');
+  $(to).classList.remove('left'); $(to).classList.add('active');
+  setTimeout(()=>$(from).classList.remove('left'), 300);
+}
+const AC = window.AudioContext ? new AudioContext() : null;
+function beep(freqs, dur=0.09){
+  if(!AC) return;
+  freqs.forEach((f,i)=>{
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type='sine'; o.frequency.value=f;
+    g.gain.setValueAtTime(.12, AC.currentTime+i*dur);
+    g.gain.exponentialRampToValueAtTime(.001, AC.currentTime+i*dur+dur);
+    o.connect(g); g.connect(AC.destination);
+    o.start(AC.currentTime+i*dur); o.stop(AC.currentTime+i*dur+dur);
+  });
+}
+const sndOk=()=>beep([660,880]), sndNo=()=>beep([300,220],.13), sndTap=()=>beep([520],.05);
+function flyXP(txt='+10 XP'){
+  const el = document.createElement('div');
+  el.className='fly-xp'; el.textContent=txt;
+  el.style.left=(140+Math.random()*80)+'px'; el.style.top='42%';
+  document.querySelector('.phone').appendChild(el);
+  setTimeout(()=>el.remove(),800);
+}
+function addXp(n){
+  earnedXp+=n; totalXp+=n;
+  $('totalXp').textContent = totalXp;
+}
+
+/* ---------- 영상 플레이어 (시뮬레이션) ---------- */
+const V_DUR = 15; // 데모용 15초
+const CAPTIONS = [
+  [0,  '🎨','AI 이미지는 텍스트 프롬프트로 만들어집니다'],
+  [4,  '✍️','좋은 프롬프트 = 대상 + 스타일 + 구도'],
+  [8,  '🖼️','"고양이" 보다 "수채화풍, 창가의 고양이"'],
+  [12, '⚡','구체적일수록 원하는 결과에 가까워져요'],
+];
+let vTime=0, vTimer=null, vSpeed=1, vPlaying=false, vDone=false;
+
+function fmtT(s){ return `0:${String(Math.floor(s)).padStart(2,'0')}`; }
+function vRender(){
+  $('vBarFill').style.width = (vTime/V_DUR*100)+'%';
+  $('vTime').textContent = `${fmtT(vTime)} / ${fmtT(V_DUR)}`;
+  const cap = [...CAPTIONS].reverse().find(c=>vTime>=c[0]);
+  if(cap){
+    $('vEmoji').textContent = cap[1];
+    const cEl = $('vCaption');
+    if(cEl.textContent !== cap[2]){
+      cEl.classList.remove('show');
+      setTimeout(()=>{ cEl.textContent=cap[2]; cEl.classList.add('show'); }, 150);
+    }
+  }
+  if(vTime >= V_DUR*0.5 && !$('chk1').classList.contains('ok')){
+    $('chk1').classList.add('ok'); sndTap();
+  }
+  if(vTime >= V_DUR && !vDone){
+    vDone = true; vPause();
+    $('chk2').classList.add('ok');
+    addXp(10); flyXP(); sndOk();
+    $('vXp').textContent = '+10';
+    $('vProg').style.width = '100%';
+    setTimeout(()=>$('vSheet').classList.add('show'), 400);
+  }
+}
+function vPlay(){
+  if(vDone) return;
+  vPlaying = true;
+  $('btnPlay').classList.add('hide');
+  $('vVisual').classList.add('playing');
+  vTimer = setInterval(()=>{
+    vTime = Math.min(V_DUR, vTime + 0.1*vSpeed);
+    $('vProg').style.width = (4 + vTime/V_DUR*46) + '%';
+    vRender();
+  }, 100);
+}
+function vPause(){
+  vPlaying = false;
+  clearInterval(vTimer);
+  $('btnPlay').classList.remove('hide');
+  $('vVisual').classList.remove('playing');
+}
+$('btnPlay').onclick = ()=>{ sndTap(); vPlay(); };
+$('vVisual').onclick = ()=>{ if(vPlaying) vPause(); };
+$('btnSpeed').onclick = e=>{
+  e.stopPropagation(); sndTap();
+  vSpeed = vSpeed===1 ? 2 : 1;
+  $('btnSpeed').textContent = vSpeed+'x';
+  $('btnSpeed').classList.toggle('on', vSpeed===2);
+};
+$('vBar').onclick = e=>{ // 시청한 지점까지만 이동 허용(간단 처리: 앞으로 스킵 불가)
+  const r = e.currentTarget.getBoundingClientRect();
+  const t = (e.clientX-r.left)/r.width*V_DUR;
+  if(t <= vTime){ vTime = Math.max(0,t); vRender(); }
+};
+$('btnVNext').onclick = ()=>{
+  $('vSheet').classList.remove('show');
+  // 맵 갱신: 영상 노드 완료, 퀴즈 노드 해제
+  completeNode($('nodeVideo'), '영상 학습!');
+  const q = $('nodeQuiz');
+  q.classList.remove('locked'); q.classList.add('current');
+  q.childNodes[0].textContent = '⭐';
+  const b = document.createElement('div');
+  b.className='start-bubble'; b.textContent='퀴즈 풀기!';
+  q.prepend(b);
+  updateCourseProg(2);
+  go('scrVideo','scrMap');
+};
+function completeNode(node){
+  node.classList.remove('current','videoNode');
+  node.classList.add('done');
+  const bub = node.querySelector('.start-bubble'); if(bub) bub.remove();
+  node.childNodes[node.querySelector('.start-bubble')?1:0].textContent='✓';
+}
+function updateCourseProg(pagesDone){ // 총 11페이지 기준
+  const pct = Math.round((1+pagesDone-1)/11*100) + 9 - 9; // 기존 1p 완료 + 신규
+  const val = Math.round((1+ (pagesDone-1)) / 11 * 100);
+  $('progNum').textContent = val+'%';
+  $('progBar').style.width = val+'%';
+}
+
+/* ---------- 퀴즈 ---------- */
+const QUESTIONS = [
+  {
+    type:'choice', typeLabel:'Q1 · 개념 확인',
+    title:'이미지 AI에게 원하는 결과를 얻기 위한 가장 좋은 프롬프트는?',
+    choices:['고양이','고양이 그려줘','수채화풍, 창가에 앉아 있는 고양이, 따뜻한 오후 햇살','예쁜 그림'],
+    answer:2,
+    desc:'대상(고양이) + 스타일(수채화풍) + 구도/분위기(창가, 햇살)를 함께 쓰면 의도에 가까운 결과가 나옵니다.'
+  },
+  {
+    type:'ox', typeLabel:'Q2 · OX 퀴즈',
+    title:'프롬프트는 짧을수록 항상 더 좋은 결과가 나온다.',
+    choices:['맞다','아니다'], big:['O','X'], answer:1,
+    desc:'짧은 프롬프트는 해석의 여지가 커서 의도와 다른 결과가 나오기 쉽습니다. 핵심 요소는 구체적으로 적는 것이 좋습니다.'
+  }
+];
+let qIdx=0, selected=-1, correctCnt=0, hearts=3;
+
+function renderQ(){
+  const q = QUESTIONS[qIdx];
+  selected=-1;
+  $('btnCheck').classList.remove('on'); $('btnCheck').disabled=true;
+  const wrap=document.createElement('div'); wrap.className='q-wrap';
+  let inner=`<div class="q-type">${q.typeLabel}</div><div class="q-title">${q.title}</div>`;
+  if(q.type==='ox'){
+    inner+=`<div class="ox-row">`+q.choices.map((c,i)=>
+      `<button class="choice" data-i="${i}"><span class="big">${q.big[i]}</span>${c}</button>`).join('')+`</div>`;
+  }else{
+    inner+=`<div class="choices">`+q.choices.map((c,i)=>
+      `<button class="choice" data-i="${i}"><span class="key">${i+1}</span>${c}</button>`).join('')+`</div>`;
+  }
+  wrap.innerHTML=inner;
+  $('qArea').innerHTML=''; $('qArea').appendChild(wrap);
+  wrap.querySelectorAll('.choice').forEach(btn=>{
+    btn.onclick=()=>{
+      sndTap();
+      wrap.querySelectorAll('.choice').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selected=+btn.dataset.i;
+      $('btnCheck').classList.add('on'); $('btnCheck').disabled=false;
+    };
+  });
+}
+$('btnCheck').onclick=()=>{
+  if(selected<0) return;
+  const q=QUESTIONS[qIdx], ok=selected===q.answer;
+  const btns=document.querySelectorAll('.q-wrap .choice');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.answer].classList.add('correct');
+  if(ok){ correctCnt++; sndOk(); addXp(10); flyXP(); }
+  else{ btns[selected].classList.add('wrong'); sndNo(); hearts=Math.max(0,hearts-1); $('heartNum').textContent=hearts; }
+  const sheet=$('sheet');
+  sheet.className='sheet show '+(ok?'ok':'no');
+  $('sIcon').textContent=ok?'✓':'✕';
+  $('sTitle').textContent=ok?'정답입니다! +10 XP':'아쉬워요!';
+  $('sDesc').textContent=q.desc;
+  $('btnCheck').style.visibility='hidden';
+};
+$('btnNext').onclick=()=>{
+  $('sheet').classList.remove('show');
+  $('btnCheck').style.visibility='visible';
+  qIdx++;
+  $('pFill').style.width=(qIdx/QUESTIONS.length*100)+'%';
+  if(qIdx>=QUESTIONS.length){ setTimeout(finish,350); }
+  else{
+    document.querySelector('.q-wrap').classList.add('out');
+    setTimeout(renderQ,200);
+  }
+};
+
+/* ---------- 완료 ---------- */
+function finish(){
+  go('scrLesson','scrDone');
+  confetti(); beep([523,659,784,1047],.11);
+  countUp('xpVal', earnedXp, '');
+  countUp('accVal', Math.round(correctCnt/QUESTIONS.length*100), '%');
+}
+function countUp(id,target,suffix){
+  let v=0; const step=Math.max(1,Math.ceil(target/25));
+  const t=setInterval(()=>{
+    v=Math.min(target,v+step);
+    $(id).textContent=v+suffix;
+    if(v>=target) clearInterval(t);
+  },30);
+}
+function confetti(){
+  const colors=['#FFC61A','#1E7CFF','#2ECB6E','#FF5A5A','#8B5CF6'];
+  for(let i=0;i<50;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'%';
+    c.style.background=colors[i%colors.length];
+    c.style.borderRadius=Math.random()>.5?'50%':'2px';
+    c.style.animationDuration=(1.4+Math.random()*1.2)+'s';
+    c.style.animationDelay=Math.random()*0.5+'s';
+    $('doneBody').appendChild(c);
+    setTimeout(()=>c.remove(),3500);
+  }
+}
+
+/* ---------- 네비게이션 ---------- */
+$('nodeVideo').onclick=()=>{
+  if(!$('nodeVideo').classList.contains('current')) return;
+  go('scrMap','scrVideo');
+};
+$('nodeQuiz').onclick=()=>{
+  if(!$('nodeQuiz').classList.contains('current')) return;
+  qIdx=0; correctCnt=0; hearts=3;
+  $('heartNum').textContent=3;
+  $('pFill').style.width='4%';
+  go('scrMap','scrLesson');
+  renderQ();
+};
+document.querySelectorAll('.btn-close').forEach(btn=>{
+  btn.onclick=()=>{
+    $('sheet').classList.remove('show');
+    $('vSheet').classList.remove('show');
+    $('btnCheck').style.visibility='visible';
+    if(vPlaying) vPause();
+    go(btn.dataset.back,'scrMap');
+  };
+});
+$('btnDone').onclick=()=>{
+  completeNode($('nodeQuiz'));
+  // 커리큘럼 2 첫 노드 해제
+  const u2=$('u2first');
+  u2.classList.remove('locked'); u2.classList.add('current');
+  u2.childNodes[0].textContent='⭐';
+  const b=document.createElement('div');
+  b.className='start-bubble'; b.textContent='다음 커리큘럼!';
+  u2.prepend(b);
+  document.querySelector('.unit-divider.locked')?.classList.remove('locked');
+  updateCourseProg(3);
+  go('scrDone','scrMap');
+};
+</script>
+</body>
+</html>
