@@ -310,20 +310,16 @@ function closeMobileSidebar() {
 
     <div class="guide-section">
       <div class="section-title">계층 구조</div>
-      <div class="section-desc">오프라인 코스는 5단계 계층으로 구성됩니다.</div>
+      <div class="section-desc">오프라인 코스는 3단계 계층으로 구성됩니다.</div>
       <div class="flex items-center gap-3 flex-wrap">
         <div class="flow-box">📚 코스</div>
         <span class="flow-arrow">→</span>
-        <div class="flow-box">📖 커리큘럼</div>
+        <div class="flow-box">📅 차수(반)</div>
         <span class="flow-arrow">→</span>
-        <div class="flow-box">🗂 슬롯</div>
-        <span class="flow-arrow">→</span>
-        <div class="flow-box">📅 차수</div>
-        <span class="flow-arrow">→</span>
-        <div class="flow-box">🕐 회차</div>
+        <div class="flow-box">🕐 회차(수업일)</div>
       </div>
       <div class="callout callout-blue mt-4">
-        <strong>예시:</strong> "글로벌 비즈니스 매너" 코스 → "필수 이론" 커리큘럼 → 4월 반 / 5월 반(슬롯) → 1차시·2차시 (회차)
+        <strong>예시:</strong> 코스 "신입 안전교육" → 차수 A반 / B반 → 회차 1일차 / 2일차
       </div>
     </div>
 
@@ -1270,7 +1266,7 @@ function closeMobileSidebar() {
             <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">공개예약</td>
             <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;"><span class="badge badge-violet">● 공개예약</span></td>
             <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9;">예약된 일시에 자동 공개</td>
-            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#94a3b8;">❌ 비활성</td>
+            <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#4338ca;">✅ 활성 (공개 전 수강생 사전 배정 가능)</td>
           </tr>
           <tr>
             <td style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">임시저장</td>
@@ -1497,7 +1493,7 @@ function closeMobileSidebar() {
       <div class="flow-row">
         <div class="flow-box">👥 수강관리</div>
         <span class="flow-arrow">→</span>
-        <div class="flow-box">offline-view.html (운영중·종료만 활성)</div>
+        <div class="flow-box">offline-view.html (운영중·공개예약·종료 활성, 임시저장만 비활성)</div>
       </div>
     </div>
 
@@ -1556,7 +1552,7 @@ function closeMobileSidebar() {
         <tbody style="font-size:12px;">
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">커버 이미지</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">720×1200px 권장. 클릭하여 업로드.</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스명 <span style="color:#e11d48">*</span></td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">필수 입력. 빈칸이면 퍼블리싱 체크리스트 미통과</td></tr>
-          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">카테고리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">직무역량 / 리더십 / 영업 / 공통온보딩 / IT / DX</td></tr>
+          <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">카테고리</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">5개 그룹의 분류 트리에서 선택 — <strong>직무/전문 역량</strong>(직무 역량·기술/IT·영업/마케팅·기획/전략) · <strong>리더십/매니지먼트</strong>(리더십·조직 관리·팀 빌딩) · <strong>공통/필수</strong>(공통/온보딩·컴플라이언스·인권/안전) · <strong>조직문화/복지</strong>(조직문화·워크라이프밸런스·복지) · <strong>외부/자격증</strong>(외부 교육·자격증/어학)</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">담당 강사 <span style="color:#e11d48">*</span></td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">대표 강사명 직접 입력(필수). 차수·회차마다 강사가 다르면 "차수·회차별 강사 다름" 토글 → 강사 3단 상속(아래 콜아웃 참조)</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">강사 소개</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">강사 약력 또는 소개 텍스트</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">코스 소개</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">textarea. 학습자 앱 코스 상세 화면에 표시</td></tr>
@@ -1882,10 +1878,12 @@ function closeMobileSidebar() {
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">회차 일자</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">날짜 피커 (date input)</td></tr>
           <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">시작 시간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">시간 피커 (time input)</td></tr>
           <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">종료 시간</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">시간 피커 (time input)</td></tr>
-          <tr style="background:#f8fafc;"><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">장소</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">텍스트 입력. 기본 장소와 다른 경우 개별 지정 가능</td></tr>
-          <tr><td style="padding:8px 12px; font-weight:600;">지각 기준</td><td style="padding:8px 12px;">시작 후 N분 이내 입실 → 지각 처리. 차수별 또는 회차별 설정</td></tr>
+          <tr style="background:#f8fafc;"><td style="padding:8px 12px; font-weight:600;">장소</td><td style="padding:8px 12px;">텍스트 입력. 기본 장소와 다른 경우 개별 지정 가능</td></tr>
         </tbody>
       </table>
+      <div class="callout callout-blue mt-4">
+        <strong>지각 기준은 회차 항목이 아닙니다.</strong> 지각 판정 시간은 <strong>코스 단위 단일 설정</strong>으로, 수료 조건 섹션의 출석 판정 기준에서 한 번만 지정합니다(기본 10분, 1~60분 범위). 차수·회차별로 따로 설정하지 않습니다.
+      </div>
     </div>
 
     <div class="guide-section">
@@ -1898,6 +1896,14 @@ function closeMobileSidebar() {
           <div class="screen-label">회차 일괄 생성</div>
           <div class="screen-caption">진행 기간 · 반복 요일 · 교육 시간 · 세부 장소 설정</div>
         </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">🔒 지난 회차 잠금</div>
+      <div class="section-desc">코스가 <strong>배포(수강중)</strong> 상태이고 회차의 종료 시간이 이미 지났으면, 해당 회차는 자동으로 잠깁니다.</div>
+      <div class="callout callout-amber">
+        <strong>종료된 회차는 수정·삭제할 수 없습니다.</strong> 잠긴 회차에는 🔒 <strong>"종료 · 수정 불가"</strong> 배지가 표시되며, 날짜·시간·장소를 변경하거나 회차를 삭제할 수 없습니다. <strong>아직 시작하지 않은 회차만</strong> 날짜·시간·장소를 변경할 수 있고, 변경 시에는 학습자에게 재안내(재알림)가 필요합니다.
       </div>
     </div>
 

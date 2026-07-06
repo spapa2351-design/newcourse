@@ -362,7 +362,7 @@
       <tr>
         <td><strong>강사</strong></td>
         <td>QR 출석 화면 운영, 출석 현황 확인</td>
-        <td>course-learners.html (출석 탭)</td>
+        <td>admin/offline-view.html (출석 탭)</td>
         <td>종이 서명부 관리</td>
       </tr>
       <tr>
@@ -429,9 +429,9 @@
     <table>
       <thead><tr><th>파일</th><th>역할</th><th>상태</th></tr></thead>
       <tbody>
-        <tr><td><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">admin/index.html</code></td><td>오프라인 코스 목록 대시보드 — 상태 필터, 카테고리, 검색, 차수 확장</td><td><span class="badge badge-done">✅ 완료</span></td></tr>
+        <tr><td><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">admin/offline-list.html</code></td><td>오프라인 코스 목록 대시보드 — 상태 필터, 카테고리, 검색, 차수 확장</td><td><span class="badge badge-done">✅ 완료</span></td></tr>
         <tr><td><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">admin/offline-builder.html</code></td><td>코스 개설/편집 빌더 — 섹션 1~4 + 우측 커리큘럼 사이드바</td><td><span class="badge badge-done">✅ 완료</span></td></tr>
-        <tr><td><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">admin/offline-course-view.html</code></td><td>수강생 관리 · 출석 관리 (수료 처리는 Phase 2)</td><td><span class="badge badge-done">✅ 완료</span></td></tr>
+        <tr><td><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">admin/offline-view.html</code></td><td>수강생 관리 · 출석 관리 (출석률 75% 수료/미수료 자동 판정·표시, 일괄 확정 버튼은 Phase 2)</td><td><span class="badge badge-done">✅ 완료</span></td></tr>
         <tr><td><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">admin/online-builder.html</code></td><td>온라인 코스 등록 빌더</td><td><span class="badge badge-done">✅ 완료</span></td></tr>
       </tbody>
     </table>
@@ -535,7 +535,7 @@
   <!-- 4.2 지각 -->
   <div id="p-late" class="policy-box">
     <div class="policy-title">4.2 지각 기준</div>
-    <p class="text-sm text-slate-500 mb-4">수업 시작 후 몇 분까지 QR 스캔을 출석으로 인정할지를 차수마다 설정합니다. 기본값은 10분이며, 0분으로 설정하면 지각 구분 없이 언제든 출석으로 처리됩니다.</p>
+    <p class="text-sm text-slate-500 mb-4">지각 기준은 <strong>코스 단위로 설정</strong>하며(해당 코스 모든 차수에 동일 적용), 수업 시작 후 몇 분까지 QR 스캔을 출석으로 인정할지를 정합니다. 기본값은 10분이며, 0분으로 설정하면 지각 구분 없이 언제든 출석으로 처리됩니다.</p>
 
     <div class="bg-slate-50 rounded-xl p-5 mb-4">
       <div class="flex items-center gap-0 text-sm font-medium mb-3">
@@ -777,8 +777,8 @@
 
   <!-- 4.4 수료 처리 -->
   <div id="p-cert" class="policy-box">
-    <div class="policy-title">4.4 수료 처리 <span class="badge badge-plan2 ml-2">Phase 2 예정</span></div>
-    <p class="text-sm text-slate-500 mb-4">전체 회차가 종료된 후 (수업 종료 시각 기준), 출석률 75% 이상인 수강생을 일괄 수료 확정하는 기능입니다. <strong>Phase 1에서는 버튼을 제공하지 않습니다.</strong> 수료 확정은 법적·인사 기록이므로 Phase 2에서 구현 예정.</p>
+    <div class="policy-title">4.4 수료 판정 · 처리 <span class="badge badge-plan2 ml-2">일괄 확정 버튼 Phase 2</span></div>
+    <p class="text-sm text-slate-500 mb-4">Phase 1에서는 전체 회차가 종료된 후 (수업 종료 시각 기준), 출석률 <strong>75% 기준으로 수료/미수료를 자동 판정·표시</strong>합니다(학습자 화면·관리자 목록에 반영). 다만 전원을 한 번에 확정하는 <strong>일괄 수료 확정 버튼은 제공하지 않으며</strong>, 법적·인사 기록을 위한 별도 수료 확정 절차는 Phase 2에서 구현 예정입니다.</p>
 
     <div class="bg-indigo-50 rounded-xl p-5 mb-5">
       <div class="font-bold text-indigo-800 text-sm mb-3">📊 수료 기준 예시 — 4회차 교육인 경우</div>
@@ -826,14 +826,14 @@
     </div>
 
     <div class="callout callout-amber">
-      Phase 1에서는 수료 처리 버튼이 없습니다. 회차 종료 후 출석률 데이터는 통계로 확인할 수 있으며, 수료 확정 처리는 Phase 2에서 구현됩니다.
+      Phase 1에서도 출석률 75% 기준 수료/미수료는 <strong>자동 판정·표시</strong>됩니다. 다만 전원 일괄 수료 확정 버튼은 없으며, 법적·인사 기록을 위한 별도 수료 확정 처리는 Phase 2에서 구현됩니다.
     </div>
   </div>
 
   <!-- 4.5 수강 신청 -->
   <div id="p-enroll" class="policy-box">
     <div class="policy-title">4.5 수강 신청</div>
-    <p class="text-sm text-slate-500 mb-4">학습자가 직접 신청하는 <strong>자율 수강</strong>과 HRD 담당자가 부서·직급 단위로 배정하는 <strong>지정 등록</strong>, 두 가지 방식을 코스별로 선택합니다.</p>
+    <p class="text-sm text-slate-500 mb-4">학습자가 직접 신청하는 <strong>자율 수강</strong>과 HRD 담당자가 부서·직급 단위로 배정하는 <strong>지정 등록</strong>. 두 방식은 배타 선택이 아니라 <strong>독립 토글</strong>이라, 코스별로 하나만 켜거나 둘 다 켤 수 있으며 <strong>최소 1개는 반드시</strong> 켜야 합니다.</p>
 
     <div class="grid grid-cols-2 gap-4 mb-5">
       <div class="border-2 border-indigo-200 bg-indigo-50 rounded-xl p-4">
@@ -842,7 +842,7 @@
         <div class="space-y-1 text-xs text-indigo-600">
           <div>• 신청 기간 내에만 가능</div>
           <div>• 잔여석이 있어야 신청 가능</div>
-          <div>• 취소 가능 기한은 코스에서 설정</div>
+          <div>• 취소·변경 가능 기한은 코스에서 설정 (기본 취소 3일·변경 5일)</div>
         </div>
       </div>
       <div class="border-2 border-violet-200 bg-violet-50 rounded-xl p-4">
@@ -864,7 +864,7 @@
       </div>
       <div class="flex gap-3 items-start bg-slate-50 rounded-lg p-3">
         <span class="text-slate-400 font-semibold text-xs flex-shrink-0 mt-0.5">재수강</span>
-        <div class="text-sm text-slate-600">코스에서 "재수강 허용" 토글을 켜야 가능합니다. 법정의무교육은 반드시 켜야 합니다.</div>
+        <div class="text-sm text-slate-600">재수강 허용 토글은 현재 빌더에 <strong>미구현(Phase 2 예정)</strong>입니다. 재이수가 필요하면 새 코스/차수를 개설해 운영합니다.</div>
       </div>
       <div class="flex gap-3 items-start bg-slate-50 rounded-lg p-3">
         <span class="text-slate-400 font-semibold text-xs flex-shrink-0 mt-0.5">취소 기한 초과</span>
@@ -872,7 +872,7 @@
       </div>
       <div class="flex gap-3 items-start bg-slate-50 rounded-lg p-3">
         <span class="text-slate-400 font-semibold text-xs flex-shrink-0 mt-0.5">차수 변경</span>
-        <div class="text-sm text-slate-600">현재는 기존 차수 취소 후 새 차수 신청으로 처리합니다. 직접 변경 기능은 Phase 2에서 추가 예정입니다.</div>
+        <div class="text-sm text-slate-600">자율 신청 코스는 <strong>일정 변경 정책(기본 5일)</strong>에 따라 학습자가 직접 "일정변경" 버튼으로 다른 차수/회차로 변경할 수 있습니다(§16). 변경 기한이 지나면 버튼이 비활성화됩니다.</div>
       </div>
       <div class="flex gap-3 items-start bg-slate-50 rounded-lg p-3">
         <span class="text-slate-400 font-semibold text-xs flex-shrink-0 mt-0.5">관리자 초과 등록</span>
@@ -921,7 +921,7 @@
   <!-- 4.7 퍼블리싱 -->
   <div id="p-pub" class="policy-box">
     <div class="policy-title">4.7 퍼블리싱</div>
-    <p class="text-sm text-slate-500 mb-4">퍼블리싱 전까지 학습자는 이 코스를 볼 수 없습니다. 아래 8개 항목이 모두 충족돼야 퍼블리싱 버튼이 활성화되며, 공개 즉시 학습자 앱에 노출됩니다.</p>
+    <p class="text-sm text-slate-500 mb-4">퍼블리싱 전까지 학습자는 이 코스를 볼 수 없습니다. 아래 11개 항목이 모두 충족돼야 퍼블리싱 버튼이 활성화되며, 공개 즉시 학습자 앱에 노출됩니다.</p>
 
     <div class="grid grid-cols-4 gap-2 mb-5">
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
@@ -934,19 +934,31 @@
         <div class="font-bold text-slate-700">③ 교육 장소</div>
       </div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
-        <div class="font-bold text-slate-700">④ 신청 기간</div>
+        <div class="font-bold text-slate-700">④ 등록 방식 1개 이상</div>
+        <div class="text-slate-400 mt-0.5">자율신청/지정등록 중 최소 1개(둘 다 가능)</div>
       </div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
-        <div class="font-bold text-slate-700">⑤ 차수 1개 이상</div>
+        <div class="font-bold text-slate-700">⑤ 신청 기간</div>
       </div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
-        <div class="font-bold text-slate-700">⑥ 모든 차수에 회차</div>
+        <div class="font-bold text-slate-700">⑥ 차수 1개 이상</div>
       </div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
-        <div class="font-bold text-slate-700">⑦ 회차 날짜/시간</div>
+        <div class="font-bold text-slate-700">⑦ 모든 차수에 회차</div>
       </div>
       <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
-        <div class="font-bold text-slate-700">⑧ 수료 조건 1개</div>
+        <div class="font-bold text-slate-700">⑧ 회차 날짜·시간</div>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
+        <div class="font-bold text-slate-700">⑨ 다중 조합형 차수 일정 미겹침</div>
+        <div class="text-slate-400 mt-0.5">여러 차수 선택일 때</div>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
+        <div class="font-bold text-slate-700">⑩ 배정 인원 일정 겹침 없음</div>
+        <div class="text-slate-400 mt-0.5">지정등록</div>
+      </div>
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center text-xs">
+        <div class="font-bold text-slate-700">⑪ 수료 조건 1개</div>
       </div>
     </div>
 
@@ -976,10 +988,10 @@
       <div class="space-y-2">
         <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="flow-action">관리자 → "새 코스 등록" 클릭</div><div class="flow-result">코스 등록 화면 진입</div></div></div>
         <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="flow-action">기본정보 입력</div><div class="flow-result">코스명, 카테고리, 강사, 장소, 표지 이미지 — 3분</div></div></div>
-        <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="flow-action">수강 신청 설정</div><div class="flow-result">자율/강제, 신청기간, 취소정책, 재수강 — 2분</div></div></div>
-        <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="flow-action">차수 생성</div><div class="flow-result">날짜, 정원, 강사, 지각기준 — 3분</div></div></div>
+        <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="flow-action">수강 신청 설정</div><div class="flow-result">등록 방식(자율 신청·지정 등록, 독립 토글·최소 1개), 신청기간, 취소·변경 정책 — 2분</div></div></div>
+        <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="flow-action">차수 생성</div><div class="flow-result">날짜, 정원, 강사 — 3분 (지각 기준은 코스 단위 설정)</div></div></div>
         <div class="flow-step"><div class="flow-num">5</div><div class="flow-content"><div class="flow-action">회차 생성</div><div class="flow-result">수동 또는 일괄 생성 — 2~5분</div></div></div>
-        <div class="flow-step"><div class="flow-num">6</div><div class="flow-content"><div class="flow-action">퍼블리싱 8항목 확인 후 공개</div><div class="flow-result">학습자 앱에 즉시 노출</div></div></div>
+        <div class="flow-step"><div class="flow-num">6</div><div class="flow-content"><div class="flow-action">퍼블리싱 11항목 확인 후 공개</div><div class="flow-result">학습자 앱에 즉시 노출</div></div></div>
       </div>
     </div>
 
@@ -1087,8 +1099,8 @@
         <tr><td>B06</td><td>일괄 회차 생성</td><td>🪄 일괄 생성 → 요일+시간</td><td>선택 요일에 맞는 회차 자동 생성</td><td>6.2</td></tr>
         <tr><td>B07</td><td>차수 복사</td><td>차수 복사 버튼</td><td>동일 설정의 새 차수 생성 (날짜 제외)</td><td>6.2</td></tr>
         <tr><td>B08</td><td>수료 조건 설정</td><td>출석률 75% 설정</td><td>수료 조건 섹션 완료</td><td>4.5</td></tr>
-        <tr><td>B09</td><td>재수강 허용 토글</td><td>토글 ON</td><td>재수강 허용 상태 저장</td><td>4.6</td></tr>
-        <tr><td>B10</td><td>퍼블리싱 8항목 체크</td><td>모든 정보 입력 → 퍼블리싱</td><td>8항목 통과 → 퍼블리싱 성공</td><td>4.7</td></tr>
+        <tr><td>B09</td><td>재수강 허용 토글 (Phase 2)</td><td>빌더에서 재수강 토글 확인</td><td>토글 미노출 — 재이수는 새 코스/차수 개설로 운영</td><td>4.5</td></tr>
+        <tr><td>B10</td><td>퍼블리싱 11항목 체크</td><td>모든 정보 입력 → 퍼블리싱</td><td>11항목 통과 → 퍼블리싱 성공</td><td>4.7</td></tr>
       </tbody>
     </table>
   </details>
@@ -1102,8 +1114,8 @@
         <tr><td>E02</td><td>정원 마감</td><td>잔여석 0 → 신청</td><td>"마감" 배지 + 다른 차수 안내</td><td>4.6</td></tr>
         <tr><td>E03</td><td>신청 기간 외</td><td>기간 종료 → 신청</td><td>버튼 비활성. 신청 기간 표시</td><td>4.6</td></tr>
         <tr><td>E04</td><td>동일 차수 중복</td><td>이미 신청 완료 → 재신청</td><td>"이미 신청됨"</td><td>4.6</td></tr>
-        <tr><td>E05</td><td>재수강 비허용 + 기수료</td><td>재수강 OFF + 기수료 → 신청</td><td>"이미 수료한 교육"</td><td>4.6</td></tr>
-        <tr><td>E06</td><td>재수강 허용 + 기수료</td><td>재수강 ON + 기수료 → 신청</td><td>다른 차수 신청 가능</td><td>4.6</td></tr>
+        <tr><td>E05</td><td>기수료자 재신청 (Phase 2)</td><td>재수강 규칙 미구현 상태에서 기수료 코스 재신청</td><td>Phase 1: 별도 차단 없음 — 재이수는 새 코스/차수로 운영</td><td>4.5</td></tr>
+        <tr><td>E06</td><td>재수강 허용 토글 (Phase 2)</td><td>빌더에서 재수강 토글 확인</td><td>토글 미구현 — 재이수는 새 코스/차수 개설로 처리</td><td>4.5</td></tr>
         <tr><td>E07</td><td>지정 등록</td><td>HRD 담당자 그룹 선택 배정</td><td>대상 그룹 전원 자동 배정</td><td>FLOW-03</td></tr>
         <tr><td>E08</td><td>신청 취소 (기한 내)</td><td>취소 클릭</td><td>취소 완료. 잔여석 +1</td><td>4.6</td></tr>
         <tr><td>E09</td><td>신청 취소 (기한 초과)</td><td>기한 경과 후 취소 시도</td><td>학습자 취소 불가. 관리자만</td><td>4.6</td></tr>
@@ -1154,7 +1166,7 @@
     <table class="mt-3">
       <thead><tr><th>TC</th><th>시나리오</th><th>행동</th><th>기대 결과</th></tr></thead>
       <tbody>
-        <tr><td>L01</td><td>상태 탭 필터</td><td>"모집중" 탭 클릭</td><td>모집중 코스만 표시 + 카운트 뱃지</td></tr>
+        <tr><td>L01</td><td>상태 탭 필터</td><td>"운영중" 탭 클릭</td><td>운영중 코스만 표시 + 카운트 뱃지</td></tr>
         <tr><td>L02</td><td>카테고리 필터</td><td>"IT" 카테고리 선택</td><td>IT 분류 코스만 표시</td></tr>
         <tr><td>L03</td><td>검색</td><td>"기업윤리" 입력</td><td>코스명에 "기업윤리" 포함 코스 표시</td></tr>
         <tr><td>L04</td><td>차수 확장</td><td>코스 행 클릭</td><td>차수별 잔여석·일정 인라인 표시</td></tr>
@@ -1387,7 +1399,7 @@
         <tr><td>기존 엑셀 데이터 이전?</td><td>Phase 2에서 엑셀 임포트 제공. Phase 1은 수동 입력 필요</td></tr>
         <tr><td>온라인 교육도?</td><td>온라인 코스 등록 빌더 Phase 1 포함. 블렌디드(혼합)는 Phase 3</td></tr>
         <tr><td>모바일에서?</td><td>학습자 QR 스캔은 모바일 브라우저. 관리자 화면은 데스크탑 최적화</td></tr>
-        <tr><td>법정의무교육?</td><td>재수강 허용 토글 + 수료율 자동 집계로 최적화</td></tr>
+        <tr><td>법정의무교육?</td><td>지정 등록으로 대상자 일괄 배정 + 수료율 자동 집계로 최적화. 재수강 허용 토글은 Phase 2 예정(재이수는 새 코스/차수 개설로 운영)</td></tr>
         <tr><td>보안?</td><td>사내 네트워크 내 배포 가능. 외부 API 의존 없이 독립 운영</td></tr>
       </tbody>
     </table>
@@ -1460,10 +1472,11 @@
       <span class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-sm"><strong>결석</strong> — 미출석</span>
       <span class="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg text-sm"><strong>수료</strong> — 기준 충족 이수 확정</span>
       <span class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-lg text-sm"><strong>미수료</strong> — 기준 미충족</span>
-      <span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-sm"><strong>준비중</strong> — 퍼블리싱 전</span>
-      <span class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-sm"><strong>모집중</strong> — 신청 받는 중</span>
-      <span class="bg-green-100 text-green-700 px-3 py-1.5 rounded-lg text-sm"><strong>진행중</strong> — 수업 시작</span>
-      <span class="bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-sm"><strong>완료</strong> — 수료 처리 완료</span>
+      <span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-sm"><strong>전체</strong> — 모든 코스</span>
+      <span class="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg text-sm"><strong>운영중</strong> — 신청·수강 진행 중</span>
+      <span class="bg-violet-100 text-violet-700 px-3 py-1.5 rounded-lg text-sm"><strong>공개예약</strong> — 공개 예약(오픈 예정)</span>
+      <span class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-lg text-sm"><strong>임시저장</strong> — 퍼블리싱 전 초안</span>
+      <span class="bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-sm"><strong>종료</strong> — 종료된 코스</span>
     </div>
   </div>
 </section>
@@ -1486,7 +1499,7 @@
         <tr><td><strong>GAP-03</strong></td><td>알림 채널·타이밍 설정 없음</td><td>알림</td><td><span class="badge badge-critical">🔴 Critical</span></td><td>앱 푸시 / 이메일 / SMS 결정 필요</td></tr>
         <tr><td><strong>GAP-04</strong></td><td>지각 인정 기준 차수별 설정 없음</td><td>출석</td><td><span class="badge badge-important">🟠 Important</span></td><td>Phase 1에서 기본값 10분으로 처리</td></tr>
         <tr><td><strong>GAP-05</strong></td><td>공결(사전 결석) 처리 플로우 없음</td><td>출석</td><td><span class="badge badge-important">🟠 Important</span></td><td>출장·병가 등 사전 사유 제출 필요</td></tr>
-        <tr><td><strong>GAP-06</strong></td><td>재수강·중복 신청 규칙 미구현</td><td>수강 신청</td><td><span class="badge badge-important">🟠 Important</span></td><td>Phase 1 토글만 존재</td></tr>
+        <tr><td><strong>GAP-06</strong></td><td>재수강·중복 신청 규칙 미구현</td><td>수강 신청</td><td><span class="badge badge-important">🟠 Important</span></td><td>재수강 허용 토글 미구현(Phase 2). 재이수는 새 코스/차수로 운영</td></tr>
         <tr><td><strong>GAP-07</strong></td><td>차수 일정 변경 시 기존 수강생 처리 미정</td><td>운영</td><td><span class="badge badge-important">🟠 Important</span></td><td>동의/거부/자동취소 플로우 필요</td></tr>
         <tr><td><strong>GAP-08</strong></td><td>강사 권한(강사 계정·출석 체크) 미정 — <span style="color:#16a34a;font-weight:600;">차수·회차 강사 설정은 해소(Phase 1, 3단 상속)</span></td><td>강사 관리</td><td><span class="badge badge-minor">🟡 Minor</span></td><td>전국 권역별 강사 = 차수 강사로 커버. 강사 계정·권한만 Phase 2+ 잔여</td></tr>
         <tr><td><strong>GAP-09</strong></td><td>수료 후 연계 트리거 미정</td><td>수료</td><td><span class="badge badge-minor">🟡 Minor</span></td><td>인사 연동, 알림</td></tr>
@@ -1711,7 +1724,7 @@
 <!-- s16 -->
 <section id="s16" data-tab="learner" class="section-card">
   <div class="section-title">16. 변경·취소 정책 UI 반영</div>
-  <p class="section-desc">관리자단에서 설정한 변경기한·취소기한 정책이 course-enrolled.html의 액션 버튼 활성/비활성과 이유 문구로 반영된다.</p>
+  <p class="section-desc">관리자단에서 설정한 변경기한(기본 5일)·취소기한(기본 3일) 정책이 course-enrolled.html의 액션 버튼 활성/비활성과 이유 문구로 반영된다. 두 정책 모두 Phase 1에 존재하며 자율 신청 코스에 노출된다.</p>
 
   <div class="subsection">
     <div class="subsection-title">16.1 정책 상태 → UI 매핑</div>

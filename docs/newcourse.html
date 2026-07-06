@@ -407,7 +407,7 @@
     <div class="reason">
       <div class="reason-body">
         <p class="rt">그린필드 = 진도 정합성·운영 모델·UX 자유.</p>
-        <p class="rd">레거시 호환 책임이 없으니 슬롯 단위 진도율·결정적 정합성·등록 채널 3종·개인별 수강 기간·만료 정책을 처음부터 깔끔히 박을 수 있다.</p>
+        <p class="rd">레거시 호환 책임이 없으니 슬롯 단위 진도율·결정적 정합성·등록 채널(현재 수동·자율 2종, 자동 등록은 Phase 2)·개인별 수강 기간을 처음부터 깔끔히 박을 수 있다.</p>
       </div>
     </div>
   </div>
@@ -598,21 +598,21 @@
       <div class="tree">코스
 ├─ 메타·정책
 │   ├─ 이름·설명·강사
-│   ├─ 최대 운영 기간
+│   ├─ 최대 운영 기간 (1차 숨김·비필수·후순위)
 │   └─ 코스 전체 수료 기준
 ├─ 커리큘럼 (학습 순서·구성)
 │   └─ <b>에셋 + 수료 조건</b>
-│       ├─ ★ 영상 (시청률 90%)        — 당장 개발
-│       ├─ ★ PDF (조회 완료)          — 당장 개발
-│       ├─ 시험 (60점 통과)            — 개발 후순위
-│       ├─ 설문 (제출 완료)            — 개발 후순위
-│       ├─ 문서 (조회 완료)            — 개발 후순위
+│       ├─ ★ 영상 (시청률 90%)         — 1차 개발
+│       ├─ ★ 시험 (60점 통과)          — 1차 개발
+│       ├─ ★ 설문 (제출 완료)          — 1차 개발
+│       ├─ ★ 자료/PDF (정보성·수료 제외) — 1차 개발
 │       ├─ 출석 (출석률 100%)          — 개발 후순위
 │       └─ 외부 링크 (방문 기록)       — 개발 후순위
+│         (아티클/문서(page)는 1차 제외)
 └─ <b>수강 등록 정책</b>
-    ├─ 채널 A: 관리자 수동 등록 (명단·그룹)
-    ├─ 채널 B: 학습자 자율 신청 (신청 가능 그룹)
-    ├─ 채널 C: 가입 시 자동 등록 (그룹 매핑)
+    ├─ 채널 A: 관리자 수동 등록 (명단·그룹)   — 현재 구현
+    ├─ 채널 B: 학습자 자율 신청 (신청 가능 그룹) — 현재 구현
+    ├─ 채널 C: 가입 시 자동 등록 (그룹 매핑)  — Phase 2 예정·현재 미구현
     └─ 수강 기간 (날짜 / 등록일+N일 / 무제한)</div>
     </div>
 
@@ -623,19 +623,19 @@
       <div class="tree">Course
 ├─ meta · policy
 │   ├─ title · description · instructor
-│   ├─ maxRunDays
+│   ├─ maxRunDays (UI 1차 숨김·비필수)
 │   └─ courseCompletionRule
 ├─ Curriculum (independent object)
 │   └─ Slot[] (sequence)
 │       ├─ contentRef → Asset
-│       │   (video/quiz/survey/page/
-│       │    offline_attendance/external_link)
+│       │   (video/exam/survey/pdf/
+│       │    offline/external_link)
 │       └─ completion policy
 │           (watchRate / passScore / ...)
 └─ <b>EnrollmentPolicy</b>
-    ├─ adminAssign (manual: roster / group)
-    ├─ selfSignup (allowedGroups[])
-    ├─ autoOnSignup (groupMapping[])
+    ├─ adminAssign (manual: roster / group)  — 현재 구현
+    ├─ memberApply (self signup)             — 현재 구현
+    ├─ autoOnSignup (groupMapping[])         — Phase 2 예정·미구현
     └─ studyWindow (fixed / days / unlimited)
 
 Enrollment[] (per learner)
@@ -662,7 +662,7 @@ Enrollment[] (per learner)
     </tr>
     <tr>
       <th>에셋</th>
-      <td><span class="dev">Slot.contentRef → Asset</span> · 실제 학습 콘텐츠 (영상·시험·설문·문서·출석·외부 링크)</td>
+      <td><span class="dev">Slot.contentRef → Asset</span> · 실제 학습 콘텐츠 (영상·시험·설문·자료(PDF)·출석·외부 링크). 아티클/문서(page)는 1차 제외</td>
     </tr>
     <tr>
       <th>수료 조건</th>
@@ -674,7 +674,7 @@ Enrollment[] (per learner)
     </tr>
     <tr>
       <th>수강 등록 정책</th>
-      <td><span class="dev">EnrollmentPolicy</span> · 코스에 학습자가 어떻게 들어오는지 정의. 채널 3종(관리자 수동·자율 신청·가입 시 자동) + 수강 기간</td>
+      <td><span class="dev">EnrollmentPolicy</span> · 코스에 학습자가 어떻게 들어오는지 정의. 현재 2개 채널(관리자 수동 등록·자율 신청 — 독립 토글, 둘 다 가능, 최소 1개) + 수강 기간. 가입 시 자동 등록은 Phase 2 예정·현재 미구현</td>
     </tr>
     <tr>
       <th>등록(수강생)</th>
@@ -704,7 +704,7 @@ Enrollment[] (per learner)
         <div class="sb-title">메타·정책 컨테이너</div>
         <ul class="sb-list">
           <li>메타: 제목·설명·분류·강사</li>
-          <li>정책: 최대 운영 기간 · 코스 전체 수료 기준</li>
+          <li>정책: 코스 전체 수료 기준 (최대 운영 기간은 1차 숨김·비필수·후순위)</li>
           <li>참조: 커리큘럼 1개</li>
           <li>상태: 초안 / 운영중 / 아카이브</li>
         </ul>
@@ -723,9 +723,10 @@ Enrollment[] (per learner)
         <span class="sb-tag">수강 등록 정책 (EnrollmentPolicy)</span>
         <div class="sb-title">학습자가 어떻게 들어오나</div>
         <ul class="sb-list">
-          <li>채널 A: 관리자 수동 등록 (명단·그룹)</li>
-          <li>채널 B: 학습자 자율 신청 (신청 가능 그룹)</li>
-          <li>채널 C: 가입 시 자동 등록 (그룹 매핑)</li>
+          <li>채널 A: 관리자 수동 등록 (명단·그룹) — 현재 구현</li>
+          <li>채널 B: 학습자 자율 신청 (신청 가능 그룹) — 현재 구현</li>
+          <li>채널 A·B는 독립 토글 · 둘 다 가능 · 최소 1개</li>
+          <li>채널 C: 가입 시 자동 등록 (그룹 매핑) — Phase 2 예정·현재 미구현</li>
           <li>수강 기간: 날짜 / 등록일+N일 / 무제한</li>
         </ul>
       </div>
@@ -748,20 +749,20 @@ Enrollment[] (per learner)
 
   <h3>에셋 종류 + 각 수료 조건</h3>
   <div class="note" style="border:1.5px solid var(--black);">
-    <strong>1차 개발 범위:</strong> <strong>영상 · PDF</strong> 두 가지를 먼저 개발합니다. 나머지(시험·설문·문서·출석·외부 링크)는 <strong>개발 후순위</strong>입니다. 항목별 자세한 수료 기준 정의는 후속 문서화로 진행합니다.
+    <strong>1차 개발 범위:</strong> <strong>영상 · 자료(PDF) · 시험 · 설문</strong> 네 가지를 먼저 개발합니다(온라인 빌더 프로토타입 반영). 나머지(출석·외부 링크)는 <strong>개발 후순위</strong>이며, 아티클/문서(page)는 <strong>1차 제외</strong>입니다. 항목별 자세한 수료 기준 정의는 후속 문서화로 진행합니다.
   </div>
   <table>
     <tr><th>에셋 종류</th><td><strong>수료 조건</strong> · 비고</td></tr>
-    <tr><th>영상 <span style="color:var(--muted-gray);font-weight:500;">(video)</span></th><td><strong>시청률 ≥ 90%</strong> · PDF는 별도 에셋 대신 문서 에셋의 sub-format으로 흡수 예정<span class="tbd">검토중</span></td></tr>
-    <tr><th>문서 <span style="color:var(--muted-gray);font-weight:500;">(page)</span></th><td><strong>조회 완료</strong> · 텍스트·이미지·임베드. 노션 스타일 본문 작성</td></tr>
-    <tr><th>시험 <span style="color:var(--muted-gray);font-weight:500;">(quiz)</span></th><td><strong>통과 점수 ≥ 60</strong> · 시험·퀴즈</td></tr>
+    <tr><th>영상 <span style="color:var(--muted-gray);font-weight:500;">(video)</span></th><td><strong>시청률 ≥ 90%</strong> · 수료/이수 조건에 포함</td></tr>
+    <tr><th>자료 <span style="color:var(--muted-gray);font-weight:500;">(pdf)</span></th><td><strong>수료 기준에 미포함 (정보성 자료)</strong> · 독립 유형. 한 번이라도 열면 진도율만 반영, 수료/이수 집계 제외. 아티클/문서(page)의 sub-format이 아닌 독립 슬롯 타입</td></tr>
+    <tr><th>시험 <span style="color:var(--muted-gray);font-weight:500;">(exam)</span></th><td><strong>통과 점수 ≥ 60</strong> · 시험·퀴즈</td></tr>
     <tr><th>설문 <span style="color:var(--muted-gray);font-weight:500;">(survey)</span></th><td><strong>제출 완료</strong> · 설문</td></tr>
     <tr><th>출석 <span style="color:var(--muted-gray);font-weight:500;">(offline_attendance)</span></th><td><strong>출석률 = 100%</strong> · 오프라인 출석</td></tr>
     <tr><th>외부 링크 <span style="color:var(--muted-gray);font-weight:500;">(external_link)</span></th><td><strong>방문 기록</strong> · 외부 링크 (강제 조건 없음)</td></tr>
   </table>
 
   <div class="note">
-    <strong>레거시와의 결정적 차이.</strong> 레거시는 <strong>페이지 단위 진도율</strong>이라 분모가 가변이다. 콘텐츠 편집이 진도율을 흔든다. newcourse는 <strong>슬롯 단위(에셋 + 수료 조건 묶음)</strong>로 카운트하므로 에셋 내부 콘텐츠(영상 교체·문서 수정 등)는 자유롭게 편집해도 진도율이 흔들리지 않는다.
+    <strong>레거시와의 결정적 차이.</strong> 레거시는 <strong>페이지 단위 진도율</strong>이라 분모가 가변이다. 콘텐츠 편집이 진도율을 흔든다. newcourse는 <strong>슬롯 단위(에셋 + 수료 조건 묶음)</strong>로 카운트하므로 에셋 내부 콘텐츠(영상 교체·자료 교체 등)는 자유롭게 편집해도 진도율이 흔들리지 않는다.
   </div>
 
   <h3>슬롯 부가 정책 — 진입·공개 제어</h3>
@@ -790,32 +791,31 @@ Enrollment[] (per learner)
   </table>
   -->
 
-  <h3>수강 등록 채널 3종</h3>
-  <p>현재 운영 케이스 4가지(관리자 일괄 강제·관리자 그룹별 강제·자율 신청·가입 시 자동)를 다음 3개 채널로 통합합니다.</p>
+  <h3>수강 등록 채널 — 현재 2개 (+ Phase 2 예정 1개)</h3>
+  <p>현재 운영 케이스를 다음 채널로 통합합니다. <strong>현재 온라인 빌더에는 A·B 2개 채널만 구현</strong>되어 있으며(관리자 등록 / 회원 신청 독립 토글), <strong>C(가입 시 자동 등록)는 Phase 2 예정·현재 미구현</strong>입니다.</p>
   <table>
-    <tr><th>A · 관리자 수동 등록</th><td>관리자가 명단(엑셀 업로드) 또는 그룹을 선택해 일괄 등록. 100~1000명 단위 강제 등록 케이스 포함</td></tr>
-    <tr><th>B · 학습자 자율 신청</th><td>코스를 "신청 가능"으로 열어둠. 신청 권한을 특정 그룹으로 제한 가능. 학습자가 임의 시점에 신청 → 등록</td></tr>
-    <tr><th>C · 가입 시 자동 등록</th><td>회원가입 시 부여되는 그룹과 코스를 매핑. 신규 가입자가 그룹에 속하면 자동으로 해당 코스에 등록. 예: "신입사원" 그룹 가입 → "신입 온보딩" 자동 등록</td></tr>
+    <tr><th>A · 관리자 수동 등록 <span style="color:var(--muted-gray);font-weight:500;">(현재 구현)</span></th><td>관리자가 명단(엑셀 업로드) 또는 그룹을 선택해 일괄 등록. 100~1000명 단위 강제 등록 케이스 포함</td></tr>
+    <tr><th>B · 학습자 자율 신청 <span style="color:var(--muted-gray);font-weight:500;">(현재 구현)</span></th><td>코스를 "신청 가능"으로 열어둠. 신청 권한을 특정 그룹으로 제한 가능. 학습자가 임의 시점에 신청 → 등록</td></tr>
+    <tr><th>C · 가입 시 자동 등록 <span class="tbd">Phase 2 예정·미구현</span></th><td>회원가입 시 부여되는 그룹과 코스를 매핑. 신규 가입자가 그룹에 속하면 자동으로 해당 코스에 등록. 예: "신입사원" 그룹 가입 → "신입 온보딩" 자동 등록. <strong>현재 코드에는 없음(autoOnSignup 미구현)</strong></td></tr>
   </table>
-  <p style="font-size:14px;color:var(--muted-gray);margin-top:8px;">※ 채널 A·B·C는 동시 활성 가능. 한 코스에 여러 채널을 함께 열어둘 수 있음.</p>
+  <p style="font-size:14px;color:var(--muted-gray);margin-top:8px;">※ 현재는 채널 A·B 2개만 사용 가능. 두 채널은 <strong>독립 토글</strong>로 동시 활성 가능하며 <strong>최소 1개</strong>는 켜져 있어야 합니다. 채널 C는 Phase 2에서 추가 예정.</p>
 
   <h3>수강 기간 (등록 단위)</h3>
   <table>
     <tr><th>fixed</th><td>코스에 지정된 시작·종료 일자 동안 학습 가능. 모든 등록자가 같은 윈도우 공유</td></tr>
     <tr><th>days</th><td><strong>각 학습자 등록일 기준 N일</strong>. 등록 시점이 다르면 만료 시점도 다름</td></tr>
-    <tr><th>unlimited</th><td>코스 자체 만료(maxRunDays) 전까지 무제한</td></tr>
+    <tr><th>unlimited</th><td>별도 만료 없이 무제한 (최대 운영 기간(maxRunDays)은 1차 숨김·비필수·후순위)</td></tr>
   </table>
 
   <h3>컴플라이언스</h3>
   <ul>
     <li><strong>시간대 제한</strong>: 특정 요일·시간만 학습 가능 (법정 의무교육 대응)</li>
     <li><strong>유휴 모니터링</strong>: 일정 시간 무동작 시 학습 시간 카운트 중단</li>
-    <li><strong>서약서</strong>: 학습 시작 전 동의서 표시 및 동의 기록</li>
   </ul>
 
   <div class="note">
-    <strong>참고.</strong> 시간대 제한·유휴 모니터링·서약서는 법정 의무교육(성희롱·개인정보·산안 등) 운영 필수 옵션. 일반 코스에는 기본 비활성.<br><br>
-    <strong>차수가 없다는 것의 의미.</strong> 같은 의무교육을 매년 돌리고 싶을 때, 레거시는 매년 새 코스를 복제했지만 newcourse는 <strong>동일 코스를 유지하고 등록자만 갱신</strong>합니다. 1년차 등록자는 만료 시 자동 등록 해제, 새 회원은 채널 C로 자동 재등록되는 식. 정기 갱신 추적이 정식 요구가 되면 그때 옵션 객체로 추가합니다.
+    <strong>참고.</strong> 시간대 제한·유휴 모니터링은 법정 의무교육(성희롱·개인정보·산안 등) 운영 필수 옵션. 일반 코스에는 기본 비활성.<br><br>
+    <strong>차수가 없다는 것의 의미.</strong> 같은 의무교육을 매년 돌리고 싶을 때, 레거시는 매년 새 코스를 복제했지만 newcourse는 <strong>동일 코스를 유지하고 등록자만 갱신</strong>합니다. 1년차 등록자는 만료 시 자동 등록 해제, 새 회원은 채널 C(가입 시 자동 등록 · Phase 2 예정)로 자동 재등록되는 식. 정기 갱신 추적이 정식 요구가 되면 그때 옵션 객체로 추가합니다.
   </div>
 </section>
 
@@ -859,7 +859,7 @@ Enrollment[] (per learner)
     <tr><th>학습 항목</th><td><strong>완료 신호</strong> · 비고</td></tr>
     <tr><th>레거시 페이지 콘텐츠 (v1)</th><td>지금 그대로 — 페이지 진도율 100% → "완료"</td></tr>
     <tr><th>영상</th><td>시청률 ≥ 90% → "완료"</td></tr>
-    <tr><th>PDF</th><td>끝까지 스크롤 또는 진도율 100% → "완료"</td></tr>
+    <tr><th>자료(PDF)</th><td>열람 시 진도율만 반영 (정보성 자료 · 수료/이수 집계 제외)</td></tr>
     <tr><th>오디오 <span style="color:var(--muted-gray);font-weight:500;">(후순위)</span></th><td>재생률 ≥ 90% → "완료"</td></tr>
     <tr><th>문서 (마크다운 등) <span style="color:var(--muted-gray);font-weight:500;">(후순위)</span></th><td>끝까지 스크롤 또는 N초 체류 → "완료"</td></tr>
     <tr><th>퀴즈·시험 <span style="color:var(--muted-gray);font-weight:500;">(후순위)</span></th><td>합격 점수 통과 → "완료"</td></tr>
@@ -920,9 +920,9 @@ Enrollment[] (per learner)
   <p class="lede-sm">데이터 모델 차원에서 빌더·에디터·관리를 분리합니다. UI는 빌더 v1 단일 화면 구조를 유지합니다.</p>
 
   <table>
-    <tr><th>① 코스 빌더</th><td>코스 메타·정책·커리큘럼 연결 · 수강 등록 정책(채널 A/B/C) · <strong>유형별 3개 (강의 / 오프라인 / 블렌디드)</strong></td></tr>
+    <tr><th>① 코스 빌더</th><td>코스 메타·정책·커리큘럼 연결 · 수강 등록 정책(현재 채널 A·B · 채널 C는 Phase 2 예정) · <strong>유형별 3개 (강의 / 오프라인 / 블렌디드)</strong></td></tr>
     <tr><th>② 커리큘럼 빌더</th><td>커리큘럼에 에셋 + 수료 조건 추가 · 순서 배치 · 커리큘럼 버전 발행</td></tr>
-    <tr><th>③ 콘텐츠 에디터</th><td>에셋 내부 본문 작성 · 종류별 에디터 (영상 업로드 / 문서 / 시험 출제 / 설문 설계)</td></tr>
+    <tr><th>③ 콘텐츠 에디터</th><td>에셋 내부 본문 작성 · 종류별 에디터 (영상 업로드 / 자료(PDF) 업로드 / 시험 출제 / 설문 설계). 아티클/문서(page) 에디터는 1차 제외</td></tr>
     <tr><th>④ 수강생 관리</th><td>등록자 명단 · 수강 기간·진도 모니터링 · 수동 등록·해제 · 학습자별 면제·대체 처리</td></tr>
   </table>
 
@@ -1061,12 +1061,12 @@ Enrollment[] (per learner)
         <div class="pstep-sub">기본 운영</div>
       </div>
       <div>
-        <div class="phase-name">에셋 + 수료 조건 시스템 + 등록 채널 3종</div>
-        <p class="phase-desc">코스 유형 3종 · 에셋 6종 + 수료 조건 · 슬롯 단위 진도율 · 수강 등록 정책(채널 A/B/C) · 최대 운영 기간 · 기본 빌더 3종.</p>
+        <div class="phase-name">에셋 + 수료 조건 시스템 + 등록 채널 2종</div>
+        <p class="phase-desc">코스 유형 3종 · 에셋 6종 + 수료 조건(1차 개발: 영상·자료(PDF)·시험·설문) · 슬롯 단위 진도율 · 수강 등록 정책(채널 A·B) · 기본 빌더 3종. (최대 운영 기간은 1차 숨김·비필수·후순위)</p>
         <ul class="phase-items">
           <li>코스 / 커리큘럼 / 수강 등록 정책 3블록 (개발: Course / Curriculum / EnrollmentPolicy)</li>
           <li>슬롯 단위 진도율 · 결정적 정합성</li>
-          <li>등록 채널 3종 (관리자 수동 / 자율 신청 / 가입 시 자동) + 그룹 매커니즘</li>
+          <li>등록 채널 2종 (관리자 수동 등록 / 자율 신청 — 독립 토글·둘 다 가능·최소 1개) + 그룹 매커니즘. 가입 시 자동 등록(채널 C)은 Phase 2 예정·현재 미구현</li>
           <li>개인별 수강 기간 (등록일 기준)</li>
           <li>온라인 / 오프라인 / 블렌디드 빌더 분리 진입</li>
         </ul>
@@ -1075,16 +1075,17 @@ Enrollment[] (per learner)
     <div class="phase">
       <div>
         <div class="pstep">PHASE 2</div>
-        <div class="pstep-sub">확장 정책 <span class="tbd">시점 미정</span></div>
+        <div class="pstep-sub">확장 정책 <span class="tbd">프로토타입 반영·백엔드 연결 대상</span></div>
       </div>
       <div>
-        <div class="phase-name">선수조건 · 드립 학습 · 컴플라이언스</div>
-        <p class="phase-desc">슬롯 진입 조건과 시간대 정책. 법정 의무교육 운영 요구 수용.</p>
+        <div class="phase-name">선수조건 · 드립 학습 · 컴플라이언스 · 가입 시 자동 등록</div>
+        <p class="phase-desc">슬롯 진입 조건과 시간대 정책. 법정 의무교육 운영 요구 수용. 아래 항목 상당수는 이미 온라인 빌더 프로토타입에 반영되어 있으며, 남은 작업은 백엔드 연결입니다.</p>
         <ul class="phase-items">
-          <li>선수조건 — 단순 앞 슬롯 1:1 (개발: prerequisiteIds)</li>
-          <li>드립 학습 — 등록일·학습시작일 기준 (개발: releaseAfter / dripLearning)</li>
-          <li>시간대 제한 · 유휴 모니터링 · 서약서</li>
-          <li>커리큘럼 버전 발행 로직 (draft → published → deprecated)</li>
+          <li>선수조건 — 단순 앞 슬롯 1:1 (개발: prerequisiteIds) <span class="tbd">프로토타입 반영됨</span></li>
+          <li>드립 학습 — 등록일·학습시작일 기준 (개발: releaseAfter / dripLearning) <span class="tbd">프로토타입 반영됨</span></li>
+          <li>시간대 제한 · 유휴 모니터링 <span class="tbd">프로토타입 반영됨</span></li>
+          <li>커리큘럼 버전 발행 로직 (draft → published → deprecated) <span class="tbd">프로토타입 반영됨</span></li>
+          <li>가입 시 자동 등록 (채널 C · 개발: autoOnSignup / groupMapping) — 현재 미구현</li>
         </ul>
       </div>
     </div>
@@ -1148,12 +1149,12 @@ Enrollment[] (per learner)
 
   <h3>미해결 논의 — 다음 회의 안건</h3>
   <ul>
-    <li>PDF를 page sub-format으로 흡수할지, 별도 슬롯 타입으로 유지할지<span class="tbd">검토중</span></li>
+    <li>(정리 완료) 자료(PDF)는 독립 슬롯 타입으로 확정 — page sub-format 흡수안은 폐기. 아티클/문서(page)는 1차 제외</li>
     <li>pageSequenceLock 옵션의 정확한 의미와 슬롯 단위 진도율과의 관계<span class="tbd">운영팀</span></li>
     <li>레거시 → newcourse 마이그레이션 컨설팅 트랙 개시 시점<span class="tbd">사업측</span></li>
     <li>커리큘럼 버전 발행 후 슬롯 추가/삭제 시 새 버전 자동 생성 트리거 조건<span class="tbd">백엔드</span></li>
-    <li>채널 C(가입 시 자동 등록)의 트리거 시점 — 가입 즉시 vs 가입 후 그룹 매핑 완료 시점<span class="tbd">운영팀</span></li>
-    <li>코스 만료(maxRunDays) 시 진행 중인 등록자 처리 — 자동 해제 vs 학습 완료까지 유지<span class="tbd">운영팀</span></li>
+    <li>채널 C(가입 시 자동 등록 · Phase 2 예정·현재 미구현)의 트리거 시점 — 가입 즉시 vs 가입 후 그룹 매핑 완료 시점<span class="tbd">운영팀</span></li>
+    <li>코스 만료(maxRunDays · 1차 숨김·비필수) 도입 시 진행 중인 등록자 처리 — 자동 해제 vs 학습 완료까지 유지<span class="tbd">운영팀</span></li>
     <li>차수(회차) 정식 요구 사례 수집 — 어떤 코스에서 동기 학습·정원 제한이 실제로 필요한지<span class="tbd">운영팀</span></li>
   </ul>
 </section>
