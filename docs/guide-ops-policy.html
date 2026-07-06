@@ -172,7 +172,7 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.3 · 2026-06-25</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.4 · 2026-07-06</span>
   <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
@@ -290,7 +290,7 @@ function closeMobileSidebar() {
             <td><strong>코스 개설</strong> — 기본정보 입력부터 퍼블리싱까지</td>
             <td>고객사 담당자</td>
             <td>offline-builder</td>
-            <td>4.7 퍼블리싱 8항목 체크</td>
+            <td>4.7 퍼블리싱 11항목 체크</td>
           </tr>
           <tr>
             <td><span class="b b-violet">FLOW-02</span></td>
@@ -322,7 +322,7 @@ function closeMobileSidebar() {
           </tr>
           <tr>
             <td><span class="b b-orange">—</span></td>
-            <td><strong>퍼블리싱 체크리스트</strong> — 공개 전 8항목 확인</td>
+            <td><strong>퍼블리싱 체크리스트</strong> — 공개 전 11항목 확인</td>
             <td>고객사 담당자 / 운영팀</td>
             <td>offline-builder</td>
             <td>4.7 퍼블리싱</td>
@@ -380,10 +380,10 @@ function closeMobileSidebar() {
 <div id="page-case-publish" class="page">
   <div class="page-tag">운영 케이스 Phase 1</div>
   <div class="page-title">퍼블리싱 체크리스트</div>
-  <div class="page-desc">코스를 학습자에게 공개하려면 아래 8가지 항목이 모두 충족돼야 퍼블리싱 버튼이 활성화됩니다. 하나라도 빠지면 버튼이 눌리지 않습니다.</div>
+  <div class="page-desc">코스를 학습자에게 공개하려면 아래 11개 항목이 모두 충족돼야 퍼블리싱 버튼이 활성화됩니다. 하나라도 빠지면 버튼이 눌리지 않습니다.</div>
 
   <div class="guide-section">
-    <div class="section-title">퍼블리싱 필수 8항목 <span class="section-tag">핵심</span></div>
+    <div class="section-title">퍼블리싱 필수 11항목 <span class="section-tag">핵심</span></div>
     <div class="overflow-x-auto mt-3">
       <table class="xl-table">
         <thead>
@@ -398,16 +398,19 @@ function closeMobileSidebar() {
           <tr><td class="text-center font-bold">①</td><td><strong>코스명</strong></td><td>기본정보 섹션 1 — 코스명 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
           <tr><td class="text-center font-bold">②</td><td><strong>담당 강사</strong></td><td>기본정보 섹션 1 — 강사 선택 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
           <tr><td class="text-center font-bold">③</td><td><strong>교육 장소</strong></td><td>기본정보 섹션 1 — 장소명 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
-          <tr><td class="text-center font-bold">④</td><td><strong>신청 기간</strong></td><td>수강 신청 설정 — 신청 오픈/마감 일시 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
-          <tr><td class="text-center font-bold">⑤</td><td><strong>차수 1개 이상</strong></td><td>커리큘럼 사이드바 — 차수 생성 여부</td><td>"최소 1개 차수 필요" 안내</td></tr>
-          <tr><td class="text-center font-bold">⑥</td><td><strong>모든 차수에 회차</strong></td><td>커리큘럼 사이드바 — 각 차수에 회차가 1개 이상 있는지</td><td>경고 표시</td></tr>
-          <tr><td class="text-center font-bold">⑦</td><td><strong>회차 날짜·시간</strong></td><td>각 회차에 날짜·시작·종료 시간 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
-          <tr><td class="text-center font-bold">⑧</td><td><strong>수료 조건 1개</strong></td><td>수료 조건 섹션 — 출석률 기준 설정 여부 (기본 75%)</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">④</td><td><strong>등록 방식 1개 이상</strong></td><td>수강 신청 설정 — 자율 신청 / 지정 등록 중 최소 1개 ON (둘 다 ON 가능)</td><td>"등록 방식을 최소 1개 이상 켜야 합니다" 안내</td></tr>
+          <tr><td class="text-center font-bold">⑤</td><td><strong>신청 기간</strong></td><td>수강 신청 설정 — 신청 오픈/마감 일시 입력 여부 (자율 신청 + 상시모집 아닐 때만 필수)</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">⑥</td><td><strong>차수 1개 이상</strong></td><td>커리큘럼 사이드바 — 차수 생성 여부</td><td>"최소 1개 차수 필요" 안내</td></tr>
+          <tr><td class="text-center font-bold">⑦</td><td><strong>모든 차수에 회차</strong></td><td>커리큘럼 사이드바 — 각 차수에 회차가 1개 이상 있는지</td><td>경고 표시</td></tr>
+          <tr><td class="text-center font-bold">⑧</td><td><strong>회차 날짜·시간</strong></td><td>각 회차에 날짜·시작·종료 시간 입력 여부</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">⑨</td><td><strong>다중 조합형 차수 일정 미겹침</strong></td><td>"여러 차수 선택"(다중 조합)일 때 — 함께 선택 가능한 차수끼리 일정이 겹치지 않는지</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">⑩</td><td><strong>배정 인원 일정 겹침 없음</strong></td><td>지정 등록일 때 — 같은 학습자가 시간이 겹치는 차수에 중복 배정되지 않았는지</td><td>퍼블리싱 버튼 비활성</td></tr>
+          <tr><td class="text-center font-bold">⑪</td><td><strong>수료 조건 1개</strong></td><td>수료 조건 섹션 — 출석률 기준 설정 여부 (기본 75%)</td><td>퍼블리싱 버튼 비활성</td></tr>
         </tbody>
       </table>
     </div>
     <div class="callout callout-green mt-2">
-      8항목 모두 충족 시 퍼블리싱 버튼이 활성화되며, 클릭 즉시 학습자 앱에 코스가 노출됩니다.
+      11항목 모두 충족 시 퍼블리싱 버튼이 활성화되며, 클릭 즉시 학습자 앱에 코스가 노출됩니다.
     </div>
   </div>
 
@@ -482,7 +485,7 @@ function closeMobileSidebar() {
         <div class="step-num">3</div>
         <div class="step-body">
           <div class="step-action">섹션 2: 수강 신청 설정 (약 2분)</div>
-          <div class="step-note">수강 방식(자율/강제) · 신청 오픈·마감 일시 · 취소·변경 규정 · 재수강 허용 여부 · 지각 기준(기본 10분). <strong>취소·변경 규정은 구조화 값(취소 N일 전·변경 M일 전·취소불가·기준 단위)으로 입력하면 안내 문구가 자동 생성</strong>됩니다(평문 입력 아님 · 2026-06-16)</div>
+          <div class="step-note">수강 방식(자율 신청 / 지정 등록 — <strong>독립 토글, 둘 다 켤 수 있고 최소 1개 필수</strong>) · 신청 오픈·마감 일시 · 취소·변경 규정 · 지각 기준(기본 10분). <strong>취소·변경 규정은 구조화 값(취소 N일 전·변경 M일 전·취소불가·기준 단위)으로 입력하면 안내 문구가 자동 생성</strong>됩니다(평문 입력 아님 · 2026-06-16). 취소 정책·일정 변경 제한은 자율 신청을 켠 경우에만 노출됩니다</div>
         </div>
       </div>
       <div class="step-row">
@@ -509,8 +512,8 @@ function closeMobileSidebar() {
       <div class="step-row">
         <div class="step-num">7</div>
         <div class="step-body">
-          <div class="step-action">퍼블리싱 8항목 확인 → "퍼블리싱" 클릭</div>
-          <div class="step-note">버튼이 활성화되면 8항목 모두 충족된 상태. 클릭 즉시 학습자 앱에 노출</div>
+          <div class="step-action">퍼블리싱 11항목 확인 → "퍼블리싱" 클릭</div>
+          <div class="step-note">버튼이 활성화되면 11항목 모두 충족된 상태. 클릭 즉시 학습자 앱에 노출</div>
         </div>
       </div>
     </div>
@@ -530,13 +533,13 @@ function closeMobileSidebar() {
         <tbody>
           <tr>
             <td><strong>수강 방식</strong></td>
-            <td>자율 수강 / 지정 등록</td>
-            <td>학습자가 직접 고르는 교육 → 자율. 법정의무교육·전사 필수교육 → 지정 등록</td>
+            <td>자율 신청 / 지정 등록 (독립 토글 · 둘 다 가능)</td>
+            <td>학습자가 직접 고르는 교육 → 자율. 법정의무교육·전사 필수교육 → 지정 등록. 병행도 가능(자율 + 일부 지정 배정)</td>
           </tr>
           <tr>
-            <td><strong>재수강 허용</strong></td>
-            <td>ON / OFF (기본 OFF)</td>
-            <td>매년 재이수 필요한 교육(법정의무 등) → 반드시 ON</td>
+            <td><strong>재수강 허용</strong> <span class="b b-slate">Phase 2</span></td>
+            <td>현재 빌더 미구현</td>
+            <td>매년 재이수 교육의 재수강 허용 토글은 <strong>아직 빌더에 없습니다(Phase 2 예정)</strong>. 현재는 매 시즌 새 코스/차수를 만들어 운영</td>
           </tr>
           <tr>
             <td><strong>지각 기준</strong></td>
@@ -627,14 +630,9 @@ function closeMobileSidebar() {
             <td>중복 신청은 시스템에서 자동 차단. 추가 대응 불필요</td>
           </tr>
           <tr>
-            <td>재수강 허용 OFF + 기수료</td>
-            <td>"이미 수료한 교육" 안내</td>
-            <td>재수강이 필요하면 고객사 담당자에게 재수강 허용 토글 요청</td>
-          </tr>
-          <tr>
-            <td>재수강 허용 ON + 기수료</td>
-            <td>다른 차수 신청 가능</td>
-            <td>정상 신청 가능. 별도 대응 불필요</td>
+            <td>이미 수료한 교육 재신청 (재수강)</td>
+            <td>재수강 제어 미구현 <span class="b b-slate">Phase 2</span></td>
+            <td>재수강 허용 토글은 아직 없습니다. 현재는 재이수가 필요하면 새 코스/차수를 개설해 운영</td>
           </tr>
           <tr>
             <td>취소 기한 내 취소 요청</td>
@@ -709,7 +707,7 @@ function closeMobileSidebar() {
           <tr><td>학습자 신청 여부</td><td>학습자가 직접 신청하지 않음. 고객사 담당자가 그룹 단위로 일괄 배정</td></tr>
           <tr><td>취소 권한</td><td>학습자 직접 취소 불가. 고객사 담당자만 수강생 관리 화면에서 제거 가능</td></tr>
           <tr><td>정원 계산</td><td>그룹 인원 합산으로 정원 자동 계산. 별도 정원 입력 불필요</td></tr>
-          <tr><td>법정의무교육</td><td>재수강 허용 토글을 반드시 ON으로 설정 (매년 재이수 필요)</td></tr>
+          <tr><td>법정의무교육 (매년 재이수)</td><td>재수강 허용 토글은 <strong>현재 빌더 미구현(Phase 2 예정)</strong>. 현재는 매년 새 코스/차수를 개설해 재이수 운영 (이력 분리에도 유리)</td></tr>
           <tr><td>앱 노출 시점</td><td>퍼블리싱 즉시 학습자 앱에 노출 (Phase 3에서 시점 조정 가능 예정)</td></tr>
         </tbody>
       </table>
@@ -769,7 +767,7 @@ function closeMobileSidebar() {
         <div class="step-num" style="background:#16a34a">5</div>
         <div class="step-body">
           <div class="step-action">수업 종료 시각 도래 → 회차 자동 종료 (별도 클릭 없음)</div>
-          <div class="step-note">남은 미확인 인원 전원 결석으로 일괄 전환. 마감 취소 불가</div>
+          <div class="step-note">남은 미확인 인원은 운영자가 직접 정리합니다("미확인 일괄 처리" 도구로 전원 출석/전원 결석/개별 처리). 자동 결석 전환은 Phase 2 예정. 회차 종료 시각은 되돌릴 수 없음</div>
         </div>
       </div>
     </div>
@@ -825,7 +823,7 @@ function closeMobileSidebar() {
         <div class="step-num" style="background:#2563eb">1</div>
         <div class="step-body">
           <div class="step-action">관리자 메인 (offline-list.html) 접속</div>
-          <div class="step-note">상단 상태 탭(전체/준비중/모집중/진행중/완료) + 좌측 카테고리 트리 표시</div>
+          <div class="step-note">상단 상태 탭(전체/운영중/공개예약/임시저장/종료) + 좌측 카테고리 트리 표시</div>
         </div>
       </div>
       <div class="step-row">
@@ -864,10 +862,10 @@ function closeMobileSidebar() {
           </tr>
         </thead>
         <tbody>
-          <tr><td><span class="b b-slate">준비중</span></td><td>아직 퍼블리싱 전. 학습자 앱에 안 보임</td><td>퍼블리싱 8항목 확인 → 공개 처리</td></tr>
-          <tr><td><span class="b b-blue">모집중</span></td><td>신청 기간 내. 학습자가 신청 가능한 상태</td><td>잔여석 모니터링. 정원 초과 문의 대응</td></tr>
-          <tr><td><span class="b b-orange">진행중</span></td><td>수업이 진행 중인 상태 (신청 기간 종료 후)</td><td>회차별 출석 관리. QR 운영 준비</td></tr>
-          <tr><td><span class="b b-green">완료</span></td><td>모든 회차 종료 완료 (운영자가 미확인 인원 정리 후)</td><td>출석률 기준으로 수료/미수료 판정 확인</td></tr>
+          <tr><td><span class="b b-slate">임시저장</span></td><td>아직 퍼블리싱 전(draft/saved). 학습자 앱에 안 보임</td><td>퍼블리싱 11항목 확인 → 공개 처리</td></tr>
+          <tr><td><span class="b b-violet">공개예약</span></td><td>지정한 공개 시각에 자동 공개 예약된 상태(scheduled)</td><td>공개 전 미리 지정 등록 배정 가능. 공개 시각 확인</td></tr>
+          <tr><td><span class="b b-green">운영중</span></td><td>퍼블리싱되어 학습자 앱에 노출(active/published). 신청·수업 진행</td><td>잔여석 모니터링 · 회차별 출석 관리 · QR 운영</td></tr>
+          <tr><td><span class="b b-slate">종료</span></td><td>운영 종료(closed). 조회 전용, 출석 처리 불가</td><td>출석률 기준 수료/미수료 판정 확인</td></tr>
         </tbody>
       </table>
     </div>
@@ -879,7 +877,7 @@ function closeMobileSidebar() {
       <table class="xl-table">
         <thead><tr><th style="width:160px">기능</th><th>사용 방법</th><th style="width:180px">활용 케이스</th></tr></thead>
         <tbody>
-          <tr><td>상태 탭 필터</td><td>상단 탭 클릭 (전체/준비중/모집중/진행중/완료)</td><td>현재 진행 중인 코스만 보고 싶을 때</td></tr>
+          <tr><td>상태 탭 필터</td><td>상단 탭 클릭 (전체/운영중/공개예약/임시저장/종료)</td><td>현재 진행 중인 코스만 보고 싶을 때</td></tr>
           <tr><td>카테고리 필터</td><td>좌측 카테고리 트리에서 클릭</td><td>특정 분류 코스만 볼 때</td></tr>
           <tr><td>검색</td><td>검색창에 코스명 입력</td><td>특정 코스를 빠르게 찾을 때</td></tr>
           <tr><td>차수 인라인 확장</td><td>코스 행 클릭</td><td>차수별 잔여석·날짜를 빠르게 확인</td></tr>
@@ -1197,7 +1195,7 @@ function closeMobileSidebar() {
       </div>
       <div class="case-how">
         <span class="case-how-label">💡 어떻게 운영하나요</span>
-        자율 수강 모드. 신청 오픈하면 <strong>5분 만에 마감되는 인기 코스</strong>예요. 한 사람이 여러 번 못 듣게 <strong>재수강 허용은 OFF</strong>로 둡니다. 매월 차수를 추가해서 대기 인원을 흡수하세요.
+        자율 수강 모드. 신청 오픈하면 <strong>5분 만에 마감되는 인기 코스</strong>예요. (재수강 제어 토글은 현재 미구현 · Phase 2 — 같은 코스 중복 신청은 시스템이 자동 차단합니다.) 매월 차수를 추가해서 대기 인원을 흡수하세요.
       </div>
       <div class="case-warn">
         <span class="case-warn-label">⚠️ 주의할 점</span>
@@ -1503,7 +1501,7 @@ function closeMobileSidebar() {
           <tr>
             <td class="text-center font-bold">①</td>
             <td><strong>법정의무교육</strong><br><span class="text-slate-500 text-xs">성희롱 예방·산업안전·개인정보</span></td>
-            <td>지정 등록<br>+ 재수강 ON</td>
+            <td>지정 등록<br><span class="text-slate-500 text-xs">(매년 재이수는 새 코스/차수 개설 — 재수강 토글 Phase 2)</span></td>
             <td><span class="b b-green">✅ 정식 가능</span></td>
             <td>부서별 차수 분리(1차수 영업·2차수 개발) → 그룹 칩으로 전직원 자동 배정 → QR 출석 → 회차 자동 종료 → 출석률 75% 기준 자동 통계</td>
             <td>FLOW-01 + FLOW-03 + FLOW-04</td>
@@ -1596,7 +1594,7 @@ function closeMobileSidebar() {
           <tr>
             <td class="text-center font-bold">⑤</td>
             <td><strong>미수료자 재이수 자동 흐름 없음</strong></td>
-            <td>법정의무 75% 미달자가 다음 차수에 자동 배정되지 않음. "재수강 허용 ON"은 학습자 자율 신청용 토글이고 지정 등록 미수료자엔 미적용</td>
+            <td>법정의무 75% 미달자가 다음 차수에 자동 배정되지 않음. (재수강 허용 토글 자체가 현재 미구현·Phase 2). 미수료자 재이수는 새 차수 지정 등록으로 수동 처리</td>
             <td><span class="b b-orange">사이클</span> ① 첫 사이클 마감 → ② 출석률 통계에서 미수료자 명단 추출 → ③ 다음 차수 지정 등록 그룹에 수동 추가 → ④ 재이수 운영. 4단계를 운영 매뉴얼화</td>
           </tr>
         </tbody>
@@ -1614,7 +1612,7 @@ function closeMobileSidebar() {
       <div class="step-row">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-action">첫 사이클 코스 개설 — 지정 등록 + 재수강 ON + 출석률 75%</div>
+          <div class="step-action">첫 사이클 코스 개설 — 지정 등록 + 출석률 75%</div>
           <div class="step-note">부서별 차수 분리. 전직원 그룹 칩으로 일괄 배정. QR 출석 운영</div>
         </div>
       </div>
@@ -1855,7 +1853,7 @@ function closeMobileSidebar() {
 <div id="page-att-late" class="page">
   <div class="page-tag">1. 출석 처리</div>
   <div class="page-title">지각 기준</div>
-  <div class="page-desc">수업 시작 후 몇 분까지 QR 스캔을 출석으로 인정할지를 차수마다 설정합니다. 기본값은 10분입니다.</div>
+  <div class="page-desc">수업 시작 후 몇 분까지 QR 스캔을 출석으로 인정할지를 코스 단위로 설정합니다(해당 코스 모든 차수에 동일 적용). 기본값은 10분입니다.</div>
 
   <div class="guide-section">
     <div class="section-title">지각 기준 설정별 동작 <span class="section-tag">핵심</span></div>
@@ -2459,7 +2457,7 @@ function closeMobileSidebar() {
 <div id="page-enroll-types" class="page">
   <div class="page-tag">4. 수강신청 관리</div>
   <div class="page-title">신청 방식 2종</div>
-  <div class="page-desc">코스별로 "자율 수강"과 "지정 등록" 중 하나를 선택합니다. 코스 개설 시 고객사 담당자가 결정합니다.</div>
+  <div class="page-desc">코스별로 "자율 수강"과 "지정 등록"을 각각 독립 토글로 켭니다 — <strong>둘 중 하나만 켜도 되고, 둘 다 켤 수도 있습니다(최소 1개는 필수)</strong>. 예: 자율 신청을 받으면서 관리자가 일부 인원을 직접 지정 배정. 코스 개설 시 고객사 담당자가 결정합니다.</div>
 
   <div class="guide-section">
     <div class="section-title">자율 수강 vs 지정 등록 비교 <span class="section-tag">핵심</span></div>
@@ -2509,9 +2507,9 @@ function closeMobileSidebar() {
           <tr><td>정원이 꽉 찼는데 추가 신청 요청</td><td>"마감" 배지 안내. 다른 차수 신청 유도. 대기 기능 없음</td><td>고객사 담당자 판단</td></tr>
           <tr><td>취소 기한이 지났는데 취소 요청</td><td>학습자 직접 취소 불가. 고객사 담당자가 수강생 관리 화면에서 직접 취소 처리</td><td>고객사 담당자</td></tr>
           <tr><td>차수 변경 요청 (A차수 → B차수)</td><td>현재는 기존 차수 취소 후 새 차수 신청으로 처리. 직접 변경 기능은 Phase 2 예정</td><td>고객사 담당자</td></tr>
-          <tr><td>재수강 신청 (같은 코스 또 듣기)</td><td>코스에 "재수강 허용" 토글이 켜져 있어야 가능. 꺼져 있으면 신청 차단됨</td><td>코스 설정에 따름</td></tr>
+          <tr><td>재수강 신청 (같은 코스 또 듣기)</td><td><strong>재수강 허용 토글은 현재 미구현(Phase 2 예정).</strong> 현재는 같은 코스 중복 수료 제어 기능이 없으며, 재이수는 새 코스/차수 개설로 운영</td><td>고객사 담당자</td></tr>
           <tr><td>같은 코스 여러 차수 동시 신청</td><td>같은 코스 내 중복 신청 자동 차단됨</td><td>시스템 자동 처리</td></tr>
-          <tr><td>법정의무교육 매년 재이수</td><td>코스에 "재수강 허용" 토글을 켜야 함. 반드시 확인 필요</td><td>고객사 담당자 설정</td></tr>
+          <tr><td>법정의무교육 매년 재이수</td><td>재수강 허용 토글 미구현(Phase 2) → 현재는 매년 새 코스/차수 개설로 처리</td><td>고객사 담당자 설정</td></tr>
           <tr><td>지정 등록된 수강생이 취소 요청</td><td>학습자 직접 취소 불가. 고객사 담당자가 수강생 관리 화면에서 직접 제거</td><td>고객사 담당자</td></tr>
         </tbody>
       </table>
@@ -2763,7 +2761,7 @@ function closeMobileSidebar() {
           <tr><td>"신청이 안 돼요"</td><td>신청 기간 확인 / 정원 잔여 확인</td><td>기간 외 → 기간 안내. 정원 마감 → 다른 차수 안내</td></tr>
           <tr><td>"신청을 취소하고 싶어요"</td><td>취소 가능 기한 확인</td><td>기한 내 → 직접 취소 안내. 기한 초과 → 운영팀이 직접 취소 처리</td></tr>
           <tr><td>"차수를 바꾸고 싶어요 (A → B)"</td><td>두 차수 모두 잔여석 확인</td><td>기존 취소 후 새 차수 신청으로 처리</td></tr>
-          <tr><td>"같은 코스를 또 신청하려는데 안 돼요"</td><td>코스 재수강 허용 설정 확인</td><td>재수강 허용 OFF면 → 고객사 담당자에게 설정 변경 요청 에스컬레이션</td></tr>
+          <tr><td>"같은 코스를 또 신청하려는데 안 돼요"</td><td>재수강 제어 기능 미구현(Phase 2) 안내</td><td>현재 재수강 허용 토글 없음. 재이수 필요 시 → 고객사 담당자가 새 코스/차수 개설</td></tr>
         </tbody>
       </table>
     </div>
@@ -2794,7 +2792,7 @@ function closeMobileSidebar() {
           <tr><td>출석 상태 수동 변경</td><td><span class="b b-orange">운영팀</span></td><td>출석 관리 화면에서 직접 처리</td></tr>
           <tr><td>수강 신청 직접 취소</td><td><span class="b b-orange">운영팀</span></td><td>수강생 관리 화면에서 직접 처리</td></tr>
           <tr><td>정원 변경 요청</td><td><span class="b b-violet">고객사 담당자</span></td><td>코스 수정 권한 필요 → 고객사 담당자에게 전달</td></tr>
-          <tr><td>재수강 허용 토글 변경</td><td><span class="b b-violet">고객사 담당자</span></td><td>코스 설정 변경 권한 → 고객사 담당자에게 전달</td></tr>
+          <tr><td>재수강 재이수 요청</td><td><span class="b b-violet">고객사 담당자</span></td><td>재수강 허용 토글 미구현(Phase 2) → 새 코스/차수 개설로 처리</td></tr>
           <tr><td>시스템 오류 (버튼 안 눌림, 화면 오류)</td><td><span class="b b-blue">개발팀</span></td><td>오류 화면 캡처 → 기획팀(승우)에게 보고</td></tr>
           <tr><td>정책 자체에 대한 이의 제기</td><td><span class="b b-blue">기획팀</span></td><td>기획팀(승우)에게 전달</td></tr>
           <tr><td>수료 이의 제기 (정정 요청)</td><td><span class="b b-orange">운영팀 → 확인 후 처리</span></td><td>출석 기록 확인 후 오기입이면 수정. 정책 문제이면 기획팀 에스컬레이션</td></tr>
@@ -3079,10 +3077,12 @@ function closeMobileSidebar() {
   <div class="page-desc">코스가 오픈된 뒤에도 차수·회차가 추가되거나 변경되는 일은 운영 일상이에요. 매니저 코칭은 분기마다 차수 추가, 데이터 분석 입문은 매월 차수 추가. 보강 회차도 분기에 한두 번씩 발생합니다. 이 페이지는 변경할 때 어떻게 처리해야 하는지를 정리한 정책입니다.</div>
 
   <div class="guide-section">
-    <div class="section-title">기본 원칙: 종료된 차수는 immutable <span class="section-tag">핵심</span></div>
+    <div class="section-title">기본 원칙: 지난 회차·종료된 차수는 잠금 <span class="section-tag">핵심</span></div>
     <div class="callout callout-blue">
-      <strong>차수가 한 번 "종료(closed)" 상태로 마감되면, 그 차수의 출석률·수료는 다시 바뀌지 않아요.</strong> 그 시점부터 회차 추가·삭제 자체를 시스템에서 차단합니다.
+      <strong>배포(수강중) 코스에서 종료 시각이 지난 회차는 수정·삭제할 수 없습니다(잠금).</strong> 빌더에서 지난 회차는 🔒 "종료 · 수정 불가" 배지로 표시되고 입력이 비활성화됩니다. 아직 시작 전인 회차만 일정·장소를 바꿀 수 있어요.<br>
+      <strong>차수가 "종료(closed)"로 마감되면</strong> 그 차수의 출석률·수료는 다시 바뀌지 않고, 회차 추가·삭제 자체가 차단됩니다.
     </div>
+    <p class="text-sm text-slate-600 mt-3">잠금 기준: 프로토타입은 "회차 종료 시각 경과"로 판정합니다(실제 백엔드는 출결 데이터 존재 여부 기준 권장 — 데이터 정합성).</p>
     <p class="text-sm text-slate-600 mt-3">왜 그런가요?</p>
     <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1 mt-1">
       <li>한 번 수료 뜬 사람의 결과는 회사가 사후에 무를 수 없어요 (사회적 약속)</li>
@@ -3124,14 +3124,19 @@ function closeMobileSidebar() {
             <td><span class="b b-green">출석률 칸 영향 없음</span> 학습자에게 일정 변경 알림만 발송</td>
           </tr>
           <tr>
-            <td><strong>회차 삭제 — 마감된 회차</strong></td>
-            <td>차수 진행 중</td>
-            <td><span class="b b-yellow">출석률 칸 감소 → 다시 계산</span> admin 이중 확인 + audit log 필수. "이 작업으로 N명의 출석률이 다시 계산됩니다" 다이얼로그</td>
+            <td><strong>회차 삭제 — 종료된(지난) 회차</strong></td>
+            <td>배포·수강중</td>
+            <td><span class="b b-red">시스템에서 차단(잠금)</span> 이미 종료된 회차는 출결 기록 보호를 위해 삭제 불가. "이미 종료된 회차는 삭제할 수 없습니다" 안내</td>
           </tr>
           <tr>
-            <td><strong>회차 일정 변경</strong> (날짜·시간만)</td>
-            <td>차수 진행 중</td>
-            <td><span class="b b-green">출석 기록 유지</span> 학습자 알림만 발송</td>
+            <td><strong>회차 일정 변경</strong> (날짜·시간·장소) — 미도래 회차</td>
+            <td>배포·수강중</td>
+            <td><span class="b b-green">변경 가능</span> 아직 시작 전인 회차만. 출석 기록 없음. 학습자 재통보 필요</td>
+          </tr>
+          <tr>
+            <td><strong>회차 일정 변경</strong> — 종료된(지난) 회차</td>
+            <td>배포·수강중</td>
+            <td><span class="b b-red">시스템에서 차단(잠금)</span> 종료된 회차는 날짜·시간·장소·정원 모두 수정 불가</td>
           </tr>
         </tbody>
       </table>
@@ -3176,8 +3181,8 @@ function closeMobileSidebar() {
           <tr><td>기존 회차의 날짜·시간만 바뀜 (예: 4월 5일 → 4월 12일로 미룸)</td><td><span class="b b-blue">회차 일정 변경</span></td></tr>
           <tr><td>새 날짜에 추가 수업 (예: 보강·연장·Q&A 세션)</td><td><span class="b b-violet">회차 추가</span></td></tr>
           <tr><td>한 회차를 두 회차로 쪼갬 (강의장 사정)</td><td><span class="b b-violet">회차 추가</span> + 원래 회차 일정 변경</td></tr>
-          <tr><td>잘못 만든 미래 회차 제거</td><td><span class="b b-slate">회차 삭제 (미래)</span></td></tr>
-          <tr><td>잘못 마감된 회차 되돌림</td><td><span class="b b-red">회차 삭제 (마감)</span> — admin 이중 확인 필수</td></tr>
+          <tr><td>잘못 만든 미래 회차 제거 (아직 시작 전)</td><td><span class="b b-slate">회차 삭제 (미도래)</span></td></tr>
+          <tr><td>이미 종료된 회차를 되돌리고 싶음</td><td><span class="b b-red">불가 — 종료된 회차 잠금</span> 개별 출석 상태 정정으로만 대응</td></tr>
         </tbody>
       </table>
       <div class="callout callout-amber mt-2">
@@ -3215,8 +3220,8 @@ function closeMobileSidebar() {
           <tr><td>학습자 요청으로 Q&A 세션 추가</td><td><span class="b b-violet">회차 추가</span></td><td>비정기</td></tr>
           <tr><td>법령 개정으로 의무교육 시수 늘어남</td><td><span class="b b-violet">회차 추가</span></td><td>연 0~1회</td></tr>
           <tr><td>강사 일정 옮김 (같은 사람·다른 날)</td><td><span class="b b-blue">회차 일정 변경</span></td><td>비정기</td></tr>
-          <tr><td>잘못 만든 미래 회차 제거</td><td><span class="b b-slate">회차 삭제</span></td><td>운영 실수 정정</td></tr>
-          <tr><td>실수로 마감한 회차 되돌림</td><td><span class="b b-red">마감된 회차 삭제 (admin 이중 확인)</span></td><td>매우 드묾</td></tr>
+          <tr><td>잘못 만든 미래 회차 제거 (아직 시작 전)</td><td><span class="b b-slate">회차 삭제 (미도래)</span></td><td>운영 실수 정정</td></tr>
+          <tr><td>이미 종료된 회차를 되돌림</td><td><span class="b b-red">불가 — 종료된 회차 잠금</span></td><td>개별 출석 상태 정정으로 대응</td></tr>
           <tr><td>외부 강사 추가 일정 받아 차수 추가</td><td><span class="b b-violet">차수 추가</span></td><td>김난도 트렌드 특강 등</td></tr>
           <tr><td>조직개편 신규 본부 차수 필요</td><td><span class="b b-violet">차수 추가</span></td><td>연 1~2회</td></tr>
         </tbody>
@@ -3244,8 +3249,8 @@ function closeMobileSidebar() {
             <td>차수가 진행 중이면 출석률 계산할 칸이 늘어나서 임시 수료 표시가 풀릴 수 있어요. 시스템에서 알림이 가고 "회사 사정으로 추가" 안내가 나갑니다. 차수가 이미 종료된 상태면 회차 추가 자체가 차단돼요.</td>
           </tr>
           <tr>
-            <td>이미 마감된 회차를 삭제할 수 있나요?</td>
-            <td>가능하지만 admin 이중 확인이 필요한 매우 드문 작업이에요. 영향받는 학습자 수를 미리 dialog로 보여주고, audit log에 기록됩니다.</td>
+            <td>이미 종료된(지난) 회차를 삭제하거나 수정할 수 있나요?</td>
+            <td><strong>아니요.</strong> 배포·수강중 코스에서 종료 시각이 지난 회차는 수정·삭제가 잠깁니다(빌더에서 🔒 표시). 출결 기록이 이미 붙어 있어 보호돼요. 잘못된 부분은 개별 출석 상태 정정으로만 대응합니다. 아직 시작 전인 회차는 일정·장소 변경이 가능합니다.</td>
           </tr>
           <tr>
             <td>회차 추가 알림이 학습자에게 안 갔다고 합니다.</td>
