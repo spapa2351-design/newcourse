@@ -1443,7 +1443,8 @@
                       })();
                       const allClosed=pkg.sessions.length>0&&pkg.sessions.every(s=>closedSessions.has(s.id));
                       const hasToday=pkg.sessions.some(s=>s.date===TODAY);
-                      const isPkgCompleted=allClosed&&pkgL.length>0&&pkgL.every(l=>completionMap[l.id]==='completed');
+                      const pkgDoneCnt=pkgL.filter(l=>completionMap[l.id]==='completed').length;
+                      const allCompleted=allClosed&&pkgL.length>0&&pkgDoneCnt===pkgL.length;
                       return (
                         <div key={pkg.id} className={`border rounded-xl overflow-hidden transition-all ${hasToday?'border-indigo-300 ring-1 ring-indigo-200':'border-slate-200'}`}>
                           {/* 차수 헤더 */}
@@ -1453,8 +1454,8 @@
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-[14px] text-slate-800">{pkg.name}</span>
                                 {hasToday && <span className="text-[11px] font-black bg-indigo-500 text-white px-2 py-0.5 rounded-full">오늘</span>}
-                                {allClosed && !isPkgCompleted && <span className="text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full">종료</span>}
-                                {isPkgCompleted && <span className="text-[11px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-full">수료완료</span>}
+                                {allClosed && <span className="text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full">종료</span>}
+                                {allClosed && pkgL.length>0 && <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${allCompleted?'bg-emerald-50 text-emerald-600 border-emerald-200':'bg-slate-100 text-slate-600 border-slate-200'}`}>{allCompleted?'✓ ':''}수료 {pkgDoneCnt}/{pkgL.length}</span>}
                               </div>
                               <div className="text-[12px] text-slate-400 mt-0.5 flex items-center gap-2">
                                 <span>{fmtRange(pkg.startDate,pkg.endDate)}</span>
@@ -1582,7 +1583,8 @@
                         return l.name.includes(q)||l.dept.includes(q);
                       });
                       const allClosed=pkg.sessions.length>0&&pkg.sessions.every(s=>closedSessions.has(s.id));
-                      const isPkgCompleted=allClosed&&pkgL.length>0&&pkgL.every(l=>completionMap[l.id]==='completed');
+                      const pkgDoneCnt=pkgL.filter(l=>completionMap[l.id]==='completed').length;
+                      const allCompleted=allClosed&&pkgL.length>0&&pkgDoneCnt===pkgL.length;
                       const hasToday=pkg.sessions.some(s=>s.date===TODAY);
                       return (
                         <div key={pkg.id} className={`border rounded-xl overflow-hidden ${hasToday?'border-indigo-300 ring-1 ring-indigo-200':'border-slate-200'}`}>
@@ -1592,7 +1594,8 @@
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-[14px] text-slate-800">{pkg.name}</span>
                                 <span className="text-[12px] text-slate-400">· {filteredPkgL.length}명</span>
-                                {isPkgCompleted && <span className="text-[11px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-full">수료완료</span>}
+                                {allClosed && <span className="text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full">종료</span>}
+                                {allClosed && pkgL.length>0 && <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${allCompleted?'bg-emerald-50 text-emerald-600 border-emerald-200':'bg-slate-100 text-slate-600 border-slate-200'}`}>{allCompleted?'✓ ':''}수료 {pkgDoneCnt}/{pkgL.length}</span>}
                               </div>
                               <div className="text-[12px] text-slate-400 mt-0.5">{fmtRange(pkg.startDate,pkg.endDate)} · {pkg.place}</div>
                             </div>
