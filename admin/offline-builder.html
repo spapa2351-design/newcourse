@@ -615,6 +615,7 @@
         { label: '최소 1개 차수 생성', ok: options.length > 0 },
         { label: '모든 차수에 회차 존재', ok: options.every(o => o.sessions.length > 0) },
         { label: '모든 회차 날짜/시간 설정', ok: options.every(o => o.sessions.every(s => s.date && s.startTime && s.endTime)) },
+        { label: '모든 회차 종료 > 시작 (자정 넘김 없음)', ok: options.every(o => o.sessions.every(s => !s.startTime || !s.endTime || _toMin(s.endTime) > _toMin(s.startTime))) },
         { label: '다중 조합형 차수 일정 미겹침', ok: selectionRule !== 'multiple' || !hasOptionOverlap },
         { label: '배정 인원 일정 겹침 없음 (지정등록)', ok: !adminAssign || !hasPersonOverlap },
         { label: '수료 조건 최소 1개 설정', ok: completionRules.length > 0 },
@@ -923,6 +924,16 @@
       };
       const handleSessionChange = (sid, field, val, optId) => {
         if (isSessLocked(sid, optId)) return;   // 지난 회차 수정 불가
+        // 자정 넘김 방지 — 오프라인 회차는 하루(날짜 1개) 안에서 끝나야 함. 종료 > 시작 강제.
+        if (field === 'startTime' || field === 'endTime') {
+          const cur = options.find(o => o.id === optId)?.sessions.find(s => s.id === sid);
+          const start = field === 'startTime' ? val : cur?.startTime;
+          const end   = field === 'endTime'   ? val : cur?.endTime;
+          if (start && end && _toMin(end) <= _toMin(start)) {
+            showToast('종료 시간은 시작 시간보다 늦어야 합니다 — 회차는 자정을 넘길 수 없어요 (익일 일정은 회차를 나눠주세요)', '⛔');
+            return;
+          }
+        }
         setOptions(options.map(opt => opt.id === optId ? { ...opt, sessions: opt.sessions.map(s => s.id === sid ? { ...s, [field]: val } : s) } : opt));
       };
       /* ── 강사 상속 (대표 → 차수 → 회차) ── */
@@ -939,7 +950,11 @@
         setOptions(options.map(opt => {
           if (opt.id !== optId) return opt;
           const insertIdx = opt.sessions.findIndex(s => s.id === refSess.id) + 1;
-          const newSess = { id: Date.now(), name: `${opt.sessions.length + 1}회차`, date: refSess.date, startTime: refSess.endTime || '13:00', endTime: '18:00', place: refSess.place || '', capacity: null, groups: null };
+          const st = refSess.endTime || '13:00';
+          // 새 슬롯도 자정 넘김 방지 — 종료는 시작보다 늦게. 기본 18:00, 시작이 그보다 늦으면 +1시간(최대 23:59).
+          const endMin = Math.min(_toMin(st) + 60, 23 * 60 + 59);
+          const et = _toMin('18:00') > _toMin(st) ? '18:00' : `${String(Math.floor(endMin/60)).padStart(2,'0')}:${String(endMin%60).padStart(2,'0')}`;
+          const newSess = { id: Date.now(), name: `${opt.sessions.length + 1}회차`, date: refSess.date, startTime: st, endTime: et, place: refSess.place || '', capacity: null, groups: null };
           const next = [...opt.sessions];
           next.splice(insertIdx, 0, newSess);
           return { ...opt, sessions: next };
@@ -974,6 +989,7 @@
         const dayMap = { '일':0,'월':1,'화':2,'수':3,'목':4,'금':5,'토':6 };
         const targetDays = batchData.days.map(d => dayMap[d]);
         if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end || targetDays.length === 0) return alert('유효한 기간과 요일을 설정해주세요.');
+        if (_toMin(batchData.endTime) <= _toMin(batchData.startTime)) return alert('종료 시간은 시작 시간보다 늦어야 합니다. 회차는 자정을 넘길 수 없습니다 (익일 일정은 회차를 나눠주세요).');
         const generated = [];
         let curr = new Date(start);
         while (curr <= end) {
