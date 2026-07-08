@@ -619,7 +619,8 @@
       return () => window.removeEventListener('keydown', onKey);
     }, [showCreateModal]);
     const goBuilder = (type) => {
-      window.location.href = type === 'online' ? 'online-builder.html' : 'offline-builder.html';
+      const map = { online: 'online-builder.html', offline: 'offline-builder.html', blended: 'blended-builder.html' };
+      window.location.href = map[type] || 'online-builder.html';
     };
 
     // C-5: BroadcastChannel setup
@@ -2299,7 +2300,7 @@
 
               <h1 className="text-[34px] font-black text-center text-slate-900 mb-14">어떤 코스를 개설하시겠어요?</h1>
 
-              <div className="grid grid-cols-2 gap-6 max-w-[820px] mx-auto">
+              <div className="grid grid-cols-3 gap-6 max-w-[1000px] mx-auto">
                 <button
                   onClick={() => goBuilder('online')}
                   className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all relative overflow-hidden"
@@ -2333,6 +2334,24 @@
                     <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">회차 관리</span>
                     <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">QR 출석</span>
                     <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">수기 처리</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => goBuilder('blended')}
+                  className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-violet-300 hover:shadow-lg transition-all relative overflow-hidden"
+                >
+                  <div className="w-14 h-14 rounded-xl bg-violet-50 flex items-center justify-center mb-5">
+                    <Layers size={26} className="text-violet-600"/>
+                  </div>
+                  <h3 className="text-[19px] font-black text-slate-900 mb-2.5">블렌디드 코스</h3>
+                  <p className="text-[14.5px] text-slate-500 leading-relaxed mb-5">
+                    온라인 학습과 집합 교육을 한 과정에 결합합니다.<br/>VOD·문서와 오프라인 출석을 함께 운영하세요.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">VOD</span>
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">오프라인 출석</span>
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">혼합 편성</span>
                   </div>
                 </button>
               </div>

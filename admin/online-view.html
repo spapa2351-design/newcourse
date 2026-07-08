@@ -76,8 +76,8 @@
       ]},
     ];
 
-    // ─── 더미 코스 + 수강생 데이터 ───
-    const COURSE = {
+    // ─── 더미 코스 + 수강생 데이터 (id 미매칭 시 기본값) ───
+    const COURSE_BASE = {
       id: 1,
       title: '2026년 핵심가치 내재화 교육',
       coverUrl: null,
@@ -97,6 +97,38 @@
           { id: 31, type: 'survey', title: '만족도 설문', isRequired: true },
         ]},
       ],
+    };
+
+    // ─── id별 코스 override (online-list.html 예시 코스 id와 매칭) — 미매칭 id는 COURSE_BASE 그대로 ───
+    const COURSE_DATA = {
+      1: {
+        title: '2025 핵심가치 내재화 교육',
+      },
+      5: {
+        title: 'AI 활용 업무 자동화 입문',
+        chapters: [
+          { id: 1, title: 'AI 툴 소개', items: [
+            { id: 11, type: 'video', title: 'ChatGPT·Copilot 개요', isRequired: true, duration: '18:00' },
+          ]},
+          { id: 2, title: '실무 자동화 실습', items: [
+            { id: 21, type: 'video', title: '업무 자동화 시나리오 3가지', isRequired: true, duration: '25:40' },
+            { id: 22, type: 'exam',  title: '실습 이해도 점검', isRequired: true },
+          ]},
+        ],
+      },
+      11: {
+        title: '신임 팀장 코칭 워크북',
+        chapters: [
+          { id: 1, title: '팀장의 역할', items: [
+            { id: 11, type: 'video', title: '팀장 1개월차 체크리스트', isRequired: true, duration: '20:00' },
+            { id: 12, type: 'pdf',   title: '코칭 워크북 PDF', pages: 40 },
+          ]},
+          { id: 2, title: '피드백 스킬', items: [
+            { id: 21, type: 'video', title: '피드백 대화법', isRequired: true, duration: '17:10' },
+            { id: 22, type: 'survey', title: '코칭 만족도 설문', isRequired: true },
+          ]},
+        ],
+      },
     };
 
     /* ─── 콘텐츠별 진행 (기획 인사이트) ─── */
@@ -125,25 +157,74 @@
       { day: '일', learners: 5 },
     ];
 
-    const ENROLLEES = Array.from({ length: 18 }, (_, i) => ({
-      id: 1000 + i,
-      photo: null,
-      userId: ['minjoon.kim', 'serina', 'choe.h', 'inhwa.lim', 'ds.kang', 'jw.park', 'sh.lee', 'hg.han', 'jeongmin', 'tae.so', 'eunji.j', 'ydw', 'kk.choi', 'sungho.j', 'aram.lim', 'mihee.k', 'yura.cha', 'jaehoon.shin'][i],
-      name: ['김민준', '강세린', '최현', '임인화', '강대수', '박지원', '이수현', '한하경', '정민', '소태경', '주은지', '양다은', '최강국', '장성호', '임아람', '김미희', '차유라', '신재훈'][i],
-      groups: [
-        ['기획팀'], ['디자인팀', '시니어'], ['개발팀'],
-        ['마케팅팀'], ['개발팀'], ['기획팀', '리더'],
-        ['디자인팀'], ['영업팀'], ['개발팀'], ['인사팀'],
-        ['마케팅팀'], ['기획팀'], ['개발팀', '시니어'], ['영업팀'], ['디자인팀'],
-        ['재무팀'], ['기획팀'], ['개발팀']
-      ][i],
-      period: '2026-01-15 ~ 무제한',
-      progress: [100, 100, 90, 75, 60, 100, 50, 30, 100, 80, 45, 100, 95, 70, 25, 100, 55, 0][i],
-      studyTime: ['1h 42m', '2h 10m', '58m', '45m', '32m', '1h 55m', '24m', '12m', '2h 02m', '47m', '20m', '1h 28m', '1h 12m', '34m', '8m', '1h 36m', '22m', '0m'][i],
-      studyMin: [102, 130, 58, 45, 32, 115, 24, 12, 122, 47, 20, 88, 72, 34, 8, 96, 22, 0][i],
-      completed: [true, true, true, false, false, true, false, false, true, false, false, true, true, false, false, true, false, false][i],
-      endDate:  ['2026-12-31','2026-08-15','2026-06-02','2026-06-10','2026-05-31','2026-12-31','2026-06-05','2026-12-31','2026-12-31','2026-06-08','2026-06-04','2026-12-31','2026-12-31','2026-12-31','2026-06-01','2026-12-31','2026-12-31','2026-12-31'][i],
-    }));
+    // ─── 코스 상태 3케이스(수강신청가능/운영중/종료) — 사람은 공유, 진도·이수만 케이스별로 다름 ───
+    const ENROLLEE_BASE = [
+      { userId: 'minjoon.kim',  name: '김민준', groups: ['기획팀'] },
+      { userId: 'serina',       name: '강세린', groups: ['디자인팀', '시니어'] },
+      { userId: 'choe.h',       name: '최현',   groups: ['개발팀'] },
+      { userId: 'inhwa.lim',    name: '임인화', groups: ['마케팅팀'] },
+      { userId: 'ds.kang',      name: '강대수', groups: ['개발팀'] },
+      { userId: 'jw.park',      name: '박지원', groups: ['기획팀', '리더'] },
+      { userId: 'sh.lee',       name: '이수현', groups: ['디자인팀'] },
+      { userId: 'hg.han',       name: '한하경', groups: ['영업팀'] },
+      { userId: 'jeongmin',     name: '정민',   groups: ['개발팀'] },
+      { userId: 'tae.so',       name: '소태경', groups: ['인사팀'] },
+      { userId: 'eunji.j',      name: '주은지', groups: ['마케팅팀'] },
+      { userId: 'ydw',          name: '양다은', groups: ['기획팀'] },
+      { userId: 'kk.choi',      name: '최강국', groups: ['개발팀', '시니어'] },
+      { userId: 'sungho.j',     name: '장성호', groups: ['영업팀'] },
+      { userId: 'aram.lim',     name: '임아람', groups: ['디자인팀'] },
+      { userId: 'mihee.k',      name: '김미희', groups: ['재무팀'] },
+      { userId: 'yura.cha',     name: '차유라', groups: ['기획팀'] },
+      { userId: 'jaehoon.shin', name: '신재훈', groups: ['개발팀'] },
+    ];
+    const fmtStudyTime = (min) => {
+      if (!min) return '0m';
+      const h = Math.floor(min / 60), m = min % 60;
+      return h > 0 ? `${h}h ${m.toString().padStart(2, '0')}m` : `${m}m`;
+    };
+    const buildEnrollees = (people, progress, studyMin, completed, endDate) =>
+      people.map((p, i) => ({
+        id: 1000 + i, photo: null, ...p,
+        period: '2026-01-15 ~ 무제한',
+        progress: progress[i],
+        studyMin: studyMin[i],
+        studyTime: fmtStudyTime(studyMin[i]),
+        completed: completed[i],
+        endDate: endDate[i],
+      }));
+    const CASES = {
+      // 수강신청가능 — 신청 기간 오픈, 신청자 소수·초반 진도
+      running: {
+        enrollees: buildEnrollees(
+          ENROLLEE_BASE.slice(0, 8),
+          [15, 8, 0, 22, 5, 0, 10, 0],
+          [12, 6, 0, 18, 4, 0, 9, 0],
+          [false, false, false, false, false, false, false, false],
+          Array(8).fill('2026-12-31'),
+        ),
+      },
+      // 운영중 — 신청 마감, 기존 학습자가 한창 학습 중 (기존 목데이터 그대로)
+      closed_apply: {
+        enrollees: buildEnrollees(
+          ENROLLEE_BASE,
+          [100, 100, 90, 75, 60, 100, 50, 30, 100, 80, 45, 100, 95, 70, 25, 100, 55, 0],
+          [102, 130, 58, 45, 32, 115, 24, 12, 122, 47, 20, 88, 72, 34, 8, 96, 22, 0],
+          [true, true, true, false, false, true, false, false, true, false, false, true, true, false, false, true, false, false],
+          ['2026-12-31', '2026-08-15', '2026-06-02', '2026-06-10', '2026-05-31', '2026-12-31', '2026-06-05', '2026-12-31', '2026-12-31', '2026-06-08', '2026-06-04', '2026-12-31', '2026-12-31', '2026-12-31', '2026-06-01', '2026-12-31', '2026-12-31', '2026-12-31'],
+        ),
+      },
+      // 종료 — 대부분 수료, 소수만 미수료로 종료
+      ended: {
+        enrollees: buildEnrollees(
+          ENROLLEE_BASE,
+          [100, 100, 100, 100, 95, 100, 100, 60, 100, 100, 100, 100, 100, 45, 100, 100, 100, 80],
+          [110, 140, 95, 88, 90, 120, 102, 40, 130, 96, 88, 105, 99, 30, 92, 110, 98, 55],
+          [true, true, true, true, true, true, true, false, true, true, true, true, true, false, true, true, true, true],
+          Array(18).fill('2026-05-31'),
+        ),
+      },
+    };
 
     // ─── 헬퍼: 초 → "1h 42m" / "32m" 변환 ───
     const formatDuration = (sec) => {
@@ -220,7 +301,8 @@
         return () => window.removeEventListener('keydown', onKey);
       }, [showCreateModal]);
       const goBuilder = (type) => {
-        window.location.href = type === 'online' ? 'online-builder.html' : 'offline-builder.html';
+        const map = { online: 'online-builder.html', offline: 'offline-builder.html', blended: 'blended-builder.html' };
+        window.location.href = map[type] || 'online-builder.html';
       };
 
       const [tab, setTab] = useState('dashboard');
@@ -232,12 +314,21 @@
       // ── 2차 보강 신규 state (online-view.design.md §3) ──
       const [sheetSeg, setSheetSeg]             = useState('progress'); // 'progress' | 'log' | 'video'
       const [periodTarget, setPeriodTarget]     = useState(null);       // null | enrollee 객체
+      const [bulkPeriodOpen, setBulkPeriodOpen] = useState(false);      // 전체(선택) 수강기간 변경
+      const [selectedIds, setSelectedIds]       = useState(new Set()); // 수강생 탭 체크박스 선택
       const [showAlarmModal, setShowAlarmModal] = useState(false);
       const [showGroupStudy, setShowGroupStudy] = useState(false);
       const [showEndModal,   setShowEndModal]   = useState(false);
       const [matrixOpen,     setMatrixOpen]     = useState(false);
 
-      const allItems = useMemo(() => COURSE.chapters.flatMap(c => c.items), []);
+      // 목록에서 넘어온 id로 코스 식별 — 매칭되는 override 없으면 COURSE_BASE(기본 코스)
+      const courseId = useMemo(() => new URLSearchParams(window.location.search).get('id'), []);
+      const COURSE = useMemo(() => {
+        const override = COURSE_DATA[courseId];
+        return override ? { ...COURSE_BASE, ...override } : COURSE_BASE;
+      }, [courseId]);
+
+      const allItems = useMemo(() => COURSE.chapters.flatMap(c => c.items), [COURSE]);
 
       // ── 코스 상태별 뷰 모드 (online-list에서 ?status= 로 전달, 없으면 COURSE.status) ──
       //    [[project_newcourse_status_definitions]]: running·closed_apply·paused·ended·admin_ended
@@ -245,6 +336,10 @@
         const p = new URLSearchParams(window.location.search).get('status');
         return p || COURSE.status;
       }, []);
+      // 코스 상태 3케이스(수강신청가능/운영중/종료)에 따라 수강생 명단·진도를 다르게 노출.
+      // paused·admin_ended는 별도 케이스 없이 '종료' 케이스 데이터 재사용, 그 외 미확인 값은 VIEW_MODE와 동일하게 'running' 기본값.
+      const CASE_STATUS_MAP = { running: 'running', closed_apply: 'closed_apply', ended: 'ended', paused: 'ended', admin_ended: 'ended' };
+      const ENROLLEES = useMemo(() => CASES[CASE_STATUS_MAP[viewStatus] || 'running'].enrollees, [viewStatus]);
       const VIEW_MODE = {
         running: {
           badge: '운영중', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500',
@@ -506,7 +601,7 @@
                   <div className="space-y-2 pb-4 border-b border-slate-100">
                     {[
                       { label: '완료 조건', value: COURSE.completionRule },
-                      { label: '커리큘럼', value: `${COURSE.chapters.length}챕터 · ${allItems.length}항목` },
+                      { label: '커리큘럼', value: `${COURSE.chapters.length}커리큘럼 · ${allItems.length}항목` },
                       { label: '필수 항목', value: `${allItems.filter(i => i.isRequired).length}개` },
                       { label: '수강 기간', value: '제한 없음' },
                     ].map(({ label, value }) => (
@@ -786,13 +881,12 @@
                       {/* [기획] 평가·설문 4지표 카드 (M4) */}
                       <div>
                         <div className="text-[13px] font-bold text-slate-400 uppercase tracking-wide mb-3">평가·설문 현황</div>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-2 gap-3">
                           {(() => {
                             const examSubmitted = EXAM_RESULTS.length;
                             const examAvg       = Math.round(EXAM_RESULTS.reduce((a,b) => a + b.score, 0) / examSubmitted);
                             const examPassed    = EXAM_RESULTS.filter(r => r.passed).length;
                             const examNotTaken  = totalEnrolled - examSubmitted;
-                            const quizSubmitted = Math.round(totalEnrolled * 0.61);
                             const surveySubmitted = Math.round(totalEnrolled * 0.39);
                             const cards = [
                               { id: 'exam',   icon: 'quiz',     color: 'violet', title: '시험', stats: [
@@ -800,12 +894,6 @@
                                 { label: '평균 점수', value: `${examAvg}점`,    accent: true },
                                 { label: '합격',     value: `${examPassed}명` },
                                 { label: '미응시',   value: `${examNotTaken}명`, warn: examNotTaken > 0 },
-                              ]},
-                              { id: 'quiz',   icon: 'task',     color: 'indigo', title: '퀴즈', stats: [
-                                { label: '응시',     value: `${quizSubmitted}명` },
-                                { label: '평균 점수', value: '78점',           accent: true },
-                                { label: '합격',     value: `${Math.round(quizSubmitted * 0.83)}명` },
-                                { label: '미응시',   value: `${totalEnrolled - quizSubmitted}명`, warn: true },
                               ]},
                               { id: 'survey', icon: 'poll',     color: 'pink',   title: '설문', stats: [
                                 { label: '응답',     value: `${surveySubmitted}명` },
@@ -846,7 +934,33 @@
                     </div>
                   )}
 
-                  {tab === 'enrollees' && (
+                  {tab === 'enrollees' && (() => {
+                    const visibleEnrollees = ENROLLEES.filter(e => {
+                      if (progressFilter === 'all')  return true;
+                      if (progressFilter === 'none') return e.progress === 0;
+                      if (progressFilter === 'low')  return e.progress > 0 && e.progress < 30;
+                      if (progressFilter === 'mid')  return e.progress >= 30 && e.progress < 60;
+                      if (progressFilter === 'high') return e.progress >= 60 && e.progress < 100;
+                      if (progressFilter === 'done') return e.progress === 100;
+                      return true;
+                    });
+                    const allVisibleSelected = visibleEnrollees.length > 0 && visibleEnrollees.every(e => selectedIds.has(e.id));
+                    const toggleSelectAll = () => {
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        if (allVisibleSelected) visibleEnrollees.forEach(e => next.delete(e.id));
+                        else visibleEnrollees.forEach(e => next.add(e.id));
+                        return next;
+                      });
+                    };
+                    const toggleSelectOne = (id) => {
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        if (next.has(id)) next.delete(id); else next.add(id);
+                        return next;
+                      });
+                    };
+                    return (
                     <div className="p-5 animate-fadeIn">
                       {/* 진도 구간 필터 칩 (대시보드 막대 클릭으로 진입 시 활성) */}
                       {progressFilter !== 'all' && (
@@ -874,8 +988,9 @@
                           </select>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button className="text-[13px] font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
-                            <MS name="schedule" size={12}/> 전체 수강기간 변경
+                          <button onClick={() => setBulkPeriodOpen(true)} disabled={selectedIds.size === 0}
+                            className={`text-[13px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 border ${selectedIds.size === 0 ? 'text-slate-300 bg-slate-50 border-slate-200 cursor-not-allowed' : 'text-slate-600 bg-white border-slate-300 hover:bg-slate-50'}`}>
+                            <MS name="schedule" size={12}/> 전체 수강기간 변경{selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
                           </button>
                           <button onClick={() => setShowAlarmModal(true)}
                             className="text-[13px] font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg flex items-center gap-1">
@@ -892,7 +1007,7 @@
                         <table className="w-full text-[13.5px]">
                           <thead className="bg-slate-50 border-b border-slate-200">
                             <tr className="text-left text-slate-500 font-bold text-[12px]">
-                              <th className="px-3 py-2.5 w-10"><input type="checkbox" className="w-3.5 h-3.5 accent-indigo-600"/></th>
+                              <th className="px-3 py-2.5 w-10"><input type="checkbox" checked={allVisibleSelected} onChange={toggleSelectAll} className="w-3.5 h-3.5 accent-indigo-600"/></th>
                               <th className="px-3 py-2.5">회원</th>
                               <th className="px-3 py-2.5 w-[140px]">아이디</th>
                               <th className="px-3 py-2.5 w-[100px]">이름</th>
@@ -905,19 +1020,11 @@
                             </tr>
                           </thead>
                           <tbody>
-                            {ENROLLEES.filter(e => {
-                              if (progressFilter === 'all')  return true;
-                              if (progressFilter === 'none') return e.progress === 0;
-                              if (progressFilter === 'low')  return e.progress > 0 && e.progress < 30;
-                              if (progressFilter === 'mid')  return e.progress >= 30 && e.progress < 60;
-                              if (progressFilter === 'high') return e.progress >= 60 && e.progress < 100;
-                              if (progressFilter === 'done') return e.progress === 100;
-                              return true;
-                            }).map(e => (
+                            {visibleEnrollees.map(e => (
                               <tr key={e.id} onClick={() => setSelectedRow(e)}
                                 className="border-t border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
                                 <td className="px-3 py-2.5" onClick={ev => ev.stopPropagation()}>
-                                  <input type="checkbox" className="w-3.5 h-3.5 accent-indigo-600"/>
+                                  <input type="checkbox" checked={selectedIds.has(e.id)} onChange={() => toggleSelectOne(e.id)} className="w-3.5 h-3.5 accent-indigo-600"/>
                                 </td>
                                 <td className="px-3 py-2.5">
                                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-white text-[11px] font-bold">
@@ -977,7 +1084,8 @@
                         </div>
                       </div>
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {/* ─── 콘텐츠 탭 (영상·시험·설문·자료 통합 + 카테고리 필터) ─── */}
                   {tab === 'content' && (
@@ -1163,6 +1271,11 @@
           {/* M2 개인 수강 기간 변경 */}
           {periodTarget && (
             <PeriodModal enrollee={periodTarget} onClose={() => setPeriodTarget(null)}/>
+          )}
+
+          {/* M2 전체(선택) 수강 기간 변경 — 수강생 탭 체크박스 선택 대상 일괄 */}
+          {bulkPeriodOpen && (
+            <PeriodModal enrollees={ENROLLEES.filter(e => selectedIds.has(e.id))} onClose={() => setBulkPeriodOpen(false)}/>
           )}
 
           {/* M3 종료 임박 알림 */}
@@ -1353,7 +1466,7 @@
 
                 <h1 className="text-[34px] font-black text-center text-slate-900 mb-14">어떤 코스를 개설하시겠어요?</h1>
 
-                <div className="grid grid-cols-2 gap-6 max-w-[820px] mx-auto">
+                <div className="grid grid-cols-3 gap-6 max-w-[1000px] mx-auto">
                   <button
                     onClick={() => goBuilder('online')}
                     className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all relative overflow-hidden"
@@ -1368,7 +1481,7 @@
                     <div className="flex flex-wrap gap-1.5">
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">VOD</span>
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">문서</span>
-                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">시험/퀴즈</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">시험</span>
                     </div>
                   </button>
 
@@ -1387,6 +1500,24 @@
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">회차 관리</span>
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">QR 출석</span>
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">수기 처리</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => goBuilder('blended')}
+                    className="group text-left bg-white rounded-2xl p-7 border border-slate-200 hover:border-violet-300 hover:shadow-lg transition-all relative overflow-hidden"
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-violet-50 flex items-center justify-center mb-5">
+                      <Layers size={26} className="text-violet-600"/>
+                    </div>
+                    <h3 className="text-[19px] font-black text-slate-900 mb-2.5">블렌디드 코스</h3>
+                    <p className="text-[14.5px] text-slate-500 leading-relaxed mb-5">
+                      온라인 학습과 집합 교육을 한 과정에 결합합니다.<br/>VOD·문서와 오프라인 출석을 함께 운영하세요.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">VOD</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">오프라인 출석</span>
+                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[12px] font-semibold rounded">혼합 편성</span>
                     </div>
                   </button>
                 </div>
@@ -1476,11 +1607,14 @@
       );
     };
 
-    /* ─── M2 PeriodModal — 개인 수강 기간 변경 ─── */
-    const PeriodModal = ({ enrollee, onClose }) => {
-      const [mode, setMode] = useState('unlimited');
+    /* ─── M2 PeriodModal — 수강 기간 변경 (개인 단일 또는 다중 선택 일괄, 빌더 studyPeriod 3종(fixed/days/unlimited)과 정합) ─── */
+    const PeriodModal = ({ enrollee, enrollees, onClose }) => {
+      const targets = enrollees && enrollees.length ? enrollees : (enrollee ? [enrollee] : []);
+      const isBulk = targets.length > 1;
+      const [mode, setMode] = useState('unlimited'); // 'fixed' | 'days' | 'unlimited'
       const [startAt, setStartAt] = useState('2026-05-26T00:00');
       const [endAt,   setEndAt]   = useState('2026-12-31T23:59');
+      const [days, setDays] = useState(90);
       React.useEffect(() => {
         const onKey = (e) => { if (e.key === 'Escape') onClose(); };
         window.addEventListener('keydown', onKey);
@@ -1498,20 +1632,36 @@
             <div className="px-6 py-5 space-y-5">
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2.5 flex items-center gap-2">
                 <MS name="person" size={15} className="text-emerald-600"/>
-                <span className="text-[13px] font-bold text-emerald-700">대상: {enrollee.name} · {enrollee.userId}</span>
+                <span className="text-[13px] font-bold text-emerald-700">
+                  {isBulk ? `대상: ${targets.length}명 선택됨` : `대상: ${targets[0]?.name} · ${targets[0]?.userId}`}
+                </span>
               </div>
 
               <label className="flex items-start gap-2 cursor-pointer">
-                <input type="radio" checked={mode === 'date'} onChange={() => setMode('date')} className="accent-indigo-600 mt-1"/>
+                <input type="radio" checked={mode === 'fixed'} onChange={() => setMode('fixed')} className="accent-indigo-600 mt-1"/>
                 <div className="flex-1">
-                  <span className="text-[14px] font-bold text-slate-700">날짜 지정</span>
-                  {mode === 'date' && (
+                  <span className="text-[14px] font-bold text-slate-700">고정 기간</span>
+                  {mode === 'fixed' && (
                     <div className="mt-2 flex items-center gap-2">
                       <input type="datetime-local" value={startAt} onChange={e => setStartAt(e.target.value)}
                         className="flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] font-mono focus:border-indigo-400 outline-none"/>
                       <span className="text-slate-400">~</span>
                       <input type="datetime-local" value={endAt} onChange={e => setEndAt(e.target.value)}
                         className="flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] font-mono focus:border-indigo-400 outline-none"/>
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input type="radio" checked={mode === 'days'} onChange={() => setMode('days')} className="accent-indigo-600 mt-1"/>
+                <div className="flex-1">
+                  <span className="text-[14px] font-bold text-slate-700">신청 후 N일</span>
+                  {mode === 'days' && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <input type="number" min={1} value={days} onChange={e => setDays(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] font-bold text-center focus:border-indigo-400 outline-none"/>
+                      <span className="text-[13px] text-slate-600">일간 수강 가능</span>
                     </div>
                   )}
                 </div>
