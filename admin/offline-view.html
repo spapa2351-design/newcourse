@@ -368,14 +368,33 @@
   const cmode = OFF_STATUS[COURSE.status] || OFF_STATUS.active;
   const isClosedCourse = COURSE.status === 'closed';
 
-  /* ── 수강생 등록 모달용 풀 ── */
+  /* ── 수강생 등록 모달용 풀 ──
+     그룹은 "필터"로만 쓰고 등록 단위는 개인. loginId=아이디, groups=다중 소속, role=권한 */
   const STUDENT_POOL = [
-    {id:'u1',name:'이승주',group:'비서실'},{id:'u2',name:'김하은',group:'개발팀'},
-    {id:'u3',name:'박준서',group:'디자인팀'},{id:'u4',name:'정유진',group:'마케팅팀'},
-    {id:'u5',name:'최민호',group:'영업팀'},{id:'u6',name:'강소연',group:'인사팀'},
-    {id:'u7',name:'윤도현',group:'재무팀'},{id:'u8',name:'한지우',group:'기획팀'},
-    {id:'u9',name:'오세린',group:'개발팀'},{id:'u10',name:'임태양',group:'영업팀'},
+    {id:'u1', name:'이승주', loginId:'seungju.lee',  groups:['비서실'],          role:''},
+    {id:'u2', name:'김하은', loginId:'haeun.kim',    groups:['개발팀','IT'],      role:''},
+    {id:'u3', name:'박준서', loginId:'junseo.park',  groups:['디자인팀'],         role:''},
+    {id:'u4', name:'정유진', loginId:'yujin.jung',   groups:['마케팅팀'],         role:'부관리자'},
+    {id:'u5', name:'최민호', loginId:'minho.choi',   groups:['영업팀','영업본부'], role:''},
+    {id:'u6', name:'강소연', loginId:'soyeon.kang',  groups:['인사팀','관리본부'], role:''},
+    {id:'u7', name:'윤도현', loginId:'dohyun.yoon',  groups:['재무팀','관리본부'], role:''},
+    {id:'u8', name:'한지우', loginId:'jiwoo.han',    groups:['기획팀'],           role:'관리자'},
+    {id:'u9', name:'오세린', loginId:'serin.oh',     groups:['개발팀','IT'],      role:''},
+    {id:'u10',name:'임태양', loginId:'taeyang.lim',  groups:['영업팀','영업본부'], role:''},
+    {id:'u11',name:'서지안', loginId:'jian.seo',     groups:['디자인팀'],         role:''},
+    {id:'u12',name:'문가온', loginId:'gaon.moon',    groups:['마케팅팀'],         role:''},
+    {id:'u13',name:'배시우', loginId:'siwoo.bae',    groups:['개발팀'],           role:''},
+    {id:'u14',name:'신하람', loginId:'haram.shin',   groups:['인사팀','관리본부'], role:''},
+    {id:'u15',name:'조은결', loginId:'eungyeol.cho', groups:['재무팀'],           role:''},
+    {id:'u16',name:'권도윤', loginId:'doyoon.kwon',  groups:['기획팀'],           role:''},
+    {id:'u17',name:'황시연', loginId:'siyeon.hwang', groups:['영업팀'],           role:''},
+    {id:'u18',name:'노아린', loginId:'arin.noh',     groups:['비서실'],           role:''},
+    {id:'u19',name:'유주원', loginId:'juwon.yoo',    groups:['개발팀','IT'],      role:'부관리자'},
+    {id:'u20',name:'전예린', loginId:'yerin.jeon',   groups:['디자인팀'],         role:''},
+    {id:'u21',name:'남시후', loginId:'sihu.nam',     groups:['영업본부'],         role:''},
+    {id:'u22',name:'구하윤', loginId:'hayoon.koo',   groups:['관리본부'],         role:''},
   ];
+  const ALL_GROUPS = [...new Set(STUDENT_POOL.flatMap(s=>s.groups))];
 
   /* ── 차수 색상 ── */
   const PKG_COLORS = [
@@ -511,10 +530,14 @@
     const [showEnrollModal, setShowEnrollModal] = useState(false);
     const [enrollSearch, setEnrollSearch] = useState('');
     const [enrollPkg, setEnrollPkg] = useState(COURSE.packages[0]?.id || 'p1');
-    const [enrollTab, setEnrollTab] = useState('member');
+    const [enrollTab, setEnrollTab] = useState('member');   // member | id | bulk
     const [enrollType, setEnrollType] = useState('selected');
     const [selectedMembers, setSelectedMembers] = useState(new Set());
     const [showMemberPicker, setShowMemberPicker] = useState(false);
+    const [enrollGroupFilter, setEnrollGroupFilter] = useState(new Set()); // 그룹=필터 전용
+    const [enrollPage, setEnrollPage] = useState(1);
+    const [enrollIdText, setEnrollIdText] = useState('');
+    const resetEnroll = () => { setShowEnrollModal(false); setEnrollSearch(''); setSelectedMembers(new Set()); setShowMemberPicker(false); setEnrollTab('member'); setEnrollType('selected'); setEnrollGroupFilter(new Set()); setEnrollPage(1); setEnrollIdText(''); };
     const [qrCountdown, setQrCountdown] = useState(30);
     const qrTimerRef = useRef(null);
     const bcRef = useRef(null);
@@ -1827,191 +1850,259 @@
           )}
         </div>
 
-        {/* ══ 수강생 등록 모달 ══ */}
-        {showEnrollModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-xl w-[500px] flex flex-col animate-slideUp">
+        {/* ══ 수강생 등록 모달 — 차수 선택 + 회원 피커(그룹=필터) + 아이디/대량 ══ */}
+        {showEnrollModal && (() => {
+          const cur = COURSE.packages.find(p=>p.id===enrollPkg) || COURSE.packages[0];
+          const remain = cur ? Math.max(0, cur.capacity - cur.enrolled) : 0;
+          // 회원 필터: 그룹(다중 OR) + 이름/아이디 검색
+          const q = enrollSearch.trim().toLowerCase();
+          const filtered = STUDENT_POOL.filter(s=>{
+            const okG = enrollGroupFilter.size===0 || s.groups.some(g=>enrollGroupFilter.has(g));
+            const okQ = !q || s.name.toLowerCase().includes(q) || s.loginId.toLowerCase().includes(q);
+            return okG && okQ;
+          });
+          const PER = 10;
+          const totalPages = Math.max(1, Math.ceil(filtered.length/PER));
+          const page = Math.min(enrollPage, totalPages);
+          const rows = filtered.slice((page-1)*PER, page*PER);
+          const filteredIds = filtered.map(s=>s.id);
+          const allFilteredSelected = filteredIds.length>0 && filteredIds.every(id=>selectedMembers.has(id));
+          const idLines = enrollIdText.split(/[\n,]/).map(x=>x.trim()).filter(Boolean);
+          const selCount = enrollTab==='member' ? selectedMembers.size : enrollTab==='id' ? idLines.length : 0;
+          const over = selCount > remain;
+          const blocked = selCount===0 || over;
+          const toggleMember = id => setSelectedMembers(prev=>{const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n;});
+          const roleBadge = role => role==='관리자' ? 'bg-indigo-100 text-indigo-700' : role==='부관리자' ? 'bg-sky-100 text-sky-700' : '';
+          return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-[940px] max-h-[88vh] flex flex-col animate-slideUp overflow-hidden">
               {/* 헤더 */}
-              <div className="flex items-center justify-between px-6 pt-5 pb-4">
+              <div className="flex items-center justify-between px-6 pt-5 pb-4 shrink-0">
                 <div className="text-[17px] font-black text-slate-900">수강생 등록</div>
-                <button onClick={()=>{setShowEnrollModal(false);setEnrollSearch('');setSelectedMembers(new Set());setShowMemberPicker(false);setEnrollTab('member');setEnrollType('selected');}}
+                <button onClick={resetEnroll}
                   className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-colors"><X size={16}/></button>
               </div>
-              {/* 탭 */}
-              <div className="px-6 pb-4 flex gap-1 border-b border-slate-200">
-                {[{key:'member',label:'회원'},{key:'group',label:'그룹'},{key:'bulk',label:'대량 등록'},{key:'id',label:'아이디 입력'}].map(t=>(
+
+              {/* 상단 고정: 코스 + 차수 + 잔여석 */}
+              <div className="px-6 py-4 border-y border-slate-100 bg-slate-50/50 space-y-3 shrink-0">
+                <div className="flex items-center gap-4">
+                  <span className="text-[13px] font-bold text-slate-400 w-9 shrink-0">코스</span>
+                  <span className="text-[14px] font-bold text-slate-800 truncate">{COURSE.title}</span>
+                </div>
+                <div className="flex items-start gap-4">
+                  <span className="text-[13px] font-bold text-slate-400 w-9 shrink-0 mt-1.5">차수</span>
+                  <div className="flex flex-wrap gap-1.5 flex-1">
+                    {COURSE.packages.map(p=>{
+                      const rm = Math.max(0, p.capacity - p.enrolled);
+                      const on = enrollPkg===p.id;
+                      return (
+                        <button key={p.id} onClick={()=>setEnrollPkg(p.id)}
+                          className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-colors border ${on?'bg-indigo-600 text-white border-indigo-600':'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'}`}>
+                          {p.name} · <span className={on?'text-indigo-100':rm<=0?'text-rose-500':rm<=5?'text-amber-600':'text-emerald-600'}>{rm<=0?'마감':`잔여 ${rm}`}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pl-[52px]">
+                  <span className="text-[12px] font-bold">
+                    <span className="text-slate-400">잔여석 </span>
+                    <span className={remain<=0?'text-rose-500':remain<=5?'text-amber-600':'text-emerald-600'}>{remain<=0?'마감':`${remain}석`}</span>
+                    <span className="text-slate-400 font-medium"> / 정원 {cur?.capacity}명 (현재 {cur?.enrolled}명)</span>
+                  </span>
+                  {selCount>0 && (
+                    <span className={`text-[12px] font-bold ${over?'text-amber-600':'text-indigo-600'}`}>{selCount}명 선택됨</span>
+                  )}
+                </div>
+                {over && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 flex items-center justify-between gap-3">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0"/>
+                      <span className="text-[12px] font-semibold text-amber-700">잔여석({remain}석)보다 {selCount-remain}명 많습니다. 정원을 늘려야 등록할 수 있습니다.</span>
+                    </div>
+                    <button
+                      onClick={()=>{
+                        /* ponytail: 프로토라 상수 COURSE 직접 갱신. 백엔드 붙으면 등록 API가 정원 상향 동반 */
+                        const idx = COURSE.packages.findIndex(p=>p.id===cur.id);
+                        if(idx>=0){ const ne=cur.enrolled+selCount; COURSE.packages[idx].capacity=ne; COURSE.packages[idx].enrolled=ne; }
+                        resetEnroll();
+                      }}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-amber-500 text-white rounded-lg text-[12px] font-bold hover:bg-amber-600 transition-colors">
+                      <Plus size={13}/> 정원 {cur.enrolled+selCount}명으로 늘려 등록
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* 모드 탭 (그룹은 탭이 아니라 필터로 제공) */}
+              <div className="px-6 pt-3 pb-3 flex gap-1 shrink-0">
+                {[{key:'member',label:'회원 선택'},{key:'id',label:'아이디 입력'},{key:'bulk',label:'대량 등록'}].map(t=>(
                   <button key={t.key} onClick={()=>setEnrollTab(t.key)}
-                    className={`px-4 py-2 rounded-lg text-[14px] font-bold transition-colors ${enrollTab===t.key?'bg-indigo-600 text-white':'text-slate-500 hover:bg-slate-100'}`}>
+                    className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-colors ${enrollTab===t.key?'bg-indigo-600 text-white':'text-slate-500 hover:bg-slate-100'}`}>
                     {t.label}
                   </button>
                 ))}
               </div>
-              {/* 본문 */}
-              <div className="px-6">
-                {/* 코스 */}
-                <div className="flex items-center gap-6 py-4 border-b border-slate-100">
-                  <span className="text-[14px] font-bold text-slate-500 w-10 shrink-0">코스</span>
-                  <span className="text-[14px] font-bold text-slate-800">{COURSE.title}</span>
-                </div>
-                {/* 차수 — 다차수 코스만: 어느 반(차수)에 등록할지 선택 */}
-                {COURSE.packages.length>1 && (
-                  <div className="flex items-center gap-6 py-4 border-b border-slate-100">
-                    <span className="text-[14px] font-bold text-slate-500 w-10 shrink-0">차수</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {COURSE.packages.map(p=>(
-                        <button key={p.id} onClick={()=>setEnrollPkg(p.id)}
-                          className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-colors border ${enrollPkg===p.id?'bg-indigo-600 text-white border-indigo-600':'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'}`}>
-                          {p.name} · 잔여 {Math.max(0, p.capacity - p.enrolled)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {/* 선택 차수 잔여석 + 정원 초과 시 정원 상향 등록 옵션 */}
-                {(() => {
-                  const cur = COURSE.packages.find(p=>p.id===enrollPkg) || COURSE.packages[0];
-                  if (!cur) return null;
-                  const remain = Math.max(0, cur.capacity - cur.enrolled);
-                  const selCount = (enrollTab==='member' && enrollType==='selected') ? selectedMembers.size : null;
-                  const over = selCount!=null && selCount > remain;
-                  return (
-                    <div className="py-3.5 border-b border-slate-100 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[14px] font-bold text-slate-500">잔여석</span>
-                        <span className="text-[13px] font-bold">
-                          <span className={remain<=0?'text-rose-500':remain<=5?'text-amber-600':'text-emerald-600'}>{remain<=0?'마감':`${remain}석`}</span>
-                          <span className="text-slate-400 font-medium"> / 정원 {cur.capacity}명 (현재 {cur.enrolled}명)</span>
-                        </span>
+
+              {/* ── 회원 선택 모드: 좌 테이블 + 우 선택 패널 ── */}
+              {enrollTab==='member' && (
+                <div className="flex-1 min-h-0 flex border-t border-slate-100">
+                  {/* 좌: 필터 + 테이블 + 페이지네이션 */}
+                  <div className="flex-1 min-w-0 flex flex-col border-r border-slate-100">
+                    <div className="px-6 py-3 space-y-2.5 border-b border-slate-100">
+                      <div className="relative">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                        <input value={enrollSearch} onChange={e=>{setEnrollSearch(e.target.value);setEnrollPage(1);}} placeholder="이름 · 아이디 검색..."
+                          className="w-full pl-9 pr-3 py-2 text-[13px] border border-slate-200 rounded-lg outline-none focus:border-indigo-400"/>
                       </div>
-                      {selCount>0 && (
-                        <div className="text-[12px] font-semibold text-slate-500">현재 <span className="text-indigo-600">{selCount}명</span> 선택됨</div>
-                      )}
-                      {over && (
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 space-y-2">
-                          <div className="flex items-start gap-2">
-                            <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0"/>
-                            <span className="text-[12px] font-semibold text-amber-700">잔여석({remain}석)보다 {selCount-remain}명 많습니다. 정원을 늘려야 등록할 수 있습니다.</span>
-                          </div>
-                          <button
-                            onClick={()=>{
-                              /* ponytail: 프로토라 상수 COURSE 직접 갱신 — 모달 닫힘 리렌더로 칩·잔여석·대시보드 반영. 백엔드 붙으면 등록 API가 정원 상향 동반 */
-                              const idx = COURSE.packages.findIndex(p=>p.id===cur.id);
-                              if(idx>=0){ const ne=cur.enrolled+selCount; COURSE.packages[idx].capacity=ne; COURSE.packages[idx].enrolled=ne; }
-                              setShowEnrollModal(false); setEnrollSearch(''); setSelectedMembers(new Set()); setShowMemberPicker(false); setEnrollType('selected');
-                            }}
-                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 text-white rounded-lg text-[13px] font-bold hover:bg-amber-600 transition-colors">
-                            <Plus size={13}/> 정원을 {cur.enrolled+selCount}명으로 늘려 {selCount}명 등록
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-                {/* 회원 탭 */}
-                {enrollTab==='member' && (
-                  <div className="flex items-start gap-6 py-5 border-b border-slate-100">
-                    <span className="text-[14px] font-bold text-slate-500 w-10 shrink-0 mt-0.5">회원</span>
-                    <div className="flex-1 space-y-3">
-                      <label className="flex items-center gap-2.5 cursor-pointer">
-                        <input type="radio" name="enrollType" checked={enrollType==='all'} onChange={()=>setEnrollType('all')} className="w-4 h-4 accent-indigo-600"/>
-                        <span className="text-[14px] font-semibold text-slate-700">전체 회원</span>
-                      </label>
-                      <div>
-                        <label className="flex items-center gap-2.5 cursor-pointer mb-3">
-                          <input type="radio" name="enrollType" checked={enrollType==='selected'} onChange={()=>setEnrollType('selected')} className="w-4 h-4 accent-indigo-600"/>
-                          <span className="text-[14px] font-semibold text-slate-700">선택한 회원</span>
-                        </label>
-                        {enrollType==='selected' && (
-                          <div className="ml-6">
-                            {selectedMembers.size>0 && (
-                              <div className="flex flex-wrap gap-1.5 mb-3">
-                                {STUDENT_POOL.filter(s=>selectedMembers.has(s.id)).map(s=>(
-                                  <span key={s.id} className="flex items-center gap-1 text-[12px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-1 rounded-full">
-                                    {s.name}
-                                    <button onClick={()=>setSelectedMembers(prev=>{const n=new Set(prev);n.delete(s.id);return n;})} className="text-indigo-400 hover:text-indigo-700 ml-0.5"><X size={10}/></button>
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                            <button onClick={()=>setShowMemberPicker(p=>!p)}
-                              className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white rounded-full text-[14px] font-bold hover:bg-indigo-700 transition-colors">
-                              <Plus size={13}/> 회원 선택
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mr-1"><Filter size={11}/> 그룹</span>
+                        {ALL_GROUPS.map(g=>{
+                          const on = enrollGroupFilter.has(g);
+                          return (
+                            <button key={g} onClick={()=>{setEnrollPage(1);setEnrollGroupFilter(prev=>{const n=new Set(prev); n.has(g)?n.delete(g):n.add(g); return n;});}}
+                              className={`px-2 py-1 rounded-full text-[11px] font-semibold border transition-colors ${on?'bg-indigo-50 text-indigo-700 border-indigo-300':'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}>
+                              {g}
                             </button>
-                            {showMemberPicker && (
-                              <div className="mt-3 border border-slate-200 rounded-xl overflow-hidden">
-                                <div className="relative px-3 py-2 border-b border-slate-100 bg-slate-50">
-                                  <Search size={12} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"/>
-                                  <input value={enrollSearch} onChange={e=>setEnrollSearch(e.target.value)} placeholder="이름 검색..."
-                                    className="w-full pl-7 pr-3 py-1 text-[13px] outline-none bg-transparent"/>
-                                </div>
-                                <div className="max-h-[160px] overflow-y-auto custom-scrollbar">
-                                  {STUDENT_POOL.filter(s=>!enrollSearch||s.name.includes(enrollSearch)).map(s=>(
-                                    <div key={s.id} onClick={()=>setSelectedMembers(prev=>{const n=new Set(prev);n.has(s.id)?n.delete(s.id):n.add(s.id);return n;})}
-                                      className={`flex items-center gap-2.5 px-4 py-2.5 cursor-pointer transition-colors ${selectedMembers.has(s.id)?'bg-indigo-50':'hover:bg-slate-50'}`}>
-                                      <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[11px] font-black text-indigo-600 shrink-0">{s.name[0]}</div>
-                                      <div className="flex-1">
-                                        <div className="text-[13px] font-bold text-slate-800">{s.name}</div>
-                                        <div className="text-[12px] text-slate-400">{s.group}</div>
-                                      </div>
-                                      {selectedMembers.has(s.id) && <CheckCircle size={14} className="text-indigo-500 shrink-0"/>}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          );
+                        })}
+                        {enrollGroupFilter.size>0 && (
+                          <button onClick={()=>{setEnrollGroupFilter(new Set());setEnrollPage(1);}} className="px-2 py-1 text-[11px] font-semibold text-rose-500 hover:underline">필터 해제</button>
                         )}
                       </div>
                     </div>
+                    <div className="px-6 py-2 flex items-center justify-between shrink-0">
+                      <span className="text-[12px] text-slate-500">검색 결과 <strong className="text-slate-700 font-bold">{filtered.length}</strong>명</span>
+                      <button onClick={()=>setSelectedMembers(prev=>{const n=new Set(prev); allFilteredSelected?filteredIds.forEach(id=>n.delete(id)):filteredIds.forEach(id=>n.add(id)); return n;})}
+                        className="text-[12px] font-bold text-indigo-600 hover:underline">{allFilteredSelected?'현재 목록 선택 해제':'현재 목록 전체 선택'}</button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-6">
+                      <table className="w-full text-[13px]">
+                        <thead className="sticky top-0 bg-white z-10">
+                          <tr className="text-slate-400 text-[12px] border-b border-slate-200">
+                            <th className="w-9 py-2"><input type="checkbox" checked={allFilteredSelected} readOnly className="w-4 h-4 accent-indigo-600 align-middle"/></th>
+                            <th className="text-left font-bold py-2">이름</th>
+                            <th className="text-left font-bold py-2">아이디</th>
+                            <th className="text-left font-bold py-2">그룹</th>
+                            <th className="text-left font-bold py-2 w-16">권한</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map(s=>{
+                            const sel = selectedMembers.has(s.id);
+                            return (
+                              <tr key={s.id} onClick={()=>toggleMember(s.id)}
+                                className={`border-b border-slate-50 cursor-pointer transition-colors ${sel?'bg-indigo-50':'hover:bg-slate-50'}`}>
+                                <td className="py-2.5 text-center"><input type="checkbox" checked={sel} readOnly className="w-4 h-4 accent-indigo-600 align-middle"/></td>
+                                <td className="py-2.5">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[11px] font-black text-slate-500 shrink-0">{s.name[0]}</div>
+                                    <span className="font-bold text-slate-800">{s.name}</span>
+                                  </div>
+                                </td>
+                                <td className="py-2.5 text-slate-500">{s.loginId}</td>
+                                <td className="py-2.5">
+                                  <div className="flex flex-wrap gap-1">
+                                    {s.groups.map(g=>(
+                                      <span key={g} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px] font-semibold">{g}</span>
+                                    ))}
+                                  </div>
+                                </td>
+                                <td className="py-2.5">
+                                  {s.role && <span className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${roleBadge(s.role)}`}>{s.role}</span>}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {rows.length===0 && (
+                            <tr><td colSpan={5} className="py-10 text-center text-[13px] text-slate-400">조건에 맞는 회원이 없습니다</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    {totalPages>1 && (
+                      <div className="px-6 py-3 border-t border-slate-100 flex items-center justify-center gap-1 shrink-0">
+                        <button onClick={()=>setEnrollPage(Math.max(1,page-1))} disabled={page<=1}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 disabled:opacity-30"><ChevronLeft size={15}/></button>
+                        {Array.from({length:totalPages},(_,i)=>i+1).map(pn=>(
+                          <button key={pn} onClick={()=>setEnrollPage(pn)}
+                            className={`w-7 h-7 rounded-lg text-[13px] font-bold transition-colors ${pn===page?'bg-indigo-600 text-white':'text-slate-500 hover:bg-slate-100'}`}>{pn}</button>
+                        ))}
+                        <button onClick={()=>setEnrollPage(Math.min(totalPages,page+1))} disabled={page>=totalPages}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 disabled:opacity-30"><ChevronRight size={15}/></button>
+                      </div>
+                    )}
                   </div>
-                )}
-                {enrollTab==='group' && (
-                  <div className="flex items-center justify-center py-12 text-[14px] text-slate-400">그룹 선택 기능은 준비 중입니다</div>
-                )}
-                {enrollTab==='bulk' && (
-                  <div className="flex flex-col items-center gap-3 py-8">
-                    <p className="text-[14px] text-slate-500">엑셀 파일로 수강생을 대량 등록합니다</p>
-                    <button onClick={downloadSampleExcel}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-[14px] font-bold hover:bg-emerald-100 transition-colors">
-                      <Download size={13}/> 양식 다운로드
-                    </button>
-                    <div className="w-full mt-1 border-2 border-dashed border-slate-200 rounded-xl px-10 py-8 text-center text-[13px] text-slate-400 cursor-pointer hover:border-indigo-300 hover:text-indigo-400 transition-colors">
-                      파일을 여기에 끌어다 놓거나 클릭하여 업로드하세요<br/>
-                      <span className="text-[12px] text-slate-300 mt-1 block">.csv, .xlsx 지원</span>
+                  {/* 우: 선택한 회원 */}
+                  <div className="w-[250px] shrink-0 flex flex-col bg-slate-50/40">
+                    <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100 shrink-0">
+                      <span className="text-[13px] font-bold text-slate-700">선택한 회원 <span className="text-indigo-600">{selectedMembers.size}</span></span>
+                      {selectedMembers.size>0 && (
+                        <button onClick={()=>setSelectedMembers(new Set())} className="text-[12px] font-semibold text-slate-400 hover:text-rose-500">전체 해제</button>
+                      )}
+                    </div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 space-y-1">
+                      {selectedMembers.size===0 ? (
+                        <div className="h-full flex items-center justify-center text-[12px] text-slate-300 text-center px-4">왼쪽에서 회원을<br/>선택하세요</div>
+                      ) : STUDENT_POOL.filter(s=>selectedMembers.has(s.id)).map(s=>(
+                        <div key={s.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white border border-slate-100">
+                          <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-black text-indigo-600 shrink-0">{s.name[0]}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[12.5px] font-bold text-slate-800 truncate">{s.name}</div>
+                            <div className="text-[11px] text-slate-400 truncate">{s.loginId}</div>
+                          </div>
+                          <button onClick={()=>toggleMember(s.id)} className="text-slate-300 hover:text-rose-500 shrink-0"><X size={13}/></button>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                )}
-                {enrollTab==='id' && (
-                  <div className="flex items-start gap-6 py-5 border-b border-slate-100">
-                    <span className="text-[14px] font-bold text-slate-500 w-10 shrink-0 mt-2">아이디</span>
-                    <textarea placeholder="아이디(이메일)를 줄바꿈으로 구분하여 입력하세요"
-                      className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-indigo-400 h-28 resize-none"/>
+                </div>
+              )}
+
+              {/* ── 아이디 입력 모드 ── */}
+              {enrollTab==='id' && (
+                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-5 border-t border-slate-100">
+                  <textarea value={enrollIdText} onChange={e=>setEnrollIdText(e.target.value)}
+                    placeholder="아이디(이메일)를 줄바꿈 또는 쉼표로 구분하여 입력하세요&#10;예) haeun.kim&#10;    minho.choi"
+                    className="w-full border border-slate-200 rounded-xl px-3.5 py-3 text-[14px] outline-none focus:border-indigo-400 h-40 resize-none leading-relaxed"/>
+                  <p className="text-[12px] text-slate-500 mt-2">현재 <strong className="text-indigo-600 font-bold">{idLines.length}</strong>건 입력됨. 등록 시 잔여석({remain}석) 내에서만 처리됩니다.</p>
+                </div>
+              )}
+
+              {/* ── 대량 등록 모드 ── */}
+              {enrollTab==='bulk' && (
+                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar flex flex-col items-center gap-3 py-10 px-6 border-t border-slate-100">
+                  <p className="text-[14px] text-slate-500">엑셀 파일로 수강생을 대량 등록합니다</p>
+                  <button onClick={downloadSampleExcel}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-[14px] font-bold hover:bg-emerald-100 transition-colors">
+                    <Download size={13}/> 양식 다운로드
+                  </button>
+                  <div className="w-full max-w-[520px] mt-1 border-2 border-dashed border-slate-200 rounded-xl px-10 py-10 text-center text-[13px] text-slate-400 cursor-pointer hover:border-indigo-300 hover:text-indigo-400 transition-colors">
+                    파일을 여기에 끌어다 놓거나 클릭하여 업로드하세요<br/>
+                    <span className="text-[12px] text-slate-300 mt-1 block">.csv, .xlsx 지원</span>
                   </div>
-                )}
+                </div>
+              )}
+
+              {/* 하단 버튼 — 정원 초과 시 등록 차단(위 '정원 늘려 등록'으로 유도) */}
+              <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 shrink-0">
+                <span className="text-[12px] font-semibold">
+                  {over ? <span className="text-amber-600">정원 초과 — 위에서 정원을 늘려 등록하세요</span>
+                    : selCount>0 ? <span className="text-slate-500"><strong className="text-indigo-600">{selCount}명</strong> 등록 예정</span>
+                    : <span className="text-slate-400">등록할 대상을 선택하세요</span>}
+                </span>
+                <button
+                  onClick={()=>{ if(!blocked) resetEnroll(); }}
+                  disabled={blocked}
+                  className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[14px] font-bold transition-colors shrink-0
+                    ${!blocked ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}>
+                  <CheckCircle size={14}/> 등록
+                </button>
               </div>
-              {/* 하단 버튼 — 정원 초과 시 일반 등록 차단(위 '정원 늘려 등록'으로 유도) */}
-              {(() => {
-                const curP = COURSE.packages.find(p=>p.id===enrollPkg) || COURSE.packages[0];
-                const remainP = curP ? Math.max(0, curP.capacity - curP.enrolled) : 0;
-                const selC = (enrollTab==='member' && enrollType==='selected') ? selectedMembers.size : 0;
-                const overP = curP && selC > remainP;
-                const emptyP = enrollTab==='member' && enrollType==='selected' && selectedMembers.size===0;
-                const blocked = emptyP || overP;
-                return (
-                  <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 mt-2">
-                    <span className="text-[12px] font-semibold text-amber-600">{overP ? '정원 초과 — 위에서 정원을 늘려 등록하세요' : ''}</span>
-                    <button
-                      disabled={blocked}
-                      className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[14px] font-bold transition-colors shrink-0
-                        ${!blocked ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}>
-                      <CheckCircle size={14}/> 등록
-                    </button>
-                  </div>
-                );
-              })()}
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* ══ 그룹별 수료 현황 모달 (페이지네이션 10/page) ══ */}
         {deptModalOpen && (() => {
