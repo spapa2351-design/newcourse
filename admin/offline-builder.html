@@ -1963,7 +1963,9 @@
 
                             {/* 액션 아이콘 */}
                             <div className="flex items-center gap-2 shrink-0">
+                              {/* 일정 편집(캘린더) — 당장 개발 대상 아니므로 숨김 처리
                               <button onClick={() => setCalModeOptId(opt.id)} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-sky-500 hover:bg-sky-400 text-white text-[11px] font-bold transition-colors shrink-0" title="캘린더로 일정 편집"><Calendar size={11}/> 일정 편집</button>
+                              */}
                               <button
                                 onClick={() => { setShowBatchForm(isBatchOpen ? null : opt.id); setActiveOptionId(opt.id); setBatchData({ startDate:'',endDate:'',days:[],startTime:'09:00',endTime:'18:00',place:'' }); }}
                                 className={`p-1.5 rounded transition-colors ${isBatchOpen ? 'bg-indigo-500 text-white' : 'text-slate-500 hover:text-white hover:bg-slate-700'}`}
