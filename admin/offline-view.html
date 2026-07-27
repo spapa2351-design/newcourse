@@ -1935,6 +1935,8 @@
               </div>
 
               {/* 모드 탭 (그룹은 탭이 아니라 필터로 제공) */}
+              {/* 1차 개발 제외: '아이디 입력' 탭 미포함. 회원 선택 모드만 제공되어 탭 바를 숨김.
+                  2차에서 아이디 입력을 되살릴 때 아래 주석을 해제하고 탭 배열에 {key:'id',label:'아이디 입력'} 추가.
               <div className="px-6 pt-3 pb-3 flex gap-1 shrink-0">
                 {[{key:'member',label:'회원 선택'},{key:'id',label:'아이디 입력'}].map(t=>(
                   <button key={t.key} onClick={()=>setEnrollTab(t.key)}
@@ -1943,6 +1945,7 @@
                   </button>
                 ))}
               </div>
+              */}
 
               {/* ── 회원 선택 모드: 좌 테이블 + 우 선택 패널 ── */}
               {enrollTab==='member' && (
@@ -2059,7 +2062,7 @@
                 </div>
               )}
 
-              {/* ── 아이디 입력 모드 ── */}
+              {/* ── 아이디 입력 모드 (1차 개발 제외 — 2차 복원 시 아래 주석 해제) ──
               {enrollTab==='id' && (
                 <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-5 border-t border-slate-100">
                   <textarea value={enrollIdText} onChange={e=>setEnrollIdText(e.target.value)}
@@ -2068,6 +2071,7 @@
                   <p className="text-[12px] text-slate-500 mt-2">현재 <strong className="text-indigo-600 font-bold">{idLines.length}</strong>건 입력됨. 등록 시 잔여석({remain}석) 내에서만 처리됩니다.</p>
                 </div>
               )}
+              */}
 
               {/* 하단 버튼 — 정원 초과 시 등록 차단(위 '정원 늘려 등록'으로 유도) */}
               <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 shrink-0">
