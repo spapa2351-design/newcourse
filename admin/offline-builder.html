@@ -121,9 +121,9 @@
             {id:104,name:'2회차',date:'2026-05-12',startTime:'13:30',endTime:'18:00',place:'',capacity:null,groups:null},
           ]},
           // 수강중(진행 중) 차수 데모 — 1회차는 이미 종료(잠금), 2회차는 미도래(수정 가능). 이팀장 협의 케이스.
-          { id:3, name:'C반 (수강중)', capacity:30, enrolled:25, startDate:'2026-07-01', endDate:'2026-07-10', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
+          { id:3, name:'C반 (수강중)', capacity:30, enrolled:25, startDate:'2026-07-01', endDate:'2026-08-10', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
             {id:105,name:'1회차',date:'2026-07-01',startTime:'10:00',endTime:'13:00',place:'',capacity:null,groups:null},
-            {id:106,name:'2회차',date:'2026-07-10',startTime:'10:00',endTime:'13:00',place:'',capacity:null,groups:null},
+            {id:106,name:'2회차',date:'2026-08-10',startTime:'10:00',endTime:'13:00',place:'',capacity:null,groups:null},
           ]},
         ]
       },
@@ -1097,7 +1097,7 @@
                 {draftPending ? (
                   /* 버저닝 — 공개본 / 작업본 2트랙 표시 */
                   <div className="ml-2 flex items-center gap-1.5">
-                    <a href={`offline-detail.html?courseId=${courseId}`}
+                    <a href={`offline-detail.html?courseId=${courseId}${draftPending ? '&draft=1' : ''}`}
                       className="px-3 py-1 rounded-full text-[12px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1.5 hover:bg-emerald-100 transition-colors"
                       title="공개본 보기">
                       <CircleDot size={10}/> 공개 중
@@ -2329,7 +2329,7 @@
                         공개본{publishedAt ? ` (${fmtPubDate(publishedAt)} 반영)` : ''}이 계속 서비스 중입니다. 퍼블리싱해야 반영됩니다.
                       </div>
                     </div>
-                    <a href={`offline-detail.html?courseId=${courseId}`}
+                    <a href={`offline-detail.html?courseId=${courseId}${draftPending ? '&draft=1' : ''}`}
                       className="text-[12px] font-bold text-amber-700 border border-amber-300 bg-white px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors shrink-0">
                       공개본 보기
                     </a>

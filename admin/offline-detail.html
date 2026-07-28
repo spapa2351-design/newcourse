@@ -27,8 +27,6 @@
     .animate-modalFade { animation:modalFade .25s ease-out; }
     .custom-scrollbar::-webkit-scrollbar { width:5px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background:#e2e8f0;border-radius:4px; }
-    /* 종료 코스 — 수정 자체가 불가하므로 반영 시점 배지를 숨긴다 */
-    .no-tier [data-tier] { display:none !important; }
   </style>
 </head>
 <body class="bg-[#f2f5f9] text-slate-800 antialiased">
@@ -40,8 +38,7 @@
 
   const {
     ChevronLeft, ChevronDown, ChevronUp, MapPin, Calendar, Users, User, Clock, Lock,
-    CircleDot, Edit3, Eye, X, CheckCircle, AlertTriangle, Trash2, List, Info,
-    Tag, Navigation, ImageIcon, FileText, UserCheck, Award, Layers, Send
+    CircleDot, Edit3, CheckCircle, AlertTriangle, ImageIcon, Award
   } = Lucide;
 
   /* ────────────────────────────────────────────────────────────────
@@ -51,9 +48,12 @@
      [수정] 버튼을 누르면 드래프트 버전이 만들어지고 빌더로 이동한다.
      드래프트를 [퍼블리시]할 때까지 공개본은 그대로 서비스된다.
 
-     ※ 필드마다 "즉시 반영 / 퍼블리시 필요" 배지를 달아
-        수정 후 저장 결과가 어떻게 갈리는지 미리 알려준다.
-        (진입 게이트는 [수정] 하나로 통일 — 관리자가 판단할 게 없다)
+     ※ 이 화면이 답하는 질문은 하나다 — "지금 수강생이 보는 설정이 뭔가".
+        반영 시점(즉시 / 퍼블리시 후) 배지는 달지 않는다. 여기선 아무것도
+        고칠 수 없어서 알아도 할 게 없고, 정작 필요한 순간은 저장 직후다.
+        변경 내역(diff)과 폐기도 두지 않는다 — 퍼블리시 직전과 빌더의 몫.
+        예외 상황 UI가 상시 노출되면 상시 화면이 예외처럼 읽힌다.
+        남기는 예외는 하나, 다른 사람이 수정 중이라는 고지(충돌 방지).
      ──────────────────────────────────────────────────────────────── */
 
   const isSessionPast = (s) => {
@@ -76,25 +76,27 @@
     const wd = ['일','월','화','수','목','금','토'][new Date(y, m-1, dd).getDay()];
     return `${m}월 ${dd}일 (${wd})`;
   };
+  // 회차 소요 시간 (분) → "3시간 30분"
+  const durationOf = (s) => {
+    if (!s.startTime || !s.endTime) return null;
+    const [sh, sm] = s.startTime.split(':').map(Number);
+    const [eh, em] = s.endTime.split(':').map(Number);
+    const mins = (eh * 60 + em) - (sh * 60 + sm);
+    if (!(mins > 0)) return null;
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return `${h ? `${h}시간` : ''}${h && m ? ' ' : ''}${m ? `${m}분` : ''}`;
+  };
+  const fmtRange = (a, b) => {
+    if (!a) return '—';
+    return (!b || b === a) ? fmtDate(a) : `${fmtDate(a)} ~ ${fmtDate(b)}`;
+  };
+
   const fmtDT = (v) => {
     if (!v) return '—';
     const dt = new Date(v);
     if (isNaN(dt.getTime())) return v;
     return dt.toLocaleString('ko-KR', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
   };
-
-  /* ── 회차 생성 헬퍼 (더미 데이터용) ── */
-  let _sid = 500;
-  const days = (startDate, n, st = '09:00', et = '18:00') => {   // 시작일부터 n일 연속
-    const [y, m, d] = startDate.split('-').map(Number);
-    return Array.from({ length: n }, (_, i) => {
-      const dt = new Date(y, m - 1, d + i);
-      const iso = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-      return { id: ++_sid, name: `${i+1}회차`, date: iso, startTime: st, endTime: et };
-    });
-  };
-  const slots = (date, times) =>                                  // 같은 날 여러 회차
-    times.map(([st, et], i) => ({ id: ++_sid, name: `${i+1}회차`, date, startTime: st, endTime: et }));
 
   /* ── 코스 데이터 (offline-builder.html COURSE_EDIT_DATA와 동일 구조) ── */
   const COURSE_DATA = {
@@ -119,30 +121,23 @@
       },
       completion: { minRate: 75 },
       options:[
-        { id:1, name:'A반 (4/14)', capacity:30, enrolled:28, place:'한샘 HQ B동 3층', sessions:[
+        { id:1, name:'A반 (4/14)', capacity:30, enrolled:28, startDate:'2026-04-14', endDate:'2026-04-14', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
           {id:101,name:'1회차',date:'2026-04-14',startTime:'09:00',endTime:'12:30'},
           {id:102,name:'2회차',date:'2026-04-14',startTime:'13:30',endTime:'18:00'},
         ]},
-        { id:2, name:'B반 (5/12)', capacity:30, enrolled:27, place:'한샘 HQ B동 3층', sessions:[
+        { id:2, name:'B반 (5/12)', capacity:30, enrolled:27, startDate:'2026-05-12', endDate:'2026-05-12', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
           {id:103,name:'1회차',date:'2026-05-12',startTime:'09:00',endTime:'12:30'},
           {id:104,name:'2회차',date:'2026-05-12',startTime:'13:30',endTime:'18:00'},
         ]},
-        { id:3, name:'C반 (수강중)', capacity:30, enrolled:25, place:'한샘 HQ B동 3층', sessions:[
+        // 수강중(진행 중) 차수 데모 — 1회차 종료(잠금), 2회차 미도래
+        { id:3, name:'C반 (수강중)', capacity:30, enrolled:25, startDate:'2026-07-01', endDate:'2026-08-10', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
           {id:105,name:'1회차',date:'2026-07-01',startTime:'10:00',endTime:'13:00'},
           {id:106,name:'2회차',date:'2026-08-10',startTime:'10:00',endTime:'13:00'},
         ]},
       ],
-      // 미공개 드래프트 (?draft=1 로 시뮬레이션)
-      draft: {
-        editor:'박서준', editedAt:'2026-07-26T14:20',
-        changes:[
-          { field:'C반 2회차 일정', from:'8월 10일 10:00', to:'8월 12일 10:00', impact:'warn', note:'등록자 25명 재통보 필요' },
-          { field:'수료 조건', from:'출석률 75%', to:'출석률 70%', impact:'warn', note:'진행 중 수강생 25명에 적용' },
-          { field:'강사 소개', from:'프로젝트 관리 전문가 · A등급 강사', to:'PMP 보유 · 15년 경력', impact:'safe', note:'' },
-          { field:'B반 정원', from:'30명', to:'25명', impact:'danger', note:'현재 27명 등록 — 정원 초과 상태가 됩니다' },
-          { field:'오시는 길', from:'강남역 3번 출구 도보 5분…', to:'강남역 3번 출구 도보 5분 (주차 2시간 무료)', impact:'safe', note:'' },
-        ],
-      },
+      // 미공개 드래프트 (?draft=1 로 시뮬레이션).
+      // 화면에는 "누가 언제부터" 만 쓴다 — 무엇을 바꿨는지는 퍼블리시 직전에 본다.
+      draft: { editor:'박서준', editedAt:'2026-07-26T14:20' },
     },
 
     /* 종료 코스 — 상세로 열리되 [수정] 없음 */
@@ -167,8 +162,10 @@
       },
       completion: { minRate: 100 },
       options: [
-        { id:61, name:'3월 15일 교육', capacity:30, enrolled:30, place:'한샘 HQ 대교육장',
-          sessions: slots('2026-03-15', [['10:00','13:00'], ['14:00','17:00']]) },
+        { id:1, name:'3월 15일 교육', capacity:30, enrolled:30, startDate:'2026-03-15', endDate:'2026-03-15', place:'한샘 HQ 대교육장', groups:[], sessionSelect:false, sessions:[
+          {id:101,name:'1회차',date:'2026-03-15',startTime:'09:00',endTime:'12:00'},
+          {id:102,name:'2회차',date:'2026-03-15',startTime:'13:00',endTime:'17:00'},
+        ]},
       ],
       draft: null,
     },
@@ -184,6 +181,7 @@
         location:'한샘 HQ 대교육장', address:'서울 강남구 테헤란로 152',
         traffic:'사내 교육장. 판교 연수원 차수는 셔틀 운행.',
         hasCover:true,
+        sessionInstructorMode:true, sessionPlaceMode:true,
       },
       enroll: {
         regStart:'', regEnd:'', regNoLimit:true,
@@ -195,11 +193,39 @@
       },
       completion: { minRate: 100 },
       options: [
-        { id:101, name:'1기 (4/7~4/11)',  capacity:30, enrolled:30, place:'한샘 HQ 대교육장', sessions: days('2026-04-07', 5, '09:00','12:00') },
-        { id:102, name:'2기 (4/14~4/18)', capacity:30, enrolled:30, place:'한샘 HQ 대교육장', sessions: days('2026-04-14', 5, '09:00','12:00') },
-        { id:103, name:'3기 (4/21~4/25)', capacity:30, enrolled:30, place:'판교 연수원',     sessions: days('2026-04-21', 5, '09:00','12:00') },
-        { id:104, name:'4기 (4/28~4/30)', capacity:30, enrolled:20, place:'판교 연수원',     sessions: days('2026-04-28', 3, '09:00','12:00') },
-        { id:105, name:'5기 (5/7~5/9)',   capacity:30, enrolled:10, place:'강남 교육장',     sessions: days('2026-05-07', 3, '09:00','12:00') },
+        // 1기 — 회차마다 주제·강사가 갈리는 케이스 (안전보건 의무교육)
+        { id:1, name:'1기 (4/7~4/11)', capacity:30, enrolled:30, startDate:'2026-04-07', endDate:'2026-04-11', place:'한샘 HQ 대교육장', groups:[], sessionSelect:false, sessions:[
+          {id:101,name:'1회차 — 화재예방',   date:'2026-04-07',startTime:'09:00',endTime:'12:00',instructor:''},
+          {id:102,name:'2회차 — 심폐소생술', date:'2026-04-08',startTime:'09:00',endTime:'12:00',instructor:'이응급'},
+          {id:103,name:'3회차 — 작업안전',   date:'2026-04-09',startTime:'13:00',endTime:'17:00',instructor:'박현장'},
+          {id:104,name:'4회차 — 보건위생',   date:'2026-04-10',startTime:'13:00',endTime:'17:00',instructor:''},
+          {id:105,name:'5회차 — 종합평가',   date:'2026-04-11',startTime:'09:00',endTime:'12:00',instructor:''},
+        ]},
+        // 2기 — 차수 전담 강사 (회차는 전부 상속)
+        { id:2, name:'2기 (4/14~4/18)', capacity:30, enrolled:30, startDate:'2026-04-14', endDate:'2026-04-18', place:'한샘 HQ 대교육장', groups:[], sessionSelect:false, instructor:'박서준', sessions:[
+          {id:106,name:'1회차',date:'2026-04-14',startTime:'09:00',endTime:'12:00'},
+          {id:107,name:'2회차',date:'2026-04-15',startTime:'09:00',endTime:'12:00'},
+          {id:108,name:'3회차',date:'2026-04-16',startTime:'13:00',endTime:'17:00'},
+          {id:109,name:'4회차',date:'2026-04-17',startTime:'13:00',endTime:'17:00'},
+          {id:110,name:'5회차',date:'2026-04-18',startTime:'09:00',endTime:'12:00'},
+        ]},
+        { id:3, name:'3기 (4/21~4/25)', capacity:30, enrolled:30, startDate:'2026-04-21', endDate:'2026-04-25', place:'판교 연수원', groups:[], sessionSelect:false, sessions:[
+          {id:111,name:'1회차',date:'2026-04-21',startTime:'09:00',endTime:'12:00'},
+          {id:112,name:'2회차',date:'2026-04-22',startTime:'09:00',endTime:'12:00'},
+          {id:113,name:'3회차',date:'2026-04-23',startTime:'13:00',endTime:'17:00'},
+          {id:114,name:'4회차',date:'2026-04-24',startTime:'13:00',endTime:'17:00'},
+          {id:115,name:'5회차',date:'2026-04-25',startTime:'09:00',endTime:'12:00'},
+        ]},
+        { id:4, name:'4기 (4/28~4/30)', capacity:30, enrolled:20, startDate:'2026-04-28', endDate:'2026-04-30', place:'판교 연수원', groups:[], sessionSelect:false, sessions:[
+          {id:116,name:'1회차',date:'2026-04-28',startTime:'09:00',endTime:'12:00'},
+          {id:117,name:'2회차',date:'2026-04-29',startTime:'09:00',endTime:'12:00'},
+          {id:118,name:'3회차',date:'2026-04-30',startTime:'13:00',endTime:'17:00'},
+        ]},
+        { id:5, name:'5기 (5/7~5/9)', capacity:30, enrolled:10, startDate:'2026-05-07', endDate:'2026-05-09', place:'강남 교육장', groups:[], sessionSelect:false, sessions:[
+          {id:119,name:'1회차',date:'2026-05-07',startTime:'09:00',endTime:'12:00'},
+          {id:120,name:'2회차',date:'2026-05-08',startTime:'09:00',endTime:'12:00'},
+          {id:121,name:'3회차',date:'2026-05-09',startTime:'13:00',endTime:'17:00'},
+        ]},
       ],
       draft: null,
     },
@@ -226,10 +252,14 @@
       },
       completion: { minRate: 80 },
       options: [
-        { id:111, name:'1차 워크숍', capacity:25, enrolled:20, place:'한샘 HQ 세미나룸',
-          sessions: slots('2026-05-20', [['09:30','12:30'], ['13:30','17:30']]) },
-        { id:112, name:'2차 워크숍', capacity:25, enrolled:18, place:'한샘 HQ 세미나룸',
-          sessions: slots('2026-06-10', [['09:30','12:30'], ['13:30','17:30']]) },
+        { id:1, name:'1차 워크숍 (5/20)', capacity:25, enrolled:20, startDate:'2026-05-20', endDate:'2026-05-20', place:'한샘 HQ 세미나룸', groups:[], sessionSelect:false, sessions:[
+          {id:101,name:'오전 세션',date:'2026-05-20',startTime:'09:00',endTime:'12:30'},
+          {id:102,name:'오후 세션',date:'2026-05-20',startTime:'13:30',endTime:'18:00'},
+        ]},
+        { id:2, name:'2차 워크숍 (6/10)', capacity:25, enrolled:18, startDate:'2026-06-10', endDate:'2026-06-10', place:'한샘 HQ 세미나룸', groups:[], sessionSelect:false, sessions:[
+          {id:103,name:'오전 세션',date:'2026-06-10',startTime:'09:00',endTime:'12:30'},
+          {id:104,name:'오후 세션',date:'2026-06-10',startTime:'13:30',endTime:'18:00'},
+        ]},
       ],
       draft: null,
     },
@@ -237,18 +267,10 @@
 
   /* ── 작은 컴포넌트들 ── */
 
-  // 즉시 반영 / 퍼블리시 필요 배지
-  const Tier = ({ live }) => (
-    <span data-tier className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border
-      ${live ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
-      {live ? '즉시 반영' : '퍼블리시 필요'}
-    </span>
-  );
-
   // 읽기 전용 값 행 — 입력창처럼 보이지 않게 값만 텍스트로 표시
-  const Row = ({ label, value, live, mono, multiline, empty }) => (
+  const Row = ({ label, value, mono, multiline, empty }) => (
     <div className="flex gap-4 py-3 border-b border-slate-100 last:border-0">
-      <div className="w-[132px] shrink-0 pt-0.5 flex items-start gap-1.5">
+      <div className="w-[132px] shrink-0 pt-0.5">
         <span className="text-[13px] font-bold text-slate-500 leading-snug">{label}</span>
       </div>
       <div className="flex-1 min-w-0">
@@ -258,7 +280,6 @@
           {empty ? '설정 없음' : value}
         </div>
       </div>
-      <div className="shrink-0 pt-0.5"><Tier live={live}/></div>
     </div>
   );
 
@@ -286,9 +307,8 @@
     // 데모 토글 — 공개 중 / 수정 중(드래프트 존재)
     const [hasDraft, setHasDraft] = useState(canDraft && params.get('draft') === '1');
     const [sec, setSec] = useState({ s1:true, s2:true, s3:true });
-    const [modal, setModal] = useState(null);      // 'start' | 'discard' | 'changes'
+    const [modal, setModal] = useState(null);      // 'start' — 수정 모드 전환 확인 하나뿐
     const [collapsed, setCollapsed] = useState({});
-    const [toast, setToast] = useState(null);
 
     const { info, enroll, completion, options, draft } = data;
 
@@ -304,11 +324,6 @@
       all.sort((a,b) => `${a.date}T${a.startTime}`.localeCompare(`${b.date}T${b.startTime}`));
       return all[0] || null;
     }, [options]);
-
-    const dangerCount = hasDraft ? draft.changes.filter(c => c.impact === 'danger').length : 0;
-    const warnCount   = hasDraft ? draft.changes.filter(c => c.impact === 'warn').length : 0;
-
-    const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2600); };
 
     const goEdit = () => { window.location.href = `offline-builder.html?courseId=${courseId}`; };
 
@@ -335,7 +350,7 @@
                 <p className="text-[11.5px] text-slate-400 font-medium leading-tight mt-0.5">오프라인 코스 · 읽기 전용</p>
               </div>
 
-              {/* 상태 칩 — 공개본 / 작업본 2트랙 */}
+              {/* 상태 칩 — 지금 공개 중인지, 그리고 누가 손대고 있는지 */}
               <div className="flex items-center gap-1.5 ml-2 shrink-0">
                 {isClosed ? (
                   <span className="px-3 py-1 rounded-full text-[12px] font-bold border bg-slate-100 text-slate-500 border-slate-300 flex items-center gap-1.5">
@@ -350,11 +365,12 @@
                     </span>
                   </span>
                 )}
+                {/* 동시 편집 충돌 방지 — 건수·diff 없이 "누가 언제부터"만 */}
                 {hasDraft && (
-                  <button onClick={() => setModal('changes')}
-                    className="px-3 py-1 rounded-full text-[12px] font-bold border bg-amber-50 text-amber-700 border-amber-300 flex items-center gap-1.5 hover:bg-amber-100 transition-colors">
-                    <Edit3 size={10}/> 수정 중 · 미공개 {draft.changes.length}건
-                  </button>
+                  <span className="px-3 py-1 rounded-full text-[12px] font-bold border bg-amber-50 text-amber-700 border-amber-300 flex items-center gap-1.5"
+                    title={`${fmtDT(draft.editedAt)}부터 수정 중 — 퍼블리시 전까지 공개본은 그대로입니다`}>
+                    <Edit3 size={10}/> {draft.editor} 수정 중
+                  </span>
                 )}
               </div>
             </div>
@@ -364,27 +380,19 @@
                 className="px-3.5 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm">
                 <Users size={15}/> 운영 현황
               </a>
-              {isClosed ? (
-                <span className="px-3.5 py-2 bg-slate-100 border border-slate-200 text-slate-400 rounded-lg text-sm font-bold flex items-center gap-1.5 cursor-not-allowed"
-                  title="종료된 코스는 수정할 수 없습니다">
-                  <Lock size={15}/> 수정 불가
-                </span>
-              ) : hasDraft ? (
-                <>
-                  <button onClick={() => setModal('discard')}
-                    className="px-3.5 py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-sm font-bold hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors flex items-center gap-1.5 shadow-sm">
-                    <Trash2 size={15}/> 수정 취소
-                  </button>
+              {/* 종료 코스는 버튼 자체를 두지 않는다 — 칩이 이미 "수정 불가"라고 말한다 */}
+              {!isClosed && (
+                hasDraft ? (
                   <button onClick={goEdit}
                     className="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-bold hover:bg-amber-600 transition-colors flex items-center gap-1.5 shadow-sm">
-                    <Edit3 size={15}/> 수정 중 이어서
+                    <Edit3 size={15}/> 이어서 수정
                   </button>
-                </>
-              ) : (
-                <button onClick={() => setModal('start')}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 shadow-sm">
-                  <Edit3 size={15}/> 수정
-                </button>
+                ) : (
+                  <button onClick={() => setModal('start')}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 shadow-sm">
+                    <Edit3 size={15}/> 수정
+                  </button>
+                )
               )}
             </div>
           </div>
@@ -432,66 +440,13 @@
                 ))}
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100">
-                {isClosed ? (
-                  <div className="px-2.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2">
-                    <Lock size={13} className="text-slate-400 mt-0.5 shrink-0"/>
-                    <p className="text-[11px] text-slate-500 leading-snug">
-                      운영이 <strong className="text-slate-600">종료된 코스</strong>입니다. 출결·수료 기록 보호를 위해 수정할 수 없습니다.
-                    </p>
-                  </div>
-                ) : hasDraft ? (
-                  <button onClick={goEdit} className="w-full py-2.5 rounded-lg text-[12px] font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors flex items-center justify-center gap-1.5">
-                    <Edit3 size={12}/> 수정 중 이어서
-                  </button>
-                ) : (
-                  <button onClick={() => setModal('start')} className="w-full py-2.5 rounded-lg text-[12px] font-bold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5">
-                    <Edit3 size={12}/> 수정
-                  </button>
-                )}
-                {!isClosed && (
-                  <p className="text-[10px] text-slate-400 text-center mt-2 leading-snug">
-                    {hasDraft ? '작업 중인 수정은 퍼블리시할 때\n공개됩니다' : '수정하면 별도 버전에 저장되고,\n퍼블리시할 때 공개됩니다'}
-                  </p>
-                )}
-              </div>
+              {/* 수정 진입점은 헤더 하나 — 헤더는 항상 보이므로 여기 또 둘 이유가 없다 */}
             </div>
           </nav>
 
           {/* ── 본문 (좌측 정보단) ── */}
-          <main className={`flex-1 overflow-y-auto custom-scrollbar py-8 space-y-6 animate-fadeIn pb-32 ${isClosed ? 'no-tier' : ''}`}>
+          <main className="flex-1 overflow-y-auto custom-scrollbar py-8 space-y-6 animate-fadeIn pb-32">
             <div className="w-[800px] mx-auto space-y-6">
-
-              {/* 드래프트 배너 */}
-              {hasDraft && (
-                <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-amber-400 text-white flex items-center justify-center shrink-0"><Edit3 size={16}/></div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-[14px] font-extrabold text-amber-900">아직 공개되지 않은 수정이 있습니다</h3>
-                        <span className="px-1.5 py-0.5 rounded bg-amber-200 text-amber-800 text-[10px] font-bold">미공개 {draft.changes.length}건</span>
-                        {dangerCount > 0 && <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold border border-rose-200">확인 필요 {dangerCount}건</span>}
-                      </div>
-                      <p className="text-[12px] text-amber-800 mt-1 leading-relaxed">
-                        <strong>{draft.editor}</strong> · {fmtDT(draft.editedAt)} 수정 —
-                        아래 표시된 내용은 <strong>지금 공개 중인 값</strong>입니다. 수정한 값은 퍼블리시할 때 반영됩니다.
-                      </p>
-                      <div className="flex items-center gap-2 mt-2.5">
-                        <button onClick={() => setModal('changes')} className="px-3 py-1.5 rounded-lg bg-white border border-amber-300 text-amber-800 text-[12px] font-bold hover:bg-amber-100 transition-colors flex items-center gap-1.5">
-                          <List size={12}/> 변경 내역 보기
-                        </button>
-                        <button onClick={goEdit} className="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[12px] font-bold hover:bg-amber-600 transition-colors flex items-center gap-1.5">
-                          <Edit3 size={12}/> 이어서 수정
-                        </button>
-                        <button onClick={() => setModal('discard')} className="px-3 py-1.5 rounded-lg text-amber-700 text-[12px] font-bold hover:bg-amber-100 transition-colors">
-                          폐기
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* 종료 코스 안내 */}
               {isClosed && (
@@ -506,35 +461,19 @@
                 </div>
               )}
 
-              {/* 배지 범례 */}
-              <div className={`bg-white border border-slate-200 rounded-xl px-4 py-3 items-center gap-4 flex-wrap ${isClosed ? 'hidden' : 'flex'}`}>
-                <div className="flex items-center gap-1.5 text-[11.5px] text-slate-500">
-                  <Info size={13} className="text-slate-400"/>
-                  <span>수정 후 저장하면 항목에 따라 반영 시점이 다릅니다</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Tier live={true}/>
-                  <span className="text-[11.5px] text-slate-500">저장 즉시 수강생 화면에 반영</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Tier live={false}/>
-                  <span className="text-[11.5px] text-slate-500">퍼블리시해야 반영 (등록·출석 영향)</span>
-                </div>
-              </div>
-
               {/* 섹션 1 — 코스 기본 정보 */}
               <div id="s-info">
                 <SectionCard num="1" title="코스 기본 정보" hint="코스명 · 분류 · 강사 · 장소"
                   open={sec.s1} onToggle={() => setSec(p => ({...p, s1:!p.s1}))}>
-                  <Row label="코스명"      value={info.title} live={false}/>
-                  <Row label="코스 분류"   value={info.category} live={true} empty={!info.category}/>
-                  <Row label="대표 강사"   value={info.instructor} live={false}/>
-                  <Row label="강사 소개"   value={info.instructorDesc} live={true} multiline empty={!info.instructorDesc}/>
-                  <Row label="코스 소개"   value={info.intro} live={true} multiline empty={!info.intro}/>
-                  <Row label="교육 장소"   value={info.location} live={false}/>
-                  <Row label="상세 주소"   value={info.address} live={true} empty={!info.address}/>
-                  <Row label="오시는 길"   value={info.traffic} live={true} multiline empty={!info.traffic}/>
-                  <Row label="커버 이미지" live={true}
+                  <Row label="코스명"      value={info.title}/>
+                  <Row label="코스 분류"   value={info.category} empty={!info.category}/>
+                  <Row label="대표 강사"   value={info.instructor}/>
+                  <Row label="강사 소개"   value={info.instructorDesc} multiline empty={!info.instructorDesc}/>
+                  <Row label="코스 소개"   value={info.intro} multiline empty={!info.intro}/>
+                  <Row label="교육 장소"   value={info.location}/>
+                  <Row label="상세 주소"   value={info.address} empty={!info.address}/>
+                  <Row label="오시는 길"   value={info.traffic} multiline empty={!info.traffic}/>
+                  <Row label="커버 이미지"
                     value={info.hasCover
                       ? <span className="inline-flex items-center gap-1.5 text-emerald-700"><ImageIcon size={13}/> 등록됨</span>
                       : null}
@@ -546,12 +485,12 @@
               <div id="s-enrl">
                 <SectionCard num="2" title="모집 및 수강 신청 설정" hint="신청 기간 · 등록 방식 · 권한"
                   open={sec.s2} onToggle={() => setSec(p => ({...p, s2:!p.s2}))}>
-                  <Row label="신청 기간" live={false}
+                  <Row label="신청 기간"
                     value={enroll.regNoLimit
                       ? <span className="inline-flex items-center gap-1.5"><span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[11px] font-bold">상시 모집</span><span className="text-slate-500 text-[12.5px]">마감은 차수별 일정·정원에서 결정</span></span>
                       : <span className="tabular-nums">{fmtDT(enroll.regStart)} ~ {fmtDT(enroll.regEnd)}</span>}/>
-                  <Row label="등록 방식" value={enrollMethodText()} live={false} empty={!enrollMethodText()}/>
-                  <Row label="신청 권한" live={false}
+                  <Row label="등록 방식" value={enrollMethodText()} empty={!enrollMethodText()}/>
+                  <Row label="신청 권한"
                     value={enroll.eligibleGroups.length
                       ? <span className="flex items-center gap-1 flex-wrap">
                           {enroll.eligibleGroups.map(g => (
@@ -560,14 +499,14 @@
                         </span>
                       : null}
                     empty={!enroll.eligibleGroups.length} multiline/>
-                  <Row label="차수 선택 방식" live={false}
+                  <Row label="차수 선택 방식"
                     value={enroll.selectionRule === 'single' ? '차수 1개 선택 (단일 선택형)' : '여러 차수 선택 (다중 조합형)'}/>
-                  <Row label="취소 정책" live={false}
+                  <Row label="취소 정책"
                     value={!enroll.cancelPolicy.enabled ? null
                       : enroll.cancelPolicy.mode === 'blocked' ? '신청 후 취소 불가'
                       : `교육 시작 ${enroll.cancelPolicy.relativeValue}${enroll.cancelPolicy.relativeUnit === 'day' ? '일' : '시간'} 전까지 취소 가능`}
                     empty={!enroll.cancelPolicy.enabled}/>
-                  <Row label="차수 변경 정책" live={false}
+                  <Row label="차수 변경 정책"
                     value={!enroll.changePolicy.enabled ? null
                       : `교육 시작 ${enroll.changePolicy.relativeValue}${enroll.changePolicy.relativeUnit === 'day' ? '일' : '시간'} 전까지 변경 가능`}
                     empty={!enroll.changePolicy.enabled}/>
@@ -597,7 +536,6 @@
                         </div>
                         <div className="text-[11px] text-slate-400 font-bold mt-0.5">이상</div>
                       </div>
-                      <Tier live={false}/>
                     </div>
                   </div>
                 </SectionCard>
@@ -658,6 +596,14 @@
                   const done = opt.sessions.every(isSessionPast);
                   const live = opt.sessions.some(isSessionLive) || (opt.sessions.some(isSessionPast) && !done);
                   const over = opt.enrolled > opt.capacity;
+                  const optPast = opt.sessions.filter(isSessionPast).length;
+                  const optMins = opt.sessions.reduce((sum, s) => {
+                    const [sh, sm] = (s.startTime || '0:0').split(':').map(Number);
+                    const [eh, em] = (s.endTime || '0:0').split(':').map(Number);
+                    return sum + Math.max(0, (eh*60+em) - (sh*60+sm));
+                  }, 0);
+                  // 차수 강사 — 대표 강사와 다를 때만 의미가 있다 (3단 상속: 회차 → 차수 → 대표)
+                  const cohortInstr = opt.instructor && opt.instructor !== info.instructor ? opt.instructor : null;
                   const badge = done
                     ? { t:'완료', c:'bg-slate-200 text-slate-600 border-slate-300' }
                     : live
@@ -677,8 +623,32 @@
                             {isCol ? <ChevronDown size={14}/> : <ChevronUp size={14}/>}
                           </button>
                         </div>
-                        {/* 메타 */}
+                        {/* 메타 1행 — 기간 · 회차 · 총 교육시간 */}
                         <div className="px-4 py-2 bg-slate-800 border-t border-slate-700 flex items-center gap-3">
+                          <span className="flex items-center gap-1.5 shrink-0 text-[11.5px] font-bold text-slate-200 tabular-nums">
+                            <Calendar size={11} className="text-slate-500 shrink-0"/> {fmtRange(opt.startDate, opt.endDate)}
+                          </span>
+                          <div className="w-px h-3.5 bg-slate-600"/>
+                          <span className="text-[11px] font-bold text-slate-400 shrink-0 tabular-nums">
+                            {opt.sessions.length}회차
+                            {optPast > 0 && !done && <span className="text-slate-500 font-medium"> · {optPast} 종료</span>}
+                          </span>
+                          {optMins > 0 && (
+                            <>
+                              <div className="w-px h-3.5 bg-slate-600"/>
+                              <span className="flex items-center gap-1 text-[11px] text-slate-400 shrink-0 tabular-nums">
+                                <Clock size={10} className="shrink-0"/> 총 {Math.floor(optMins/60)}시간{optMins%60 ? ` ${optMins%60}분` : ''}
+                              </span>
+                            </>
+                          )}
+                          <a href={`offline-view.html?id=${courseId}`}
+                            className="ml-auto shrink-0 text-[10.5px] font-bold text-indigo-300 hover:text-white border border-indigo-500/40 hover:border-indigo-400 px-2 py-1 rounded transition-colors">
+                            등록자
+                          </a>
+                        </div>
+
+                        {/* 메타 2행 — 정원 · 장소 · 차수 강사 */}
+                        <div className="px-4 py-2 bg-slate-800/60 border-t border-slate-700/60 flex items-center gap-3">
                           <div className="flex items-center gap-1.5 shrink-0">
                             <Users size={11} className="text-slate-500"/>
                             <span className={`text-[12px] font-bold tabular-nums ${over ? 'text-rose-300' : 'text-white'}`}>{opt.enrolled}</span>
@@ -686,16 +656,31 @@
                             {over && <span className="px-1 py-0.5 rounded bg-rose-900/60 border border-rose-700 text-rose-200 text-[9.5px] font-bold">초과</span>}
                           </div>
                           <div className="w-px h-3.5 bg-slate-600"/>
-                          <span className="text-[11px] font-bold text-slate-400 shrink-0 tabular-nums">{opt.sessions.length}회차</span>
-                          <div className="w-px h-3.5 bg-slate-600"/>
                           <span className="flex items-center gap-1 text-[11px] text-slate-400 truncate">
                             <MapPin size={10} className="shrink-0"/> {opt.place || '장소 미지정'}
                           </span>
-                          <a href={`offline-view.html?id=${courseId}`}
-                            className="ml-auto shrink-0 text-[10.5px] font-bold text-indigo-300 hover:text-white border border-indigo-500/40 hover:border-indigo-400 px-2 py-1 rounded transition-colors">
-                            등록자
-                          </a>
+                          {cohortInstr && (
+                            <>
+                              <div className="w-px h-3.5 bg-slate-600 shrink-0"/>
+                              <span className="flex items-center gap-1 text-[11px] shrink-0" title="이 차수 전담 강사 — 회차에 지정이 없으면 이 강사가 적용됩니다">
+                                <User size={10} className="text-slate-500 shrink-0"/>
+                                <span className="text-amber-300 font-bold">{cohortInstr}</span>
+                              </span>
+                            </>
+                          )}
                         </div>
+
+                        {/* 메타 3행 — 차수별 신청 권한 (설정된 경우만) */}
+                        {opt.groups && opt.groups.length > 0 && (
+                          <div className="px-4 py-2 bg-slate-800/60 border-t border-slate-700/60 flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[10px] font-bold text-slate-500 shrink-0">신청 권한</span>
+                            {opt.groups.map(g => (
+                              <span key={g.id || g} className="px-1.5 py-0.5 rounded bg-slate-700 border border-slate-600 text-slate-200 text-[10.5px] font-bold">
+                                {g.name || g}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       {/* 회차 목록 */}
@@ -704,9 +689,13 @@
                           {opt.sessions.map((s, si) => {
                             const past = isSessionPast(s);
                             const now = isSessionLive(s);
+                            const dur = durationOf(s);
+                            // 회차 강사가 따로 지정된 경우만 표시 — 없으면 차수/대표 강사를 그대로 따른다
+                            const sessInstr = s.instructor && s.instructor !== (opt.instructor || info.instructor) ? s.instructor : null;
+                            const sessPlace = s.place && s.place !== opt.place ? s.place : null;
                             return (
-                              <div key={s.id} className={`px-4 py-2.5 flex items-center gap-3 ${past ? 'bg-slate-50' : 'bg-white'}`}>
-                                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black tabular-nums shrink-0
+                              <div key={s.id} className={`px-4 py-2.5 flex items-start gap-3 ${past ? 'bg-slate-50' : 'bg-white'}`}>
+                                <span className={`w-6 h-6 mt-0.5 rounded-lg flex items-center justify-center text-[11px] font-black tabular-nums shrink-0
                                   ${past ? 'bg-slate-200 text-slate-500' : now ? 'bg-emerald-500 text-white' : 'bg-indigo-100 text-indigo-700'}`}>
                                   {si+1}
                                 </span>
@@ -714,11 +703,34 @@
                                   <div className={`text-[13px] font-bold truncate ${past ? 'text-slate-500' : 'text-slate-800'}`}>{s.name}</div>
                                   <div className={`text-[11.5px] tabular-nums mt-0.5 ${past ? 'text-slate-400' : 'text-slate-500'}`}>
                                     {fmtDate(s.date)} · {s.startTime}~{s.endTime}
+                                    {dur && <span className={past ? 'text-slate-300' : 'text-slate-400'}> · {dur}</span>}
                                   </div>
+                                  {(sessInstr || sessPlace || s.capacity) && (
+                                    <div className="flex items-center gap-2 flex-wrap mt-1">
+                                      {sessInstr && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-700 text-[10.5px] font-bold"
+                                          title="이 회차만 다른 강사">
+                                          <User size={9}/> {sessInstr}
+                                        </span>
+                                      )}
+                                      {sessPlace && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-violet-50 border border-violet-200 text-violet-700 text-[10.5px] font-bold"
+                                          title="이 회차만 다른 장소">
+                                          <MapPin size={9}/> {sessPlace}
+                                        </span>
+                                      )}
+                                      {s.capacity && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-600 text-[10.5px] font-bold tabular-nums"
+                                          title="이 회차만 다른 정원">
+                                          <Users size={9}/> {s.capacity}명
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
-                                {now && <span className="shrink-0 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold">진행중</span>}
+                                {now && <span className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold">진행중</span>}
                                 {past && (
-                                  <span className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 text-[10px] font-bold" title="종료 — 수정 불가">
+                                  <span className="shrink-0 mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 text-[10px] font-bold" title="종료 — 수정 불가">
                                     <Lock size={9}/> 종료
                                   </span>
                                 )}
@@ -784,104 +796,6 @@
           </div>
         )}
 
-        {/* ── 모달: 드래프트 폐기 ── */}
-        {modal === 'discard' && (
-          <div className="fixed inset-0 bg-slate-900/70 z-[300] flex items-center justify-center px-4" onClick={() => setModal(null)}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[440px] overflow-hidden animate-modalFade" onClick={e => e.stopPropagation()}>
-              <div className="px-6 pt-6 pb-4">
-                <div className="w-11 h-11 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center mb-3.5"><Trash2 size={20}/></div>
-                <h3 className="text-[17px] font-extrabold text-slate-900">작업 중인 수정을 폐기할까요?</h3>
-                <p className="text-[13px] text-slate-500 mt-1.5 leading-relaxed">
-                  미공개 변경 <strong className="text-slate-700">{hasDraft ? draft.changes.length : 0}건</strong>이 사라지고,
-                  현재 공개 중인 내용이 그대로 유지됩니다. 되돌릴 수 없습니다.
-                </p>
-                <div className="mt-3.5 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg">
-                  <p className="text-[11.5px] text-slate-500 leading-snug">
-                    <strong className="text-slate-600">{hasDraft ? draft.editor : ''}</strong> · {hasDraft ? fmtDT(draft.editedAt) : ''} 수정
-                  </p>
-                </div>
-              </div>
-              <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex gap-2 justify-end">
-                <button onClick={() => setModal(null)} className="px-4 py-2 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-200 transition-colors">유지</button>
-                <button onClick={() => { setHasDraft(false); setModal(null); showToast('수정 내용을 폐기했습니다 — 공개본 유지'); }}
-                  className="px-4 py-2 rounded-lg bg-rose-600 text-white text-[13px] font-bold hover:bg-rose-700 transition-colors flex items-center gap-1.5">
-                  <Trash2 size={14}/> 폐기
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── 모달: 변경 내역 (드래프트 diff) ── */}
-        {modal === 'changes' && hasDraft && (
-          <div className="fixed inset-0 bg-slate-900/70 z-[300] flex items-center justify-center px-4" onClick={() => setModal(null)}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[620px] max-h-[85vh] flex flex-col overflow-hidden animate-modalFade" onClick={e => e.stopPropagation()}>
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0"><List size={16}/></div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-[15px] font-extrabold text-slate-900">미공개 변경 내역</h3>
-                  <p className="text-[11.5px] text-slate-400 mt-0.5">{draft.editor} · {fmtDT(draft.editedAt)}</p>
-                </div>
-                <button onClick={() => setModal(null)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors"><X size={18}/></button>
-              </div>
-
-              {(dangerCount > 0 || warnCount > 0) && (
-                <div className="px-6 py-3 bg-amber-50 border-b border-amber-200 flex items-center gap-2 flex-wrap">
-                  <AlertTriangle size={14} className="text-amber-500 shrink-0"/>
-                  <span className="text-[12px] text-amber-800 font-medium">
-                    퍼블리시 전에 확인 필요 —
-                    {dangerCount > 0 && <strong> 등록자 충돌 {dangerCount}건</strong>}
-                    {dangerCount > 0 && warnCount > 0 && ','}
-                    {warnCount > 0 && <strong> 재통보 필요 {warnCount}건</strong>}
-                  </span>
-                </div>
-              )}
-
-              <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-2.5">
-                {draft.changes.map((c, i) => {
-                  const st = c.impact === 'danger'
-                    ? { bd:'border-rose-200', bg:'bg-rose-50', chip:'bg-rose-500', label:'확인 필요' }
-                    : c.impact === 'warn'
-                      ? { bd:'border-amber-200', bg:'bg-amber-50', chip:'bg-amber-500', label:'등록자 영향' }
-                      : { bd:'border-slate-200', bg:'bg-white', chip:'bg-slate-300', label:'즉시 반영 가능' };
-                  return (
-                    <div key={i} className={`border rounded-xl px-4 py-3 ${st.bd} ${st.bg}`}>
-                      <div className="flex items-center gap-2">
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${st.chip}`}/>
-                        <span className="text-[13px] font-extrabold text-slate-800 flex-1 truncate">{c.field}</span>
-                        <span className="text-[10px] font-bold text-slate-500 shrink-0">{st.label}</span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2 flex-wrap text-[12.5px]">
-                        <span className="px-2 py-1 rounded bg-white border border-slate-200 text-slate-400 line-through">{c.from}</span>
-                        <span className="text-slate-300 font-bold">→</span>
-                        <span className="px-2 py-1 rounded bg-white border border-indigo-200 text-indigo-700 font-bold">{c.to}</span>
-                      </div>
-                      {c.note && (
-                        <p className={`text-[11.5px] mt-2 leading-snug ${c.impact === 'danger' ? 'text-rose-600 font-bold' : 'text-amber-700'}`}>
-                          {c.note}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex gap-2 justify-end">
-                <button onClick={() => setModal('discard')} className="px-4 py-2 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-200 transition-colors">전체 폐기</button>
-                <button onClick={goEdit} className="px-4 py-2 rounded-lg bg-amber-500 text-white text-[13px] font-bold hover:bg-amber-600 transition-colors flex items-center gap-1.5">
-                  <Edit3 size={14}/> 이어서 수정
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 토스트 */}
-        {toast && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[400] bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl text-[13px] font-bold animate-fadeIn flex items-center gap-2">
-            <CheckCircle size={15} className="text-emerald-400"/> {toast}
-          </div>
-        )}
       </div>
     );
   };
