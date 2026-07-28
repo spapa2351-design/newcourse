@@ -62,6 +62,7 @@
     ══════════════════════════════════════ */
     const COURSES = [
       { id: 1, title: '2026 직무교육 — 프로젝트 관리 심화', status: 'active', thumb: '', instructor: '김민준', creator: 'jiyoungkim', category: '직무 역량', registeredAt: '2026/04/08 14:28', enrollMethod: 'self',
+        draftPending: true,   // 퍼블리시되지 않은 수정본 보유
         totalEnrolled: 55, totalCapacity: 60,
         packages: [
           { name: 'A반 (4/14)', startDate: '2026-04-14', endDate: '2026-04-14', place: '한샘 HQ B동 3층', capacity: 30, enrolled: 28, sessions: 2 },
@@ -134,6 +135,19 @@
     };
 
     const TODAY = '2026-04-28';
+
+    /* ── 코스 수정 진입점 (버저닝 D2 — 게이트는 하나) ──
+       운영중 코스는 빌더로 직행하지 않고 읽기 전용 상세로 먼저 보낸다.
+       퍼블리싱된 코스의 편집은 상세의 [수정] 버튼이 유일한 진입점.
+       종료 코스도 상세로 보내되 수정 버튼 없이 열린다.
+       아직 공개 전인 임시저장·공개예약 코스는 기존대로 빌더 직행. */
+    const courseEditHref = (c) => {
+      if (c.status === 'active' || c.status === 'published')
+        return `offline-detail.html?courseId=${c.id}${c.draftPending ? '&draft=1' : ''}`;
+      if (c.status === 'closed')
+        return `offline-detail.html?courseId=${c.id}&closed=1`;
+      return `offline-builder.html?courseId=${c.id}`;
+    };
 
     const fmtDate = (d) => d ? d.replace(/-/g, '.').slice(5) : '';
     const fmtRange = (s, e) => {
@@ -768,10 +782,19 @@
                               </td>
                               {/* 상태 */}
                               <td className="px-3 py-3">
-                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold whitespace-nowrap ${statusCfg.bg} ${statusCfg.text}`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusCfg.dot}`}/>
-                                  {statusCfg.label}
-                                </span>
+                                <div className="flex flex-col items-start gap-1">
+                                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold whitespace-nowrap ${statusCfg.bg} ${statusCfg.text}`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusCfg.dot}`}/>
+                                    {statusCfg.label}
+                                  </span>
+                                  {/* 미공개 드래프트 — 목록에서 방치된 작업본을 발견 가능하게 */}
+                                  {isActive && course.draftPending && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold whitespace-nowrap"
+                                      title="퍼블리시되지 않은 수정본이 있습니다">
+                                      <span className="w-1 h-1 rounded-full bg-amber-500 shrink-0"/> 수정 중
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               {/* 표지 썸네일 */}
                               <td className="px-3 py-2 text-center">
@@ -787,7 +810,7 @@
                               {/* 코스명 */}
                               <td className="px-3 py-3">
                                 <div className="flex items-center gap-2">
-                                  <a href={`offline-builder.html?courseId=${course.id}`} className="text-[14px] font-bold text-slate-800 hover:text-indigo-600 transition-colors leading-snug">
+                                  <a href={courseEditHref(course)} className="text-[14px] font-bold text-slate-800 hover:text-indigo-600 transition-colors leading-snug">
                                     {course.title}
                                   </a>
                                   {hasPackages && (
@@ -858,7 +881,8 @@
                               <td className="px-3 py-3">
                                 <div className="flex items-center justify-center gap-0.5">
                                   <button className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"><Link2 size={14}/></button>
-                                  <a href={`offline-builder.html?courseId=${course.id}`} className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"><Edit3 size={14}/></a>
+                                  <a href={courseEditHref(course)} title={isActive ? '코스 수정 (상세에서 수정 시작)' : '코스 수정'}
+                                    className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"><Edit3 size={14}/></a>
                                   <button onClick={() => handleDelete(course.id)} className="p-1 text-slate-400 hover:text-rose-500 transition-colors"><Trash2 size={14}/></button>
                                 </div>
                               </td>

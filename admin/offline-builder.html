@@ -63,7 +63,7 @@
       Wand2, ChevronLeft, ChevronRight, ChevronUp, User, Users, MousePointerClick, ChevronDown, GripVertical,
       Save, Send, Clock, Check, AlertTriangle, Eye, FileText, CircleDot, ImageIcon, Upload,
       BookOpen, Monitor, Star, List, Archive, AlertCircle, Grid3X3, CheckCircle, Filter, Layers, Info, ArrowRight,
-      Settings2, CalendarDays, CalendarCheck, Lock,
+      Settings2, CalendarDays, CalendarCheck, Lock, Edit3,
       MessageSquare, Play, BarChart2, Settings, ArrowLeft, UserCheck, Search
     } = Lucide;
 
@@ -109,6 +109,7 @@
     const COURSE_EDIT_DATA = {
       1: {
         status: 'published',
+        publishedAt: '2026-07-20T14:30',
         info: { title:'2026 직무교육 — 프로젝트 관리 심화', category:'직무 역량', instructor:'김민준', instructorDesc:'프로젝트 관리 전문가 · A등급 강사', intro:'', location:'한샘 HQ B동 3층', address:'', traffic:'강남역 3번 출구 도보 5분 거리. 지하 주차장 이용 시 무료 주차권 지급.' },
         options:[
           { id:1, name:'A반 (4/14)', capacity:30, enrolled:28, startDate:'2026-04-14', endDate:'2026-04-14', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
@@ -148,6 +149,7 @@
       },
       6: {
         status: 'published',
+        publishedAt: '2026-02-18T10:00',
         info: { title:'고객 응대 서비스 매너', category:'직무 역량', instructor:'한소희', instructorDesc:'고객 서비스 교육 전문가', intro:'', location:'한샘 HQ 대교육장', address:'', traffic:'' },
         options:[
           { id:1, name:'3월 15일 교육', capacity:30, enrolled:30, startDate:'2026-03-15', endDate:'2026-03-15', place:'한샘 HQ 대교육장', groups:[], sessionSelect:false, sessions:[
@@ -158,6 +160,7 @@
       },
       10: {
         status: 'published',
+        publishedAt: '2026-03-25T09:00',
         info: { title:'안전보건 법정의무교육 (4월)', category:'공통/온보딩', instructor:'강태훈', instructorDesc:'안전보건 법정의무교육 전문 강사', intro:'', location:'한샘 HQ 대교육장', address:'', traffic:'', sessionInstructorMode:true, sessionPlaceMode:true },
         options:[
           { id:1, name:'1기 (4/7~4/11)', capacity:30, enrolled:30, startDate:'2026-04-07', endDate:'2026-04-11', place:'한샘 HQ 대교육장', groups:[], sessionSelect:false, sessions:[
@@ -195,6 +198,7 @@
       },
       11: {
         status: 'published',
+        publishedAt: '2026-04-30T16:20',
         info: { title:'신임 팀장 리더십 캠프', category:'리더십', instructor:'최예진', instructorDesc:'리더십 개발 코치 · 팀장 교육 전문가', intro:'', location:'한샘 HQ 세미나룸', address:'', traffic:'' },
         options:[
           { id:1, name:'1차 워크숍 (5/20)', capacity:25, enrolled:20, startDate:'2026-05-20', endDate:'2026-05-20', place:'한샘 HQ 세미나룸', groups:[], sessionSelect:false, sessions:[
@@ -488,6 +492,18 @@
 
       const [courseStatus, setCourseStatus] = useState(_editData ? _editData.status : 'draft'); // draft | saved | scheduled | published
       const [lastSavedAt, setLastSavedAt] = useState(null);
+
+      /* ── 버저닝 ──
+         운영 중(published) 코스를 편집하면 = 드래프트 버전 작업.
+         공개본은 그대로 서비스되고, 퍼블리싱을 눌러야 드래프트가 실서비스로 교체된다.
+         ※ 상세 화면(offline-detail.html)의 [수정] 버튼이 이 상태의 유일한 진입점. */
+      const [publishedAt, setPublishedAt] = useState(_editData?.publishedAt || null);
+      const [draftPending, setDraftPending] = useState(isEditMode && _editData?.status === 'published');
+      const fmtPubDate = (v) => {
+        if (!v) return '';
+        const dt = new Date(v);
+        return isNaN(dt.getTime()) ? '' : `${dt.getMonth() + 1}.${dt.getDate()}`;
+      };
       const [showPublishModal, setShowPublishModal] = useState(false);
       // 차수 인원 배정 모달 (수강생 등록 모달 패턴 차용 — 그룹/개인 탭)
       const [assignModalOptId, setAssignModalOptId] = useState(null);
@@ -560,7 +576,8 @@
 
       const handleSaveDraft = () => {
         const isFirstSave = courseStatus === 'draft';
-        setCourseStatus('saved');
+        // 드래프트 편집 중이면 공개본 상태(published)를 내리지 않는다 — 공개본은 계속 서비스 중
+        if (!draftPending) setCourseStatus('saved');
         setLastSavedAt(new Date());
 
         if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -574,10 +591,17 @@
 
       /* ─── 나가기 가드 ─── */
       const [showExitModal, setShowExitModal] = useState(false);
-      const [isDirty, setIsDirty] = useState(true); // 빌더 진입 = 작업 중으로 간주, 임시저장 시 false
-      const isDirtyRef = useRef(true); // beforeunload·이동 직전 동기 참조용
+      /* 신규 등록은 진입 = 작업 중으로 간주.
+         편집(버저닝)은 실제로 값을 바꾼 시점부터 — 구경만 하고 [공개본 보기]로 나가는 건
+         드래프트를 만들지 않으므로 붙잡을 이유가 없다 (버저닝 D3). */
+      const [isDirty, setIsDirty] = useState(!isEditMode);
+      const isDirtyRef = useRef(!isEditMode); // beforeunload·이동 직전 동기 참조용
       useEffect(() => { isDirtyRef.current = isDirty; }, [isDirty]);
-      useEffect(() => { setIsDirty(true); }, [courseInfo, regPeriod, options]);
+      const didMount = useRef(false);
+      useEffect(() => {
+        if (!didMount.current) { didMount.current = true; return; } // 초기값 주입은 변경이 아님
+        setIsDirty(true);
+      }, [courseInfo, regPeriod, options]);
       const exitToList = () => {
         isDirtyRef.current = false; // 이동 직전 동기 해제 → beforeunload 가드 무력화
         window.location.href = 'offline-list.html';
@@ -621,6 +645,12 @@
         { label: '수료 조건 최소 1개 설정', ok: completionRules.length > 0 },
       ];
 
+      /* 퍼블리싱 확정 — 드래프트가 실서비스로 교체되고 공개본 시각이 갱신된다 */
+      const applyPublished = () => {
+        setDraftPending(false);
+        setPublishedAt(new Date().toISOString());
+      };
+
       const handlePublish = () => {
         const checks = getValidation();
         if (checks.some(c => !c.ok)) return;
@@ -630,6 +660,7 @@
             // 이미 지난 시간이면 즉시 퍼블리싱
             setCourseStatus('published');
             setScheduledAt(null);
+            applyPublished();
             showToast('예약 시간이 이미 지나 즉시 퍼블리싱됩니다', '🚀');
           } else {
             setCourseStatus('scheduled');
@@ -639,14 +670,17 @@
             scheduleCheckRef.current = setTimeout(() => {
               setCourseStatus('published');
               setScheduledAt(null);
+              applyPublished();
               showToast('예약된 시간이 되어 코스가 공개됐습니다', '🎉', 5000);
             }, schedDt - new Date());
             showToast(`${schedDt.toLocaleString('ko-KR', {month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}에 공개 예약됐습니다`, '📅', 4000);
           }
         } else {
+          const wasDraftEdit = draftPending;
           setCourseStatus('published');
           setScheduledAt(null);
-          showToast('코스가 즉시 공개됐습니다', '🚀');
+          applyPublished();
+          showToast(wasDraftEdit ? '변경사항이 공개됐습니다 — 드래프트가 실서비스로 교체됩니다' : '코스가 즉시 공개됐습니다', '🚀');
         }
         setShowPublishModal(false);
         setLastSavedAt(new Date());
@@ -1060,10 +1094,25 @@
                 <div>
                   <h1 className="text-lg font-extrabold text-slate-900 leading-none mb-1">{isEditMode ? '오프라인 코스 편집' : '오프라인 코스 개설'}</h1>
                 </div>
-                <span className={`ml-2 px-3 py-1 rounded-full text-[12px] font-bold border flex items-center gap-1.5 ${statusColor[courseStatus]}`}>
-                  <CircleDot size={10}/>
-                  {statusLabel[courseStatus]}
-                </span>
+                {draftPending ? (
+                  /* 버저닝 — 공개본 / 작업본 2트랙 표시 */
+                  <div className="ml-2 flex items-center gap-1.5">
+                    <a href={`offline-detail.html?courseId=${courseId}`}
+                      className="px-3 py-1 rounded-full text-[12px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1.5 hover:bg-emerald-100 transition-colors"
+                      title="공개본 보기">
+                      <CircleDot size={10}/> 공개 중
+                      {publishedAt && <span className="font-medium text-emerald-600/80">· {fmtPubDate(publishedAt)} 반영</span>}
+                    </a>
+                    <span className="px-3 py-1 rounded-full text-[12px] font-bold border bg-amber-50 text-amber-700 border-amber-300 flex items-center gap-1.5">
+                      <Edit3 size={10}/> 수정 중 · 미공개
+                    </span>
+                  </div>
+                ) : (
+                  <span className={`ml-2 px-3 py-1 rounded-full text-[12px] font-bold border flex items-center gap-1.5 ${statusColor[courseStatus]}`}>
+                    <CircleDot size={10}/>
+                    {statusLabel[courseStatus]}
+                  </span>
+                )}
                 {courseStatus === 'scheduled' && scheduledAt && (
                   <div className="ml-1 flex items-center gap-1.5 bg-violet-50 border border-violet-200 rounded-full px-3 py-1">
                     <Clock size={11} className="text-violet-500"/>
@@ -2270,39 +2319,37 @@
               </div>
 
               <div className="bg-white border-t border-slate-200 p-4 shrink-0 space-y-2">
-                {courseStatus === 'published' ? (
-                  <div className="space-y-2">
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shrink-0"><Check size={16} className="text-white"/></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[14px] font-bold text-emerald-800">퍼블리싱 완료</div>
-                        <div className="text-[12px] text-emerald-600">학습자 앱에 공개 중입니다.</div>
+                {/* 드래프트 편집 중 — 공개본은 계속 서비스 중임을 상시 고지 */}
+                {draftPending && (
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center shrink-0"><Edit3 size={15} className="text-white"/></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13.5px] font-bold text-amber-900">수정 중 — 아직 공개되지 않았습니다</div>
+                      <div className="text-[11.5px] text-amber-700 leading-snug">
+                        공개본{publishedAt ? ` (${fmtPubDate(publishedAt)} 반영)` : ''}이 계속 서비스 중입니다. 퍼블리싱해야 반영됩니다.
                       </div>
-                      <button onClick={() => setCourseStatus('saved')} className="text-[12px] font-bold text-emerald-600 border border-emerald-300 bg-white px-3 py-1.5 rounded-lg hover:bg-emerald-50 transition-colors shrink-0">
-                        수정 모드
-                      </button>
                     </div>
-                    <a href="offline-view.html" className="w-full bg-indigo-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-600 transition-colors text-[14px] shadow-sm">
-                      <Users size={15}/> 수강관리
+                    <a href={`offline-detail.html?courseId=${courseId}`}
+                      className="text-[12px] font-bold text-amber-700 border border-amber-300 bg-white px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors shrink-0">
+                      공개본 보기
                     </a>
                   </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleAddOption}
-                      className="flex items-center justify-center gap-1.5 bg-white border-2 border-slate-300 text-slate-600 py-3.5 px-4 rounded-xl font-bold hover:border-indigo-400 hover:text-indigo-600 transition-all text-[13px] shrink-0"
-                    >
-                      <Plus size={15}/> 새 차수
-                    </button>
-                    <button
-                      onClick={() => setShowPublishModal(true)}
-                      disabled={!canPublish}
-                      className={`flex-1 py-3.5 rounded-xl font-bold shadow-[0_4px_12px_rgba(92,102,242,0.3)] flex items-center justify-center gap-2 transition-all text-[15px] ${canPublish ? 'bg-[#5c66f2] text-white hover:bg-[#4a54e1]' : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'}`}
-                    >
-                      <Send size={16}/> 코스 퍼블리싱
-                    </button>
-                  </div>
                 )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleAddOption}
+                    className="flex items-center justify-center gap-1.5 bg-white border-2 border-slate-300 text-slate-600 py-3.5 px-4 rounded-xl font-bold hover:border-indigo-400 hover:text-indigo-600 transition-all text-[13px] shrink-0"
+                  >
+                    <Plus size={15}/> 새 차수
+                  </button>
+                  <button
+                    onClick={() => setShowPublishModal(true)}
+                    disabled={!canPublish}
+                    className={`flex-1 py-3.5 rounded-xl font-bold shadow-[0_4px_12px_rgba(92,102,242,0.3)] flex items-center justify-center gap-2 transition-all text-[15px] ${canPublish ? 'bg-[#5c66f2] text-white hover:bg-[#4a54e1]' : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'}`}
+                  >
+                    <Send size={16}/> {draftPending ? '변경사항 퍼블리싱' : '코스 퍼블리싱'}
+                  </button>
+                </div>
               </div>
             </aside>
           </div>

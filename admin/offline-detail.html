@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오프라인 코스 정보 (읽기 전용)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Pretendard"','"Roboto"','"Inter"','-apple-system','sans-serif'] },
+          colors: {
+            indigo: { 50:'#EEF0FF',100:'#E0E4FF',200:'#C7CDFF',300:'#9BA8FF',400:'#7B8AFF',500:'#5569FF',600:'#4454CC',700:'#3340A6',800:'#2A3587',900:'#000C57' }
+          },
+          boxShadow: { card:'0px 9px 16px rgba(159,162,191,.18),0px 2px 2px rgba(159,162,191,0.32)' }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
+  <style>
+    body { font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:14px; line-height:1.5; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes modalFade { from{opacity:0;scale:.97} to{opacity:1;scale:1} }
+    .animate-fadeIn { animation:fadeIn .2s ease-out forwards; }
+    .animate-modalFade { animation:modalFade .25s ease-out; }
+    .custom-scrollbar::-webkit-scrollbar { width:5px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background:#e2e8f0;border-radius:4px; }
+    /* 종료 코스 — 수정 자체가 불가하므로 반영 시점 배지를 숨긴다 */
+    .no-tier [data-tier] { display:none !important; }
+  </style>
+</head>
+<body class="bg-[#f2f5f9] text-slate-800 antialiased">
+<div id="root"></div>
+<script type="text/babel" data-type="module">
+  import React, { useState, useMemo } from 'https://esm.sh/react@18.2.0';
+  import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+  import * as Lucide from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
+
+  const {
+    ChevronLeft, ChevronDown, ChevronUp, MapPin, Calendar, Users, User, Clock, Lock,
+    CircleDot, Edit3, Eye, X, CheckCircle, AlertTriangle, Trash2, List, Info,
+    Tag, Navigation, ImageIcon, FileText, UserCheck, Award, Layers, Send
+  } = Lucide;
+
+  /* ────────────────────────────────────────────────────────────────
+     읽기 전용 코스 정보 화면 (버저닝 모델)
+
+     운영이 시작된(퍼블리싱된) 코스는 이 화면으로 열린다.
+     [수정] 버튼을 누르면 드래프트 버전이 만들어지고 빌더로 이동한다.
+     드래프트를 [퍼블리시]할 때까지 공개본은 그대로 서비스된다.
+
+     ※ 필드마다 "즉시 반영 / 퍼블리시 필요" 배지를 달아
+        수정 후 저장 결과가 어떻게 갈리는지 미리 알려준다.
+        (진입 게이트는 [수정] 하나로 통일 — 관리자가 판단할 게 없다)
+     ──────────────────────────────────────────────────────────────── */
+
+  const isSessionPast = (s) => {
+    if (!s || !s.date) return false;
+    const t = s.endTime || s.startTime || '23:59';
+    const dt = new Date(`${s.date}T${t}`);
+    return !isNaN(dt.getTime()) && dt < new Date();
+  };
+  const isSessionLive = (s) => {
+    if (!s || !s.date) return false;
+    const st = new Date(`${s.date}T${s.startTime || '00:00'}`);
+    const en = new Date(`${s.date}T${s.endTime || '23:59'}`);
+    const now = new Date();
+    return st <= now && now <= en;
+  };
+
+  const fmtDate = (d) => {
+    if (!d) return '—';
+    const [y, m, dd] = d.split('-').map(Number);
+    const wd = ['일','월','화','수','목','금','토'][new Date(y, m-1, dd).getDay()];
+    return `${m}월 ${dd}일 (${wd})`;
+  };
+  const fmtDT = (v) => {
+    if (!v) return '—';
+    const dt = new Date(v);
+    if (isNaN(dt.getTime())) return v;
+    return dt.toLocaleString('ko-KR', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  };
+
+  /* ── 회차 생성 헬퍼 (더미 데이터용) ── */
+  let _sid = 500;
+  const days = (startDate, n, st = '09:00', et = '18:00') => {   // 시작일부터 n일 연속
+    const [y, m, d] = startDate.split('-').map(Number);
+    return Array.from({ length: n }, (_, i) => {
+      const dt = new Date(y, m - 1, d + i);
+      const iso = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+      return { id: ++_sid, name: `${i+1}회차`, date: iso, startTime: st, endTime: et };
+    });
+  };
+  const slots = (date, times) =>                                  // 같은 날 여러 회차
+    times.map(([st, et], i) => ({ id: ++_sid, name: `${i+1}회차`, date, startTime: st, endTime: et }));
+
+  /* ── 코스 데이터 (offline-builder.html COURSE_EDIT_DATA와 동일 구조) ── */
+  const COURSE_DATA = {
+    1: {
+      status: 'published',
+      publishedAt: '2026-07-20T14:30',
+      info: {
+        title:'2026 직무교육 — 프로젝트 관리 심화', category:'직무 역량',
+        instructor:'김민준', instructorDesc:'프로젝트 관리 전문가 · A등급 강사',
+        intro:'프로젝트 기획부터 리스크 관리까지, 실무 사례 중심으로 다룹니다.',
+        location:'한샘 HQ B동 3층', address:'서울 강남구 테헤란로 152',
+        traffic:'강남역 3번 출구 도보 5분 거리. 지하 주차장 이용 시 무료 주차권 지급.',
+        hasCover: true,
+      },
+      enroll: {
+        regStart:'2026-04-10T09:00', regEnd:'2026-04-25T18:00', regNoLimit:false,
+        isSelfEnroll:true, adminAssign:false,
+        eligibleGroups:['개발팀','기획팀'],
+        selectionRule:'single',
+        cancelPolicy:{ enabled:true, mode:'allowed', relativeValue:3, relativeUnit:'day' },
+        changePolicy:{ enabled:false, relativeValue:5, relativeUnit:'day' },
+      },
+      completion: { minRate: 75 },
+      options:[
+        { id:1, name:'A반 (4/14)', capacity:30, enrolled:28, place:'한샘 HQ B동 3층', sessions:[
+          {id:101,name:'1회차',date:'2026-04-14',startTime:'09:00',endTime:'12:30'},
+          {id:102,name:'2회차',date:'2026-04-14',startTime:'13:30',endTime:'18:00'},
+        ]},
+        { id:2, name:'B반 (5/12)', capacity:30, enrolled:27, place:'한샘 HQ B동 3층', sessions:[
+          {id:103,name:'1회차',date:'2026-05-12',startTime:'09:00',endTime:'12:30'},
+          {id:104,name:'2회차',date:'2026-05-12',startTime:'13:30',endTime:'18:00'},
+        ]},
+        { id:3, name:'C반 (수강중)', capacity:30, enrolled:25, place:'한샘 HQ B동 3층', sessions:[
+          {id:105,name:'1회차',date:'2026-07-01',startTime:'10:00',endTime:'13:00'},
+          {id:106,name:'2회차',date:'2026-08-10',startTime:'10:00',endTime:'13:00'},
+        ]},
+      ],
+      // 미공개 드래프트 (?draft=1 로 시뮬레이션)
+      draft: {
+        editor:'박서준', editedAt:'2026-07-26T14:20',
+        changes:[
+          { field:'C반 2회차 일정', from:'8월 10일 10:00', to:'8월 12일 10:00', impact:'warn', note:'등록자 25명 재통보 필요' },
+          { field:'수료 조건', from:'출석률 75%', to:'출석률 70%', impact:'warn', note:'진행 중 수강생 25명에 적용' },
+          { field:'강사 소개', from:'프로젝트 관리 전문가 · A등급 강사', to:'PMP 보유 · 15년 경력', impact:'safe', note:'' },
+          { field:'B반 정원', from:'30명', to:'25명', impact:'danger', note:'현재 27명 등록 — 정원 초과 상태가 됩니다' },
+          { field:'오시는 길', from:'강남역 3번 출구 도보 5분…', to:'강남역 3번 출구 도보 5분 (주차 2시간 무료)', impact:'safe', note:'' },
+        ],
+      },
+    },
+
+    /* 종료 코스 — 상세로 열리되 [수정] 없음 */
+    6: {
+      status:'closed',
+      publishedAt:'2026-03-10T10:30',
+      info: {
+        title:'고객 응대 서비스 매너', category:'직무 역량',
+        instructor:'한소희', instructorDesc:'CS 교육 15년 · 서비스 아카데미 수석강사',
+        intro:'대면·비대면 응대 상황별 스크립트와 클레임 대응을 실습합니다.',
+        location:'한샘 HQ 대교육장', address:'서울 강남구 테헤란로 152',
+        traffic:'강남역 3번 출구 도보 5분 거리.',
+        hasCover:false,
+      },
+      enroll: {
+        regStart:'2026-02-20T09:00', regEnd:'2026-03-06T18:00', regNoLimit:false,
+        isSelfEnroll:false, adminAssign:true,
+        eligibleGroups:['CS팀'],
+        selectionRule:'single',
+        cancelPolicy:{ enabled:true, mode:'blocked', relativeValue:0, relativeUnit:'day' },
+        changePolicy:{ enabled:false, relativeValue:0, relativeUnit:'day' },
+      },
+      completion: { minRate: 100 },
+      options: [
+        { id:61, name:'3월 15일 교육', capacity:30, enrolled:30, place:'한샘 HQ 대교육장',
+          sessions: slots('2026-03-15', [['10:00','13:00'], ['14:00','17:00']]) },
+      ],
+      draft: null,
+    },
+
+    /* 운영중 · 드래프트 없음 (관리자 지정 등록 + 다차수) */
+    10: {
+      status:'published',
+      publishedAt:'2026-03-25T09:00',
+      info: {
+        title:'안전보건 법정의무교육 (4월)', category:'공통/온보딩',
+        instructor:'강태훈', instructorDesc:'산업안전지도사 · 법정교육 전담',
+        intro:'산업안전보건법에 따른 분기 법정의무교육입니다. 전 임직원 이수 대상.',
+        location:'한샘 HQ 대교육장', address:'서울 강남구 테헤란로 152',
+        traffic:'사내 교육장. 판교 연수원 차수는 셔틀 운행.',
+        hasCover:true,
+      },
+      enroll: {
+        regStart:'', regEnd:'', regNoLimit:true,
+        isSelfEnroll:false, adminAssign:true,
+        eligibleGroups:['전사'],
+        selectionRule:'single',
+        cancelPolicy:{ enabled:true, mode:'blocked', relativeValue:0, relativeUnit:'day' },
+        changePolicy:{ enabled:true, relativeValue:3, relativeUnit:'day' },
+      },
+      completion: { minRate: 100 },
+      options: [
+        { id:101, name:'1기 (4/7~4/11)',  capacity:30, enrolled:30, place:'한샘 HQ 대교육장', sessions: days('2026-04-07', 5, '09:00','12:00') },
+        { id:102, name:'2기 (4/14~4/18)', capacity:30, enrolled:30, place:'한샘 HQ 대교육장', sessions: days('2026-04-14', 5, '09:00','12:00') },
+        { id:103, name:'3기 (4/21~4/25)', capacity:30, enrolled:30, place:'판교 연수원',     sessions: days('2026-04-21', 5, '09:00','12:00') },
+        { id:104, name:'4기 (4/28~4/30)', capacity:30, enrolled:20, place:'판교 연수원',     sessions: days('2026-04-28', 3, '09:00','12:00') },
+        { id:105, name:'5기 (5/7~5/9)',   capacity:30, enrolled:10, place:'강남 교육장',     sessions: days('2026-05-07', 3, '09:00','12:00') },
+      ],
+      draft: null,
+    },
+
+    /* 운영중 · 드래프트 없음 (자율 신청 + 다중 차수 조합) */
+    11: {
+      status:'published',
+      publishedAt:'2026-04-30T16:20',
+      info: {
+        title:'신임 팀장 리더십 캠프', category:'리더십',
+        instructor:'최예진', instructorDesc:'조직개발 컨설턴트 · 리더십 코치',
+        intro:'신임 팀장이 첫 6개월에 마주하는 상황을 케이스로 다룹니다. 1·2차 워크숍 연속 참여 과정입니다.',
+        location:'한샘 HQ 세미나룸', address:'서울 강남구 테헤란로 152',
+        traffic:'강남역 3번 출구 도보 5분 거리.',
+        hasCover:true,
+      },
+      enroll: {
+        regStart:'2026-04-20T09:00', regEnd:'2026-05-10T18:00', regNoLimit:false,
+        isSelfEnroll:true, adminAssign:true,
+        eligibleGroups:['팀장급','파트리더'],
+        selectionRule:'multi',
+        cancelPolicy:{ enabled:true, mode:'allowed', relativeValue:7, relativeUnit:'day' },
+        changePolicy:{ enabled:true, relativeValue:7, relativeUnit:'day' },
+      },
+      completion: { minRate: 80 },
+      options: [
+        { id:111, name:'1차 워크숍', capacity:25, enrolled:20, place:'한샘 HQ 세미나룸',
+          sessions: slots('2026-05-20', [['09:30','12:30'], ['13:30','17:30']]) },
+        { id:112, name:'2차 워크숍', capacity:25, enrolled:18, place:'한샘 HQ 세미나룸',
+          sessions: slots('2026-06-10', [['09:30','12:30'], ['13:30','17:30']]) },
+      ],
+      draft: null,
+    },
+  };
+
+  /* ── 작은 컴포넌트들 ── */
+
+  // 즉시 반영 / 퍼블리시 필요 배지
+  const Tier = ({ live }) => (
+    <span data-tier className={`shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border
+      ${live ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+      {live ? '즉시 반영' : '퍼블리시 필요'}
+    </span>
+  );
+
+  // 읽기 전용 값 행 — 입력창처럼 보이지 않게 값만 텍스트로 표시
+  const Row = ({ label, value, live, mono, multiline, empty }) => (
+    <div className="flex gap-4 py-3 border-b border-slate-100 last:border-0">
+      <div className="w-[132px] shrink-0 pt-0.5 flex items-start gap-1.5">
+        <span className="text-[13px] font-bold text-slate-500 leading-snug">{label}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className={`text-[14px] leading-relaxed break-words
+          ${empty ? 'text-slate-400 italic' : 'text-slate-800 font-medium'}
+          ${mono ? 'tabular-nums' : ''} ${multiline ? '' : 'truncate'}`}>
+          {empty ? '설정 없음' : value}
+        </div>
+      </div>
+      <div className="shrink-0 pt-0.5"><Tier live={live}/></div>
+    </div>
+  );
+
+  const SectionCard = ({ num, icon: Icon, title, hint, open, onToggle, children }) => (
+    <section className="scroll-mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center gap-2.5 cursor-pointer select-none" onClick={onToggle}>
+        <div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">{num}</div>
+        <h2 className="text-base font-bold text-slate-800">{title}</h2>
+        {hint && <span className="text-[11.5px] text-slate-400 font-medium">· {hint}</span>}
+        <ChevronDown size={16} className={`ml-auto text-slate-400 transition-transform ${open ? '' : '-rotate-90'}`}/>
+      </div>
+      <div className={`px-6 py-2 ${open ? '' : 'hidden'}`}>{children}</div>
+    </section>
+  );
+
+  const App = () => {
+    const params = new URLSearchParams(window.location.search);
+    const courseId = Number(params.get('courseId') || 1);
+    const data = COURSE_DATA[courseId] || COURSE_DATA[1];
+
+    // 종료된 코스는 같은 화면으로 열리되 수정 진입점이 없다
+    const isClosed = data.status === 'closed' || params.get('closed') === '1';
+    const canDraft = !!data.draft && !isClosed;
+
+    // 데모 토글 — 공개 중 / 수정 중(드래프트 존재)
+    const [hasDraft, setHasDraft] = useState(canDraft && params.get('draft') === '1');
+    const [sec, setSec] = useState({ s1:true, s2:true, s3:true });
+    const [modal, setModal] = useState(null);      // 'start' | 'discard' | 'changes'
+    const [collapsed, setCollapsed] = useState({});
+    const [toast, setToast] = useState(null);
+
+    const { info, enroll, completion, options, draft } = data;
+
+    const totalSessions = options.reduce((s,o) => s + o.sessions.length, 0);
+    const totalCap = options.reduce((s,o) => s + o.capacity, 0);
+    const totalEnrolled = options.reduce((s,o) => s + o.enrolled, 0);
+    const pastCount = options.reduce((s,o) => s + o.sessions.filter(isSessionPast).length, 0);
+
+    // 다음 회차 (미도래 중 가장 이른 것)
+    const nextSession = useMemo(() => {
+      const all = [];
+      options.forEach(o => o.sessions.forEach(s => { if (!isSessionPast(s)) all.push({ ...s, optName:o.name }); }));
+      all.sort((a,b) => `${a.date}T${a.startTime}`.localeCompare(`${b.date}T${b.startTime}`));
+      return all[0] || null;
+    }, [options]);
+
+    const dangerCount = hasDraft ? draft.changes.filter(c => c.impact === 'danger').length : 0;
+    const warnCount   = hasDraft ? draft.changes.filter(c => c.impact === 'warn').length : 0;
+
+    const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2600); };
+
+    const goEdit = () => { window.location.href = `offline-builder.html?courseId=${courseId}`; };
+
+    const enrollMethodText = () => {
+      const t = [];
+      if (enroll.isSelfEnroll) t.push('회원 직접 신청');
+      if (enroll.adminAssign) t.push('관리자 지정 등록');
+      return t.length ? t.join(' + ') : null;
+    };
+
+    return (
+      <div className="relative flex flex-col h-screen overflow-hidden bg-[#f2f5f9]">
+
+        {/* ── 헤더 ── */}
+        <header className="shrink-0 px-4 pt-4 pr-[516px]">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-5 py-3 flex justify-between items-center">
+            <div className="flex items-center gap-3 min-w-0">
+              <a href="offline-list.html" className="w-8 h-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-colors shrink-0" title="코스 목록">
+                <ChevronLeft size={18}/>
+              </a>
+              <div className="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center shadow-sm shrink-0"><MapPin size={18}/></div>
+              <div className="min-w-0">
+                <h1 className="text-lg font-extrabold text-slate-900 leading-tight truncate">{info.title}</h1>
+                <p className="text-[11.5px] text-slate-400 font-medium leading-tight mt-0.5">오프라인 코스 · 읽기 전용</p>
+              </div>
+
+              {/* 상태 칩 — 공개본 / 작업본 2트랙 */}
+              <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                {isClosed ? (
+                  <span className="px-3 py-1 rounded-full text-[12px] font-bold border bg-slate-100 text-slate-500 border-slate-300 flex items-center gap-1.5">
+                    <Lock size={10}/> 종료
+                    <span className="font-medium text-slate-400">· 수정 불가</span>
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-[12px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1.5">
+                    <CircleDot size={10}/> 공개 중
+                    <span className="font-medium text-emerald-600/80">
+                      · {new Date(data.publishedAt).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})} 반영
+                    </span>
+                  </span>
+                )}
+                {hasDraft && (
+                  <button onClick={() => setModal('changes')}
+                    className="px-3 py-1 rounded-full text-[12px] font-bold border bg-amber-50 text-amber-700 border-amber-300 flex items-center gap-1.5 hover:bg-amber-100 transition-colors">
+                    <Edit3 size={10}/> 수정 중 · 미공개 {draft.changes.length}건
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <a href={`offline-view.html?id=${courseId}`}
+                className="px-3.5 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm">
+                <Users size={15}/> 운영 현황
+              </a>
+              {isClosed ? (
+                <span className="px-3.5 py-2 bg-slate-100 border border-slate-200 text-slate-400 rounded-lg text-sm font-bold flex items-center gap-1.5 cursor-not-allowed"
+                  title="종료된 코스는 수정할 수 없습니다">
+                  <Lock size={15}/> 수정 불가
+                </span>
+              ) : hasDraft ? (
+                <>
+                  <button onClick={() => setModal('discard')}
+                    className="px-3.5 py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-sm font-bold hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors flex items-center gap-1.5 shadow-sm">
+                    <Trash2 size={15}/> 수정 취소
+                  </button>
+                  <button onClick={goEdit}
+                    className="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-bold hover:bg-amber-600 transition-colors flex items-center gap-1.5 shadow-sm">
+                    <Edit3 size={15}/> 수정 중 이어서
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => setModal('start')}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 shadow-sm">
+                  <Edit3 size={15}/> 수정
+                </button>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <div className="flex-1 flex overflow-hidden pr-[500px]">
+
+          {/* ── 좌측 요약 ── */}
+          <nav className="w-[224px] shrink-0 px-4 pt-2 pb-4 overflow-y-auto custom-scrollbar h-full">
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sticky top-2">
+              <div className="mb-4">
+                <div className="text-[10px] font-bold text-slate-400 tracking-widest mb-1">등록 현황</div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[22px] font-black tabular-nums text-slate-900">{totalEnrolled}</span>
+                  <span className="text-[12px] font-bold text-slate-500">/ {totalCap} 명</span>
+                </div>
+                <div className="mt-2 h-1 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-500 transition-all" style={{ width:`${totalCap ? Math.min(100, totalEnrolled/totalCap*100) : 0}%` }}/>
+                </div>
+              </div>
+
+              {nextSession && (
+                <div className="mb-4 px-2.5 py-2 bg-indigo-50 border border-indigo-100 rounded-lg">
+                  <div className="text-[10px] font-bold text-indigo-400 tracking-wide mb-0.5">다음 회차</div>
+                  <div className="text-[12px] font-bold text-indigo-800 leading-snug">{fmtDate(nextSession.date)}</div>
+                  <div className="text-[11px] text-indigo-600 tabular-nums mt-0.5">{nextSession.startTime}~{nextSession.endTime} · {nextSession.optName}</div>
+                </div>
+              )}
+
+              <div className="space-y-0.5">
+                {[
+                  { id:'s-info',  label:'코스 기본 정보', detail:`${info.category} · ${info.instructor}` },
+                  { id:'s-enrl',  label:'모집·신청 설정', detail:enrollMethodText() || '미설정' },
+                  { id:'s-comp',  label:'수료 조건',      detail:`출석률 ${completion.minRate}% 이상` },
+                ].map((s, i) => (
+                  <a key={s.id} href={`#${s.id}`} className="block px-2.5 py-2 rounded-lg hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center text-[10px] font-black shrink-0">
+                        {String(i+1).padStart(2,'0')}
+                      </span>
+                      <span className="flex-1 truncate font-bold text-[12.5px] text-slate-700">{s.label}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1 ml-7 leading-snug truncate">{s.detail}</p>
+                  </a>
+                ))}
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100">
+                {isClosed ? (
+                  <div className="px-2.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2">
+                    <Lock size={13} className="text-slate-400 mt-0.5 shrink-0"/>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      운영이 <strong className="text-slate-600">종료된 코스</strong>입니다. 출결·수료 기록 보호를 위해 수정할 수 없습니다.
+                    </p>
+                  </div>
+                ) : hasDraft ? (
+                  <button onClick={goEdit} className="w-full py-2.5 rounded-lg text-[12px] font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors flex items-center justify-center gap-1.5">
+                    <Edit3 size={12}/> 수정 중 이어서
+                  </button>
+                ) : (
+                  <button onClick={() => setModal('start')} className="w-full py-2.5 rounded-lg text-[12px] font-bold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5">
+                    <Edit3 size={12}/> 수정
+                  </button>
+                )}
+                {!isClosed && (
+                  <p className="text-[10px] text-slate-400 text-center mt-2 leading-snug">
+                    {hasDraft ? '작업 중인 수정은 퍼블리시할 때\n공개됩니다' : '수정하면 별도 버전에 저장되고,\n퍼블리시할 때 공개됩니다'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </nav>
+
+          {/* ── 본문 (좌측 정보단) ── */}
+          <main className={`flex-1 overflow-y-auto custom-scrollbar py-8 space-y-6 animate-fadeIn pb-32 ${isClosed ? 'no-tier' : ''}`}>
+            <div className="w-[800px] mx-auto space-y-6">
+
+              {/* 드래프트 배너 */}
+              {hasDraft && (
+                <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-amber-400 text-white flex items-center justify-center shrink-0"><Edit3 size={16}/></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-[14px] font-extrabold text-amber-900">아직 공개되지 않은 수정이 있습니다</h3>
+                        <span className="px-1.5 py-0.5 rounded bg-amber-200 text-amber-800 text-[10px] font-bold">미공개 {draft.changes.length}건</span>
+                        {dangerCount > 0 && <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold border border-rose-200">확인 필요 {dangerCount}건</span>}
+                      </div>
+                      <p className="text-[12px] text-amber-800 mt-1 leading-relaxed">
+                        <strong>{draft.editor}</strong> · {fmtDT(draft.editedAt)} 수정 —
+                        아래 표시된 내용은 <strong>지금 공개 중인 값</strong>입니다. 수정한 값은 퍼블리시할 때 반영됩니다.
+                      </p>
+                      <div className="flex items-center gap-2 mt-2.5">
+                        <button onClick={() => setModal('changes')} className="px-3 py-1.5 rounded-lg bg-white border border-amber-300 text-amber-800 text-[12px] font-bold hover:bg-amber-100 transition-colors flex items-center gap-1.5">
+                          <List size={12}/> 변경 내역 보기
+                        </button>
+                        <button onClick={goEdit} className="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[12px] font-bold hover:bg-amber-600 transition-colors flex items-center gap-1.5">
+                          <Edit3 size={12}/> 이어서 수정
+                        </button>
+                        <button onClick={() => setModal('discard')} className="px-3 py-1.5 rounded-lg text-amber-700 text-[12px] font-bold hover:bg-amber-100 transition-colors">
+                          폐기
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 종료 코스 안내 */}
+              {isClosed && (
+                <div className="bg-slate-100 border border-slate-300 rounded-2xl px-5 py-4 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-400 text-white flex items-center justify-center shrink-0"><Lock size={16}/></div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[14px] font-extrabold text-slate-700">운영이 종료된 코스입니다</h3>
+                    <p className="text-[12px] text-slate-500 mt-1 leading-relaxed">
+                      출결·수료 기록이 확정되어 내용을 변경할 수 없습니다. 등록자와 수료 결과는 <strong className="text-slate-600">[운영 현황]</strong>에서 확인하세요.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* 배지 범례 */}
+              <div className={`bg-white border border-slate-200 rounded-xl px-4 py-3 items-center gap-4 flex-wrap ${isClosed ? 'hidden' : 'flex'}`}>
+                <div className="flex items-center gap-1.5 text-[11.5px] text-slate-500">
+                  <Info size={13} className="text-slate-400"/>
+                  <span>수정 후 저장하면 항목에 따라 반영 시점이 다릅니다</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Tier live={true}/>
+                  <span className="text-[11.5px] text-slate-500">저장 즉시 수강생 화면에 반영</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Tier live={false}/>
+                  <span className="text-[11.5px] text-slate-500">퍼블리시해야 반영 (등록·출석 영향)</span>
+                </div>
+              </div>
+
+              {/* 섹션 1 — 코스 기본 정보 */}
+              <div id="s-info">
+                <SectionCard num="1" title="코스 기본 정보" hint="코스명 · 분류 · 강사 · 장소"
+                  open={sec.s1} onToggle={() => setSec(p => ({...p, s1:!p.s1}))}>
+                  <Row label="코스명"      value={info.title} live={false}/>
+                  <Row label="코스 분류"   value={info.category} live={true} empty={!info.category}/>
+                  <Row label="대표 강사"   value={info.instructor} live={false}/>
+                  <Row label="강사 소개"   value={info.instructorDesc} live={true} multiline empty={!info.instructorDesc}/>
+                  <Row label="코스 소개"   value={info.intro} live={true} multiline empty={!info.intro}/>
+                  <Row label="교육 장소"   value={info.location} live={false}/>
+                  <Row label="상세 주소"   value={info.address} live={true} empty={!info.address}/>
+                  <Row label="오시는 길"   value={info.traffic} live={true} multiline empty={!info.traffic}/>
+                  <Row label="커버 이미지" live={true}
+                    value={info.hasCover
+                      ? <span className="inline-flex items-center gap-1.5 text-emerald-700"><ImageIcon size={13}/> 등록됨</span>
+                      : null}
+                    empty={!info.hasCover}/>
+                </SectionCard>
+              </div>
+
+              {/* 섹션 2 — 모집 및 수강 신청 설정 */}
+              <div id="s-enrl">
+                <SectionCard num="2" title="모집 및 수강 신청 설정" hint="신청 기간 · 등록 방식 · 권한"
+                  open={sec.s2} onToggle={() => setSec(p => ({...p, s2:!p.s2}))}>
+                  <Row label="신청 기간" live={false}
+                    value={enroll.regNoLimit
+                      ? <span className="inline-flex items-center gap-1.5"><span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[11px] font-bold">상시 모집</span><span className="text-slate-500 text-[12.5px]">마감은 차수별 일정·정원에서 결정</span></span>
+                      : <span className="tabular-nums">{fmtDT(enroll.regStart)} ~ {fmtDT(enroll.regEnd)}</span>}/>
+                  <Row label="등록 방식" value={enrollMethodText()} live={false} empty={!enrollMethodText()}/>
+                  <Row label="신청 권한" live={false}
+                    value={enroll.eligibleGroups.length
+                      ? <span className="flex items-center gap-1 flex-wrap">
+                          {enroll.eligibleGroups.map(g => (
+                            <span key={g} className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[11.5px] font-bold text-slate-600">{g}</span>
+                          ))}
+                        </span>
+                      : null}
+                    empty={!enroll.eligibleGroups.length} multiline/>
+                  <Row label="차수 선택 방식" live={false}
+                    value={enroll.selectionRule === 'single' ? '차수 1개 선택 (단일 선택형)' : '여러 차수 선택 (다중 조합형)'}/>
+                  <Row label="취소 정책" live={false}
+                    value={!enroll.cancelPolicy.enabled ? null
+                      : enroll.cancelPolicy.mode === 'blocked' ? '신청 후 취소 불가'
+                      : `교육 시작 ${enroll.cancelPolicy.relativeValue}${enroll.cancelPolicy.relativeUnit === 'day' ? '일' : '시간'} 전까지 취소 가능`}
+                    empty={!enroll.cancelPolicy.enabled}/>
+                  <Row label="차수 변경 정책" live={false}
+                    value={!enroll.changePolicy.enabled ? null
+                      : `교육 시작 ${enroll.changePolicy.relativeValue}${enroll.changePolicy.relativeUnit === 'day' ? '일' : '시간'} 전까지 변경 가능`}
+                    empty={!enroll.changePolicy.enabled}/>
+                </SectionCard>
+              </div>
+
+              {/* 섹션 3 — 수료 조건 */}
+              <div id="s-comp">
+                <SectionCard num="3" title="수료 조건" hint="출석률 기준"
+                  open={sec.s3} onToggle={() => setSec(p => ({...p, s3:!p.s3}))}>
+                  <div className="py-4">
+                    <div className="flex items-center gap-4 px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl">
+                      <div className="w-10 h-10 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0"><Award size={20}/></div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[14px] font-extrabold text-slate-800">오프라인 출석</span>
+                          <span className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px] font-bold">필수</span>
+                        </div>
+                        <p className="text-[12px] text-slate-500 mt-0.5">
+                          등록한 차수의 회차 기준 출석률 · 지각은 출석으로 인정
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="flex items-baseline gap-1 justify-end">
+                          <span className="text-[26px] font-black text-emerald-600 tabular-nums leading-none">{completion.minRate}</span>
+                          <span className="text-[13px] font-bold text-emerald-600">%</span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-bold mt-0.5">이상</div>
+                      </div>
+                      <Tier live={false}/>
+                    </div>
+                  </div>
+                </SectionCard>
+              </div>
+
+            </div>
+          </main>
+
+          {/* ── 우측 차수 · 회차 (읽기 전용) ── */}
+          <aside className="absolute top-0 right-0 w-[500px] h-screen bg-white border-l border-slate-200 flex flex-col z-30 shadow-[-10px_0_20px_-10px_rgba(0,0,0,0.05)] shrink-0 overflow-hidden">
+            <div className="px-4 py-2.5 border-b border-slate-200 shrink-0 bg-slate-900 text-white flex items-center gap-2">
+              <Calendar size={14} className="text-indigo-400 shrink-0"/>
+              <h3 className="font-bold text-[13px]">차수 · 회차</h3>
+              <span className="text-[11px] text-slate-500 ml-1">· 읽기 전용</span>
+              <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 border border-slate-700 rounded px-1.5 py-0.5">
+                <Lock size={9}/> {isClosed ? '종료 — 변경 불가' : '수정은 [수정] 버튼'}
+              </span>
+            </div>
+
+            {/* 통계 바 */}
+            <div className="px-5 py-3 border-b border-slate-700 shrink-0 bg-slate-800 flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[16px] font-black text-white tabular-nums">{options.length}</span>
+                <span className="text-[11px] text-slate-400">차수</span>
+              </div>
+              <div className="w-px h-3.5 bg-slate-600"/>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[16px] font-black text-white tabular-nums">{totalSessions}</span>
+                <span className="text-[11px] text-slate-400">총 회차</span>
+              </div>
+              <div className="w-px h-3.5 bg-slate-600"/>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[16px] font-black text-white tabular-nums">{totalEnrolled}</span>
+                <span className="text-[11px] text-slate-400">/ {totalCap} 등록</span>
+              </div>
+              {pastCount > 0 && (
+                <span className="ml-auto inline-flex items-center gap-1 text-[10.5px] font-bold text-slate-300 bg-slate-700 border border-slate-600 rounded px-2 py-1">
+                  <Lock size={10}/> 종료 {pastCount}회차
+                </span>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f4f7fc]">
+
+              {pastCount > 0 && (
+                <div className="mx-5 mt-4 px-3.5 py-2.5 bg-slate-100 border border-slate-300 rounded-lg flex items-start gap-2">
+                  <Lock size={13} className="text-slate-500 mt-0.5 shrink-0"/>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    이미 <strong>종료된 회차</strong>는 출결 기록 보호를 위해 수정 모드에서도 변경·삭제할 수 없습니다.
+                    <span className="block text-slate-400 mt-0.5">버전이 바뀌어도 과거 회차는 그대로 유지됩니다.</span>
+                  </p>
+                </div>
+              )}
+
+              <div className="px-5 pt-4 pb-6 space-y-4">
+                {options.map((opt, oi) => {
+                  const isCol = !!collapsed[opt.id];
+                  const done = opt.sessions.every(isSessionPast);
+                  const live = opt.sessions.some(isSessionLive) || (opt.sessions.some(isSessionPast) && !done);
+                  const over = opt.enrolled > opt.capacity;
+                  const badge = done
+                    ? { t:'완료', c:'bg-slate-200 text-slate-600 border-slate-300' }
+                    : live
+                      ? { t:'진행중', c:'bg-emerald-100 text-emerald-700 border-emerald-300' }
+                      : { t:'예정', c:'bg-indigo-100 text-indigo-700 border-indigo-300' };
+
+                  return (
+                    <div key={opt.id} className="bg-white border-2 border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                      {/* 차수 헤더 */}
+                      <div className="bg-slate-900">
+                        <div className="px-4 py-2.5 flex items-center gap-2.5">
+                          <span className="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-500 text-white text-[12px] font-extrabold tabular-nums">{oi+1}차수</span>
+                          <span className="flex-1 text-[14px] font-bold text-white truncate">{opt.name}</span>
+                          <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10.5px] font-bold border ${badge.c}`}>{badge.t}</span>
+                          <button onClick={() => setCollapsed(p => ({...p, [opt.id]: !isCol}))}
+                            className="p-1 rounded text-slate-500 hover:text-white hover:bg-slate-700 transition-colors shrink-0">
+                            {isCol ? <ChevronDown size={14}/> : <ChevronUp size={14}/>}
+                          </button>
+                        </div>
+                        {/* 메타 */}
+                        <div className="px-4 py-2 bg-slate-800 border-t border-slate-700 flex items-center gap-3">
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <Users size={11} className="text-slate-500"/>
+                            <span className={`text-[12px] font-bold tabular-nums ${over ? 'text-rose-300' : 'text-white'}`}>{opt.enrolled}</span>
+                            <span className="text-[11px] text-slate-500 tabular-nums">/ {opt.capacity}명</span>
+                            {over && <span className="px-1 py-0.5 rounded bg-rose-900/60 border border-rose-700 text-rose-200 text-[9.5px] font-bold">초과</span>}
+                          </div>
+                          <div className="w-px h-3.5 bg-slate-600"/>
+                          <span className="text-[11px] font-bold text-slate-400 shrink-0 tabular-nums">{opt.sessions.length}회차</span>
+                          <div className="w-px h-3.5 bg-slate-600"/>
+                          <span className="flex items-center gap-1 text-[11px] text-slate-400 truncate">
+                            <MapPin size={10} className="shrink-0"/> {opt.place || '장소 미지정'}
+                          </span>
+                          <a href={`offline-view.html?id=${courseId}`}
+                            className="ml-auto shrink-0 text-[10.5px] font-bold text-indigo-300 hover:text-white border border-indigo-500/40 hover:border-indigo-400 px-2 py-1 rounded transition-colors">
+                            등록자
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* 회차 목록 */}
+                      {!isCol && (
+                        <div className="divide-y divide-slate-100">
+                          {opt.sessions.map((s, si) => {
+                            const past = isSessionPast(s);
+                            const now = isSessionLive(s);
+                            return (
+                              <div key={s.id} className={`px-4 py-2.5 flex items-center gap-3 ${past ? 'bg-slate-50' : 'bg-white'}`}>
+                                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black tabular-nums shrink-0
+                                  ${past ? 'bg-slate-200 text-slate-500' : now ? 'bg-emerald-500 text-white' : 'bg-indigo-100 text-indigo-700'}`}>
+                                  {si+1}
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                  <div className={`text-[13px] font-bold truncate ${past ? 'text-slate-500' : 'text-slate-800'}`}>{s.name}</div>
+                                  <div className={`text-[11.5px] tabular-nums mt-0.5 ${past ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    {fmtDate(s.date)} · {s.startTime}~{s.endTime}
+                                  </div>
+                                </div>
+                                {now && <span className="shrink-0 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold">진행중</span>}
+                                {past && (
+                                  <span className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 text-[10px] font-bold" title="종료 — 수정 불가">
+                                    <Lock size={9}/> 종료
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {/* ── 데모 상태 토글 (드래프트 더미가 있는 코스에서만) ── */}
+        <div className={`fixed bottom-4 left-4 z-[200] bg-slate-900/95 text-white rounded-xl shadow-2xl px-3 py-2.5 items-center gap-2.5 ${canDraft ? 'flex' : 'hidden'}`}>
+          <span className="text-[10px] font-bold text-slate-400 tracking-widest">DEMO</span>
+          <div className="flex bg-slate-800 rounded-lg p-0.5">
+            <button onClick={() => setHasDraft(false)}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors ${!hasDraft ? 'bg-emerald-500 text-white' : 'text-slate-400 hover:text-white'}`}>
+              공개 중
+            </button>
+            <button onClick={() => setHasDraft(true)}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors ${hasDraft ? 'bg-amber-500 text-white' : 'text-slate-400 hover:text-white'}`}>
+              수정 중(드래프트)
+            </button>
+          </div>
+        </div>
+
+        {/* ── 모달: 수정 시작 확인 ── */}
+        {modal === 'start' && (
+          <div className="fixed inset-0 bg-slate-900/70 z-[300] flex items-center justify-center px-4" onClick={() => setModal(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[460px] overflow-hidden animate-modalFade" onClick={e => e.stopPropagation()}>
+              <div className="px-6 pt-6 pb-4">
+                <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3.5"><Edit3 size={20}/></div>
+                <h3 className="text-[17px] font-extrabold text-slate-900">수정 모드로 전환할까요?</h3>
+                <p className="text-[13px] text-slate-500 mt-1.5 leading-relaxed">
+                  운영 중인 코스입니다. 수정 내용은 별도로 보관되고, <strong className="text-slate-700">퍼블리시</strong>할 때 수강생 화면에 반영됩니다.
+                </p>
+
+                <div className="mt-4 space-y-2">
+                  {[
+                    { i: CheckCircle, c:'text-emerald-500', t:'지금 공개 중인 내용은 그대로 서비스됩니다' },
+                    { i: Lock,        c:'text-slate-400',   t:'이미 종료된 회차는 수정할 수 없습니다' },
+                    { i: AlertTriangle, c:'text-amber-500', t:'정원·일정 변경은 퍼블리시 전에 등록자 영향을 확인합니다' },
+                  ].map((r, i) => (
+                    <div key={i} className="flex items-start gap-2.5 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                      <r.i size={15} className={`${r.c} mt-0.5 shrink-0`}/>
+                      <span className="text-[12.5px] text-slate-600 leading-snug">{r.t}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex gap-2 justify-end">
+                <button onClick={() => setModal(null)} className="px-4 py-2 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-200 transition-colors">취소</button>
+                <button onClick={goEdit} className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-[13px] font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5">
+                  <Edit3 size={14}/> 수정 시작
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── 모달: 드래프트 폐기 ── */}
+        {modal === 'discard' && (
+          <div className="fixed inset-0 bg-slate-900/70 z-[300] flex items-center justify-center px-4" onClick={() => setModal(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[440px] overflow-hidden animate-modalFade" onClick={e => e.stopPropagation()}>
+              <div className="px-6 pt-6 pb-4">
+                <div className="w-11 h-11 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center mb-3.5"><Trash2 size={20}/></div>
+                <h3 className="text-[17px] font-extrabold text-slate-900">작업 중인 수정을 폐기할까요?</h3>
+                <p className="text-[13px] text-slate-500 mt-1.5 leading-relaxed">
+                  미공개 변경 <strong className="text-slate-700">{hasDraft ? draft.changes.length : 0}건</strong>이 사라지고,
+                  현재 공개 중인 내용이 그대로 유지됩니다. 되돌릴 수 없습니다.
+                </p>
+                <div className="mt-3.5 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                  <p className="text-[11.5px] text-slate-500 leading-snug">
+                    <strong className="text-slate-600">{hasDraft ? draft.editor : ''}</strong> · {hasDraft ? fmtDT(draft.editedAt) : ''} 수정
+                  </p>
+                </div>
+              </div>
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex gap-2 justify-end">
+                <button onClick={() => setModal(null)} className="px-4 py-2 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-200 transition-colors">유지</button>
+                <button onClick={() => { setHasDraft(false); setModal(null); showToast('수정 내용을 폐기했습니다 — 공개본 유지'); }}
+                  className="px-4 py-2 rounded-lg bg-rose-600 text-white text-[13px] font-bold hover:bg-rose-700 transition-colors flex items-center gap-1.5">
+                  <Trash2 size={14}/> 폐기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── 모달: 변경 내역 (드래프트 diff) ── */}
+        {modal === 'changes' && hasDraft && (
+          <div className="fixed inset-0 bg-slate-900/70 z-[300] flex items-center justify-center px-4" onClick={() => setModal(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[620px] max-h-[85vh] flex flex-col overflow-hidden animate-modalFade" onClick={e => e.stopPropagation()}>
+              <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0"><List size={16}/></div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-[15px] font-extrabold text-slate-900">미공개 변경 내역</h3>
+                  <p className="text-[11.5px] text-slate-400 mt-0.5">{draft.editor} · {fmtDT(draft.editedAt)}</p>
+                </div>
+                <button onClick={() => setModal(null)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors"><X size={18}/></button>
+              </div>
+
+              {(dangerCount > 0 || warnCount > 0) && (
+                <div className="px-6 py-3 bg-amber-50 border-b border-amber-200 flex items-center gap-2 flex-wrap">
+                  <AlertTriangle size={14} className="text-amber-500 shrink-0"/>
+                  <span className="text-[12px] text-amber-800 font-medium">
+                    퍼블리시 전에 확인 필요 —
+                    {dangerCount > 0 && <strong> 등록자 충돌 {dangerCount}건</strong>}
+                    {dangerCount > 0 && warnCount > 0 && ','}
+                    {warnCount > 0 && <strong> 재통보 필요 {warnCount}건</strong>}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-2.5">
+                {draft.changes.map((c, i) => {
+                  const st = c.impact === 'danger'
+                    ? { bd:'border-rose-200', bg:'bg-rose-50', chip:'bg-rose-500', label:'확인 필요' }
+                    : c.impact === 'warn'
+                      ? { bd:'border-amber-200', bg:'bg-amber-50', chip:'bg-amber-500', label:'등록자 영향' }
+                      : { bd:'border-slate-200', bg:'bg-white', chip:'bg-slate-300', label:'즉시 반영 가능' };
+                  return (
+                    <div key={i} className={`border rounded-xl px-4 py-3 ${st.bd} ${st.bg}`}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${st.chip}`}/>
+                        <span className="text-[13px] font-extrabold text-slate-800 flex-1 truncate">{c.field}</span>
+                        <span className="text-[10px] font-bold text-slate-500 shrink-0">{st.label}</span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2 flex-wrap text-[12.5px]">
+                        <span className="px-2 py-1 rounded bg-white border border-slate-200 text-slate-400 line-through">{c.from}</span>
+                        <span className="text-slate-300 font-bold">→</span>
+                        <span className="px-2 py-1 rounded bg-white border border-indigo-200 text-indigo-700 font-bold">{c.to}</span>
+                      </div>
+                      {c.note && (
+                        <p className={`text-[11.5px] mt-2 leading-snug ${c.impact === 'danger' ? 'text-rose-600 font-bold' : 'text-amber-700'}`}>
+                          {c.note}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex gap-2 justify-end">
+                <button onClick={() => setModal('discard')} className="px-4 py-2 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-200 transition-colors">전체 폐기</button>
+                <button onClick={goEdit} className="px-4 py-2 rounded-lg bg-amber-500 text-white text-[13px] font-bold hover:bg-amber-600 transition-colors flex items-center gap-1.5">
+                  <Edit3 size={14}/> 이어서 수정
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 토스트 */}
+        {toast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[400] bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl text-[13px] font-bold animate-fadeIn flex items-center gap-2">
+            <CheckCircle size={15} className="text-emerald-400"/> {toast}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  createRoot(document.getElementById('root')).render(<App/>);
+</script>
+<script src="feature-highlight.js"></script>
+</body>
+</html>
