@@ -43,7 +43,7 @@
   const {
     ArrowLeft, Edit3, Download, QrCode, Users, User, Calendar, MapPin,
     CheckCircle, Clock, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-    Search, BarChart2, TrendingUp, Award, RefreshCw,
+    Search, BarChart2, TrendingUp, Award, RefreshCw, AlertTriangle,
     CheckSquare, UserCheck, Zap, Minimize2, Power, Plus, Pencil, PauseCircle, Ban, CalendarX,
     BookOpen, Copy, Monitor, Star, List, Archive, AlertCircle, Grid3X3, Eye, Filter, FileText, Layers,
     MessageSquare, Play, Settings, ImageIcon
@@ -57,6 +57,8 @@
       course: {
         id:1, title:'2026 직무교육 — 프로젝트 관리 심화',
         status:'active', instructor:'김민준', category:'직무 역량', enrollMethod:'self',
+        // 출석 방식 = 인쇄 QR + 퇴장 체크 ON (빌더 설정 반영. ?mode=live 로 라이브 분기 확인)
+        attendanceMode:'fixed', checkoutEnabled:true,
         packages:[
           { id:'pa1', name:'A반 (4/14)', startDate:'2026-04-14', endDate:'2026-04-14',
             place:'한샘 HQ B동 3층', capacity:30, enrolled:28,
@@ -97,6 +99,7 @@
       course: {
         id:3, title:'AI 활용 업무 자동화 워크숍',
         status:'draft', instructor:'박지훈', category:'직무 역량', enrollMethod:'self',
+        attendanceMode:'fixed',
         packages:[
           { id:'pb1', name:'A반 (초급)', startDate:'2026-05-12', endDate:'2026-05-12',
             place:'판교 연수원', capacity:40, enrolled:0,
@@ -129,6 +132,7 @@
       course: {
         id:6, title:'고객 응대 서비스 매너',
         status:'closed', instructor:'한소희', category:'직무 역량', enrollMethod:'assign',
+        attendanceMode:'fixed',
         packages:[
           { id:'pc1', name:'3월 15일 교육', startDate:'2026-03-15', endDate:'2026-03-15',
             place:'한샘 HQ 대교육장', capacity:30, enrolled:30,
@@ -160,6 +164,9 @@
       course: {
         id:10, title:'안전보건 법정의무교육 (4월)',
         status:'active', instructor:'강태훈', category:'공통/온보딩', enrollMethod:'assign',
+        // 출석 방식 = 라이브 QR (빌더 설정 반영. ?mode=fixed 로 인쇄 분기 확인)
+        // 4기 1회차가 오늘(4/28)이라 [라이브 출석] 버튼이 활성되는 유일한 케이스
+        attendanceMode:'live',
         packages:[
           { id:'p1', name:'1기 (4/7~4/11)', startDate:'2026-04-07', endDate:'2026-04-11',
             place:'한샘 HQ 대교육장', capacity:15, enrolled:10,
@@ -247,6 +254,8 @@
       course: {
         id:11, title:'신임 팀장 리더십 캠프',
         status:'active', instructor:'최예진', category:'리더십', enrollMethod:'self',
+        // 라이브 QR — 전 회차가 미래라 오늘 회차가 없다. QR 진입점은 교육일에만 열린다 (설계 의도)
+        attendanceMode:'live',
         packages:[
           { id:'pp1', name:'1차 워크숍 (5/20)', startDate:'2026-05-20', endDate:'2026-05-20',
             place:'한샘 HQ 세미나룸', capacity:25, enrolled:20, instructor:'정현우',
@@ -283,6 +292,7 @@
       course: {
         id:12, title:'영업 전략 부트캠프 (5기)',
         status:'draft', instructor:'김도윤', category:'영업', enrollMethod:'self',
+        attendanceMode:'live',
         packages:[
           { id:'pq1', name:'집합교육 1주차', startDate:'2026-06-02', endDate:'2026-06-06',
             place:'판교 연수원', capacity:25, enrolled:0,
@@ -325,6 +335,7 @@
       course: {
         id:14, title:'하반기 신입사원 온보딩 (7월)',
         status:'scheduled', instructor:'박지훈', category:'공통/온보딩', enrollMethod:'assign',
+        attendanceMode:'fixed',
         packages:[
           { id:'pr1', name:'1기 (7/1~7/3)', startDate:'2026-07-01', endDate:'2026-07-03',
             place:'판교 연수원', capacity:40, enrolled:0,
@@ -355,6 +366,62 @@
   const COMPLETION = _cdata.completion;
   // 수료 출석률 기준 — 빌더 수료조건(attendance_rate minRate) 연동값. 데이터 미지정 시 표준 75%.
   const COMPLETION_MIN_RATE = (COURSE.completionMinRate != null) ? COURSE.completionMinRate : 75;
+
+  /* ── 출석 방식 (attendanceMode) — 코스 레벨 선(先)결정. 진행 중 전환은 빌더에서만 (경고 + 토큰 폐기) ──
+     'live'  = 강사 화면 전체화면 QR + 30초 자동갱신 (기존 동작)
+     'fixed' = 차수당 QR 발급 → PNG 다운로드해 현장 게시. 회차는 스캔 시각으로 판정 (E13)
+     필드가 없는 기존 코스는 'live'로 간주하고 마이그레이션하지 않는다 (E3).
+     ?mode=fixed|live · ?checkout=1 로 두 분기를 QA에서 바로 확인할 수 있다. */
+  const _qp = new URLSearchParams(window.location.search);
+  const ATT_MODE = (_qp.get('mode') === 'fixed' || _qp.get('mode') === 'live')
+    ? _qp.get('mode') : (COURSE.attendanceMode || 'live');
+  const CHECKOUT_ON = (_qp.get('checkout') === '1' || _qp.get('checkout') === '0')
+    ? _qp.get('checkout') === '1' : !!COURSE.checkoutEnabled;
+
+  /* ── QR 목업 — 토큰에서 결정적으로 생성. 실제 QR 인코딩은 구현 단계(A3-34) ── */
+  const qrCells = (token, n) => {
+    let h = 2166136261;
+    for (const ch of String(token)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    const rnd = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1000) / 1000; };
+    const g = Array.from({ length: n }, () => Array(n).fill(false));
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) g[y][x] = rnd() > 0.5;
+    // finder 패턴 3개 + 주변 여백 — 한눈에 QR로 읽히게
+    const finder = (ox, oy) => {
+      for (let y = -1; y <= 7; y++) for (let x = -1; x <= 7; x++) {
+        const py = oy + y, px = ox + x;
+        if (py < 0 || px < 0 || py >= n || px >= n) continue;
+        if (x < 0 || y < 0 || x > 6 || y > 6) { g[py][px] = false; continue; }
+        g[py][px] = (x === 0 || x === 6 || y === 0 || y === 6) || (x >= 2 && x <= 4 && y >= 2 && y <= 4);
+      }
+    };
+    finder(0, 0); finder(n - 7, 0); finder(0, n - 7);
+    return g;
+  };
+  const drawQr = (canvas, token, px, n = 25) => {
+    const q = 2, size = (n + q * 2) * px;
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#0f172a';
+    const g = qrCells(token, n);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (g[y][x]) ctx.fillRect((x + q) * px, (y + q) * px, px, px);
+  };
+  // 파일명이 유일한 식별자 (F10) — 이미지에는 아무 정보도 싣지 않는다 (F9)
+  const qrFileName = (pkgName, kind, issuedAt) =>
+    [COURSE.title, pkgName, kind, issuedAt.replace(/-/g, '')]
+      .map(s => String(s).trim().replace(/\s+/g, '').replace(/[\\/:*?"<>|]/g, ''))
+      .join('_') + '.png';
+  const downloadQr = (token, fileName) => {
+    const c = document.createElement('canvas');
+    drawQr(c, token, 16);
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png'); a.download = fileName; a.click();
+  };
+  const QrBox = ({ token, px = 7 }) => {
+    const ref = useRef(null);
+    useEffect(() => { if (ref.current) drawQr(ref.current, token, px); }, [token, px]);
+    return <canvas ref={ref} className="rounded-lg border border-slate-200 bg-white" style={{ width: 160, height: 160 }}/>;
+  };
 
   /* ── 코스 상태별 뷰 모드 (오프라인: active·published·scheduled·draft·closed) ──
      오프라인은 종료 모달(온라인 전용)이 없는 단순 모델 — 회차 종료·신청 만료로 자연 종료. 운영중/예정/종료 상태로만 구분. */
@@ -541,6 +608,24 @@
     const [qrCountdown, setQrCountdown] = useState(30);
     const qrTimerRef = useRef(null);
     const bcRef = useRef(null);
+
+    /* ── 차수 QR 모달 (고정 모드 전용, A3-34·A3-35) ──
+       토큰은 발급 후 동결(D3). 재발급만 새 토큰을 만들고, 입장·퇴장을 쌍으로 교체한다(F11). */
+    const [qrModal, setQrModal] = useState(null);        // 대상 차수(pkg) 또는 null
+    const [qrIssues, setQrIssues] = useState({});        // {pkgId: {rev, issuedAt}}
+    const [qrConfirmReissue, setQrConfirmReissue] = useState(false);  // 2단 확인 (모달 내 인라인)
+    const qrInfoOf = (pkg) => {
+      const { rev = 1, issuedAt = '2026-04-06' } = qrIssues[pkg.id] || {};
+      return { rev, issuedAt, tokenIn: `${COURSE.id}:${pkg.id}:in:v${rev}`, tokenOut: `${COURSE.id}:${pkg.id}:out:v${rev}` };
+    };
+    const reissueQr = (pkg) => {
+      setQrIssues(prev => ({ ...prev, [pkg.id]: { rev: (prev[pkg.id]?.rev || 1) + 1, issuedAt: TODAY } }));
+      setQrConfirmReissue(false);
+    };
+    const closeQrModal = () => { setQrModal(null); setQrConfirmReissue(false); };
+    // 모드가 진입 동작을 정한다 (E9). 고정 모드에서는 라이브 전체화면으로 가지 않는다.
+    const openAttendanceQr = (pkg) => ATT_MODE === 'fixed' ? setQrModal(pkg) : setLiveMode(true);
+    const attQrLabel = ATT_MODE === 'fixed' ? '출석 QR' : 'QR 출석';
 
     const [coverImage, setCoverImage] = useState(() => {
       try { const s = localStorage.getItem('lms_cover_' + COURSE.id); return s ? JSON.parse(s) : null; } catch(e) { return null; }
@@ -1209,10 +1294,12 @@
                   <UserCheck size={13}/> 수강생 등록
                 </button>
               )}
-              {!isClosedCourse && todaySess && (
-                <button data-feature-id="A3-04" onClick={()=>setLiveMode(true)}
+              {/* 모드가 진입 버튼을 정한다 (E9) — 반대 경로는 비활성이 아니라 미표시.
+                  고정 모드는 오늘 회차가 없어도 열린다(전날 미리 뽑는 게 목적). */}
+              {!isClosedCourse && (todaySess || ATT_MODE==='fixed') && (
+                <button data-feature-id="A3-04" onClick={()=>openAttendanceQr(todayPkg || COURSE.packages[0])}
                   className="w-full flex items-center justify-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-[14px] py-2 rounded-xl transition-colors shadow-sm">
-                  <QrCode size={13}/> 라이브 출석
+                  <QrCode size={13}/> {ATT_MODE==='fixed' ? '출석 QR' : '라이브 출석'}
                 </button>
               )}
               {isClosedCourse && (
@@ -1237,9 +1324,9 @@
                   <div className="text-[14px] font-black">{todayPkg.name} · {todaySess.name} &nbsp;|&nbsp; {todaySess.start}~{todaySess.end} &nbsp;|&nbsp; {todayPkg.place}</div>
                   <div className="text-[13px] text-indigo-200 mt-0.5">예정 인원 {todayPkg.enrolled}명</div>
                 </div>
-                <button onClick={()=>setLiveMode(true)}
+                <button onClick={()=>openAttendanceQr(todayPkg)}
                   className="flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 rounded-xl text-[14px] font-black hover:bg-indigo-50 transition-colors shadow-sm shrink-0">
-                  <QrCode size={16}/> QR 출석 시작
+                  <QrCode size={16}/> {ATT_MODE==='fixed' ? '출석 QR' : 'QR 출석 시작'}
                 </button>
               </div>
             )}
@@ -1491,10 +1578,11 @@
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              {hasToday && (
-                                <button onClick={e=>{e.stopPropagation();setLiveMode(true);}}
+                              {/* 고정 모드는 오늘 회차가 없어도 열린다 — 전날 미리 뽑아 붙이는 게 목적 */}
+                              {(hasToday || ATT_MODE==='fixed') && (
+                                <button onClick={e=>{e.stopPropagation();openAttendanceQr(pkg);}}
                                   className="flex items-center gap-1 text-[12px] font-bold text-white bg-indigo-500 hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition-colors">
-                                  <QrCode size={12}/> QR 출석
+                                  <QrCode size={12}/> {attQrLabel}
                                 </button>
                               )}
                               {isOpen?<ChevronUp size={15} className="text-slate-400"/>:<ChevronDown size={15} className="text-slate-400"/>}
@@ -2187,10 +2275,13 @@
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  {calPopover.date === TODAY && (
-                    <button onClick={()=>{setLiveMode(true);setCalPopover(null);}}
+                  {(calPopover.date === TODAY || ATT_MODE==='fixed') && (
+                    <button onClick={()=>{
+                        const cp = COURSE.packages.find(p=>p.id===calPopover.pkgId);
+                        setCalPopover(null); openAttendanceQr(cp);
+                      }}
                       className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-indigo-500 text-white rounded-xl text-[14px] font-bold hover:bg-indigo-600 transition-colors shadow-sm">
-                      <QrCode size={14}/> QR 출석
+                      <QrCode size={14}/> {attQrLabel}
                     </button>
                   )}
                   <button onClick={()=>{setTab('attendance');setOpenPkgs(prev=>new Set([...prev,calPopover.pkgId]));setCalPopover(null);}}
@@ -2202,6 +2293,92 @@
             </div>
           </div>
         )}
+        {/* ── 차수 QR 모달 (고정 모드, A3-34·A3-35) ──
+            차수당 발급(E13) · 토큰 동결(D3) · 입퇴장 쌍 재발급(F11) · PNG만(F9) */}
+        {qrModal && (()=>{
+          const q = qrInfoOf(qrModal);
+          const cards = [
+            { kind:'입장', token:q.tokenIn,  desc:'들어올 때 · 입구에 게시', tone:'indigo' },
+            ...(CHECKOUT_ON ? [{ kind:'퇴장', token:q.tokenOut, desc:'나갈 때 · 출구에 게시', tone:'orange' }] : []),
+          ];
+          return (
+            <div className="fixed inset-0 bg-slate-900/50 z-[60] flex items-center justify-center p-6 animate-fadeIn" onClick={closeQrModal}>
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[560px] overflow-hidden" onClick={e=>e.stopPropagation()}>
+                {/* 헤더 */}
+                <div className="px-6 py-4 bg-slate-900 flex items-start gap-3">
+                  <QrCode size={18} className="text-indigo-400 shrink-0 mt-0.5"/>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[15px] font-black text-white">{qrModal.name}</div>
+                    <div className="text-[12px] text-slate-400 mt-0.5">{qrModal.place} · {qrModal.sessions.length}회차 · 신청 {qrModal.enrolled}명</div>
+                  </div>
+                  <button onClick={closeQrModal} className="text-slate-400 hover:text-white transition-colors shrink-0"><X size={18}/></button>
+                </div>
+
+                {/* 설명 — 차수당 1개, 회차는 스캔 시각으로 (E13) */}
+                <div className="px-6 py-3 bg-indigo-50/70 border-b border-indigo-100">
+                  <p className="text-[12px] text-slate-600 leading-relaxed">
+                    이 QR {CHECKOUT_ON ? '2장' : '1장'}으로 <span className="font-bold text-indigo-600">{qrModal.sessions.length}회차 전체</span>를 커버합니다.
+                    회차는 <span className="font-bold text-indigo-600">스캔한 시각</span>으로 자동 구분되므로 회차마다 따로 뽑지 않습니다.
+                    <span className="text-slate-400"> 회차 추가·일정 변경에도 재발급이 필요 없습니다.</span>
+                  </p>
+                </div>
+
+                {/* QR 카드 */}
+                <div className={`px-6 py-5 grid gap-4 ${CHECKOUT_ON ? 'grid-cols-2' : 'grid-cols-1 justify-items-center'}`}>
+                  {cards.map(c=>(
+                    <div key={c.kind} className="flex flex-col items-center gap-2.5">
+                      <span className={`text-[12px] font-black px-2.5 py-0.5 rounded-full border ${c.tone==='indigo'
+                        ? 'text-indigo-600 bg-indigo-50 border-indigo-200' : 'text-orange-600 bg-orange-50 border-orange-200'}`}>{c.kind}</span>
+                      <QrBox token={c.token}/>
+                      <span className="text-[11px] text-slate-400">{c.desc}</span>
+                      <button onClick={()=>downloadQr(c.token, qrFileName(qrModal.name, c.kind, q.issuedAt))}
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 text-white rounded-lg text-[12px] font-bold hover:bg-slate-700 transition-colors">
+                        <Download size={13}/> PNG 다운로드
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {!CHECKOUT_ON && (
+                  <div className="px-6 pb-4 -mt-1">
+                    <p className="text-[11px] text-slate-400 text-center">퇴장 체크를 쓰려면 코스 빌더 &gt; 수료 조건 &gt; 출석 판정 기준에서 켜세요.</p>
+                  </div>
+                )}
+
+                {/* 발급 정보 · 재발급 */}
+                <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[12px] font-bold text-slate-600 tabular-nums">{q.issuedAt} 발급{q.rev>1 && <span className="text-slate-400 font-medium"> · {q.rev}차</span>}</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">파일명으로 구분합니다 — {qrFileName(qrModal.name, '입장', q.issuedAt)}</div>
+                  </div>
+                  {qrConfirmReissue ? (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button onClick={()=>reissueQr(qrModal)}
+                        className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[12px] font-bold hover:bg-rose-600 transition-colors">정말 재발급</button>
+                      <button onClick={()=>setQrConfirmReissue(false)}
+                        className="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-[12px] font-bold hover:bg-slate-100 transition-colors">취소</button>
+                    </div>
+                  ) : (
+                    <button onClick={()=>setQrConfirmReissue(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-[12px] font-bold hover:bg-slate-100 transition-colors shrink-0">
+                      <RefreshCw size={12}/> 재발급
+                    </button>
+                  )}
+                </div>
+                {qrConfirmReissue && (
+                  <div className="px-6 py-2.5 bg-rose-50 border-t border-rose-100 flex items-start gap-1.5 animate-fadeIn">
+                    <AlertTriangle size={12} className="text-rose-500 shrink-0 mt-0.5"/>
+                    <p className="text-[11px] text-rose-600 leading-relaxed">
+                      이미 게시한 QR이 <span className="font-bold">즉시 무효화</span>됩니다.
+                      {CHECKOUT_ON ? ' 입장·퇴장이 함께 교체되므로 둘 다 다시 내려받아 교체하세요.' : ' 새 QR을 다시 내려받아 교체하세요.'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ── 출석 명단 모달 ── */}
         {attModal && (()=>{
           const {pkg:mp,session:ms,pkgL:mL}=attModal;

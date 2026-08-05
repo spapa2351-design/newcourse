@@ -63,12 +63,14 @@
     const COURSES = [
       { id: 1, title: '2026 직무교육 — 프로젝트 관리 심화', status: 'active', thumb: '', instructor: '김민준', creator: 'jiyoungkim', category: '직무 역량', registeredAt: '2026/04/08 14:28', enrollMethod: 'self',
         draftPending: true,   // 퍼블리시되지 않은 수정본 보유
+        attendanceMode: 'fixed', checkoutEnabled: true,   // 인쇄 QR 대표 케이스 — 입장·퇴장 2장
         totalEnrolled: 55, totalCapacity: 60,
         packages: [
           { name: 'A반 (4/14)', startDate: '2026-04-14', endDate: '2026-04-14', place: '한샘 HQ B동 3층', capacity: 30, enrolled: 28, sessions: 2 },
           { name: 'B반 (5/12)', startDate: '2026-05-12', endDate: '2026-05-12', place: '한샘 HQ B동 3층', capacity: 30, enrolled: 27, sessions: 2 },
         ]},
       { id: 3, title: 'AI 활용 업무 자동화 워크숍', status: 'draft', thumb: '', instructor: '박지훈', creator: 'jiyoungkim', category: '직무 역량', registeredAt: '2026/04/07 17:45', enrollMethod: 'self',
+        attendanceMode: 'fixed',
         totalEnrolled: 0, totalCapacity: 120,
         packages: [
           { name: 'A반 (초급)', startDate: '2026-05-12', endDate: '2026-05-12', place: '판교 연수원', capacity: 40, enrolled: 0, sessions: 3 },
@@ -76,11 +78,13 @@
           { name: 'C반 (심화)', startDate: '2026-05-14', endDate: '2026-05-14', place: '강남 교육장', capacity: 40, enrolled: 0, sessions: 2 },
         ]},
       { id: 6, title: '고객 응대 서비스 매너', status: 'closed', thumb: '', instructor: '한소희', creator: 'jiyoungkim', category: '직무 역량', registeredAt: '2026/03/10 10:30', enrollMethod: 'assign',
+        attendanceMode: 'fixed',
         totalEnrolled: 30, totalCapacity: 30,
         packages: [
           { name: '3월 15일 교육', startDate: '2026-03-15', endDate: '2026-03-15', place: '한샘 HQ 대교육장', capacity: 30, enrolled: 30, sessions: 2 },
         ]},
       { id: 10, title: '안전보건 법정의무교육 (4월)', status: 'active', thumb: '', instructor: '강태훈', otherInstructors: ['이응급','박현장','박서준'], creator: 'jiyoungkim', category: '공통/온보딩', registeredAt: '2026/03/25 09:00', enrollMethod: 'assign',
+        attendanceMode: 'live',   // 라이브 QR 대표 케이스 — 4기 1회차가 오늘(4/28)이라 [라이브 출석] 버튼이 활성된다
         totalEnrolled: 120, totalCapacity: 150,
         packages: [
           { name: '1기 (4/7~4/11)', startDate: '2026-04-07', endDate: '2026-04-11', place: '한샘 HQ 대교육장', capacity: 30, enrolled: 30, sessions: 5 },
@@ -90,12 +94,14 @@
           { name: '5기 (5/7~5/9)', startDate: '2026-05-07', endDate: '2026-05-09', place: '강남 교육장', capacity: 30, enrolled: 10, sessions: 3 },
         ]},
       { id: 11, title: '신임 팀장 리더십 캠프', status: 'active', thumb: '', instructor: '최예진', otherInstructors: ['정현우','한지민'], creator: 'jaewan.na', category: '리더십', registeredAt: '2026/04/05 11:20', enrollMethod: 'self',
+        attendanceMode: 'live',
         totalEnrolled: 38, totalCapacity: 50,
         packages: [
           { name: '1차 워크숍', startDate: '2026-05-20', endDate: '2026-05-20', place: '한샘 HQ 세미나룸', capacity: 25, enrolled: 20, sessions: 2 },
           { name: '2차 워크숍', startDate: '2026-06-10', endDate: '2026-06-10', place: '한샘 HQ 세미나룸', capacity: 25, enrolled: 18, sessions: 2 },
         ]},
       { id: 12, title: '영업 전략 부트캠프 (5기)', status: 'draft', thumb: '', instructor: '김도윤', creator: 'jiyoungkim', category: '영업', registeredAt: '2026/04/06 13:10', enrollMethod: 'self',
+        attendanceMode: 'live',
         totalEnrolled: 0, totalCapacity: 100,
         packages: [
           { name: '집합교육 1주차', startDate: '2026-06-02', endDate: '2026-06-06', place: '판교 연수원', capacity: 25, enrolled: 0, sessions: 5 },
@@ -105,6 +111,7 @@
         ]},
       { id: 14, title: '하반기 신입사원 온보딩 (7월)', status: 'scheduled', thumb: '', instructor: '박지훈', creator: 'jiyoungkim', category: '공통/온보딩', registeredAt: '2026/04/28 09:00', enrollMethod: 'assign',
         scheduledAt: '2026-05-01T09:00',
+        attendanceMode: 'fixed',
         totalEnrolled: 0, totalCapacity: 80,
         packages: [
           { name: '1기 (7/1~7/3)', startDate: '2026-07-01', endDate: '2026-07-03', place: '판교 연수원', capacity: 40, enrolled: 0, sessions: 3 },
@@ -133,6 +140,16 @@
       saved:     { label: '임시저장', bg: 'bg-slate-100',  text: 'text-slate-500',   dot: 'bg-slate-400' },
       closed:    { label: '종료',     bg: 'bg-slate-50',   text: 'text-slate-400',   dot: 'bg-slate-300' },
     };
+
+    /* ── 출석 방식 (attendanceMode) — 코스 레벨 선(先)결정. 빌더에서만 전환한다 ──
+       'live'  = 강사 화면에 QR 표시 · 30초마다 자동 갱신
+       'fixed' = 차수당 QR 발급 → 인쇄해 현장 게시. 회차는 스캔 시각으로 판정
+       필드가 없는 기존 코스는 'live'로 간주 (offline-view.html과 동일 규칙). */
+    const ATT_MODE_CFG = {
+      live:  { label: '라이브 QR', bg: 'bg-rose-50',   text: 'text-rose-600',   border: 'border-rose-200',   tip: '강사 화면에 QR 표시 · 30초마다 자동 갱신' },
+      fixed: { label: '인쇄 QR',   bg: 'bg-sky-50',    text: 'text-sky-700',    border: 'border-sky-200',    tip: '차수당 QR 발급 → 인쇄해 현장 게시. 회차는 스캔 시각으로 판정' },
+    };
+    const attModeOf = (c) => ATT_MODE_CFG[c.attendanceMode] || ATT_MODE_CFG.live;
 
     const TODAY = '2026-04-28';
 
@@ -751,7 +768,7 @@
                         <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[80px]">상태</th>
                         <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[52px] text-center">표지</th>
                         <th className="px-3 py-3 text-[12px] font-bold text-slate-400">코스명</th>
-                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[90px] text-center whitespace-nowrap">수강관리</th>
+                        <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[104px] text-center whitespace-nowrap">수강관리</th>
                         <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[110px] whitespace-nowrap">차수</th>
                         <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[90px]">분류</th>
                         <th className="px-3 py-3 text-[12px] font-bold text-slate-400 w-[140px]">교육 기간</th>
@@ -770,6 +787,7 @@
                         const isFull = course.totalCapacity > 0 && course.totalEnrolled >= course.totalCapacity;
                         const dday = getDday(course);
                         const isActive = course.status === 'active' || course.status === 'published';
+                        const attCfg = attModeOf(course);
 
                         return (
                           <React.Fragment key={course.id}>
@@ -831,15 +849,22 @@
                               </td>
                               {/* 수강관리 */}
                               <td className="px-3 py-3 text-center" data-feature-id="A1-08">
-                                {(isActive || course.status === 'closed' || course.status === 'scheduled') ? (
-                                  <a href={`offline-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
-                                    <Users size={10}/> 수강관리
-                                  </a>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 bg-slate-50 text-slate-300 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold cursor-not-allowed whitespace-nowrap" title="퍼블리싱 후 이용 가능">
-                                    <Users size={10}/> 수강관리
+                                <div className="inline-flex flex-col items-center gap-1">
+                                  {(isActive || course.status === 'closed' || course.status === 'scheduled') ? (
+                                    <a href={`offline-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
+                                      <Users size={10}/> 수강관리
+                                    </a>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 bg-slate-50 text-slate-300 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold cursor-not-allowed whitespace-nowrap" title="퍼블리싱 후 이용 가능">
+                                      <Users size={10}/> 수강관리
+                                    </span>
+                                  )}
+                                  {/* 출석 방식 — 코스 레벨 설정. 라이브 QR / 인쇄 QR 중 하나 */}
+                                  <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[10px] font-bold whitespace-nowrap ${attCfg.bg} ${attCfg.text} ${attCfg.border}`}
+                                    title={`출석 방식 — ${attCfg.tip}`}>
+                                    <QrCode size={9}/> {attCfg.label}
                                   </span>
-                                )}
+                                </div>
                               </td>
                               {/* 차수 */}
                               <td className="px-3 py-3">

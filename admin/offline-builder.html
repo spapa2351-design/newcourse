@@ -64,7 +64,8 @@
       Save, Send, Clock, Check, AlertTriangle, Eye, FileText, CircleDot, ImageIcon, Upload,
       BookOpen, Monitor, Star, List, Archive, AlertCircle, Grid3X3, CheckCircle, Filter, Layers, Info, ArrowRight,
       Settings2, CalendarDays, CalendarCheck, Lock, Edit3,
-      MessageSquare, Play, BarChart2, Settings, ArrowLeft, UserCheck, Search
+      MessageSquare, Play, BarChart2, Settings, ArrowLeft, UserCheck, Search,
+      LogOut, QrCode
     } = Lucide;
 
     const Toggle = ({ active, onClick }) => (
@@ -110,6 +111,7 @@
       1: {
         status: 'published',
         publishedAt: '2026-07-20T14:30',
+        attendanceMode: 'fixed', checkoutEnabled: true,   // 인쇄 QR + 퇴장 체크 ON
         info: { title:'2026 직무교육 — 프로젝트 관리 심화', category:'직무 역량', instructor:'김민준', instructorDesc:'프로젝트 관리 전문가 · A등급 강사', intro:'', location:'한샘 HQ B동 3층', address:'', traffic:'강남역 3번 출구 도보 5분 거리. 지하 주차장 이용 시 무료 주차권 지급.' },
         options:[
           { id:1, name:'A반 (4/14)', capacity:30, enrolled:28, startDate:'2026-04-14', endDate:'2026-04-14', place:'한샘 HQ B동 3층', groups:[], sessionSelect:false, sessions:[
@@ -129,6 +131,7 @@
       },
       3: {
         status: 'draft',
+        attendanceMode: 'fixed',
         info: { title:'AI 활용 업무 자동화 워크숍', category:'직무 역량', instructor:'박지훈', instructorDesc:'AI·자동화 전문 강사', intro:'', location:'판교 연수원', address:'', traffic:'' },
         options:[
           { id:1, name:'A반 (초급)', capacity:40, enrolled:0, startDate:'2026-05-12', endDate:'2026-05-12', place:'판교 연수원', groups:[], sessionSelect:false, sessions:[
@@ -150,6 +153,7 @@
       6: {
         status: 'published',
         publishedAt: '2026-02-18T10:00',
+        attendanceMode: 'fixed',
         info: { title:'고객 응대 서비스 매너', category:'직무 역량', instructor:'한소희', instructorDesc:'고객 서비스 교육 전문가', intro:'', location:'한샘 HQ 대교육장', address:'', traffic:'' },
         options:[
           { id:1, name:'3월 15일 교육', capacity:30, enrolled:30, startDate:'2026-03-15', endDate:'2026-03-15', place:'한샘 HQ 대교육장', groups:[], sessionSelect:false, sessions:[
@@ -161,6 +165,7 @@
       10: {
         status: 'published',
         publishedAt: '2026-03-25T09:00',
+        attendanceMode: 'live',   // 라이브 QR — 강사 화면에 QR 표시 · 30초 자동 갱신
         info: { title:'안전보건 법정의무교육 (4월)', category:'공통/온보딩', instructor:'강태훈', instructorDesc:'안전보건 법정의무교육 전문 강사', intro:'', location:'한샘 HQ 대교육장', address:'', traffic:'', sessionInstructorMode:true, sessionPlaceMode:true },
         options:[
           { id:1, name:'1기 (4/7~4/11)', capacity:30, enrolled:30, startDate:'2026-04-07', endDate:'2026-04-11', place:'한샘 HQ 대교육장', groups:[], sessionSelect:false, sessions:[
@@ -199,6 +204,7 @@
       11: {
         status: 'published',
         publishedAt: '2026-04-30T16:20',
+        attendanceMode: 'live',
         info: { title:'신임 팀장 리더십 캠프', category:'리더십', instructor:'최예진', instructorDesc:'리더십 개발 코치 · 팀장 교육 전문가', intro:'', location:'한샘 HQ 세미나룸', address:'', traffic:'' },
         options:[
           { id:1, name:'1차 워크숍 (5/20)', capacity:25, enrolled:20, startDate:'2026-05-20', endDate:'2026-05-20', place:'한샘 HQ 세미나룸', groups:[], sessionSelect:false, sessions:[
@@ -213,6 +219,7 @@
       },
       12: {
         status: 'draft',
+        attendanceMode: 'live',
         info: { title:'영업 전략 부트캠프 (5기)', category:'영업', instructor:'김도윤', instructorDesc:'영업 전략 컨설턴트 · B등급 강사', intro:'', location:'판교 연수원', address:'', traffic:'' },
         options:[
           { id:1, name:'집합교육 1주차', capacity:25, enrolled:0, startDate:'2026-06-02', endDate:'2026-06-06', place:'판교 연수원', groups:[], sessionSelect:false, sessions:[
@@ -241,6 +248,7 @@
       },
       14: {
         status: 'scheduled',
+        attendanceMode: 'fixed',
         info: { title:'하반기 신입사원 온보딩 (7월)', category:'공통/온보딩', instructor:'박지훈', instructorDesc:'신입사원 온보딩 전문 강사', intro:'', location:'판교 연수원', address:'', traffic:'' },
         options:[
           { id:1, name:'1기 (7/1~7/3)', capacity:40, enrolled:0, startDate:'2026-07-01', endDate:'2026-07-03', place:'판교 연수원', groups:[], sessionSelect:false, sessions:[
@@ -814,6 +822,11 @@
       /* ── 출석 정책 ── */
       const [lateMinutes, setLateMinutes] = useState(10);
       const [lateEnabled, setLateEnabled] = useState(true);
+      // 출석 방식 — 코스 레벨 선(先)결정. 신규 기본은 인쇄(fixed). 진행 중 임의 전환을 열지 않는다.
+      // 수정 모드는 저장된 값을 그대로 불러온다 (offline-list.html·offline-view.html의 attendanceMode와 동일 값)
+      const [attendanceMode, setAttendanceMode] = useState(_editData?.attendanceMode || 'fixed');
+      // 퇴장 체크 — ON이면 입장·퇴장 QR 2장 발급, 종료 전 퇴장은 조퇴 판정
+      const [checkoutEnabled, setCheckoutEnabled] = useState(!!_editData?.checkoutEnabled);
 
       /* ── 수료 조건 ── */
       const [completionRules, setCompletionRules] = useState([
@@ -1867,8 +1880,87 @@
 
                     {/* 스위치 OFF 안내 */}
                     {!lateEnabled && (
-                      <div className="px-4 py-2 bg-slate-50 text-[11px] text-slate-400 animate-fadeIn">
+                      <div className="px-4 py-2 bg-slate-50 text-[11px] text-slate-400 animate-fadeIn border-b border-slate-100">
                         지각 구분 없이 출석 시간과 무관하게 <span className="font-bold text-slate-500">출석 / 결석</span>만 판정됩니다.
+                      </div>
+                    )}
+
+                    {/* 출석 방식 행 (A2-34) — 라디오 2개. 둘 다 이름 있는 선택지라 스위치를 쓰지 않는다 */}
+                    <div className="px-4 py-3 bg-white border-b border-slate-100">
+                      <div className="text-[12px] font-bold text-slate-700 mb-2">출석 방식</div>
+                      <div className="space-y-1.5">
+                        {[
+                          { v:'live',  label:'라이브 QR', desc:'강사 화면에 QR 표시 · 30초마다 자동 갱신',
+                            sub:'사진 공유로 대리 출석하는 걸 막습니다' },
+                          { v:'fixed', label:'인쇄 QR',   desc:'차수당 QR을 내려받아 현장에 게시합니다',
+                            sub:'회차는 스캔한 시각으로 자동 구분됩니다',
+                            warn:'자동 갱신이 없어 사진 공유를 막지 못합니다' },
+                        ].map(o=>{
+                          const on = attendanceMode===o.v;
+                          return (
+                            <div key={o.v} onClick={()=>setAttendanceMode(o.v)}
+                              className={`flex items-start gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors border ${on?'bg-indigo-50/70 border-indigo-200':'bg-white border-transparent hover:bg-slate-50'}`}>
+                              <div className={`w-4 h-4 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${on?'border-indigo-500':'border-slate-300'}`}>
+                                {on && <div className="w-2 h-2 rounded-full bg-indigo-500"/>}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className={`text-[12px] font-bold ${on?'text-indigo-700':'text-slate-600'}`}>{o.label}</span>
+                                  <span className="text-[11px] text-slate-400">{o.desc}</span>
+                                </div>
+                                <div className="text-[11px] text-slate-400 mt-0.5">{o.sub}</div>
+                                {o.warn && on && (
+                                  <div className="text-[11px] text-amber-600 font-semibold mt-0.5 flex items-center gap-1">
+                                    <AlertTriangle size={10} className="shrink-0"/>{o.warn}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {attendanceMode==='fixed' && (
+                        <p className="text-[11px] text-slate-400 mt-2 pl-3 leading-relaxed animate-fadeIn">
+                          차수별 QR은 퍼블리싱한 뒤 <span className="font-semibold text-slate-500">운영 현황 &gt; 출석</span>에서 PNG로 내려받습니다.
+                          회차마다 따로 뽑을 필요 없습니다.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* 퇴장 체크 행 */}
+                    <div className="px-4 py-3 bg-white flex items-center gap-3">
+                      {/* 스위치 */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div onClick={() => setCheckoutEnabled(v => !v)}
+                          className={`w-9 h-5 rounded-full relative cursor-pointer transition-colors ${checkoutEnabled ? 'bg-indigo-500' : 'bg-slate-300'}`}>
+                          <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${checkoutEnabled ? 'left-[19px]' : 'left-0.5'}`}/>
+                        </div>
+                        <span className={`text-[12px] font-bold transition-colors ${checkoutEnabled ? 'text-slate-700' : 'text-slate-400'}`}>퇴장 체크 사용</span>
+                      </div>
+
+                      {/* 세부 규칙 — 스위치 ON일 때만 활성 */}
+                      <div className={`flex items-center gap-2 flex-wrap transition-opacity ${checkoutEnabled ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
+                        <div className="w-px h-4 bg-slate-200"/>
+                        <span className="text-[12px] text-slate-400">종료 전 퇴장</span>
+                        <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">조퇴</span>
+                        <span className="text-[12px] text-slate-400">/ 미체크</span>
+                        <span className="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">퇴장 미확인</span>
+                      </div>
+                    </div>
+
+                    {/* 퇴장 체크 ON 안내 */}
+                    {checkoutEnabled && (
+                      <div className="px-4 py-2 bg-indigo-50/60 border-t border-indigo-100 flex items-start gap-1.5 animate-fadeIn">
+                        <QrCode size={12} className="text-indigo-400 shrink-0 mt-0.5"/>
+                        <p className="text-[11px] text-slate-500 leading-relaxed flex-1 min-w-0">
+                          {attendanceMode === 'fixed' ? (
+                            <>차수마다 <span className="font-bold text-indigo-600">입장 QR · 퇴장 QR 2장</span>이 발급됩니다.
+                            퍼블리싱 후 <span className="font-semibold text-slate-600">운영 현황 &gt; 출석</span>에서 내려받아 입구·출구에 게시하세요.</>
+                          ) : (
+                            <>수강생이 <span className="font-bold text-indigo-600">들어올 때와 나갈 때 한 번씩</span> 스캔합니다.
+                            강사 화면에서 <span className="font-semibold text-slate-600">입장 QR · 퇴장 QR</span>을 전환해 표출합니다.</>
+                          )}
+                        </p>
                       </div>
                     )}
                   </div>
