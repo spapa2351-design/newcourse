@@ -210,7 +210,7 @@
       <a class="nav-link" onclick="navTo('s16')">변경·취소 정책 UI</a>
       <a class="nav-link" onclick="navTo('s17')">MY탭 & QR출석</a>
       <a class="nav-sub nav-link" onclick="navTo('s17-hero')">히어로 5가지 뷰</a>
-      <a class="nav-sub nav-link" onclick="navTo('s17-qr')">QR 결과 5종</a>
+      <a class="nav-sub nav-link" onclick="navTo('s17-qr')">QR 스캔 화면</a>
       <a class="nav-link" onclick="navTo('s18')">라이브 모드 & 연동</a>
       <a class="nav-link" onclick="navTo('s19')">학습자 갭 목록</a>
     </div>
@@ -1562,7 +1562,7 @@
         <tr><td><strong>WHY</strong></td><td>관리자단 Phase 1(코스 개설·출석·수료)이 완성됐으나 학습자 앱은 공식 명세 없이 프로토타입 상태. 납품 기준 완성도 확보를 위해 명세화 필요</td></tr>
         <tr><td><strong>WHO</strong></td><td>학습자(수강생) — 코스를 조회·신청하고 QR로 출석하며 수료/미수료 판정을 받는 사람</td></tr>
         <tr><td><strong>RISK</strong></td><td>화면 간 상태 전이가 암묵적으로 구현되어 있어 누락된 분기가 있을 수 있음; QR 문구가 현장에서 혼란 유발 가능</td></tr>
-        <tr><td><strong>SUCCESS</strong></td><td>7개 화면의 모든 상태·분기가 문서화됨 / QR 결과 5종 문구 확정 / 관리자단 Phase 1과의 연동 포인트 명시</td></tr>
+        <tr><td><strong>SUCCESS</strong></td><td>7개 화면의 모든 상태·분기가 문서화됨 / QR 스캔 화면(랜딩 2·판정 5·오버레이 3) 문구 확정 / 관리자단 Phase 1과의 연동 포인트 명시</td></tr>
         <tr><td><strong>SCOPE</strong></td><td>Phase 1: 7개 기존 HTML 파일 수정만. 신규 JS 파일 없음. 알림 푸시·지도·PDF는 Phase 2</td></tr>
       </tbody>
     </table>
@@ -1592,7 +1592,7 @@
     <table>
       <thead><tr><th>설정 키</th><th>사용 화면</th><th>내용</th></tr></thead>
       <tbody>
-        <tr><td><code class="bg-slate-100 px-1 rounded text-xs">qrMessages</code></td><td>my.html</td><td>QR 결과 5종 (아이콘·색상·문구·자동닫힘)</td></tr>
+        <tr><td><code class="bg-slate-100 px-1 rounded text-xs">qrMessages</code></td><td>my.html</td><td>QR 스캔 화면 — 랜딩 2상태 + 판정 결과 5종 + 오버레이 3종 (아이콘·색상·문구·자동닫힘)</td></tr>
         <tr><td><code class="bg-slate-100 px-1 rounded text-xs">routing.*</code></td><td>course-detail, my.html</td><td>상태 기반 화면 이동 함수</td></tr>
         <tr><td><code class="bg-slate-100 px-1 rounded text-xs">graduationThreshold</code></td><td>course-enrolled, course-completed</td><td>수료 기준선 0.75 (75%)</td></tr>
         <tr><td><code class="bg-slate-100 px-1 rounded text-xs">enrollModes</code></td><td>course-detail</td><td>single / multi / assigned / sessionSelect</td></tr>
@@ -1744,7 +1744,7 @@
 <!-- s17 -->
 <section id="s17" data-tab="learner" class="section-card">
   <div class="section-title">17. MY 오프라인 탭 & QR 출석</div>
-  <p class="section-desc">my.html의 오프라인 탭은 학습자의 수강 상황에 따라 히어로 카드 5가지 뷰를 보여주며, QR 스캔 결과는 5종 모달로 표시된다.</p>
+  <p class="section-desc">my.html의 오프라인 탭은 학습자의 수강 상황에 따라 히어로 카드 5가지 뷰를 보여주며, QR 스캔 시에는 <strong>랜딩 2상태 + 판정 결과 5종 + 오버레이 3종</strong>이 표시된다. 출석 방식(라이브·프린트)에 따라 나타나는 화면이 달라진다.</p>
 
   <div class="subsection" id="s17-hero">
     <div class="subsection-title">17.1 히어로 카드 5가지 뷰 상태</div>
@@ -1762,53 +1762,128 @@
   </div>
 
   <div class="subsection" id="s17-qr">
-    <div class="subsection-title">17.2 QR 출석 체크인 — 결과 5종 명세</div>
+    <div class="subsection-title">17.2 QR 스캔 화면 명세 — 랜딩 2 + 판정 결과 5 + 오버레이 3</div>
+    <p class="text-sm text-slate-500 mb-4">
+      결정 계보: <code class="bg-slate-100 px-1 rounded text-xs">2026-07-28 E11~E13</code> → <code class="bg-slate-100 px-1 rounded text-xs">2026-08-04 F12</code> → <code class="bg-slate-100 px-1 rounded text-xs">2026-08-05 G1·G7·G8</code>.
+      정본 = <code class="bg-slate-100 px-1 rounded text-xs">user/my.html</code> · 케이스 갤러리 = <code class="bg-slate-100 px-1 rounded text-xs">user/qr-attendance-cases.html</code> · 운영 절차 = <code class="bg-slate-100 px-1 rounded text-xs">docs/guide-ops-policy.html</code> §6.
+    </p>
+
+    <div class="callout callout-blue mb-4">
+      <strong>진입 경로</strong> — 카메라로 QR 스캔 → <strong>스캔 URL(항상 동일) → 터치클래스 앱 오픈(딥링크) → 서버 판정 → 화면</strong>.
+      서버가 <code class="bg-slate-100 px-1 rounded text-xs">(현재 시각, 등록 차수, 토큰 종류, 기존 기록)</code>으로 어느 화면을 줄지 정한다. 클라이언트 시각은 신뢰하지 않는다.
+      외부 URL 진입이라 뒤로 갈 스택이 없으므로 랜딩 좌상단 <code class="bg-slate-100 px-1 rounded text-xs">✕</code>는 <strong>MY 화면으로 이동</strong>한다(G8).
+    </div>
+
+    <div class="subsection-title" style="font-size:14px;margin-top:18px;">17.2.1 랜딩 2상태 — 프린트 QR 전용</div>
+    <p class="text-sm text-slate-500 mb-3">
+      <strong>QR은 게이트가 아니라 차수 홈</strong>이다. 벽에 상시 붙어 있는 프린트 QR은 아무 때나 찍어도 쓸모가 있어야 하므로,
+      출석 가능 시간대 밖 스캔도 거부가 아니라 화면으로 받는다.
+      <strong>라이브 QR에는 랜딩이 없다</strong> — 강사가 QR을 띄운 동안이 곧 접수 구간이고, 띄우지 않으면 스캔할 대상 자체가 없다.
+    </p>
     <table>
-      <thead><tr><th>결과 타입</th><th>코드</th><th>아이콘</th><th>제목</th><th>부제</th><th>자동 닫힘</th></tr></thead>
+      <thead><tr><th>상태</th><th>코드</th><th>조건</th><th>화면 구성</th></tr></thead>
       <tbody>
         <tr>
-          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22C55E;margin-right:4px;"></span>출석 완료</td>
-          <td><code class="bg-slate-100 px-1 rounded text-xs">qr-success</code></td>
-          <td>✓ (초록)</td>
-          <td><strong>출석 완료!</strong></td>
-          <td>오늘도 화이팅이에요</td>
-          <td>3초 자동 닫힘</td>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#878787;margin-right:4px;"></span><strong>대기</strong></td>
+          <td><code class="bg-slate-100 px-1 rounded text-xs">qr-land-pre</code></td>
+          <td>출석 가능 시간대 <strong>밖</strong> + 남은 회차 있음</td>
+          <td>회차명 · 시작 시각 · <strong>"12:30부터 출석 가능"</strong> · 장소 · 강사 · 내 출석 현황 2/5 — <strong>출석 버튼 없음</strong></td>
         </tr>
         <tr>
-          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#F97316;margin-right:4px;"></span>지각</td>
-          <td><code class="bg-slate-100 px-1 rounded text-xs">qr-late</code></td>
-          <td>⏰ (주황)</td>
-          <td><strong>지각 처리됐어요</strong></td>
-          <td>다음엔 일찍 와요!</td>
-          <td>3초 자동 닫힘</td>
-        </tr>
-        <tr>
-          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6B7280;margin-right:4px;"></span>체크인 시간 종료</td>
-          <td><code class="bg-slate-100 px-1 rounded text-xs">qr-expired</code></td>
-          <td>✗ (회색)</td>
-          <td><strong>체크인 시간이 지났어요</strong></td>
-          <td>강사에게 문의해주세요</td>
-          <td>수동 닫기</td>
-        </tr>
-        <tr>
-          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6B7280;margin-right:4px;"></span>수강 대상 아님</td>
-          <td><code class="bg-slate-100 px-1 rounded text-xs">qr-notarget</code></td>
-          <td>⚠ (회색)</td>
-          <td><strong>수강 대상이 아니에요</strong></td>
-          <td>현재 회차 수강생이 아닙니다</td>
-          <td>수동 닫기</td>
-        </tr>
-        <tr>
-          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#5569FF;margin-right:4px;"></span>수업 시작 전</td>
-          <td><code class="bg-slate-100 px-1 rounded text-xs">qr-notyet</code></td>
-          <td>🕐 (파랑)</td>
-          <td><strong>아직 시작 전이에요</strong></td>
-          <td>수업 시작 후 다시 스캔해주세요</td>
-          <td>수동 닫기</td>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2e84ff;margin-right:4px;"></span><strong>출석 체크 가능</strong></td>
+          <td><code class="bg-slate-100 px-1 rounded text-xs">qr-land-open</code></td>
+          <td>출석 가능 시간대 <strong>안</strong> + 기존 기록 없음</td>
+          <td>동일 정보 + 하단 고정 <strong>[출석 체크]</strong> 버튼</td>
         </tr>
       </tbody>
     </table>
-    <div class="callout callout-blue mt-4"><span class="badge badge-done">GAP-U04 완료</span> QR 문구가 위 명세 기준으로 my.html에 반영됨. success·late는 3초 타이머 후 자동 닫힘.</div>
+    <div class="callout callout-amber mt-3">
+      <strong>스캔만으로 기록하지 않는다.</strong> 판정은 <strong>[출석 체크]를 누른 뒤</strong> 서버가 한다 — 지나가며 잘못 찍은 것을 출석으로 만들지 않기 위해서다.
+      <strong>출석 버튼은 미표시</strong>(비활성이 아님) — 눌러서 실패하는 경험은 "언제든 찍으면 뭔가 된다"는 오해를 키운다.
+    </div>
+
+    <div class="subsection-title" style="font-size:14px;margin-top:22px;">17.2.2 판정 결과 5종</div>
+    <table>
+      <thead><tr><th>결과</th><th>코드</th><th>아이콘</th><th>제목</th><th>부제</th><th>자동 닫힘</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2f9e31;margin-right:4px;"></span>출석</td><td><code class="bg-slate-100 px-1 rounded text-xs">qr-success</code></td><td>✓ (파랑)</td>
+          <td><strong>출석 완료!</strong></td><td>오늘도 화이팅이에요</td><td>3초 자동 닫힘</td>
+        </tr>
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff603e;margin-right:4px;"></span>지각</td><td><code class="bg-slate-100 px-1 rounded text-xs">qr-late</code></td><td>⏰ (주황)</td>
+          <td><strong>지각 처리됐어요</strong></td><td><strong>지각도 출석으로 인정돼요</strong></td><td>3초 자동 닫힘</td>
+        </tr>
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#d00c0c;margin-right:4px;"></span>결석</td><td><code class="bg-slate-100 px-1 rounded text-xs">qr-absent</code></td><td>📅 (빨강)</td>
+          <td><strong>결석 처리됐어요</strong></td>
+          <td>출석으로 인정받기 어려운 시각이에요. 사정이 있었다면 강사·담당자에게 알려주세요</td><td>수동 닫기</td>
+        </tr>
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff603e;margin-right:4px;"></span>조퇴</td><td><code class="bg-slate-100 px-1 rounded text-xs">qr-early</code></td><td>↩ (주황)</td>
+          <td><strong>조퇴로 기록됐어요</strong></td><td>조퇴도 출석으로 인정돼요. 안전하게 돌아가세요</td><td>수동 닫기</td>
+        </tr>
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2f9e31;margin-right:4px;"></span>정상 퇴장</td><td><code class="bg-slate-100 px-1 rounded text-xs">qr-checkout</code></td><td>↩ (파랑)</td>
+          <td><strong>수고하셨어요!</strong></td><td>끝까지 참여 확인됐어요</td><td>3초 자동 닫힘</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout callout-blue mt-3">
+      <strong>조퇴·정상 퇴장은 퇴장 체크 ON일 때만</strong> 나타난다(<code class="bg-slate-100 px-1 rounded text-xs">checkoutEnabled</code>, 기본 OFF).
+      OFF인 코스에서는 조퇴 자동 판정 경로가 없고 <strong>관리자 수기 변경 + 사유 입력</strong>으로 처리한다.
+      어느 경로든 <strong>조퇴는 출석으로 인정</strong>되어 출석률 분자에 포함된다.
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>미해결 — 결석 판정 한계값이 정의되지 않았다.</strong> 08-04 타임라인에는 입장 시간대 안에 결석 구간이 그려져 있으나
+      <strong>경계값도 설정 항목도 없다.</strong> 확정 전까지 <code class="bg-slate-100 px-1 rounded text-xs">qr-absent</code>의 노출 시각은 예시다.
+    </div>
+
+    <div class="subsection-title" style="font-size:14px;margin-top:22px;">17.2.3 오버레이 3종 — 랜딩 대신 즉시 표시</div>
+    <table>
+      <thead><tr><th>오버레이</th><th>코드</th><th>조건</th><th>제목 · 부제</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#878787;margin-right:4px;"></span>이미 확인됨</td><td><code class="bg-slate-100 px-1 rounded text-xs">qr-already</code></td><td>같은 회차에 기존 기록 존재</td>
+          <td><strong>이미 입장 확인됐어요</strong> · 다시 찍어도 기록은 그대로 유지돼요 + 현재 상태(예: 13:23 지각으로 기록됨)</td>
+        </tr>
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2e84ff;margin-right:4px;"></span>종료된 과정</td><td><code class="bg-slate-100 px-1 rounded text-xs">qr-closed</code></td><td>차수에 남은 회차 없음</td>
+          <td><strong>종료된 과정입니다</strong> · 이 QR은 더 이상 출석에 사용되지 않아요</td>
+        </tr>
+        <tr>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#d00c0c;margin-right:4px;"></span>다른 차수</td><td><code class="bg-slate-100 px-1 rounded text-xs">qr-notarget</code></td><td>등록 차수 밖</td>
+          <td><strong>다른 차수의 QR이에요</strong> · 홍길동 님은 2차수 등록자입니다. 본인 차수 교육장의 QR을 찍어주세요</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout callout-blue mt-3">
+      <strong>회차 종료 직후는 "종료된 과정"이 아니라 다음 회차의 "대기"</strong>로 흡수한다. 회차 단위로 두면 5회차 차수에 상태 전이가 10번 생기고 학습자는 하루에 두 얼굴을 본다.
+      종료 안내는 그 차수에 <strong>남은 회차가 없을 때만</strong>이다.
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>종료 화면에 최종 출석률·수료 여부·수료증은 넣지 않는다(G7).</strong> 수료 처리·수료증 발급이 Phase 2이므로 보여줄 것이 출석 현황뿐이고, 그건 MY 화면에 이미 있다.
+      08-04에서 CLOSED를 랜딩으로 잡았던 근거가 사라져 <strong>오버레이 한 장</strong>으로 축소했다.
+    </div>
+
+    <div class="subsection-title" style="font-size:14px;margin-top:22px;">17.2.4 출석 방식별 나타나는 화면</div>
+    <table>
+      <thead><tr><th>화면</th><th>라이브 QR</th><th>프린트 QR (신규 코스 기본값)</th></tr></thead>
+      <tbody>
+        <tr><td>랜딩 (대기 · 출석 체크 가능)</td><td>—</td><td>✅</td></tr>
+        <tr><td>출석 · 지각</td><td>✅ 스캔 즉시</td><td>✅ [출석 체크] 후</td></tr>
+        <tr><td>결석</td><td>✅</td><td>✅</td></tr>
+        <tr><td>조퇴 · 정상 퇴장</td><td>—</td><td>✅ 퇴장 체크 ON일 때</td></tr>
+        <tr><td>이미 확인됨 · 다른 차수</td><td>✅</td><td>✅</td></tr>
+        <tr><td>종료된 과정</td><td>—</td><td>✅</td></tr>
+        <tr><td><strong>만료된 QR</strong></td><td>✅ <strong>라이브 전용</strong> (30초 갱신 전 캡처본)</td><td>— (토큰 동결)</td></tr>
+        <tr><td>출석 가능 시간대 검증</td><td>미적용 (강사가 표출 시점 통제)</td><td><strong>적용</strong> — 입장 시작 30분 전~종료 / 퇴장 시작~종료 후 30분</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-blue mt-3">
+      <strong>출석 가능 시간대 ≠ 지각 기준.</strong> 시간대는 "스캔을 접수할지"만 정하고, 출석·지각·결석 판정은 §4.3 지각 기준이 그대로 한다 —
+      <strong>30분 전에 찍어도 출석</strong>이다. 30분은 양쪽 모두 <strong>고정값</strong>이며 설정으로 노출하지 않는다.
+    </div>
   </div>
 
   <div class="subsection">
@@ -1864,7 +1939,7 @@
       <thead><tr><th>항목</th><th>범위</th><th>이유</th></tr></thead>
       <tbody>
         <tr><td>수강신청 3모드 + sessionSelect</td><td><span class="badge badge-done">Phase 1</span></td><td>현재 프로토타입에 구현됨 (sessionSelect = 단일 선택형 하위 토글)</td></tr>
-        <tr><td>QR 결과 5종 모달</td><td><span class="badge badge-done">Phase 1</span></td><td>문구·색상 확정 후 반영</td></tr>
+        <tr><td>QR 스캔 화면 (랜딩 2 · 판정 5 · 오버레이 3)</td><td><span class="badge badge-done">Phase 1</span></td><td>2026-08-05 G1·G7·G8 반영 완료</td></tr>
         <tr><td>라이브 모드 (BroadcastChannel)</td><td><span class="badge badge-done">Phase 1</span></td><td>데모 환경 전제로 구현</td></tr>
         <tr><td>지도 버튼</td><td><span class="badge badge-done">Phase 1</span></td><td>버튼 노출만 (실제 연동 없음)</td></tr>
         <tr><td>푸시 알림 (D-7, D-1, 당일)</td><td><span class="badge badge-plan2">Phase 2</span></td><td>앱 네이티브 기능 필요</td></tr>

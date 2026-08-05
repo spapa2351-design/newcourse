@@ -172,7 +172,7 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.4 · 2026-07-06</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.5 · 2026-08-05</span>
   <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
@@ -246,6 +246,7 @@ function closeMobileSidebar() {
     <div class="nav-divider"></div>
     <div class="nav-group-title">6. QR 현장 운영</div>
     <div class="nav-item" onclick="showPage('qr-flow',this)"><span class="nav-dot"></span>QR 운영 절차</div>
+    <div class="nav-item" onclick="showPage('qr-print',this)"><span class="nav-dot"></span>인쇄 QR 운영</div>
     <div class="nav-item" onclick="showPage('qr-trouble',this)"><span class="nav-dot"></span>스캔 오류 대응</div>
 
     <div class="nav-divider"></div>
@@ -722,7 +723,7 @@ function closeMobileSidebar() {
 <div id="page-case-attendance" class="page">
   <div class="page-tag">운영 케이스 FLOW-04</div>
   <div class="page-title">현장 QR 출석 운영</div>
-  <div class="page-desc">수업 당일 강사 또는 고객사 담당자가 라이브 모드로 QR 출석을 운영하고 회차를 마감하는 전체 흐름입니다.</div>
+  <div class="page-desc">수업 당일 강사 또는 고객사 담당자가 라이브 모드로 QR 출석을 운영하고 회차를 마감하는 전체 흐름입니다. <strong>인쇄 QR을 쓰는 코스</strong>는 절차가 다릅니다 — <em>6. QR 현장 운영 → 인쇄 QR 운영</em>을 보세요.</div>
 
   <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin:20px 0;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -1919,6 +1920,9 @@ function closeMobileSidebar() {
         </tbody>
       </table>
     </div>
+    <div class="callout callout-blue mt-2">
+      <strong>인쇄 QR 코스는 "시작 전 스캔"에 상한이 있습니다</strong> — <strong>시작 30분 전부터만</strong> 접수됩니다(출석 가능 시간대). 그보다 이르면 스캔이 거부되고 <code>N시 N분부터 출석 가능</code> 안내가 뜹니다. 접수된 뒤의 출석·지각 판정은 위 표 그대로입니다. 자세히는 <em>6. QR 현장 운영 → QR 운영 절차</em>를 보세요.
+    </div>
   </div>
 </div>
 
@@ -2003,8 +2007,15 @@ function closeMobileSidebar() {
           <tr><td>수강생이 수업 중 먼저 나감</td><td>관리자가 출석 관리 화면 → 해당 수강생 드롭다운 → <strong>조퇴</strong> 선택</td><td>QR 재스캔으로는 변경 안 됨</td></tr>
           <tr><td>수업 끝나고 나중에 조퇴 처리 요청</td><td>동일. 마감 전후 모두 관리자 수동 변경 가능</td><td>—</td></tr>
           <tr><td>조퇴 → 출석으로 다시 바꾸려면</td><td>동일. 관리자 드롭다운 → 출석 선택</td><td>—</td></tr>
+          <tr><td><strong>퇴장 체크를 쓰는 코스</strong>에서 수강생이 종료 전 퇴장 QR을 스캔</td><td><strong>자동 조퇴</strong> 처리 — 관리자 조작 불필요</td><td>사유 필드는 비어 있으므로 마감 시 채웁니다</td></tr>
         </tbody>
       </table>
+    </div>
+    <div class="callout callout-green mt-2">
+      <strong>퇴장 체크는 기본 OFF이므로 대부분 코스에서 조퇴는 수기 처리입니다.</strong> 수강생이 강사·담당자에게 말하고 나가면 관리자가 위 표대로 상태를 바꾸고 사유를 남깁니다. 어느 경로든 <strong>조퇴는 출석으로 인정</strong>되어 출석률 분자에 포함됩니다.
+    </div>
+    <div class="callout callout-amber mt-2">
+      퇴장 체크 ON인 코스에서 <strong>퇴장을 찍지 않고 간</strong> 수강생은 <code>퇴장 미확인</code>으로 표시됩니다. 상태가 자동 변경되지 <strong>않으므로</strong> 관리자가 회차 마감 시 판단합니다 — 출석 인정도, 조퇴 처리도 자동으로 하지 않습니다.
     </div>
   </div>
 
@@ -2620,10 +2631,37 @@ function closeMobileSidebar() {
 <div id="page-qr-flow" class="page">
   <div class="page-tag">6. QR 현장 운영</div>
   <div class="page-title">QR 운영 절차</div>
-  <div class="page-desc">현장 QR 출석 운영 절차입니다. QR 코드는 30초마다 자동으로 갱신되므로 수강생이 화면을 미리 캡처해도 사용할 수 없습니다.</div>
+  <div class="page-desc">현장 QR 출석 운영 절차입니다. 출석 방식은 <strong>라이브 QR</strong>과 <strong>인쇄 QR</strong> 2종이며, <strong>코스 개설 시 하나를 선택</strong>합니다. <strong>새 코스의 기본값은 인쇄 QR</strong>입니다. 인쇄 QR의 발급·부착 상세는 <em>인쇄 QR 운영</em> 페이지를 보세요.</div>
 
   <div class="guide-section">
-    <div class="section-title">현장 운영 순서 <span class="section-tag">핵심</span></div>
+    <div class="section-title">출석 방식 2종 — 무엇을 고르나 <span class="section-tag">먼저 읽기</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:130px">항목</th>
+            <th>라이브 QR</th>
+            <th>인쇄 QR <span class="b b-green">새 코스 기본값</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>표출 방식</strong></td><td>강사·운영자 화면을 빔·모니터에 띄움</td><td>PNG를 인쇄해 벽·입구에 부착</td></tr>
+          <tr><td><strong>QR 갱신</strong></td><td>30초마다 자동 갱신</td><td>없음 — 발급 후 동결(변하지 않음)</td></tr>
+          <tr><td><strong>발급 단위</strong></td><td>회차 진행 중 실시간 생성</td><td>차수당 1장 (퇴장 체크 ON이면 2장)</td></tr>
+          <tr><td><strong>회차 구분</strong></td><td>강사가 연 회차</td><td>스캔 시각으로 시스템이 자동 판단</td></tr>
+          <tr><td><strong>사진 공유 방어</strong></td><td><span class="b b-green">가능</span> 30초 갱신이 막음</td><td><span class="b b-red">불가</span> 아래 트레이드오프 참고</td></tr>
+          <tr><td><strong>적합한 현장</strong></td><td>빔·스크린이 있는 교육장 · 어뷰징이 문제되는 코스</td><td>빔·스크린 없는 곳, 전날 미리 준비하는 운영</td></tr>
+          <tr><td><strong>새 코스 기본값</strong></td><td>—</td><td><span class="b b-green">기본 선택</span> 개설 시 별도로 바꾸지 않으면 인쇄입니다</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>진행 중 임의 전환은 열지 않습니다.</strong> 벽에 붙은 종이는 소프트웨어로 회수되지 않기 때문입니다. 부득이 <code>인쇄 → 라이브</code>로 바꾸면 <strong>차수 QR이 즉시 폐기</strong>되어 남은 인쇄물은 모두 거부됩니다 — 반드시 종이를 수거하세요.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">A. 라이브 QR 현장 절차</div>
     <div class="mt-3 space-y-0">
       <div class="step-row">
         <div class="step-num">1</div>
@@ -2661,20 +2699,282 @@ function closeMobileSidebar() {
         </div>
       </div>
     </div>
+    <div class="callout callout-blue mt-2">
+      라이브 모드에는 <strong>출석 가능 시간대 검증이 적용되지 않습니다.</strong> 강사가 QR을 언제 띄울지 통제하므로 시간 검증이 이미 내재돼 있습니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">B. 인쇄 QR 현장 절차</div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-action">수업 전날 — 출석 탭 <code>[출석 QR]</code> → PNG 다운로드 → 인쇄</div>
+          <div class="step-note">오늘 회차가 없어도 버튼이 보입니다. 차수당 1장이면 그 차수 전체 회차를 커버합니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-action">교육장 입구·벽에 부착</div>
+          <div class="step-note">퇴장 체크를 쓰는 코스는 <strong>입장용·퇴장용 2장</strong>을 서로 떨어진 위치에 붙입니다(입구 / 출구). 파일명으로 구분하세요.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-action">수강생이 입장하며 스캔 — 시작 30분 전부터 가능</div>
+          <div class="step-note">회차는 시스템이 스캔 시각으로 자동 판단합니다. 수강생이 회차를 고르지 않습니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-action">운영자는 출석 탭에서 실시간 현황 확인</div>
+          <div class="step-note">라이브 모드 화면은 열리지 않습니다. 출석 목록으로 확인합니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-action">회차 종료 → 미확인 인원 정리</div>
+          <div class="step-note">차수의 <strong>모든 회차가 끝날 때까지 QR은 그대로 두세요.</strong> 회차마다 다시 뽑을 필요 없습니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-green mt-2">
+      <strong>회차 추가·일정 변경·차수명·장소가 바뀌어도 재출력이 불필요합니다.</strong> QR 이미지에는 아무 정보도 인쇄되지 않기 때문입니다. 재발급이 필요한 경우는 <em>인쇄물 유출이 의심될 때</em>뿐입니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">출석 가능 시간대 — 언제 찍어야 인정되나 <span class="section-tag">핵심</span></div>
+    <p class="text-sm text-slate-600 mt-2">인쇄 QR은 벽에 상시 붙어 있으므로, 아무 때나 찍어도 통과하면 안 나오고도 출석됩니다. 그래서 <strong>스캔을 접수하는 시간 구간</strong>을 둡니다.</p>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:110px">QR 종류</th>
+            <th style="width:230px">출석 가능 시간대</th>
+            <th>시간대 안에서의 판정</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>입장</strong></td><td>회차 <strong>시작 30분 전 ~ 종료 시각</strong></td><td>지각 기준 그대로 — <span class="b b-green">출석</span> / <span class="b b-orange">지각</span> / <span class="b b-red">결석</span></td></tr>
+          <tr><td><strong>퇴장</strong></td><td>회차 <strong>시작 ~ 종료 후 30분</strong></td><td>종료 <strong>전</strong> → <span class="b b-yellow">조퇴</span> · 종료 <strong>후</strong> → 정상 퇴장</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:150px">스캔 시점<br><span class="font-normal text-slate-500">회차 09:00~12:00 · 지각 10분</span></th>
+            <th style="width:110px">결과</th>
+            <th>수강생 화면</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>08:29 (31분 전)</td><td><span class="b b-slate">거부</span></td><td><code>08:30부터 출석 가능</code> — 회차명·시작 시각·장소·강사·내 출석 현황 표시, 출석 버튼 없음</td></tr>
+          <tr><td>08:40 (20분 전)</td><td><span class="b b-green">출석</span></td><td>판정 결과 즉시 표시</td></tr>
+          <tr><td>09:05</td><td><span class="b b-green">출석</span></td><td>지각 기준 10분 이내</td></tr>
+          <tr><td>09:15</td><td><span class="b b-orange">지각</span></td><td>기준 초과</td></tr>
+          <tr><td>12:01 (종료 후)</td><td><span class="b b-slate">거부</span></td><td>남은 회차가 있으면 <strong>다음 회차 안내</strong>, 없으면 최종 출석률·수료 여부</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-blue mt-2">
+      <strong>30분은 고정값이며 설정 항목으로 노출하지 않습니다.</strong> 운영자가 입력하는 것은 회차 시간뿐이고, 출석 가능 시간대는 거기서 자동 계산됩니다. "입장하며 5~10분 전에 찍는" 동선을 덮기에 충분하고, 값 하나 때문에 코스 설정을 늘리지 않는다는 판단입니다.
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>출석 가능 시간대 ≠ 지각 기준.</strong> 시간대는 "지금 스캔을 받을지"만 정하고, 출석·지각·결석 판정은 기존 지각 기준이 그대로 합니다. 30분 전에 찍어도 <span class="b b-green">출석</span>입니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">퇴장 체크 — 켤 때와 끌 때</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:120px">항목</th>
+            <th>OFF <span class="b b-green">기본값</span></th>
+            <th>ON</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>QR 장수</strong></td><td>1장 (입장만)</td><td>2장 (입장·퇴장)</td></tr>
+          <tr><td><strong>수강생 행동</strong></td><td>한 번만 스캔</td><td>입장·퇴장 <strong>두 번</strong> 스캔</td></tr>
+          <tr><td><strong>조퇴 판정</strong></td><td>자동 판정 없음 — <strong>관리자 수기 처리</strong></td><td>퇴장 스캔이 종료 전이면 자동 <span class="b b-yellow">조퇴</span></td></tr>
+          <tr><td><strong>퇴장 미체크자</strong></td><td>해당 없음</td><td><code>퇴장 미확인</code> 표시 — 상태를 자동 변경하지 않고 관리자가 회차 마감 시 판단</td></tr>
+          <tr><td><strong>출석률 영향</strong></td><td colspan="2">없음 — 상태는 <strong>입장 판정</strong>이 정합니다. 조퇴도 출석으로 인정됩니다(공용 정책)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-green mt-2">
+      <strong>OFF일 때 조퇴 운영</strong>: 수강생이 강사·담당자에게 말하고 나가면, 관리자가 출석부에서 상태를 <span class="b b-yellow">조퇴</span>로 변경하고 <strong>사유를 입력</strong>합니다. 기존 오프라인 운영 방식 그대로이며, 출석률에도 영향이 없습니다.
+    </div>
+    <div class="callout callout-amber mt-2">
+      진행 중에 퇴장 체크를 <strong>켜도 지난 회차에 소급되지 않고</strong>, <strong>끄면 이미 쌓인 기록은 보존</strong>되며 이후 판정에서만 제외됩니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">인쇄 QR의 트레이드오프 — 사진 공유 대리 출석 <span class="section-tag">감수 항목</span></div>
+    <p class="text-sm text-slate-600 mt-2">인쇄 QR은 코드가 변하지 않으므로, <strong>찍어서 남에게 보내면 현장에 없는 사람이 출석됩니다.</strong> 인쇄 모드를 여는 순간 따라오는 비용이며, 감수하기로 결정한 항목입니다.</p>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:250px">조건</th><th>사진 1장이 유효한 범위</th></tr></thead>
+        <tbody>
+          <tr><td>출석 가능 시간대가 없다면</td><td>차수 <strong>전 기간 × 24시간</strong></td></tr>
+          <tr><td>출석 가능 시간대 적용 (현행)</td><td>해당 회차 <strong>약 3.5시간</strong>(09:00~12:00 기준)만 — 다음 회차엔 재사용 불가</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-blue mt-2">
+      <strong>30분은 이 위험의 원인이 아니라 축소 장치입니다.</strong> 시간대가 노출 범위를 회차 단위로 잘라냅니다.
+    </div>
+    <p class="text-sm text-slate-700 mt-3 font-semibold">운영으로 줄이는 방법</p>
+    <ul class="text-sm text-slate-600 mt-1 space-y-1" style="list-style:disc;padding-left:20px">
+      <li><strong>어뷰징 우려가 있는 코스는 라이브로 바꾸세요.</strong> 30초 갱신이 사진 공유를 막습니다. <strong>새 코스는 인쇄가 기본값</strong>이라 이 위험이 기본으로 켜져 있으므로, 법정의무·평가 연계 코스는 개설 시 라이브로 바꿨는지 확인하세요.</li>
+      <li><strong>퇴장 체크를 켜면 부분 억제</strong>가 됩니다 — 원격 대리자는 종료 시각에 또 찍어야 하고, 안 찍으면 <code>퇴장 미확인</code>으로 남아 마감 때 드러납니다.</li>
+      <li><strong>QR은 강사·운영자 시야 안에</strong> 붙이세요. 복도·화장실 근처보다 교육장 입구가 안전합니다.</li>
+      <li>최종 방어선은 <strong>관리자 수기 정정</strong>입니다.</li>
+    </ul>
+    <div class="callout callout-red mt-2">
+      GPS 반경 검증(실내 오차·권한 거부로 현장 클레임)과 코드 주기 갱신(인쇄 자체가 불가능해짐)은 <strong>채택하지 않습니다.</strong>
+    </div>
   </div>
 
   <div class="guide-section">
     <div class="section-title">QR 특성 요약</div>
     <div class="overflow-x-auto mt-3">
       <table class="xl-table">
-        <thead><tr><th style="width:200px">항목</th><th>내용</th></tr></thead>
+        <thead><tr><th style="width:170px">항목</th><th>라이브 QR</th><th>인쇄 QR</th></tr></thead>
         <tbody>
-          <tr><td><strong>QR 갱신 주기</strong></td><td>30초마다 자동 갱신 — 화면 캡처 후 나중에 스캔 불가</td></tr>
-          <tr><td><strong>1인 1회 스캔</strong></td><td>동일 수강생이 같은 회차에 여러 번 스캔해도 상태는 한 번만 처리</td></tr>
-          <tr><td><strong>지각 기준 적용 시점</strong></td><td>QR 스캔이 완료된 서버 수신 시각 기준</td></tr>
-          <tr><td><strong>인터넷 필요 여부</strong></td><td>수강생 스마트폰 + 관리자 화면 모두 인터넷 연결 필요</td></tr>
+          <tr><td><strong>QR 갱신 주기</strong></td><td>30초마다 자동 갱신 — 화면 캡처 후 나중에 스캔 불가</td><td>없음 — 발급 후 동결</td></tr>
+          <tr><td><strong>출석 가능 시간대</strong></td><td>미적용 (강사가 표출 시점 통제)</td><td>적용 — 시작 30분 전 ~ 종료</td></tr>
+          <tr><td><strong>1인 1회 스캔</strong></td><td colspan="2">동일 수강생이 같은 회차에 여러 번 스캔해도 <strong>기존 기록을 덮어쓰지 않습니다</strong> — <code>이미 입장 확인됨</code> 안내만 표시</td></tr>
+          <tr><td><strong>지각 기준 적용 시점</strong></td><td colspan="2">QR 스캔이 완료된 서버 수신 시각 기준</td></tr>
+          <tr><td><strong>인터넷 필요 여부</strong></td><td>수강생 스마트폰 + 관리자 화면 모두 필요</td><td>수강생 스마트폰만 필요 (관리자 화면 상시 접속 불필요)</td></tr>
+          <tr><td><strong>타 차수 등록자 스캔</strong></td><td colspan="2"><code>귀하는 N차수 등록자입니다</code> — 거부</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     6. QR — 인쇄 QR 운영
+══════════════════════════════════════════ -->
+<div id="page-qr-print" class="page">
+  <div class="page-tag">6. QR 현장 운영</div>
+  <div class="page-title">인쇄 QR 운영</div>
+  <div class="page-desc">빔·스크린이 없는 현장, 또는 전날 미리 준비하려는 운영을 위한 경로입니다. 개념과 시간대는 <em>QR 운영 절차</em> 페이지에 있고, 여기서는 <strong>발급·부착·재발급 실무</strong>를 다룹니다.</div>
+
+  <div class="guide-section">
+    <div class="section-title">발급 규칙 <span class="section-tag">핵심</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:150px">항목</th><th>규칙</th></tr></thead>
+        <tbody>
+          <tr><td><strong>발급 단위</strong></td><td><strong>차수당 1장.</strong> 그 차수의 모든 회차를 한 장으로 커버합니다. 회차는 스캔 시각으로 시스템이 구분합니다</td></tr>
+          <tr><td><strong>퇴장 체크 ON</strong></td><td>입장용·퇴장용 <strong>2장</strong>. 입장/퇴장 판정은 <strong>찍은 종이가 선언</strong>하므로 스캔 순서를 추론하지 않습니다</td></tr>
+          <tr><td><strong>진입 경로</strong></td><td>관리 화면 <strong>출석 탭 → <code>[출석 QR]</code></strong> → 차수 QR 모달. 오늘 회차가 없어도 노출됩니다(전날 준비 동선)</td></tr>
+          <tr><td><strong>산출물</strong></td><td><strong>순수 QR 이미지 PNG만.</strong> A4 레이아웃·일괄 인쇄는 제공하지 않습니다 — 이미지에 코스명·차수·날짜를 싣지 않으므로 낡을 것이 없습니다</td></tr>
+          <tr><td><strong>파일명</strong></td><td>파일명이 유일한 식별자입니다 — <code>{코스명}_{차수명}_{입장|퇴장}_{발급일}.png</code></td></tr>
+          <tr><td><strong>기록 단위</strong></td><td>QR은 차수 단위지만 <strong>출석 기록은 회차 단위</strong>로 남습니다. 출석부 구조는 라이브와 동일합니다</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>이미지에 아무 정보도 인쇄되지 않으므로 파일명 관리가 곧 현물 관리입니다.</strong> 다운로드 후 파일명을 바꾸면 어느 차수의 것인지 알 수 없습니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">준비 체크리스트 (수업 전날)</div>
+    <div class="mt-3 space-y-0">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-action">코스의 출석 방식이 <code>인쇄 QR</code>로 저장돼 있는지 확인</div>
+          <div class="step-note">빌더 → 수료 조건 → <strong>출석 판정 기준</strong> 블록. 라이브로 되어 있으면 QR 모달이 열리지 않습니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-action">퇴장 체크 사용 여부 확정</div>
+          <div class="step-note">인쇄 후에 켜면 <strong>퇴장 QR을 다시 뽑아 붙여야</strong> 합니다. 부착 전에 결정하세요.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-action">차수별로 PNG 다운로드 → 인쇄</div>
+          <div class="step-note">차수가 여러 개면 <strong>차수마다 별도 QR</strong>입니다. 섞이면 <code>귀하는 N차수 등록자입니다</code> 거부가 발생합니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-action">부착 위치 선정 — 교육장 입구, 강사·운영자 시야 안</div>
+          <div class="step-note">퇴장 QR은 출구 쪽으로 <strong>떨어뜨려</strong> 붙입니다. 나란히 붙이면 잘못 찍습니다.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-action">운영자 스마트폰으로 시범 스캔</div>
+          <div class="step-note">시작 30분 전이 아니면 <code>N시 N분부터 출석 가능</code> 안내가 뜨는 것이 정상입니다 — 오류가 아닙니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">재발급 — 필요한 경우와 아닌 경우 <span class="section-tag">중요</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:280px">상황</th><th style="width:130px">조치</th><th>이유</th></tr></thead>
+        <tbody>
+          <tr><td>회차 추가 / 일정(날짜·시간) 변경</td><td><span class="b b-green">불필요</span></td><td>회차는 스캔 시각으로 판단하므로 QR이 그대로 유효</td></tr>
+          <tr><td>차수명 변경 / 장소 변경 / 강사 변경</td><td><span class="b b-green">불필요</span></td><td>이미지에 해당 정보가 없음</td></tr>
+          <tr><td>정원·수료 조건 변경</td><td><span class="b b-green">불필요</span></td><td>QR과 무관</td></tr>
+          <tr><td><strong>인쇄물 유출·분실이 의심됨</strong></td><td><span class="b b-red">재발급</span></td><td>기존 토큰을 무효화해야 함</td></tr>
+          <tr><td><strong>퇴장 체크를 나중에 켬</strong></td><td><span class="b b-orange">퇴장분 추가</span></td><td>퇴장용 QR이 새로 발급됨</td></tr>
+          <tr><td><strong>인쇄 → 라이브로 전환</strong></td><td><span class="b b-red">종이 수거</span></td><td>전환 시 차수 QR이 <strong>즉시 폐기</strong>되어 남은 종이는 전부 거부됨</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-red mt-2">
+      <strong>재발급하면 기존 인쇄물은 즉시 무효입니다.</strong> 명시적 버튼 + 2단 확인을 거치며, 입장·퇴장이 <strong>쌍으로 동시</strong> 재발급됩니다(발급일이 어긋나지 않도록). 재발급 후 <strong>반드시 붙여둔 종이를 모두 교체</strong>하세요.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">수강생이 보는 화면 — 랜딩 2종 + 안내 3종</div>
+    <p class="text-sm text-slate-600 mt-2">인쇄 QR은 상시 붙어 있으므로 <strong>아무 때나 찍어도 쓸모가 있어야</strong> 합니다. 그래서 시간대 밖 스캔은 오류가 아니라 <em>안내 화면</em>으로 처리됩니다. CS 응대 시 참고하세요.</p>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:130px">화면</th><th style="width:190px">조건</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td><span class="b b-slate">대기</span> 랜딩</td><td>출석 가능 시간대 밖 + 남은 회차 있음</td><td>회차명 · 시작 시각 · <code>12:30부터 출석 가능</code> · 장소 · 강사 · <code>내 출석 현황 2/5</code> — <strong>출석 버튼 없음</strong></td></tr>
+          <tr><td><span class="b b-green">출석 가능</span> 랜딩</td><td>출석 가능 시간대 안 + 기존 기록 없음</td><td><code>[출석 체크]</code> 버튼 → 누르면 판정 결과 표시</td></tr>
+          <tr><td><span class="b b-slate">이미 확인됨</span> 안내</td><td>같은 회차에 기존 기록 존재</td><td><code>이미 입장 확인됨 · 2회차 09:04 지각</code> — 재스캔해도 기존 기록을 덮지 않습니다</td></tr>
+          <tr><td><span class="b b-blue">종료된 과정</span> 안내</td><td>차수에 남은 회차 없음</td><td><code>종료된 과정입니다 · 이 QR은 더 이상 출석에 사용되지 않아요</code></td></tr>
+          <tr><td><span class="b b-red">다른 차수</span> 안내</td><td>등록하지 않은 차수의 QR</td><td><code>귀하는 2차수 등록자입니다</code> — 본인 차수 교육장의 QR로 안내</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-blue mt-2">
+      <strong>회차 종료 직후는 "종료된 과정"이 아니라 다음 회차의 "대기"</strong>로 넘어갑니다. 5회차 차수에서 학습자가 하루에 두 얼굴을 보지 않도록 한 것으로, <strong>종료 안내는 그 차수에 남은 회차가 없을 때만</strong> 나타납니다.
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>종료 화면에 최종 출석률·수료 여부는 표시하지 않습니다.</strong> 수료 처리·수료증 발급이 Phase 2이므로 지금 보여줄 수 있는 것은 출석 현황뿐이고, 그것은 학습자 MY 화면에 이미 있습니다. 수료 관련 문의는 <em>7. CS 응대</em> 기준으로 안내하세요.
     </div>
   </div>
 </div>
@@ -2700,10 +3000,10 @@ function closeMobileSidebar() {
           </tr>
         </thead>
         <tbody>
-          <tr><td>QR 스캔이 안 됨 (카메라가 인식 못 함)</td><td>화면이 너무 작거나 밝기 부족</td><td>화면 밝기 높이기 / 스크린 크게 확대</td></tr>
-          <tr><td>"만료된 QR" 오류 메시지</td><td>30초 갱신 전의 QR을 캡처해서 사용</td><td>화면에 표시된 최신 QR을 다시 스캔하도록 안내</td></tr>
+          <tr><td>QR 스캔이 안 됨 (카메라가 인식 못 함)</td><td>화면이 너무 작거나 밝기 부족 / 인쇄물 훼손·구겨짐</td><td>화면 밝기 높이기·스크린 확대 / 인쇄물 교체 (같은 PNG 재인쇄 — 재발급 아님)</td></tr>
+          <tr><td>"만료된 QR" 오류 메시지</td><td>30초 갱신 전의 QR을 캡처해서 사용 <span class="b b-slate">라이브</span></td><td>화면에 표시된 최신 QR을 다시 스캔하도록 안내</td></tr>
           <tr><td>스캔했는데 출석 처리 안 됨</td><td>인터넷 연결 불안정</td><td>수강생 Wi-Fi 확인 / 관리자 화면 새로고침 후 상태 확인</td></tr>
-          <tr><td>라이브 모드 화면이 업데이트 안 됨</td><td>관리자 화면 인터넷 불안정</td><td>관리자 화면 새로고침</td></tr>
+          <tr><td>라이브 모드 화면이 업데이트 안 됨</td><td>관리자 화면 인터넷 불안정 <span class="b b-slate">라이브</span></td><td>관리자 화면 새로고침</td></tr>
           <tr><td>스마트폰이 없는 수강생</td><td>기기 미소지</td><td>수업 후 관리자 수동으로 출석 처리</td></tr>
           <tr><td>QR 스캔 자체가 불가능한 환경</td><td>인터넷 불가 장소 등</td><td>회차 자동 종료 후 운영자가 "미확인 일괄 처리" 도구로 수동 처리</td></tr>
         </tbody>
@@ -2711,6 +3011,29 @@ function closeMobileSidebar() {
     </div>
     <div class="callout callout-green mt-2">
       <strong>QR이 안 될 때 최후 수단</strong>: 수동 출석 처리. 수업 후 출석 명단을 종이로 받은 후 관리자가 1명씩 수동으로 출석 상태를 변경합니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">인쇄 QR 전용 — 오류가 아닌 것들 <span class="section-tag">CS 필독</span></div>
+    <p class="text-sm text-slate-600 mt-2">아래는 <strong>정상 동작</strong>입니다. 오류로 접수되기 쉬우니 응대 시 구분하세요.</p>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead><tr><th style="width:250px">수강생이 말하는 증상</th><th style="width:110px">판정</th><th>응대</th></tr></thead>
+        <tbody>
+          <tr><td>"출석 버튼이 안 보여요"</td><td><span class="b b-green">정상</span></td><td>회차 시작 <strong>30분 전이 안 됐을 때</strong>입니다. 화면에 표시된 <code>N시 N분부터 출석 가능</code> 시각 이후 다시 찍도록 안내</td></tr>
+          <tr><td>"이미 확인됐다고 나와요"</td><td><span class="b b-green">정상</span></td><td>중복 스캔 방지입니다. <strong>기존 기록이 그대로 유지</strong>되며 손실 없음. 표시된 상태(예: <code>2회차 09:04 지각</code>)를 확인시켜 주세요</td></tr>
+          <tr><td>"다른 차수 등록자라고 나와요"</td><td><span class="b b-green">정상</span></td><td>등록하지 않은 차수의 QR을 찍은 경우입니다. <strong>본인 차수 교육장의 QR</strong>을 찍도록 안내</td></tr>
+          <tr><td>"수업 끝났는데 출석률만 나와요"</td><td><span class="b b-green">정상</span></td><td>그 차수에 남은 회차가 없을 때의 화면입니다</td></tr>
+          <tr><td>"회차를 고르는 화면이 없어요"</td><td><span class="b b-green">정상</span></td><td>회차는 <strong>스캔 시각으로 시스템이 자동 판단</strong>합니다. 수강생이 고르지 않습니다</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>실제 조치가 필요한 인쇄 QR 문제</strong>는 두 가지뿐입니다 — ① 인쇄물 훼손 → 같은 PNG 재인쇄, ② 유출 의심 → <strong>재발급 + 붙여둔 종이 전량 교체</strong>. 회차·일정·장소가 바뀐 것은 조치 대상이 아닙니다.
+    </div>
+    <div class="callout callout-red mt-2">
+      <strong>"안 왔는데 출석됐다"는 신고</strong>는 사진 공유 대리 출석일 수 있습니다. 관리자가 해당 회차 상태를 수기로 정정하고, 반복되면 그 코스를 <strong>라이브 모드로 전환</strong>하는 것을 검토하세요(전환 시 종이 수거 필수).
     </div>
   </div>
 </div>
@@ -3426,8 +3749,9 @@ function closeMobileSidebar() {
     { id:'enroll-cases',       label:'상황별 처리',             cat:'4. 수강신청' },
     { id:'capacity-policy',    label:'정원 변경 정책',           cat:'4. 수강신청' },
     { id:'data-perm',          label:'수정 가능 범위',          cat:'5. 데이터 정정' },
-    { id:'qr-flow',            label:'QR 운영 절차',            cat:'6. QR 현장 운영' },
-    { id:'qr-trouble',         label:'스캔 오류 대응',          cat:'6. QR 현장 운영' },
+    { id:'qr-flow',            label:'QR 운영 절차',            cat:'6. QR 현장 운영', kw:'라이브 인쇄 고정 출석 가능 시간대 30분 퇴장 체크 조퇴 사진 공유 대리출석 트레이드오프 출석방식' },
+    { id:'qr-print',           label:'인쇄 QR 운영',            cat:'6. QR 현장 운영', kw:'인쇄 고정 PNG 다운로드 발급 재발급 부착 파일명 차수 토큰 동결 대기 종료 유출' },
+    { id:'qr-trouble',         label:'스캔 오류 대응',          cat:'6. QR 현장 운영', kw:'오류 만료 스캔 실패 이미 확인됨 다른 차수 출석버튼 없음 CS' },
     { id:'cs-guide',           label:'문의 유형별 처리',        cat:'7. CS 응대' },
     { id:'cs-escalate',        label:'에스컬레이션 기준',       cat:'7. CS 응대' },
   ];
