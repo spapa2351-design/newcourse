@@ -297,6 +297,89 @@
   font-size: 12px; color: var(--secondary); margin-top: 8px; font-weight: 600;
 }
 
+/* ══════════════════════════════════════════════════════
+   QR 스캔 랜딩 — 2상태 (design 2026-08-04 F12 · 08-05 G7)
+   QR은 게이트가 아니라 "차수 홈"이다. 아무 때나 찍어도
+   내 출석 현황을 볼 수 있어야 하므로 모달이 아닌 화면이다.
+   ══════════════════════════════════════════════════════ */
+.qr-land {
+  display: none; position: absolute; inset: 0; z-index: 550;
+  background: var(--white); flex-direction: column;
+}
+.qr-land.open { display: flex; }
+.qr-land-top {
+  padding: 14px 16px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.qr-land-top .mi { font-size: 22px; color: var(--n-08); cursor: pointer; }
+.qr-land-top-t { font-size: 14px; font-weight: 700; color: var(--black); }
+.qr-land-body { flex: 1; overflow-y: auto; padding: 22px 20px 20px; }
+
+/* 상태 배지 */
+.qr-state {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: var(--r-pill);
+  font-size: 11.5px; font-weight: 800; margin-bottom: 14px;
+}
+.qr-state .mi { font-size: 14px; }
+.qr-state.pre { background: var(--n-01); color: var(--n-07); }
+.qr-state.open { background: var(--brand-01); color: var(--brand-08); }
+
+.qr-land-course { font-size: 12px; font-weight: 700; color: var(--secondary); margin-bottom: 3px; }
+.qr-land-sess { font-size: 21px; font-weight: 800; color: var(--black); line-height: 1.3; letter-spacing: -0.8px; }
+.qr-land-when { font-size: 13.5px; font-weight: 600; color: var(--n-08); margin-top: 6px; }
+
+/* 출석 가능 시각 안내 — PRE의 핵심 정보 */
+.qr-avail {
+  margin: 18px 0 0; padding: 14px 16px; border-radius: var(--r);
+  background: var(--brand-01); display: flex; align-items: center; gap: 10px;
+}
+.qr-avail .mi { font-size: 20px; color: var(--brand-06); flex-shrink: 0; }
+.qr-avail-t { font-size: 15px; font-weight: 800; color: var(--brand-08); }
+.qr-avail-s { font-size: 12px; color: var(--brand-08); opacity: .75; margin-top: 2px; }
+
+/* 메타 (장소·강사) */
+.qr-meta { margin-top: 18px; border-top: 1px solid var(--border); }
+.qr-meta-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.qr-meta-row .mi { font-size: 18px; color: var(--muted); flex-shrink: 0; margin-top: 1px; }
+.qr-meta-k { font-size: 12px; color: var(--secondary); width: 44px; flex-shrink: 0; font-weight: 600; }
+.qr-meta-v { font-size: 13.5px; color: var(--black); font-weight: 600; flex: 1; line-height: 1.45; }
+
+/* 내 출석 현황 */
+.qr-mystat { margin-top: 18px; padding: 16px; border-radius: var(--r-lg); background: var(--body-bg); }
+.qr-mystat-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.qr-mystat-k { font-size: 12px; font-weight: 700; color: var(--secondary); }
+.qr-mystat-v { font-size: 15px; font-weight: 800; color: var(--black); }
+.qr-mystat-v em { font-style: normal; color: var(--primary); }
+.qr-dots { display: flex; gap: 5px; }
+.qr-dot {
+  flex: 1; height: 6px; border-radius: 3px; background: var(--n-02);
+}
+.qr-dot.attended { background: var(--success); }
+.qr-dot.late { background: var(--warning); }
+.qr-dot.absent { background: var(--error); }
+.qr-legend { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.qr-legend span { font-size: 11px; color: var(--secondary); display: inline-flex; align-items: center; gap: 4px; }
+.qr-legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+
+/* 하단 액션 */
+.qr-land-foot { padding: 14px 20px 20px; flex-shrink: 0; border-top: 1px solid var(--border); }
+.qr-land-note {
+  font-size: 12px; color: var(--secondary); text-align: center;
+  line-height: 1.5; padding: 2px 0 0;
+}
+.qr-btn-check {
+  width: 100%; height: 54px; border-radius: var(--r); border: none;
+  background: var(--primary); color: #fff; font-size: 16px; font-weight: 800;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
+  transition: all .15s;
+}
+.qr-btn-check:active { transform: scale(.985); background: var(--primary-hover); }
+.qr-btn-check .mi { font-size: 20px; }
+
 /* ── QR 결과 모달 ── */
     .qr-overlay {
       display: none; position: fixed; inset: 0;
@@ -525,13 +608,24 @@
     <button class="proto-chip" onclick="setView('busy')">이번 주 5건 몰림</button>
     <button class="proto-chip" onclick="setView('no-hero')">D-7 이상 (히어로 없음)</button>
   </div>
-  <div style="font-size: 10px; font-weight: 800; color: var(--secondary); margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 1px;">QR 출석 결과</div>
+  <div style="font-size: 10px; font-weight: 800; color: var(--secondary); margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 1px;">QR 스캔 랜딩 (2상태)</div>
   <div class="proto-chips">
-    <button class="proto-chip" onclick="showQr('qr-success')">출석 완료</button>
+    <button class="proto-chip" onclick="showQrLand('qr-land-pre')">대기 (시간대 밖)</button>
+    <button class="proto-chip" onclick="showQrLand('qr-land-open')">출석 가능</button>
+  </div>
+  <div style="font-size: 10px; font-weight: 800; color: var(--secondary); margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 1px;">판정 결과 (체크 후)</div>
+  <div class="proto-chips">
+    <button class="proto-chip" onclick="showQr('qr-success')">출석</button>
     <button class="proto-chip" onclick="showQr('qr-late')">지각</button>
-    <button class="proto-chip" onclick="showQr('qr-expired')">기간 종료</button>
-    <button class="proto-chip" onclick="showQr('qr-notarget')">대상 아님</button>
-    <button class="proto-chip" onclick="showQr('qr-notyet')">시작 전</button>
+    <button class="proto-chip" onclick="showQr('qr-absent')">결석</button>
+    <button class="proto-chip" onclick="showQr('qr-early')">조퇴 (퇴장)</button>
+    <button class="proto-chip" onclick="showQr('qr-checkout')">정상 퇴장</button>
+  </div>
+  <div style="font-size: 10px; font-weight: 800; color: var(--secondary); margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 1px;">오버레이 (즉시 거부·안내)</div>
+  <div class="proto-chips">
+    <button class="proto-chip" onclick="showQr('qr-already')">이미 확인됨</button>
+    <button class="proto-chip" onclick="showQr('qr-closed')">종료된 과정</button>
+    <button class="proto-chip" onclick="showQr('qr-notarget')">다른 차수</button>
   </div>
 </div>
 
@@ -867,11 +961,115 @@
     <button class="tab-item active"><span class="mi">person</span><span>MY</span></button>
   </div>
 
+<!-- ════════════════════════════════════════════════════
+     QR 스캔 랜딩 2상태 (design 2026-08-04 F12 · 08-05 G7 개정)
+     스캔 URL은 항상 동일하고, 서버가
+     (현재 시각, 등록 차수, 토큰 종류, 기존 기록)으로 상태를 정한다.
+     ① 등록 차수 확인 → 아니면 오버레이: 다른 차수
+     ② 토큰 종류 식별 (입장 / 퇴장 / 라이브)
+     ③ 출석 가능 시간대 매칭 → 없으면 PRE 또는 오버레이: 종료된 과정
+     ④ 기존 기록 확인 → 있으면 오버레이: 이미 확인됨
+     ⑤ 기록 + 판정 → OPEN
+
+     CLOSED는 랜딩이 아니라 오버레이다(G7). 수료 판정·수료증이 Phase 2라
+     보여줄 것이 출석 현황뿐이고, 그건 MY 화면에 이미 있다.
+     ════════════════════════════════════════════════════ -->
+
+<!-- ── PRE : 출석 가능 시간대 밖 + 남은 회차 있음 ── -->
+<div class="qr-land" id="qr-land-pre">
+  <div class="qr-land-top">
+    <span class="mi" onclick="exitToMy()">close</span>
+    <div class="qr-land-top-t">리스크 관리 과정 · 1기</div>
+  </div>
+  <div class="qr-land-body">
+    <div class="qr-state pre"><span class="mi">schedule</span>출석 대기</div>
+    <div class="qr-land-course">다음 회차</div>
+    <div class="qr-land-sess">3회차 · 리스크 관리 실습</div>
+    <div class="qr-land-when">4월 9일 (목) 13:00 ~ 16:00</div>
+
+    <div class="qr-avail">
+      <span class="mi">how_to_reg</span>
+      <div>
+        <div class="qr-avail-t">12:30부터 출석 가능</div>
+        <div class="qr-avail-s">시작 30분 전부터 QR을 찍을 수 있어요</div>
+      </div>
+    </div>
+
+    <div class="qr-meta">
+      <div class="qr-meta-row"><span class="mi">place</span><div class="qr-meta-k">장소</div><div class="qr-meta-v">한샘 HQ 대교육장 (본관 3F)</div></div>
+      <div class="qr-meta-row"><span class="mi">person</span><div class="qr-meta-k">강사</div><div class="qr-meta-v">김상현</div></div>
+    </div>
+
+    <div class="qr-mystat">
+      <div class="qr-mystat-h">
+        <div class="qr-mystat-k">내 출석 현황</div>
+        <div class="qr-mystat-v"><em>2</em> / 5회차</div>
+      </div>
+      <div class="qr-dots">
+        <div class="qr-dot attended"></div>
+        <div class="qr-dot late"></div>
+        <div class="qr-dot"></div>
+        <div class="qr-dot"></div>
+        <div class="qr-dot"></div>
+      </div>
+      <div class="qr-legend">
+        <span><i style="background:var(--success)"></i>출석</span>
+        <span><i style="background:var(--warning)"></i>지각</span>
+        <span><i style="background:var(--error)"></i>결석</span>
+        <span><i style="background:var(--n-02)"></i>예정</span>
+      </div>
+    </div>
+  </div>
+  <!-- 출석 버튼 없음 (F12) — 시간대 밖에서는 누를 수 있는 것을 만들지 않는다 -->
+  <div class="qr-land-foot">
+    <div class="qr-land-note">출석 가능 시각이 되면 이 화면에서 바로 체크할 수 있어요</div>
+  </div>
+</div>
+
+<!-- ── OPEN : 출석 가능 시간대 안 ── -->
+<div class="qr-land" id="qr-land-open">
+  <div class="qr-land-top">
+    <span class="mi" onclick="exitToMy()">close</span>
+    <div class="qr-land-top-t">리스크 관리 과정 · 1기</div>
+  </div>
+  <div class="qr-land-body">
+    <div class="qr-state open"><span class="mi">check_circle</span>출석 체크 가능</div>
+    <div class="qr-land-course">진행 회차</div>
+    <div class="qr-land-sess">3회차 · 리스크 관리 실습</div>
+    <div class="qr-land-when">4월 9일 (목) 13:00 ~ 16:00</div>
+
+    <div class="qr-meta">
+      <div class="qr-meta-row"><span class="mi">place</span><div class="qr-meta-k">장소</div><div class="qr-meta-v">한샘 HQ 대교육장 (본관 3F)</div></div>
+      <div class="qr-meta-row"><span class="mi">person</span><div class="qr-meta-k">강사</div><div class="qr-meta-v">김상현</div></div>
+    </div>
+
+    <div class="qr-mystat">
+      <div class="qr-mystat-h">
+        <div class="qr-mystat-k">내 출석 현황</div>
+        <div class="qr-mystat-v"><em>2</em> / 5회차</div>
+      </div>
+      <div class="qr-dots">
+        <div class="qr-dot attended"></div>
+        <div class="qr-dot late"></div>
+        <div class="qr-dot"></div>
+        <div class="qr-dot"></div>
+        <div class="qr-dot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="qr-land-foot">
+    <!-- 판정은 버튼을 누른 뒤 서버가 한다 (스캔 자체로 기록하지 않음) -->
+    <button class="qr-btn-check" onclick="doCheckIn()"><span class="mi">how_to_reg</span>출석 체크</button>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <!-- ════ QR 결과 모달들 ════ -->
 
-<!-- 출석 성공 -->
+<!-- ── 판정 결과 5종 : OPEN에서 [출석 체크]를 누른 뒤 ── -->
+
+<!-- 출석 (시작 ~ 지각 기준 이내) -->
 <div class="qr-overlay" id="qr-success" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon success"><span class="mi">check</span></div>
@@ -879,55 +1077,96 @@
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-name">홍길동 님</div>
     <div class="qr-modal-desc">오늘도 화이팅이에요</div>
-    <div class="qr-modal-time">2026.04.12 08:57</div>
+    <div class="qr-modal-time">2026.04.09 12:47</div>
     <button class="qr-modal-btn primary" onclick="closeQr()">확인</button>
   </div>
 </div>
 
-<!-- 지각 -->
+<!-- 지각 (지각 기준 초과) -->
 <div class="qr-overlay" id="qr-late" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon late-icon"><span class="mi">schedule</span></div>
     <div class="qr-modal-title">지각 처리됐어요</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-name">홍길동 님</div>
-    <div class="qr-modal-desc">다음엔 일찍 와요!</div>
-    <div class="qr-modal-time" style="color:var(--warning);">2026.04.12 09:23</div>
+    <div class="qr-modal-desc">지각도 출석으로 인정돼요</div>
+    <div class="qr-modal-time" style="color:var(--warning);">2026.04.09 13:23</div>
     <button class="qr-modal-btn primary" style="background:var(--warning);" onclick="closeQr()">확인</button>
   </div>
 </div>
 
-<!-- 체크인 시간 종료 -->
-<div class="qr-overlay" id="qr-expired" onclick="if(event.target===this)closeQr()">
+<!-- 결석 (시간대 안이지만 지각 한계를 넘겨 입장) -->
+<div class="qr-overlay" id="qr-absent" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
-    <div class="qr-modal-icon fail"><span class="mi">close</span></div>
-    <div class="qr-modal-title">체크인 시간이 지났어요</div>
-    <div class="qr-modal-desc" style="margin-top:8px;">강사에게 문의해주세요</div>
+    <div class="qr-modal-icon fail"><span class="mi">event_busy</span></div>
+    <div class="qr-modal-title">결석 처리됐어요</div>
+    <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
+    <div class="qr-modal-name">홍길동 님</div>
+    <div class="qr-modal-desc">출석으로 인정받기 어려운 시각이에요.<br>사정이 있었다면 강사·담당자에게 알려주세요</div>
+    <div class="qr-modal-time" style="color:var(--error);">2026.04.09 15:40</div>
+    <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
+  </div>
+</div>
+
+<!-- 조퇴 (퇴장 QR · 회차 종료 전) -->
+<div class="qr-overlay" id="qr-early" onclick="if(event.target===this)closeQr()">
+  <div class="qr-modal">
+    <div class="qr-modal-icon late-icon"><span class="mi">logout</span></div>
+    <div class="qr-modal-title">조퇴로 기록됐어요</div>
+    <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
+    <div class="qr-modal-name">홍길동 님</div>
+    <div class="qr-modal-desc">조퇴도 출석으로 인정돼요.<br>안전하게 돌아가세요</div>
+    <div class="qr-modal-time" style="color:var(--warning);">2026.04.09 14:30 퇴장</div>
+    <button class="qr-modal-btn primary" style="background:var(--warning);" onclick="closeQr()">확인</button>
+  </div>
+</div>
+
+<!-- 정상 퇴장 (퇴장 QR · 회차 종료 후) -->
+<div class="qr-overlay" id="qr-checkout" onclick="if(event.target===this)closeQr()">
+  <div class="qr-modal">
+    <div class="qr-modal-icon success"><span class="mi">logout</span></div>
+    <div class="qr-modal-title">수고하셨어요!</div>
+    <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
+    <div class="qr-modal-name">홍길동 님</div>
+    <div class="qr-modal-desc">끝까지 참여 확인됐어요</div>
+    <div class="qr-modal-time">2026.04.09 16:04 퇴장</div>
+    <button class="qr-modal-btn primary" onclick="closeQr()">확인</button>
+  </div>
+</div>
+
+<!-- ── 오버레이 2종 : 랜딩 대신 즉시 뜨는 안내 (F12) ── -->
+
+<!-- 이미 확인됨 — 기존 기록을 덮지 않는다 -->
+<div class="qr-overlay" id="qr-already" onclick="if(event.target===this)closeQr()">
+  <div class="qr-modal">
+    <div class="qr-modal-icon wait"><span class="mi">task_alt</span></div>
+    <div class="qr-modal-title">이미 입장 확인됐어요</div>
+    <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
+    <div class="qr-modal-desc" style="margin-top:8px;">다시 찍어도 기록은 그대로 유지돼요</div>
+    <div class="qr-modal-time" style="color:var(--warning);">09:04 지각으로 기록됨</div>
+    <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
+  </div>
+</div>
+
+<!-- 종료된 과정 — 차수에 남은 회차 없음 (G7: 랜딩 아님) -->
+<div class="qr-overlay" id="qr-closed" onclick="if(event.target===this)closeQr()">
+  <div class="qr-modal">
+    <div class="qr-modal-icon wait"><span class="mi">flag</span></div>
+    <div class="qr-modal-title">종료된 과정입니다</div>
+    <div class="qr-modal-desc" style="margin-top:8px;">이 QR은 더 이상 출석에 사용되지 않아요</div>
     <div style="height:12px"></div>
     <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
   </div>
 </div>
 
-<!-- 수강 대상 아님 -->
+<!-- 등록 차수 밖 — 차수 단위로 거부한다 -->
 <div class="qr-overlay" id="qr-notarget" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon fail"><span class="mi">person_off</span></div>
-    <div class="qr-modal-title">수강 대상이 아니에요</div>
-    <div class="qr-modal-desc" style="margin-top:8px;">현재 회차 수강생이 아닙니다</div>
+    <div class="qr-modal-title">다른 차수의 QR이에요</div>
+    <div class="qr-modal-desc" style="margin-top:8px;">홍길동 님은 <b>2차수</b> 등록자입니다.<br>본인 차수 교육장의 QR을 찍어주세요</div>
     <div style="height:12px"></div>
     <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
-  </div>
-</div>
-
-<!-- 수업 시작 전 -->
-<div class="qr-overlay" id="qr-notyet" onclick="if(event.target===this)closeQr()">
-  <div class="qr-modal">
-    <div class="qr-modal-icon wait"><span class="mi">schedule</span></div>
-    <div class="qr-modal-title">아직 시작 전이에요</div>
-    <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
-    <div class="qr-modal-desc" style="margin-top:8px;">수업 시작 후 다시 스캔해주세요</div>
-    <div style="height:12px"></div>
-    <button class="qr-modal-btn primary" onclick="closeQr()">확인</button>
   </div>
 </div>
 
@@ -1011,18 +1250,51 @@ function toggleUpcoming(btn) {
   document.getElementById('upc-more-label').textContent = expanded ? '접기' : hidden + '건 더 보기';
 }
 
-/* ── QR result modals ── */
+/* ══════════════════════════════════════════════════════
+   QR 스캔 — 랜딩 2상태 + 판정 결과·오버레이 모달
+   실제 서비스에서는 서버가 (현재 시각, 등록 차수, 토큰 종류,
+   기존 기록)으로 어느 화면을 줄지 정한다. 여기서는 프로토타입
+   칩으로 각 분기를 직접 띄운다.
+   ══════════════════════════════════════════════════════ */
+
+/* ── 랜딩 (PRE / OPEN) ── */
+function showQrLand(id) {
+  closeQr();
+  closeQrLand();
+  document.getElementById(id).classList.add('open');
+}
+function closeQrLand() {
+  document.querySelectorAll('.qr-land').forEach(o => o.classList.remove('open'));
+}
+
+/* 랜딩 좌상단 X → MY 화면 (2026-08-05 G8).
+   스캔은 카메라 앱에서 외부 URL로 진입하므로 뒤로 갈 스택이 없다.
+   앱이 이미 열린 상태이므로 MY로 보내면 출석 현황을 계속 볼 수 있다.
+   이 프로토타입은 my.html 위에 랜딩을 얹은 구조라 닫는 것이 곧 MY 도착이다. */
+function exitToMy() {
+  closeQrLand();
+}
+
+/* ── 판정 결과 · 오버레이 모달 ── */
 let qrDismissTimer = null;
+const QR_AUTO_CLOSE = ['qr-success', 'qr-late', 'qr-checkout'];
 function showQr(id) {
   closeQr();
   document.getElementById(id).classList.add('open');
-  if (id === 'qr-success' || id === 'qr-late') {
+  if (QR_AUTO_CLOSE.includes(id)) {
     qrDismissTimer = setTimeout(closeQr, 3000);
   }
 }
 function closeQr() {
   if (qrDismissTimer) { clearTimeout(qrDismissTimer); qrDismissTimer = null; }
   document.querySelectorAll('.qr-overlay').forEach(o => o.classList.remove('open'));
+}
+
+/* OPEN 랜딩의 [출석 체크] — 누른 뒤 판정 결과가 뜬다.
+   프로토타입은 '출석'으로 고정. 지각·결석은 칩으로 확인한다. */
+function doCheckIn(result) {
+  closeQrLand();
+  showQr(result || 'qr-success');
 }
 
 /* ── 데모 토스트 ── */

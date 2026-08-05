@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR 출석 케이스 갤러리 — 라이브 QR | 프린트 QR</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+<style>
+  :root{
+    /* TouchClass tokens — user/my.html과 동일 */
+    --brand-01:#ebf3ff; --brand-02:#dbeaff; --brand-06:#2e84ff; --brand-08:#0052c7;
+    --n-00:#ffffff; --n-01:#f2f2f2; --n-02:#e5e5e5; --n-04:#bababa;
+    --n-05:#a1a1a1; --n-06:#878787; --n-07:#6e6e6e; --n-08:#545454; --n-10:#222222;
+    --primary:#2e84ff; --primary-hover:#0052c7; --primary-lighter:#ebf3ff;
+    --secondary:#878787; --muted:#bababa;
+    --error:#d00c0c; --error-bg:#ffeded;
+    --success:#2f9e31; --success-bg:#edf8ed;
+    --warning:#ff603e; --warning-bg:#fff1ed;
+    --live:#ff3b3b;
+    --black:#222222; --white:#ffffff; --body-bg:#f2f2f2; --border:#e5e5e5;
+    --surface:#f2f4f6; --amber:#b96a00; --purple:#6d3fd4;
+    --r-sm:8px; --r:12px; --r-lg:16px; --r-xl:20px; --r-pill:300px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif; letter-spacing:-0.5px;
+        background:#eceef0; color:var(--black); padding:32px 20px 80px; font-size:14px; }
+  .mi{ font-family:'Material Symbols Rounded'; font-weight:normal; font-style:normal; font-size:20px;
+       line-height:1; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle;
+       font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .mi.i14{font-size:14px} .mi.i16{font-size:16px} .mi.i18{font-size:18px}
+
+  .wrap{ max-width:1760px; margin:0 auto; }
+  code{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em;
+        background:var(--n-01); padding:1px 5px; border-radius:4px; }
+
+  /* ── 페이지 헤더 ── */
+  .page-h h1{ font-size:25px; font-weight:800; }
+  .page-h p{ font-size:14px; color:var(--secondary); margin-top:8px; line-height:1.65; }
+  .page-h .legend{ margin-top:14px; display:flex; flex-wrap:wrap; gap:8px; }
+  .page-h .legend span{ font-size:12px; font-weight:600; color:var(--secondary); background:var(--white);
+        border:1px solid var(--border); border-radius:8px; padding:5px 10px; }
+
+  /* ── 참조 패널 ── */
+  .ref-panel{ background:var(--white); border:1px solid var(--border); border-radius:16px; padding:24px 26px 26px; margin-top:22px; }
+  .ref-panel h2{ font-size:18px; font-weight:800; }
+  .ref-panel .sub{ font-size:13px; color:var(--secondary); margin:6px 0 4px; line-height:1.65; }
+  .ref-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:22px; margin-top:16px; }
+  .ref-block .bh{ font-size:13.5px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+  .ref-block .bnote{ font-size:11.5px; color:var(--secondary); font-weight:600; margin-bottom:10px; line-height:1.5; }
+  table.ref{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.ref th{ text-align:left; font-weight:700; color:var(--secondary); padding:8px 10px;
+        border-bottom:1.5px solid var(--border); background:var(--surface); white-space:nowrap; }
+  table.ref th:first-child{ border-top-left-radius:8px; } table.ref th:last-child{ border-top-right-radius:8px; }
+  table.ref td{ padding:10px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.5; }
+  table.ref td.memo{ color:var(--secondary); font-size:11.5px; }
+  .ok{ color:var(--success); font-weight:800; } .no{ color:var(--muted); font-weight:800; }
+  .row-div td{ background:var(--surface); font-size:11px; font-weight:800; color:var(--secondary);
+        padding:6px 10px; letter-spacing:.3px; }
+
+  /* 판정 순서 */
+  .flow{ margin-top:16px; display:flex; flex-wrap:wrap; gap:8px; align-items:stretch; }
+  .flow-step{ flex:1 1 180px; background:var(--surface); border-radius:10px; padding:11px 13px; }
+  .flow-step .n{ font-size:10.5px; font-weight:800; color:var(--primary); letter-spacing:.4px; }
+  .flow-step .t{ font-size:12.5px; font-weight:700; margin-top:3px; }
+  .flow-step .d{ font-size:11px; color:var(--secondary); margin-top:3px; line-height:1.45; }
+
+  /* 콜아웃 */
+  .callout{ border-left:3px solid; padding:11px 15px; border-radius:0 8px 8px 0; margin-top:14px;
+        font-size:12.5px; line-height:1.65; }
+  .callout.blue{ border-color:var(--primary); background:var(--primary-lighter); color:#0b3f8f; }
+  .callout.amber{ border-color:#f59e0b; background:#fffbeb; color:#78350f; }
+  .callout.red{ border-color:var(--error); background:var(--error-bg); color:#7f1d1d; }
+
+  /* ── 섹션 ── */
+  .sec-h{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:38px 0 4px; }
+  .sec-h h2{ font-size:20px; font-weight:800; }
+  .sec-tag{ font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:var(--r-pill); }
+  .sec-tag.live{ color:#fff; background:var(--live); }
+  .sec-tag.print{ color:var(--n-08); background:var(--n-02); }
+  .sec-d{ font-size:13px; color:var(--secondary); line-height:1.65; margin-bottom:6px; max-width:1080px; }
+
+  /* ── 갤러리 ── */
+  .gallery{ display:grid; grid-template-columns:repeat(auto-fill,minmax(392px,1fr)); gap:30px 24px;
+        margin-top:16px; justify-items:center; }
+  .case-col{ width:392px; }
+  .case-label{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; padding:0 4px; }
+  .case-label .num{ font-size:15px; font-weight:800; }
+  .lab-chip{ font-size:11px; font-weight:800; border-radius:7px; padding:3px 9px; white-space:nowrap; }
+  .lab-blue{ color:var(--primary); background:#eaf2ff; }
+  .lab-green{ color:#1c7d1e; background:var(--success-bg); }
+  .lab-amber{ color:#b54708; background:var(--warning-bg); }
+  .lab-red{ color:var(--error); background:var(--error-bg); }
+  .lab-grey{ color:var(--secondary); background:var(--surface); }
+  .case-cond{ font-size:11.5px; color:var(--secondary); line-height:1.55; margin:0 4px 12px; }
+  .case-cond b{ color:var(--n-08); }
+
+  /* ── 폰 프레임 ── */
+  .phone{ width:392px; height:748px; background:var(--white); border-radius:30px; border:1px solid #dfe3e8;
+        box-shadow:0 14px 44px rgba(0,0,0,.16); overflow:hidden; position:relative;
+        display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; align-items:center; padding:11px 24px 5px;
+        font-size:13px; font-weight:700; flex-shrink:0; }
+  .statusbar .icons{ display:flex; align-items:center; gap:5px; }
+  .statusbar .icons .mi{ font-size:16px; }
+
+  /* ══ 랜딩 2상태 (my.html .qr-land 계열과 동일 규격) ══ */
+  .land{ flex:1; display:flex; flex-direction:column; min-height:0; }
+  .land-top{ padding:14px 16px; display:flex; align-items:center; gap:10px;
+        border-bottom:1px solid var(--border); flex-shrink:0; }
+  .land-top .mi{ font-size:22px; color:var(--n-08); }
+  .land-top-t{ font-size:14px; font-weight:700; }
+  .land-body{ flex:1; overflow-y:auto; padding:22px 20px 20px; }
+
+  .qr-state{ display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:var(--r-pill);
+        font-size:11.5px; font-weight:800; margin-bottom:14px; }
+  .qr-state .mi{ font-size:14px; }
+  .qr-state.pre{ background:var(--n-01); color:var(--n-07); }
+  .qr-state.open{ background:var(--brand-01); color:var(--brand-08); }
+
+  .land-course{ font-size:12px; font-weight:700; color:var(--secondary); margin-bottom:3px; }
+  .land-sess{ font-size:21px; font-weight:800; line-height:1.3; letter-spacing:-0.8px; }
+  .land-when{ font-size:13.5px; font-weight:600; color:var(--n-08); margin-top:6px; }
+
+  .avail{ margin-top:18px; padding:14px 16px; border-radius:var(--r); background:var(--brand-01);
+        display:flex; align-items:center; gap:10px; }
+  .avail .mi{ font-size:20px; color:var(--brand-06); flex-shrink:0; }
+  .avail-t{ font-size:15px; font-weight:800; color:var(--brand-08); }
+  .avail-s{ font-size:12px; color:var(--brand-08); opacity:.75; margin-top:2px; }
+
+  .meta{ margin-top:18px; border-top:1px solid var(--border); }
+  .meta-row{ display:flex; align-items:flex-start; gap:10px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .meta-row .mi{ font-size:18px; color:var(--muted); flex-shrink:0; margin-top:1px; }
+  .meta-k{ font-size:12px; color:var(--secondary); width:44px; flex-shrink:0; font-weight:600; }
+  .meta-v{ font-size:13.5px; font-weight:600; flex:1; line-height:1.45; }
+
+  .mystat{ margin-top:18px; padding:16px; border-radius:var(--r-lg); background:var(--body-bg); }
+  .mystat-h{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+  .mystat-k{ font-size:12px; font-weight:700; color:var(--secondary); }
+  .mystat-v{ font-size:15px; font-weight:800; }
+  .mystat-v em{ font-style:normal; color:var(--primary); }
+  .dots{ display:flex; gap:5px; }
+  .dot{ flex:1; height:6px; border-radius:3px; background:var(--n-02); }
+  .dot.attended{ background:var(--success); } .dot.late{ background:var(--warning); } .dot.absent{ background:var(--error); }
+  .legend-row{ display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
+  .legend-row span{ font-size:11px; color:var(--secondary); display:inline-flex; align-items:center; gap:4px; }
+  .legend-row i{ width:8px; height:8px; border-radius:2px; display:inline-block; }
+
+  .land-foot{ padding:14px 20px 20px; flex-shrink:0; border-top:1px solid var(--border); }
+  .land-note{ font-size:12px; color:var(--secondary); text-align:center; line-height:1.5; }
+  .btn-check{ width:100%; height:54px; border-radius:var(--r); border:none; background:var(--primary);
+        color:#fff; font-size:16px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:7px; }
+  .btn-check .mi{ font-size:20px; }
+
+  /* ══ 스캐너 화면 (모달 배경) ══ */
+  .scan-bg{ flex:1; position:relative; background:#1a1a1a; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; overflow:hidden; }
+  .scan-bg .frame{ width:196px; height:196px; border-radius:22px; position:relative; }
+  .scan-bg .frame i{ position:absolute; width:34px; height:34px; border:3px solid rgba(255,255,255,.9); }
+  .scan-bg .frame i:nth-child(1){ top:0; left:0; border-right:0; border-bottom:0; border-radius:12px 0 0 0; }
+  .scan-bg .frame i:nth-child(2){ top:0; right:0; border-left:0; border-bottom:0; border-radius:0 12px 0 0; }
+  .scan-bg .frame i:nth-child(3){ bottom:0; left:0; border-right:0; border-top:0; border-radius:0 0 0 12px; }
+  .scan-bg .frame i:nth-child(4){ bottom:0; right:0; border-left:0; border-top:0; border-radius:0 0 12px 0; }
+  .scan-bg .hint{ position:absolute; bottom:56px; left:0; right:0; text-align:center;
+        font-size:12.5px; color:rgba(255,255,255,.62); font-weight:600; }
+  .scan-src{ position:absolute; top:16px; left:16px; display:inline-flex; align-items:center; gap:5px;
+        font-size:11px; font-weight:800; padding:4px 10px; border-radius:var(--r-pill); }
+  .scan-src.live{ background:var(--live); color:#fff; }
+  .scan-src.print{ background:rgba(255,255,255,.9); color:var(--n-10); }
+  .scan-src .mi{ font-size:13px; }
+
+  /* ══ 결과 모달 ══ */
+  .ov{ position:absolute; inset:0; background:rgba(0,0,0,.55); z-index:20;
+        display:flex; align-items:center; justify-content:center; padding:24px; }
+  .modal{ background:var(--white); border-radius:20px; padding:36px 28px 28px; width:100%; max-width:320px;
+        text-align:center; box-shadow:0 24px 64px rgba(0,0,0,.2); }
+  .modal-icon{ width:64px; height:64px; border-radius:50%; margin:0 auto 16px;
+        display:flex; align-items:center; justify-content:center; }
+  .modal-icon .mi{ font-size:28px; }
+  .modal-icon.success{ background:var(--brand-01); color:var(--brand-08); }
+  .modal-icon.late{ background:var(--warning-bg); color:var(--warning); }
+  .modal-icon.fail{ background:var(--error-bg); color:var(--error); }
+  .modal-icon.wait{ background:var(--body-bg); color:var(--secondary); }
+  .modal-title{ font-size:18px; font-weight:700; margin-bottom:4px; }
+  .modal-course{ font-size:13px; font-weight:600; color:var(--primary); margin-bottom:14px; }
+  .modal-name{ font-size:15px; font-weight:700; margin-bottom:4px; }
+  .modal-desc{ font-size:13px; color:var(--secondary); line-height:1.5; margin-bottom:6px; }
+  .modal-time{ font-size:13px; font-weight:600; color:var(--primary); margin-bottom:20px; }
+  .modal-btn{ width:100%; height:50px; border-radius:12px; border:none; font-size:15px; font-weight:700;
+        display:flex; align-items:center; justify-content:center; }
+  .modal-btn.primary{ background:var(--primary); color:#fff; }
+  .modal-btn.warn{ background:var(--warning); color:#fff; }
+  .modal-btn.gray{ background:var(--black); color:#fff; }
+
+  .ver{ font-size:11.5px; color:var(--muted); font-weight:600; margin-top:40px; text-align:right; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="page-h">
+    <h1>QR 출석 케이스 갤러리 — 라이브 QR | 프린트 QR</h1>
+    <p>학습자가 QR을 스캔했을 때 실제로 보는 화면을 <b>출석 방식 2종</b>으로 나눠 모았습니다.
+       두 방식은 <b>같은 스캔 URL</b>을 쓰지만 토큰의 성질이 달라 분기가 갈립니다 —
+       <b>새 코스의 기본값은 프린트</b>입니다(08-04 E3 — 영업 니즈로 07-22 D5의 `라이브 기본`을 개정).
+       라이브는 30초마다 갱신되고 <b>출석 가능 시간대를 타지 않으며</b>, 프린트는 토큰이 동결되고
+       <b>시간대 검증을 받습니다</b>. 그래서 프린트에만 <b>2상태 랜딩</b>(대기·출석 체크 가능)이 존재합니다.</p>
+    <div class="page-h legend" style="display:flex;">
+      <span>정본: <code>user/my.html</code> (랜딩·모달 구현)</span>
+      <span>정책: <code>docs/02-design/features/offline-attendance.design.md</code> §2.3~2.4</span>
+      <span>절차: <code>docs/guide-ops-policy.html</code> 6. QR 현장 운영</span>
+      <span style="color:var(--amber)">결정 계보: 07-22 → 07-28 (E11~E13) → 08-04 (F1~F14) → 08-05</span>
+    </div>
+  </div>
+
+  <!-- ── 분기 조건표 ── -->
+  <div class="ref-panel">
+    <h2>어떤 화면이 나오는가 — 서버 판정 순서</h2>
+    <p class="sub">스캔 URL은 항상 동일하다. 서버가 <code>(현재 시각, 등록 차수, 토큰 종류, 기존 기록)</code>으로 화면을 정한다.
+       클라이언트 시각은 신뢰하지 않는다.</p>
+
+    <div class="flow">
+      <div class="flow-step"><div class="n">STEP 1</div><div class="t">등록 차수 확인</div>
+        <div class="d">아니면 → 오버레이 <b>다른 차수의 QR</b></div></div>
+      <div class="flow-step"><div class="n">STEP 2</div><div class="t">토큰 종류 식별</div>
+        <div class="d">입장 / 퇴장 / 라이브 — 여기서 두 방식이 갈린다</div></div>
+      <div class="flow-step"><div class="n">STEP 3</div><div class="t">출석 가능 시간대 매칭</div>
+        <div class="d">프린트만 적용. 없으면 → <b>대기</b> 랜딩 또는 <b>종료된 과정</b> 오버레이</div></div>
+      <div class="flow-step"><div class="n">STEP 4</div><div class="t">기존 기록 확인</div>
+        <div class="d">있으면 → 오버레이 <b>이미 확인됨</b> (덮지 않는다)</div></div>
+      <div class="flow-step"><div class="n">STEP 5</div><div class="t">기록 + 판정</div>
+        <div class="d">지각 기준으로 출석 / 지각 / 결석</div></div>
+    </div>
+
+    <div class="ref-grid">
+      <div class="ref-block">
+        <div class="bh"><span class="sec-tag live">라이브 QR</span> 기본값 · 강사 화면 표출</div>
+        <div class="bnote">강사가 QR을 띄운 동안만 존재하므로 시간 검증이 내재돼 있다. 대기·종료 랜딩이 필요 없다.</div>
+        <table class="ref">
+          <thead><tr><th style="width:120px">케이스</th><th>조건</th><th style="width:96px">화면</th></tr></thead>
+          <tbody>
+            <tr><td><b>출석</b></td><td class="memo">지각 기준 이내 스캔</td><td>결과 모달</td></tr>
+            <tr><td><b>지각</b></td><td class="memo">지각 기준 초과 스캔</td><td>결과 모달</td></tr>
+            <tr><td><b>만료된 QR</b></td><td class="memo">30초 갱신 전 캡처본을 스캔 — <b>라이브 전용</b></td><td>결과 모달</td></tr>
+            <tr><td><b>이미 확인됨</b></td><td class="memo">같은 회차 기존 기록 존재</td><td>오버레이</td></tr>
+            <tr><td><b>다른 차수</b></td><td class="memo">등록 차수 밖</td><td>오버레이</td></tr>
+            <tr class="row-div"><td colspan="3">존재하지 않는 케이스</td></tr>
+            <tr><td class="no">대기 / 종료된 과정</td><td class="memo">강사가 QR을 띄우지 않으면 스캔할 대상 자체가 없다</td><td class="no">—</td></tr>
+            <tr><td class="no">조퇴 / 정상 퇴장</td><td class="memo">퇴장 체크는 프린트 QR 전용 (토큰 2개 발급 구조)</td><td class="no">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-block">
+        <div class="bh"><span class="sec-tag print">프린트 QR</span> 신규 코스 기본값 · 벽 부착 · 토큰 동결</div>
+        <div class="bnote">벽에 상시 붙어 있으므로 <b>아무 때나 찍어도 쓸모가 있어야</b> 한다. 시간대 밖 스캔은 오류가 아니라 안내 화면이다.</div>
+        <table class="ref">
+          <thead><tr><th style="width:120px">케이스</th><th>조건</th><th style="width:96px">화면</th></tr></thead>
+          <tbody>
+            <tr><td><b>대기</b></td><td class="memo">시간대 밖 + 남은 회차 있음 (시작 30분 전 이전)</td><td>랜딩</td></tr>
+            <tr><td><b>출석 체크 가능</b></td><td class="memo">시간대 안 + 기존 기록 없음</td><td>랜딩</td></tr>
+            <tr><td><b>출석</b></td><td class="memo">체크 후 — 지각 기준 이내</td><td>결과 모달</td></tr>
+            <tr><td><b>지각</b></td><td class="memo">체크 후 — 지각 기준 초과</td><td>결과 모달</td></tr>
+            <tr><td><b>결석</b></td><td class="memo">체크 후 — 지각 한계 초과 <b style="color:var(--error)">(한계값 미정의 · 아래 참고)</b></td><td>결과 모달</td></tr>
+            <tr><td><b>조퇴</b></td><td class="memo">퇴장 QR · 회차 종료 <b>전</b> — 퇴장 체크 ON일 때만</td><td>결과 모달</td></tr>
+            <tr><td><b>정상 퇴장</b></td><td class="memo">퇴장 QR · 회차 종료 <b>후</b> ~ 30분</td><td>결과 모달</td></tr>
+            <tr><td><b>이미 확인됨</b></td><td class="memo">같은 회차 기존 기록 존재</td><td>오버레이</td></tr>
+            <tr><td><b>다른 차수</b></td><td class="memo">등록 차수 밖 (차수당 QR 1장이므로 차수 단위 거부)</td><td>오버레이</td></tr>
+            <tr><td><b>종료된 과정</b></td><td class="memo">차수에 남은 회차 없음 — <b>오버레이</b>다(G7). 수료 판정·수료증이 Phase 2라 랜딩으로 만들 내용이 없다</td><td>오버레이</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout blue">
+      <b>출석 가능 시간대</b> — 입장 <code>회차 시작 30분 전 ~ 종료</code> · 퇴장 <code>회차 시작 ~ 종료 후 30분</code>.
+      30분은 양쪽 모두 <b>고정값</b>이며 설정으로 노출하지 않는다. 시간대는 "스캔을 접수할지"만 정하고,
+      출석·지각·결석 판정은 기존 지각 기준이 그대로 한다 — <b>30분 전에 찍어도 출석</b>이다.
+    </div>
+    <div class="callout amber">
+      <b>회차 종료 직후는 "종료된 과정"이 아니라 다음 회차의 "대기"</b>다. 회차 단위로 두면 5회차 차수에 상태 전이가
+      10번 생기고 학습자는 하루에 두 얼굴을 본다. 종료 안내는 그 차수에 <b>남은 회차가 없을 때만</b>이다.
+    </div>
+    <div class="callout blue">
+      <b>진입 경로</b> — 카메라로 QR을 찍으면 <b>스캔 URL → 터치클래스 앱 오픈(딥링크) → 서버 판정 → 아래 화면</b> 순서다.
+      외부 URL로 들어오므로 뒤로 갈 스택이 없어, 랜딩 좌상단 <code>✕</code>는 <b>MY 화면으로 이동</b>한다(G8).
+      앱이 이미 열린 상태이므로 MY에서 출석 현황을 계속 볼 수 있다.
+      <b>앱 미설치·미로그인 분기는 아직 미정</b>(열린 항목 H5) — 특히 미로그인은 로그인 후 원래 스캔 URL로 복귀해야 한다.
+    </div>
+    <div class="callout blue">
+      <b>랜딩은 2상태, 종료는 오버레이다 (08-05 G7 개정).</b> 08-04에서 CLOSED를 랜딩으로 잡았던 근거는
+      "최종 출석률·수료 여부를 보여준다"였는데, <b>수료 처리·수료증 발급이 Phase 2</b>라 실제로 보여줄 것이
+      출석 현황뿐이고 그건 MY 화면에 이미 있다. 화면을 하나 더 만들 이유가 사라졌다.
+    </div>
+    <div class="callout red">
+      <b>미해결 — 결석 판정 한계값이 정의되지 않았다.</b> 08-04 타임라인에는 입장 시간대 안에 <code>결석</code> 구간이
+      그려져 있고 "지각 한계를 넘겨 입장"이라는 표현도 있으나, 그 <b>경계값도 설정 항목도 어디에도 없다</b>.
+      운영 가이드의 지각 기준 표 역시 <code>지각 → 결석</code> 전이를 다루지 않는다.
+      아래 <b>P5 결석</b> 폰은 이 갭을 드러내기 위한 것이며, 실제 문구·시각은 한계값 확정 후 확정해야 한다.
+    </div>
+  </div>
+
+  <!-- ══ 라이브 QR ══ -->
+  <div class="sec-h">
+    <h2>A. 라이브 QR 출석</h2>
+  </div>
+  <p class="sec-d">강사·운영자 화면의 QR을 빔·모니터에 띄우고 학습자가 스캔한다. QR은 <b>30초마다 자동 갱신</b>되므로
+     화면을 캡처해 나중에 쓰거나 사진을 공유해도 통하지 않는다. 강사가 표출 시점을 통제하므로
+     <b>출석 가능 시간대 검증을 타지 않고</b>, 스캔 즉시 판정 결과가 뜬다 — 별도의 <code>[출석 체크]</code> 단계가 없다.</p>
+  <div class="gallery" id="gal-live"></div>
+
+  <!-- ══ 프린트 QR ══ -->
+  <div class="sec-h">
+    <h2>B. 프린트 QR 출석</h2>
+    <span class="sec-tag print">신규 코스 기본값</span>
+  </div>
+  <p class="sec-d">인쇄한 PNG를 벽·입구에 부착한다. <b>차수당 1장</b>이 그 차수의 모든 회차를 커버하며
+     회차는 스캔 시각으로 시스템이 판정한다. 토큰이 동결돼 있어 사진 공유를 막지 못하므로
+     <b>출석 가능 시간대</b>가 노출 범위를 회차 단위로 잘라낸다. <b>새 코스의 기본값이 프린트</b>이므로(08-04 E3) 이 경로가 실제 다수가 된다. QR은 게이트가 아니라 <b>차수 홈</b>이라서,
+     시간대 밖에 찍어도 내 출석 현황을 볼 수 있는 <b>랜딩 2상태</b>가 존재한다.</p>
+  <div class="gallery" id="gal-print"></div>
+
+  <p class="ver">
+    QR 출석 케이스 v1.0 · 2026-08-05<br>
+    라이브 5종 + 프린트 10종 = 15케이스 · 랜딩 2상태(대기·출석 체크 가능) + 판정 결과 6종 + 오버레이 3종<br>
+    용어: <b>유효 창 → 출석 가능 시간대</b> (2026-08-05 G1) · 결석 한계값 미정의 (열린 항목)
+  </p>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   케이스 정의
+   type 'land'  → 랜딩 2상태 (프린트 전용)
+   type 'modal' → 스캐너 배경 + 결과·오버레이 모달
+   ══════════════════════════════════════════════════════════════ */
+
+const SESS   = '3회차 · 리스크 관리 실습';
+const COHORT = '리스크 관리 과정 · 1기';
+const PLACE  = '한샘 HQ 대교육장 (본관 3F)';
+const TUTOR  = '김상현';
+const WHEN   = '4월 9일 (목) 13:00 ~ 16:00';
+/* 진행률: 1회차 출석 · 2회차 지각 · 3~5회차 예정 */
+const DOTS   = ['attended','late','',''  ,''];
+
+const CASES_LIVE = [
+  { n:'L1', title:'출석', chips:[['lab-green','출석']],
+    cond:'지각 기준 <b>10분 이내</b> 스캔 (13:00 시작 · 13:07 스캔). 라이브는 시간대 검증이 없어 <b>강사가 QR을 띄운 동안</b>이 곧 접수 구간이다.',
+    type:'modal', src:'live',
+    icon:'check', iconCls:'success', mTitle:'출석 완료!', desc:'오늘도 화이팅이에요',
+    time:'2026.04.09 13:07', btn:'primary' },
+
+  { n:'L2', title:'지각', chips:[['lab-amber','지각']],
+    cond:'지각 기준 <b>초과</b> 스캔 (13:23). 지각도 출석률 분자에 포함된다 — 학습자에게 그 사실을 알려 불필요한 문의를 막는다.',
+    type:'modal', src:'live',
+    icon:'schedule', iconCls:'late', mTitle:'지각 처리됐어요', desc:'지각도 출석으로 인정돼요',
+    time:'2026.04.09 13:23', timeCls:'var(--warning)', btn:'warn' },
+
+  { n:'L3', title:'만료된 QR', chips:[['lab-red','라이브 전용'],['lab-grey','거부']],
+    cond:'<b>30초 갱신 전의 QR</b>을 캡처해 스캔. 라이브 모드의 사진 공유 방어 장치가 작동한 결과다. 프린트 QR에는 이 케이스가 없다(토큰 동결).',
+    type:'modal', src:'live',
+    icon:'timer_off', iconCls:'fail', mTitle:'만료된 QR이에요', hideName:true,
+    desc:'화면에 표시된 <b>최신 QR</b>을 다시 찍어주세요', btn:'gray' },
+
+  { n:'L4', title:'이미 확인됨', chips:[['lab-grey','오버레이']],
+    cond:'같은 회차에 <b>기존 기록이 있는 상태</b>로 재스캔. 기록을 덮지 않고 현재 상태를 보여준다 — 재스캔으로 지각을 출석으로 되돌릴 수 없다.',
+    type:'modal', src:'live',
+    icon:'task_alt', iconCls:'wait', mTitle:'이미 입장 확인됐어요', hideName:true,
+    desc:'다시 찍어도 기록은 그대로 유지돼요',
+    time:'13:23 지각으로 기록됨', timeCls:'var(--warning)', btn:'gray' },
+
+  { n:'L5', title:'다른 차수', chips:[['lab-red','거부'],['lab-grey','오버레이']],
+    cond:'<b>등록하지 않은 차수</b>의 QR을 스캔. 거부 단위는 회차가 아니라 <b>차수</b>다 — 등록은 차수 단위로 이뤄지기 때문이다.',
+    type:'modal', src:'live',
+    icon:'person_off', iconCls:'fail', mTitle:'다른 차수의 QR이에요', hideName:true,
+    desc:'홍길동 님은 <b>2차수</b> 등록자입니다.<br>본인 차수 교육장의 QR을 찍어주세요', btn:'gray' },
+];
+
+const CASES_PRINT = [
+  { n:'P1', title:'대기', chips:[['lab-grey','랜딩'],['lab-blue','시간대 밖']],
+    cond:'현재 <b>12:29</b> — 시작(13:00) 30분 전이 아직 안 됐다. 출석 버튼을 <b>만들지 않는다</b>: 누를 수 없는 버튼을 보여주면 눌러보고 실패한다.',
+    type:'land', state:'pre', stateIcon:'schedule', stateLabel:'출석 대기',
+    course:'다음 회차',
+    avail:{ t:'12:30부터 출석 가능', s:'시작 30분 전부터 QR을 찍을 수 있어요' },
+    foot:{ note:'출석 가능 시각이 되면 이 화면에서 바로 체크할 수 있어요' } },
+
+  { n:'P2', title:'출석 체크 가능', chips:[['lab-blue','랜딩'],['lab-green','시간대 안']],
+    cond:'현재 <b>12:47</b> — 시간대 안(12:30~16:00)이고 기존 기록이 없다. <b>스캔만으로 기록하지 않고</b> 버튼을 누른 뒤 판정한다: 지나가며 잘못 찍은 것을 출석으로 만들지 않기 위해서다.',
+    type:'land', state:'open', stateIcon:'check_circle', stateLabel:'출석 체크 가능',
+    course:'진행 회차',
+    foot:{ button:true } },
+
+  { n:'P3', title:'출석', chips:[['lab-green','출석']],
+    cond:'P2에서 <code>[출석 체크]</code>를 누른 결과. 시작 <b>13분 전</b> 스캔이지만 정상 <b>출석</b>이다 — 시간대는 접수 여부만 정하고 판정은 지각 기준이 한다.',
+    type:'modal', src:'print',
+    icon:'check', iconCls:'success', mTitle:'출석 완료!', desc:'오늘도 화이팅이에요',
+    time:'2026.04.09 12:47', btn:'primary' },
+
+  { n:'P4', title:'지각', chips:[['lab-amber','지각']],
+    cond:'13:23 체크 — 지각 기준 10분 초과. 벽 QR을 늦게 찍어도 <b>기록은 남는다</b>. 결석보다 지각이 학습자에게 유리하므로 늦더라도 찍게 유도한다.',
+    type:'modal', src:'print',
+    icon:'schedule', iconCls:'late', mTitle:'지각 처리됐어요', desc:'지각도 출석으로 인정돼요',
+    time:'2026.04.09 13:23', timeCls:'var(--warning)', btn:'warn' },
+
+  { n:'P5', title:'결석', chips:[['lab-red','결석'],['lab-red','한계값 미정의']],
+    cond:'<b style="color:var(--error)">한계값이 정의되지 않은 케이스.</b> 08-04 타임라인에는 입장 시간대 안에 결석 구간이 있으나 경계값·설정 항목이 없다. 아래 15:40은 <b>예시</b>이며 확정값이 아니다.',
+    type:'modal', src:'print',
+    icon:'event_busy', iconCls:'fail', mTitle:'결석 처리됐어요',
+    desc:'출석으로 인정받기 어려운 시각이에요.<br>사정이 있었다면 강사·담당자에게 알려주세요',
+    time:'2026.04.09 15:40', timeCls:'var(--error)', btn:'gray' },
+
+  { n:'P6', title:'조퇴', chips:[['lab-amber','조퇴'],['lab-grey','퇴장 체크 ON']],
+    cond:'<b>퇴장 QR</b>을 회차 종료(16:00) <b>전</b>에 스캔. 판정은 <b>찍은 종이가 선언</b>하므로 스캔 순서를 추론하지 않는다. 퇴장 체크 OFF(기본)면 이 케이스가 없고 관리자 수기 처리다.',
+    type:'modal', src:'print',
+    icon:'logout', iconCls:'late', mTitle:'조퇴로 기록됐어요',
+    desc:'조퇴도 출석으로 인정돼요.<br>안전하게 돌아가세요',
+    time:'2026.04.09 14:30 퇴장', timeCls:'var(--warning)', btn:'warn' },
+
+  { n:'P7', title:'정상 퇴장', chips:[['lab-green','정상 퇴장'],['lab-grey','퇴장 체크 ON']],
+    cond:'퇴장 QR을 종료(16:00) <b>후</b> 스캔. 퇴장 시간대는 <code>종료 후 30분</code>까지 — 나가면서 줄 서서 찍는 동선이고, 입장의 30분 선행과 대칭이라 기억하기 쉽다.',
+    type:'modal', src:'print',
+    icon:'logout', iconCls:'success', mTitle:'수고하셨어요!', desc:'끝까지 참여 확인됐어요',
+    time:'2026.04.09 16:04 퇴장', btn:'primary' },
+
+  { n:'P8', title:'이미 확인됨', chips:[['lab-grey','오버레이']],
+    cond:'벽 QR은 여러 번 찍기 쉽다. 기존 기록을 <b>덮지 않고</b> 현재 상태를 보여준다. 이 안내가 없으면 "찍었는데 아무 반응이 없다"는 문의가 생긴다.',
+    type:'modal', src:'print',
+    icon:'task_alt', iconCls:'wait', mTitle:'이미 입장 확인됐어요', hideName:true,
+    desc:'다시 찍어도 기록은 그대로 유지돼요',
+    time:'13:23 지각으로 기록됨', timeCls:'var(--warning)', btn:'gray' },
+
+  { n:'P9', title:'다른 차수', chips:[['lab-red','거부'],['lab-grey','오버레이']],
+    cond:'차수가 여러 개인 코스에서 <b>다른 차수 교육장</b>의 QR을 찍은 경우. 차수당 QR이 1장이므로 거부 단위도 차수다.',
+    type:'modal', src:'print',
+    icon:'person_off', iconCls:'fail', mTitle:'다른 차수의 QR이에요', hideName:true,
+    desc:'홍길동 님은 <b>2차수</b> 등록자입니다.<br>본인 차수 교육장의 QR을 찍어주세요', btn:'gray' },
+
+  { n:'P10', title:'종료된 과정', chips:[['lab-grey','오버레이'],['lab-blue','남은 회차 없음']],
+    cond:'차수의 <b>모든 회차가 끝난</b> 뒤 스캔. <b>랜딩이 아니라 오버레이</b>다(08-05 G7) — 수료 판정·수료증이 Phase 2라 보여줄 것이 출석 현황뿐이고, 그건 MY 화면에 이미 있다.',
+    type:'modal', src:'print',
+    icon:'flag', iconCls:'wait', mTitle:'종료된 과정입니다', hideName:true,
+    desc:'이 QR은 더 이상 출석에 사용되지 않아요', btn:'gray' },
+];
+
+/* ── 렌더 ── */
+const statusbar = `
+  <div class="statusbar">
+    <span>12:47</span>
+    <span class="icons"><span class="mi i16">signal_cellular_alt</span><span class="mi i16">wifi</span><span class="mi i16">battery_full</span></span>
+  </div>`;
+
+const dotsHtml = d => `<div class="dots">${d.map(c=>`<div class="dot ${c}"></div>`).join('')}</div>`;
+
+const mystat = () => `
+  <div class="mystat">
+    <div class="mystat-h">
+      <div class="mystat-k">내 출석 현황</div>
+      <div class="mystat-v"><em>2</em> / 5회차</div>
+    </div>
+    ${dotsHtml(DOTS)}
+    <div class="legend-row">
+      <span><i style="background:var(--success)"></i>출석</span>
+      <span><i style="background:var(--warning)"></i>지각</span>
+      <span><i style="background:var(--error)"></i>결석</span>
+      <span><i style="background:var(--n-02)"></i>예정</span>
+    </div>
+  </div>`;
+
+function landScreen(c) {
+  return `
+  <div class="land">
+    <!-- 좌상단 X → MY 화면 (G8). 스캔은 외부 URL 진입이라 뒤로 갈 스택이 없다 -->
+    <div class="land-top"><span class="mi">close</span><div class="land-top-t">${COHORT}</div></div>
+    <div class="land-body">
+      <div class="qr-state ${c.state}"><span class="mi">${c.stateIcon}</span>${c.stateLabel}</div>
+      <div class="land-course">${c.course}</div>
+      <div class="land-sess">${SESS}</div>
+      <div class="land-when">${WHEN}</div>
+      ${c.avail ? `
+        <div class="avail"><span class="mi">how_to_reg</span>
+          <div><div class="avail-t">${c.avail.t}</div><div class="avail-s">${c.avail.s}</div></div>
+        </div>` : ''}
+      <div class="meta">
+        <div class="meta-row"><span class="mi">place</span><div class="meta-k">장소</div><div class="meta-v">${PLACE}</div></div>
+        <div class="meta-row"><span class="mi">person</span><div class="meta-k">강사</div><div class="meta-v">${TUTOR}</div></div>
+      </div>
+      ${mystat()}
+    </div>
+    <div class="land-foot">
+      ${c.foot.button
+        ? `<button class="btn-check"><span class="mi">how_to_reg</span>출석 체크</button>`
+        : `<div class="land-note">${c.foot.note}</div>`}
+    </div>
+  </div>`;
+}
+
+function modalScreen(c) {
+  const srcLabel = c.src === 'live'
+    ? `<span class="mi">cast</span>라이브 QR · 30초 갱신`
+    : `<span class="mi">print</span>프린트 QR · 벽 부착`;
+  return `
+  <div class="scan-bg">
+    <span class="scan-src ${c.src}">${srcLabel}</span>
+    <div class="frame"><i></i><i></i><i></i><i></i></div>
+    <div class="hint">QR을 화면 안에 맞춰주세요</div>
+    <div class="ov">
+      <div class="modal">
+        <div class="modal-icon ${c.iconCls}"><span class="mi">${c.icon}</span></div>
+        <div class="modal-title">${c.mTitle}</div>
+        ${c.hideName ? '' : `<div class="modal-course">${SESS}</div>`}
+        ${c.hideName ? '' : `<div class="modal-name">홍길동 님</div>`}
+        <div class="modal-desc" ${c.hideName ? 'style="margin-top:8px"' : ''}>${c.desc}</div>
+        ${c.time
+          ? `<div class="modal-time" ${c.timeCls ? `style="color:${c.timeCls}"` : ''}>${c.time}</div>`
+          : `<div style="height:12px"></div>`}
+        <button class="modal-btn ${c.btn}">확인</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function phone(c) {
+  return `
+  <div class="case-col">
+    <div class="case-label">
+      <span class="num">${c.n}. ${c.title}</span>
+      ${c.chips.map(([cls, t]) => `<span class="lab-chip ${cls}">${t}</span>`).join('')}
+    </div>
+    <div class="case-cond">${c.cond}</div>
+    <div class="phone">
+      ${statusbar}
+      ${c.type === 'land' ? landScreen(c) : modalScreen(c)}
+    </div>
+  </div>`;
+}
+
+document.getElementById('gal-live').innerHTML  = CASES_LIVE.map(phone).join('');
+document.getElementById('gal-print').innerHTML = CASES_PRINT.map(phone).join('');
+</script>
+</body>
+</html>
