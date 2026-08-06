@@ -375,8 +375,11 @@
   const _qp = new URLSearchParams(window.location.search);
   const ATT_MODE = (_qp.get('mode') === 'fixed' || _qp.get('mode') === 'live')
     ? _qp.get('mode') : (COURSE.attendanceMode || 'live');
-  const CHECKOUT_ON = (_qp.get('checkout') === '1' || _qp.get('checkout') === '0')
+  /* 퇴장 체크는 인쇄 전용 — 입장/퇴장은 "찍은 종이가 선언"하는데(F6) 라이브엔 선언할 종이가 없다.
+     빌더가 라이브에서 스위치를 잠그지만, 여기서도 한 번 더 막아 ?checkout=1 로 불가능한 상태를 만들지 않는다. */
+  const _checkoutSaved = (_qp.get('checkout') === '1' || _qp.get('checkout') === '0')
     ? _qp.get('checkout') === '1' : !!COURSE.checkoutEnabled;
+  const CHECKOUT_ON = _checkoutSaved && ATT_MODE === 'fixed';
 
   /* ── QR 목업 — 토큰에서 결정적으로 생성. 실제 QR 인코딩은 구현 단계(A3-34) ── */
   const qrCells = (token, n) => {
