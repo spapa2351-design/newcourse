@@ -1892,17 +1892,20 @@
                           onChange={e => setLateMinutes(Math.min(60, Math.max(1, parseInt(e.target.value) || 1)))}
                           className="w-12 text-center text-[14px] font-black border-2 border-indigo-300 rounded-lg px-1.5 py-1 outline-none focus:border-indigo-500 bg-white text-indigo-700"
                         />
+                        {/* 2026-08-06 H6 — 스캔은 결석을 만들지 않는다. 유예 안이면 출석, 넘으면 지각까지다.
+                            결석은 회차 마감 시 "안 찍은 사람"에게 붙으므로 이 줄에 나올 값이 아니다. */}
                         <span className="text-[12px] text-slate-400">분 이내 입장</span>
-                        <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">지각</span>
+                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">출석</span>
                         <span className="text-[12px] text-slate-400">/ 초과 시</span>
-                        <span className="text-[11px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">결석</span>
+                        <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">지각</span>
                       </div>
                     </div>
 
                     {/* 스위치 OFF 안내 */}
                     {!lateEnabled && (
                       <div className="px-4 py-2 bg-slate-50 text-[11px] text-slate-400 animate-fadeIn border-b border-slate-100">
-                        지각 구분 없이 출석 시간과 무관하게 <span className="font-bold text-slate-500">출석 / 결석</span>만 판정됩니다.
+                        지각 구분 없이 <span className="font-bold text-slate-500">찍으면 모두 출석</span>으로 처리됩니다.
+                        결석은 회차 마감 시 <span className="font-bold text-slate-500">한 번도 찍지 않은 수강생</span>에게 붙습니다.
                       </div>
                     )}
 
@@ -2277,6 +2280,40 @@
                           </div>
                         )}
 
+                        {/* 회차선택형 신청 정원 합계 (2026-08-06 H8) — 회차선택형에서만 회차가 신청 게이트다.
+                            합계가 차수 정원보다 적으면 열어둔 좌석을 실제로는 팔 수 없다 → 경고.
+                            합계가 많은 건 정상이다 — 오전/오후 각 20석(합 40)으로 열어야 30명이 어느 쪽으로 몰려도 받는다.
+                            상한은 차수 정원이 잡아주므로 초과 개설을 막지 않는다. 전체일정형은 신청이 차수에서 마감돼 이 판정을 하지 않는다. */}
+                        {!isCollapsed && opt.sessionSelect && opt.sessions.length > 0 && (() => {
+                          const capped = opt.sessions.filter(s => s.groups != null);
+                          const uncapped = opt.sessions.length - capped.length;
+                          const capSum = capped.reduce((a, s) => a + (s.capacity || 0), 0);
+                          // 정원 미설정 회차는 제한이 없어 남는 인원을 전부 흡수한다 → 부족 판정 불가 (그 회차엔 별도 '신청 정원 없음' 배지)
+                          const shortfall = uncapped === 0 ? Math.max(0, opt.capacity - capSum) : 0;
+                          const over = capSum > opt.capacity;
+                          return (
+                            <div className={`mx-3 mt-2 px-3 py-2 rounded-lg border text-[11px] leading-relaxed
+                              ${shortfall > 0 ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                              <div className="flex items-center gap-1.5 font-bold">
+                                {shortfall > 0 && <AlertTriangle size={11} className="text-amber-500 shrink-0"/>}
+                                회차 신청 정원 합계 <span className={shortfall > 0 ? 'text-amber-800' : 'text-slate-700'}>{capSum}석</span>
+                                <span className="font-medium">· 차수 정원 {opt.capacity}명(상한)</span>
+                              </div>
+                              {shortfall > 0 && (
+                                <div className="mt-0.5 font-semibold">
+                                  {shortfall}석은 신청받을 수 없습니다 — 회차 정원을 올리거나 차수 정원을 {capSum}명으로 맞추세요.
+                                </div>
+                              )}
+                              {shortfall === 0 && over && (
+                                <div className="mt-0.5">쏠림 대비로 상한보다 넉넉히 열어둔 상태입니다. 실제 등록은 차수 정원 {opt.capacity}명에서 멈춥니다.</div>
+                              )}
+                              {uncapped > 0 && (
+                                <div className="mt-0.5">정원 미설정 회차 {uncapped}개는 제한이 없어 합계 판정에서 제외했습니다.</div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
                         {/* 회차 목록 — 차수 내 드래그앤드롭 */}
                         {!isCollapsed && <div className="p-3 space-y-2 bg-white">
                           {opt.sessions.length > 0 ? opt.sessions.map((sess, idx) => {
@@ -2285,6 +2322,9 @@
                             const locked = courseStatus === 'published' && isSessionPast(sess);   // 배포·수강중 + 종료된 회차 → 수정 불가
                             const sameDateCount = sess.date ? opt.sessions.filter(s => s.date === sess.date).length : 0;
                             const hasIndividual = sess.groups !== null && sess.groups !== undefined;
+                            // 회차선택형인데 개별 정원이 없으면 그 회차는 신청 제한이 없다 (2026-08-06 H7).
+                            // 차수 정원은 총원이라 한 회차에 전원이 몰려도 통과한다 — 조용히 두면 현장에서 터진다.
+                            const pickNoCap = opt.sessionSelect && !hasIndividual;
                             // 차수 내 회차 시간 겹침 — 같은 시간대 회차는 QR 출석 코드(차수당 1개)로 구분 불가
                             const sessOverlap = opt.sessions.some(o => o.id !== sess.id && _sessConflict(o, sess));
                             return (
@@ -2311,6 +2351,12 @@
                                     placeholder="회차명"
                                     className={`flex-1 text-[13px] font-bold bg-transparent border-b border-transparent outline-none px-1 min-w-0 ${locked ? 'text-slate-500 cursor-not-allowed' : 'text-slate-800 hover:border-slate-300 focus:border-indigo-400'}`}
                                   />
+                                  {pickNoCap && !locked && (
+                                    <span title="회차선택형은 학습자가 회차를 골라 신청하므로 회차가 실질 신청 단위입니다. 정원을 안 정하면 이 회차에 차수 인원 전부가 몰릴 수 있습니다."
+                                      className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded whitespace-nowrap">
+                                      <AlertTriangle size={9}/> 신청 정원 없음
+                                    </span>
+                                  )}
                                   {locked ? (
                                     <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-200 border border-slate-300 px-2 py-0.5 rounded whitespace-nowrap">
                                       <Lock size={9}/> 종료 · 수정 불가
@@ -2413,9 +2459,9 @@
                                         <div className="w-12 text-[11px] font-bold text-violet-400 shrink-0">{opt.sessionSelect ? '신청정원' : '정원'}</div>
                                         <input type="number" min="0" value={sess.capacity !== null && sess.capacity !== undefined ? sess.capacity : ''} onChange={e => handleSessionCapacityChange(sess.id, opt.id, e.target.value)} placeholder={`${opt.capacity}`} className="w-16 text-[12px] font-bold text-center border border-indigo-300 rounded px-1.5 py-1 outline-none focus:border-indigo-500 bg-indigo-50"/>
                                         <span className="text-[11px] text-slate-400">명</span>
-                                        {opt.sessionSelect && (sess.capacity === null || sess.capacity === undefined) && (
-                                          <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded whitespace-nowrap">
-                                            미설정 — 이 회차는 신청 제한 없음
+                                        {opt.sessionSelect && sess.capacity === 0 && (
+                                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded whitespace-nowrap">
+                                            0 = 신청 마감 (학습자 목록에서 선택 불가)
                                           </span>
                                         )}
                                       </div>
