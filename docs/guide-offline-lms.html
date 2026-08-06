@@ -159,7 +159,7 @@
     <span class="font-bold text-slate-800 text-base">오프라인 코스 가이드</span>
   </div>
   <div class="flex-1"></div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v2.6 · 2026-06-25</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">v2.7 · 2026-08-05</span>
 </header>
 
 <script>
@@ -265,7 +265,7 @@ function closeMobileSidebar() {
       <div class="nav-sub" onclick="showPage('admin-view-dashboard', this)">대시보드</div>
       <div class="nav-sub" onclick="showPage('admin-view-students', this)">수강생 관리</div>
       <div class="nav-sub" onclick="showPage('admin-view-attendance', this)">출석·수료</div>
-      <div class="nav-sub" onclick="showPage('admin-view-qr', this)">QR 라이브 모드</div>
+      <div class="nav-sub" onclick="showPage('admin-view-qr', this)">QR 출석 운영 (2종)</div>
     </div>
 
     <div class="nav-divider"></div>
@@ -1091,7 +1091,7 @@ function closeMobileSidebar() {
     <div class="page-header">
       <div class="page-tag">MY 탭</div>
       <h1 class="page-title">MY 탭</h1>
-      <p class="page-desc">내가 신청한 오프라인 코스를 한눈에 확인하는 탭입니다. 다가오는 수업 히어로 카드, 코스 목록을 제공합니다. <strong>출석은 교육장에 게시된 QR을 휴대폰 카메라로 직접 스캔</strong>해 처리하며(앱 안에 누르는 체크인 버튼은 없습니다), 스캔 결과가 화면에 표시됩니다.</p>
+      <p class="page-desc">내가 신청한 오프라인 코스를 한눈에 확인하는 탭입니다. 다가오는 수업 히어로 카드, 코스 목록을 제공합니다. <strong>출석은 교육장의 QR을 휴대폰 카메라로 직접 스캔</strong>해 처리합니다 — MY 탭 안에는 누르는 체크인 버튼이 없습니다. 스캔하면 앱이 열리고, 출석 방식에 따라 <strong>랜딩 화면(인쇄 QR)</strong> 또는 <strong>판정 결과(라이브 QR)</strong>가 표시됩니다.</p>
     </div>
 
     <div class="guide-section">
@@ -1127,46 +1127,125 @@ function closeMobileSidebar() {
     </div>
 
     <div class="guide-section">
-      <div class="section-title">② QR 출석 결과 5종</div>
-      <div class="section-desc">QR 코드를 스캔하면 서버 검증 후 아래 5가지 결과 중 하나가 표시됩니다.</div>
+      <div class="section-title">② QR 스캔 화면 — 랜딩 2 + 판정 결과 5 + 안내 4</div>
+      <div class="section-desc">
+        교육장 QR을 카메라로 스캔하면 <strong>터치클래스 앱이 열리고</strong>, 서버가
+        <strong>(현재 시각 · 등록 차수 · QR 종류 · 기존 기록)</strong>으로 어떤 화면을 보여줄지 정합니다.
+        출석 방식이 <strong>인쇄 QR</strong>이면 먼저 랜딩 화면이 뜨고 버튼을 눌러야 처리되며,
+        <strong>라이브 QR</strong>이면 스캔 즉시 결과가 표시됩니다.
+      </div>
+
+      <div class="callout callout-blue">
+        <strong>인쇄 QR에만 "출석 가능 시간대"가 있습니다.</strong>
+        입장은 <strong>회차 시작 30분 전 ~ 종료</strong>, 퇴장은 <strong>시작 ~ 종료 후 30분</strong>.
+        벽에 상시 붙어 있는 QR을 아무 때나 찍어 출석되는 것을 막기 위한 것으로,
+        30분은 고정값이며 설정으로 바꿀 수 없습니다.
+        라이브 QR은 강사가 QR을 띄운 동안만 존재하므로 이 검증을 하지 않습니다.
+      </div>
+
+      <div class="section-subtitle mt-4" style="font-weight:700;color:#334155;">랜딩 2종 — 인쇄 QR 전용</div>
+      <div class="section-desc">시간대 밖에 찍어도 오류가 아니라 <strong>내 출석 현황을 보여주는 화면</strong>이 뜹니다. QR은 게이트가 아니라 차수 홈입니다.</div>
       <div class="flex gap-4 overflow-x-auto pb-4">
         <div class="screen-card" style="flex-shrink:0">
-          <img src="../screenshots/my/06_qr_success.png" class="screen-img" style="width:180px" alt="출석완료">
+          <img src="../screenshots/my/11_land_pre.png" class="screen-img" style="width:180px" alt="출석 대기">
+          <div class="screen-label">출석 대기</div>
+          <div class="screen-caption" style="color:#64748b">출석 가능 시각 안내<br>출석 버튼 없음</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/12_land_open.png" class="screen-img" style="width:180px" alt="출석 체크 가능">
+          <div class="screen-label">출석 체크 가능</div>
+          <div class="screen-caption" style="color:#1d4ed8">[출석 체크] 버튼<br>누르면 판정</div>
+        </div>
+      </div>
+
+      <div class="section-subtitle mt-2" style="font-weight:700;color:#334155;">판정 결과 5종</div>
+      <div class="section-desc">인쇄 QR은 <strong>[출석 체크]를 누른 뒤</strong>, 라이브 QR은 <strong>스캔 즉시</strong> 표시됩니다.</div>
+      <div class="flex gap-4 overflow-x-auto pb-4">
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/06_qr_success.png" class="screen-img" style="width:180px" alt="출석 완료">
           <div class="screen-label">출석 완료</div>
-          <div class="screen-caption" style="color:#065f46">정상 출석 처리</div>
+          <div class="screen-caption" style="color:#065f46">정상 출석 처리<br>3초 후 자동 닫힘</div>
         </div>
         <div class="screen-card" style="flex-shrink:0">
           <img src="../screenshots/my/07_qr_late.png" class="screen-img" style="width:180px" alt="지각">
           <div class="screen-label">지각</div>
-          <div class="screen-caption" style="color:#92400e">입실 시간 경과 후 스캔</div>
+          <div class="screen-caption" style="color:#92400e">지각 기준 초과<br>출석으로 인정</div>
         </div>
         <div class="screen-card" style="flex-shrink:0">
-          <img src="../screenshots/my/08_qr_expired.png" class="screen-img" style="width:180px" alt="기간종료">
-          <div class="screen-label">체크인 시간 종료</div>
-          <div class="screen-caption" style="color:#b91c1c">QR 유효시간 만료</div>
+          <img src="../screenshots/my/13_qr_absent.png" class="screen-img" style="width:180px" alt="결석">
+          <div class="screen-label">결석</div>
+          <div class="screen-caption" style="color:#b91c1c">인정 어려운 시각<br>강사·담당자에게 문의</div>
         </div>
         <div class="screen-card" style="flex-shrink:0">
-          <img src="../screenshots/my/09_qr_notarget.png" class="screen-img" style="width:180px" alt="대상아님">
-          <div class="screen-label">수강 대상 아님</div>
-          <div class="screen-caption" style="color:#b91c1c">해당 회차 미수강자</div>
+          <img src="../screenshots/my/14_qr_early.png" class="screen-img" style="width:180px" alt="조퇴">
+          <div class="screen-label">조퇴</div>
+          <div class="screen-caption" style="color:#92400e">퇴장 QR · 종료 전<br>출석으로 인정</div>
         </div>
         <div class="screen-card" style="flex-shrink:0">
-          <img src="../screenshots/my/10_qr_notyet.png" class="screen-img" style="width:180px" alt="시작전">
-          <div class="screen-label">수업 시작 전</div>
-          <div class="screen-caption" style="color:#64748b">체크인 가능 시간 이전</div>
+          <img src="../screenshots/my/15_qr_checkout.png" class="screen-img" style="width:180px" alt="정상 퇴장">
+          <div class="screen-label">정상 퇴장</div>
+          <div class="screen-caption" style="color:#065f46">퇴장 QR · 종료 후<br>끝까지 참여 확인</div>
+        </div>
+      </div>
+
+      <div class="section-subtitle mt-2" style="font-weight:700;color:#334155;">안내 화면 4종</div>
+      <div class="section-desc">랜딩 대신 바로 뜨는 안내입니다. <strong>오류가 아니라 정상 동작</strong>이므로 CS 응대 시 구분하세요.</div>
+      <div class="flex gap-4 overflow-x-auto pb-4">
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/16_qr_already.png" class="screen-img" style="width:180px" alt="이미 확인됨">
+          <div class="screen-label">이미 확인됨</div>
+          <div class="screen-caption" style="color:#64748b">재스캔 — 기존 기록<br>덮지 않음</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/17_qr_closed.png" class="screen-img" style="width:180px" alt="종료된 과정">
+          <div class="screen-label">종료된 과정</div>
+          <div class="screen-caption" style="color:#1d4ed8">차수에 남은 회차 없음</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/18_qr_notarget.png" class="screen-img" style="width:180px" alt="다른 차수">
+          <div class="screen-label">다른 차수</div>
+          <div class="screen-caption" style="color:#b91c1c">등록하지 않은 차수의 QR</div>
+        </div>
+        <div class="screen-card" style="flex-shrink:0">
+          <img src="../screenshots/my/08_qr_expired.png" class="screen-img" style="width:180px" alt="만료된 QR">
+          <div class="screen-label">만료된 QR</div>
+          <div class="screen-caption" style="color:#b91c1c">라이브 전용<br>30초 갱신 전 캡처본</div>
         </div>
       </div>
 
       <table class="mt-4 w-full text-xs border-collapse">
-        <thead><tr class="border-b border-slate-200"><th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">결과</th><th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">출석 처리</th><th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">수료 인정</th></tr></thead>
+        <thead><tr class="border-b border-slate-200">
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">화면</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">출석 처리</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">수료 인정</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">나타나는 방식</th>
+        </tr></thead>
         <tbody class="text-slate-600">
-          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-green">출석완료</span></td><td class="py-2 px-3">출석</td><td class="py-2 px-3">✅ 인정</td></tr>
-          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-amber">지각</span></td><td class="py-2 px-3">지각 (출석 인정)</td><td class="py-2 px-3">✅ 인정</td></tr>
-          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-red">체크인 시간 종료</span></td><td class="py-2 px-3">결석</td><td class="py-2 px-3">❌ 미인정</td></tr>
-          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-red">수강 대상 아님</span></td><td class="py-2 px-3">—</td><td class="py-2 px-3">—</td></tr>
-          <tr><td class="py-2 px-3"><span class="badge badge-slate">시작 전</span></td><td class="py-2 px-3">대기</td><td class="py-2 px-3">체크인 시간 이후 재시도</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-green">출석 완료</span></td><td class="py-2 px-3">출석</td><td class="py-2 px-3">✅ 인정</td><td class="py-2 px-3">라이브 · 인쇄</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-amber">지각</span></td><td class="py-2 px-3">지각</td><td class="py-2 px-3">✅ 인정</td><td class="py-2 px-3">라이브 · 인쇄</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-red">결석</span></td><td class="py-2 px-3">결석</td><td class="py-2 px-3">❌ 미인정</td><td class="py-2 px-3">라이브 · 인쇄</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-amber">조퇴</span></td><td class="py-2 px-3">조퇴</td><td class="py-2 px-3">✅ 인정</td><td class="py-2 px-3">인쇄 · 퇴장 체크 ON</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-green">정상 퇴장</span></td><td class="py-2 px-3">입장 판정 유지</td><td class="py-2 px-3">✅ 인정</td><td class="py-2 px-3">인쇄 · 퇴장 체크 ON</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-slate">출석 대기</span></td><td class="py-2 px-3">—</td><td class="py-2 px-3">—</td><td class="py-2 px-3">인쇄 (시간대 밖)</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-slate">이미 확인됨</span></td><td class="py-2 px-3">기존 기록 유지</td><td class="py-2 px-3">기존 그대로</td><td class="py-2 px-3">라이브 · 인쇄</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-slate">종료된 과정</span></td><td class="py-2 px-3">—</td><td class="py-2 px-3">—</td><td class="py-2 px-3">인쇄 (남은 회차 없음)</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><span class="badge badge-red">다른 차수</span></td><td class="py-2 px-3">—</td><td class="py-2 px-3">—</td><td class="py-2 px-3">라이브 · 인쇄</td></tr>
+          <tr><td class="py-2 px-3"><span class="badge badge-red">만료된 QR</span></td><td class="py-2 px-3">—</td><td class="py-2 px-3">—</td><td class="py-2 px-3">라이브 전용</td></tr>
         </tbody>
       </table>
+
+      <div class="callout callout-amber mt-3">
+        <strong>지각·조퇴도 출석으로 인정됩니다</strong>(출석률 분자 포함). 학습자 화면에도 그 문구를 넣어 불필요한 문의를 줄였습니다.
+        <strong>퇴장 체크는 기본 OFF</strong>이므로 대부분 코스에서는 조퇴·정상 퇴장 화면이 나타나지 않고, 조퇴는 관리자가 수기로 처리합니다.
+      </div>
+      <div class="callout callout-blue mt-2">
+        <strong>종료된 과정 화면에는 최종 출석률·수료 여부·수료증이 없습니다.</strong>
+        수료 처리·수료증 발급이 Phase 2이므로 보여줄 것이 출석 현황뿐이고, 그것은 MY 화면에 이미 있습니다.
+      </div>
+      <div class="callout callout-blue mt-2">
+        전체 케이스(라이브 5종 · 인쇄 10종)는 <strong>user/qr-attendance-cases.html</strong>에, 운영 절차는
+        <strong>운영팀 정책 가이드 → 6. QR 현장 운영</strong>에 있습니다.
+      </div>
     </div>
 
     <div class="nav-pn">
@@ -1702,6 +1781,60 @@ function closeMobileSidebar() {
       </div>
       <div class="callout callout-amber mt-4">
         지각(late)과 조퇴(early_leave)는 모두 출석 1회로 인정됩니다(코스 유형 무관 공용 기본정책). 결석·미확인만 불인정. 조퇴·결석엔 사유를 기록합니다. 법정의무교육의 시수 strict(조퇴=미인정)는 Phase 2 분기 예정입니다.
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">출석 판정 기준 — 같은 블록에서 3개를 정합니다</div>
+      <div class="section-desc">
+        수료 조건 섹션 안의 <strong>출석 판정 기준</strong> 블록에서 <strong>지각 기준 · 출석 방식 · 퇴장 체크</strong>를 함께 정합니다.
+        셋 다 "출석을 어떻게 판정하는가"에 속하므로 섹션을 따로 만들지 않았습니다.
+      </div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/09_attendance_criteria.png" class="screen-img" style="width:100%" alt="출석 판정 기준">
+          <div class="screen-label">출석 판정 기준 (기본 상태)</div>
+          <div class="screen-caption">지각 기준 10분 · 출석 방식 <strong>인쇄 QR</strong>(새 코스 기본값) · 퇴장 체크 OFF</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-builder/10_checkout_on.png" class="screen-img" style="width:100%" alt="퇴장 체크 ON">
+          <div class="screen-label">퇴장 체크를 켠 상태</div>
+          <div class="screen-caption">"차수마다 입장 QR · 퇴장 QR 2장이 발급됩니다" 안내가 펼쳐집니다</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mt-4">
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">출석 방식 — 라디오 2개</div>
+          <div class="text-xs text-slate-500 leading-relaxed space-y-1">
+            <div>• <strong>라이브 QR</strong> — 강사 화면에 QR 표시, 30초마다 자동 갱신</div>
+            <div>• <strong>인쇄 QR</strong> — 차수당 QR을 내려받아 현장에 게시</div>
+            <div>• <strong>새 코스 기본값은 인쇄 QR</strong>입니다</div>
+            <div>• 코스 레벨 선(先)결정 — 진행 중 임의 전환을 열지 않습니다</div>
+          </div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 bg-white">
+          <div class="font-bold text-sm text-slate-700 mb-2">퇴장 체크 — 스위치 (기본 OFF)</div>
+          <div class="text-xs text-slate-500 leading-relaxed space-y-1">
+            <div>• ON이면 차수당 <strong>입장·퇴장 QR 2장</strong> 발급</div>
+            <div>• 종료 전 퇴장 스캔 → <strong>조퇴</strong> 자동 판정</div>
+            <div>• 미체크자 → <strong>퇴장 미확인</strong> 표시 (자동 변경 없음)</div>
+            <div>• 대부분 현장은 입장만 씁니다</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-amber mt-4">
+        <strong>인쇄 QR을 고르면 "자동 갱신이 없어 사진 공유를 막지 못합니다" 경고가 뜹니다.</strong>
+        새 코스 기본값이 인쇄이므로 이 위험은 기본으로 켜져 있습니다 — 법정의무·평가 연계 코스는 개설 시 <strong>라이브로 바꿨는지</strong> 확인하세요.
+      </div>
+      <div class="callout callout-blue mt-2">
+        <strong>퇴장 체크를 켜면 수강생이 두 번 찍어야 하므로 "퍼블리시 필요" 등급</strong>입니다.
+        인쇄물을 붙인 뒤에 켜면 퇴장 QR을 다시 뽑아 붙여야 하니 <strong>부착 전에 결정</strong>하세요.
+      </div>
+      <div class="callout callout-blue mt-2">
+        <strong>"출석 가능 시간대"는 설정 항목이 아닙니다.</strong> 인쇄 QR은 회차 <strong>시작 30분 전 ~ 종료</strong>(퇴장은 시작 ~ 종료 후 30분)에만 스캔을 받으며,
+        30분은 고정값이라 운영자가 입력할 것이 없습니다. 회차 시간에서 자동 계산됩니다.
       </div>
     </div>
 
@@ -2352,55 +2485,170 @@ function closeMobileSidebar() {
     <div class="breadcrumb">코스 운영 <span>›</span> offline-view</div>
     <div class="page-header">
       <div class="page-tag">코스 운영</div>
-      <h1 class="page-title">QR 라이브 모드</h1>
-      <p class="page-desc">현장 출석 체크를 위한 QR 코드 화면입니다. 강사/운영자가 프로젝터에 띄워두고 수강생이 스캔합니다. 30초마다 QR이 자동 갱신됩니다.</p>
+      <h1 class="page-title">QR 출석 운영 — 라이브 · 인쇄</h1>
+      <p class="page-desc">
+        현장 출석을 처리하는 두 경로입니다. 코스 개설 시 고른 <strong>출석 방식이 진입 버튼을 정합니다</strong> —
+        반대 경로는 비활성이 아니라 <strong>아예 보이지 않습니다</strong>. 새 코스 기본값은 인쇄 QR입니다.
+      </p>
     </div>
 
     <div class="guide-section">
-      <div class="section-title">QR 라이브 화면 구성</div>
+      <div class="section-title">진입 버튼이 모드를 따라갑니다</div>
+      <table class="w-full text-xs border-collapse">
+        <thead><tr class="border-b border-slate-200">
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50" style="width:120px">출석 방식</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50" style="width:180px">버튼</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">노출 조건</th>
+        </tr></thead>
+        <tbody class="text-slate-600">
+          <tr class="border-b border-slate-100">
+            <td class="py-2 px-3"><span class="badge badge-red">라이브 QR</span></td>
+            <td class="py-2 px-3"><strong>[라이브 출석]</strong> · <strong>[QR 출석 시작]</strong></td>
+            <td class="py-2 px-3"><strong>오늘 회차가 있을 때만</strong> 활성</td>
+          </tr>
+          <tr>
+            <td class="py-2 px-3"><span class="badge badge-slate">인쇄 QR</span></td>
+            <td class="py-2 px-3"><strong>[출석 QR]</strong></td>
+            <td class="py-2 px-3"><strong>오늘 회차가 없어도 노출</strong> — 전날 미리 뽑는 동선이 목적</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">A. 라이브 QR — 강사 화면에 띄우기</div>
+      <div class="section-desc">강사·운영자 화면을 빔·모니터에 띄우고 수강생이 스캔합니다. QR은 30초마다 자동 갱신되어 사진 공유를 막습니다.</div>
       <div class="screen-wrap">
         <div class="screen-card">
-          <img src="../screenshots/admin/offline-view/qr_live.png" class="screen-img" style="width:100%" alt="QR 라이브" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="screen-placeholder" style="width:560px;height:340px;display:none">📸 캡처 필요 — QR 라이브 모드 화면</div>
-          <div class="screen-label">QR 라이브 모드</div>
-          <div class="screen-caption">중앙 QR 코드 + 우측 실시간 출석 현황 패널</div>
+          <img src="../screenshots/admin/offline-view/qr_live.png" class="screen-img" style="width:100%" alt="QR 라이브 모드">
+          <div class="screen-label">라이브 모드 (전체화면)</div>
+          <div class="screen-caption">중앙 대형 QR + "24초 후 갱신" 카운트다운 · 우측 실시간 출석 현황</div>
         </div>
       </div>
-    </div>
-
-    <div class="guide-section">
-      <div class="section-title">화면 구성 요소</div>
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-2 gap-4 mt-4">
         <div class="border border-indigo-100 rounded-xl p-4 bg-indigo-50">
-          <div class="font-bold text-sm text-indigo-700 mb-2">🔲 중앙 QR 코드</div>
+          <div class="font-bold text-sm text-indigo-700 mb-2">중앙 QR 코드</div>
           <div class="text-xs text-indigo-600 leading-relaxed space-y-1">
-            <div>• 280×280px 대형 QR 코드</div>
-            <div>• 30초마다 자동 갱신 (타이머 표시)</div>
-            <div>• 회차명·일시 표시</div>
-            <div>• 수강생이 학습자 앱으로 스캔</div>
+            <div>• 대형 QR + 30초 자동 갱신 (카운트다운 표시)</div>
+            <div>• 코스명 · 차수 · 회차 · 일시 · 장소 표시</div>
+            <div>• "학습자 앱에서 QR을 스캔하세요" 안내</div>
           </div>
         </div>
         <div class="border border-slate-200 rounded-xl p-4 bg-white">
-          <div class="font-bold text-sm text-slate-700 mb-2">📊 우측 실시간 패널</div>
+          <div class="font-bold text-sm text-slate-700 mb-2">우측 실시간 패널</div>
           <div class="text-xs text-slate-500 leading-relaxed space-y-1">
-            <div>• 실시간 출석률 (%) 표시</div>
-            <div>• 출석 / 지각 / 조퇴 / 결석 / 미확인 카운트</div>
-            <div>• 최근 출석 목록 (이름 + 타임스탬프)</div>
+            <div>• 실시간 출석 인원 / 정원 + 출석률 %</div>
+            <div>• 출석 · 지각 · 미확인 · 결석 카운트</div>
+            <div>• 최근 출석 목록 (이름 + 소속)</div>
           </div>
         </div>
+      </div>
+      <div class="callout callout-blue mt-3">
+        <strong>라이브 모드에는 출석 가능 시간대 검증이 없습니다.</strong> 강사가 QR을 언제 띄울지 통제하므로 시간 검증이 이미 내재돼 있습니다.
+        수업 종료 시각이 되면 라이브 모드가 자동으로 꺼지고 회차가 종료됩니다.
       </div>
     </div>
 
     <div class="guide-section">
-      <div class="section-title">진입 방법</div>
-      <div class="flow-row">
-        <div class="flow-box">코스 운영 현황</div>
-        <span class="flow-arrow">→</span>
-        <div class="flow-box">헤더 "라이브 출석" 버튼</div>
-        <span class="flow-arrow">→</span>
-        <div class="flow-box">회차 선택</div>
-        <span class="flow-arrow">→</span>
-        <div class="flow-box">QR 라이브 화면</div>
+      <div class="section-title">B. 인쇄 QR — 차수 QR 모달에서 내려받기</div>
+      <div class="section-desc">
+        빔·스크린이 없는 현장, 또는 전날 미리 준비하려는 운영을 위한 경로입니다.
+        출석 탭 <strong>[출석 QR]</strong>로 진입합니다.
+      </div>
+      <div class="screen-wrap">
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-view/qr_modal.png" class="screen-img" style="width:100%" alt="차수 QR 모달">
+          <div class="screen-label">차수 QR 모달</div>
+          <div class="screen-caption">입장·퇴장 QR + PNG 다운로드 + 발급일·파일명 + 재발급</div>
+        </div>
+        <div class="screen-card">
+          <img src="../screenshots/admin/offline-view/qr_modal_full.png" class="screen-img" style="width:100%" alt="모달 진입 화면">
+          <div class="screen-label">진입 화면 전체</div>
+          <div class="screen-caption">오늘 수업 배너 우측 [출석 QR] → 모달</div>
+        </div>
+      </div>
+
+      <table class="mt-4 w-full text-xs border-collapse">
+        <thead><tr class="border-b border-slate-200">
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50" style="width:130px">항목</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">규칙</th>
+        </tr></thead>
+        <tbody class="text-slate-600">
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><strong>발급 단위</strong></td><td class="py-2 px-3"><strong>차수당 1장.</strong> 그 차수의 모든 회차를 한 장으로 커버합니다 — 회차는 스캔한 시각으로 시스템이 구분합니다</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><strong>퇴장 체크 ON</strong></td><td class="py-2 px-3">입장·퇴장 <strong>2장</strong>. 입구·출구에 <strong>떨어뜨려</strong> 붙입니다 — 나란히 붙이면 잘못 찍습니다</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><strong>산출물</strong></td><td class="py-2 px-3"><strong>순수 QR 이미지 PNG만.</strong> A4 레이아웃·일괄 인쇄는 없습니다 — 이미지에 코스명·날짜를 싣지 않으므로 낡을 것이 없습니다</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><strong>파일명</strong></td><td class="py-2 px-3">파일명이 <strong>유일한 식별자</strong>입니다 — <code>{코스명}_{차수명}_{입장|퇴장}_{발급일}.png</code>. 바꾸면 어느 차수 것인지 알 수 없습니다</td></tr>
+          <tr><td class="py-2 px-3"><strong>기록 단위</strong></td><td class="py-2 px-3">QR은 차수 단위지만 <strong>출석 기록은 회차 단위</strong>로 남습니다. 출석부 구조는 라이브와 같습니다</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-subtitle mt-4" style="font-weight:700;color:#334155;">재발급 — 필요한 경우와 아닌 경우</div>
+      <table class="mt-2 w-full text-xs border-collapse">
+        <thead><tr class="border-b border-slate-200">
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">상황</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50" style="width:110px">조치</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">이유</th>
+        </tr></thead>
+        <tbody class="text-slate-600">
+          <tr class="border-b border-slate-100"><td class="py-2 px-3">회차 추가 / 일정 변경</td><td class="py-2 px-3"><span class="badge badge-green">불필요</span></td><td class="py-2 px-3">회차는 스캔 시각으로 판단하므로 QR이 그대로 유효</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3">차수명 · 장소 · 강사 변경</td><td class="py-2 px-3"><span class="badge badge-green">불필요</span></td><td class="py-2 px-3">이미지에 해당 정보가 없음</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3">인쇄물 훼손 · 구겨짐</td><td class="py-2 px-3"><span class="badge badge-slate">재인쇄</span></td><td class="py-2 px-3">같은 PNG를 다시 인쇄 — 재발급이 아닙니다</td></tr>
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><strong>인쇄물 유출·분실 의심</strong></td><td class="py-2 px-3"><span class="badge badge-red">재발급</span></td><td class="py-2 px-3">기존 토큰을 무효화해야 함</td></tr>
+          <tr><td class="py-2 px-3"><strong>인쇄 → 라이브 전환</strong></td><td class="py-2 px-3"><span class="badge badge-red">종이 수거</span></td><td class="py-2 px-3">전환 시 차수 QR이 <strong>즉시 폐기</strong>되어 남은 종이는 전부 거부됨</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-red mt-3">
+        <strong>재발급하면 기존 인쇄물은 즉시 무효입니다.</strong> 명시적 버튼 + 2단 확인을 거치며,
+        입장·퇴장이 <strong>쌍으로 동시</strong> 재발급됩니다(발급일이 어긋나지 않도록). 재발급 후 <strong>붙여둔 종이를 모두 교체</strong>하세요.
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">출석 가능 시간대 — 인쇄 QR에만 적용</div>
+      <div class="section-desc">벽에 상시 붙어 있는 QR을 아무 때나 찍어 출석되는 것을 막습니다. 라이브 QR은 이 검증을 하지 않습니다.</div>
+      <table class="w-full text-xs border-collapse">
+        <thead><tr class="border-b border-slate-200">
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50" style="width:90px">QR</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50" style="width:220px">스캔을 받는 구간</th>
+          <th class="text-left py-2 px-3 text-slate-500 font-semibold bg-slate-50">구간 안에서의 판정</th>
+        </tr></thead>
+        <tbody class="text-slate-600">
+          <tr class="border-b border-slate-100"><td class="py-2 px-3"><strong>입장</strong></td><td class="py-2 px-3">회차 <strong>시작 30분 전 ~ 종료</strong></td><td class="py-2 px-3">지각 기준 그대로 — 출석 / 지각 / 결석</td></tr>
+          <tr><td class="py-2 px-3"><strong>퇴장</strong></td><td class="py-2 px-3">회차 <strong>시작 ~ 종료 후 30분</strong></td><td class="py-2 px-3">종료 <strong>전</strong> → 조퇴 · 종료 <strong>후</strong> → 정상 퇴장</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-blue mt-3">
+        <strong>출석 가능 시간대 ≠ 지각 기준.</strong> 시간대는 "지금 스캔을 받을지"만 정하고,
+        출석·지각·결석 판정은 지각 기준이 그대로 합니다 — <strong>30분 전에 찍어도 출석</strong>입니다.
+        30분은 양쪽 모두 고정값이며 설정으로 노출하지 않습니다.
+      </div>
+      <div class="callout callout-amber mt-2">
+        <strong>수강생이 "출석 버튼이 안 보인다"고 하면 오류가 아닙니다.</strong> 시작 30분 전이 안 됐을 때는
+        <code>N시 N분부터 출석 가능</code> 안내만 뜨고 버튼을 만들지 않습니다. 학습자 화면 전체는
+        <strong>학습자 가이드 → MY 탭</strong>을 보세요.
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <div class="section-title">감수하는 트레이드오프 — 사진 공유 대리 출석</div>
+      <div class="section-desc">
+        인쇄 QR은 코드가 변하지 않으므로 <strong>찍어서 남에게 보내면 현장에 없는 사람도 출석됩니다.</strong>
+        인쇄 모드를 여는 순간 따라오는 비용이며, 감수하기로 결정한 항목입니다.
+      </div>
+      <div class="callout callout-blue">
+        <strong>출석 가능 시간대가 노출 범위를 잘라냅니다</strong> — 시간대가 없으면 사진 1장이 차수 전 기간 × 24시간 유효하지만,
+        적용하면 해당 회차 약 3.5시간(09:00~12:00 기준)만 유효하고 다음 회차엔 재사용되지 않습니다.
+        <strong>30분은 위험의 원인이 아니라 축소 장치입니다.</strong>
+      </div>
+      <div class="text-sm text-slate-700 mt-3 font-semibold">운영으로 줄이는 방법</div>
+      <ul class="text-xs text-slate-500 mt-1 leading-relaxed" style="list-style:disc;padding-left:20px">
+        <li><strong>어뷰징 우려가 있는 코스는 라이브로 바꾸세요.</strong> 새 코스는 인쇄가 기본값이라 이 위험이 기본으로 켜져 있습니다.</li>
+        <li><strong>퇴장 체크를 켜면 부분 억제</strong>됩니다 — 원격 대리자는 종료 시각에 또 찍어야 하고, 안 찍으면 <code>퇴장 미확인</code>으로 남아 마감 때 드러납니다.</li>
+        <li><strong>QR은 강사·운영자 시야 안에</strong> 붙이세요. 복도·화장실 근처보다 교육장 입구가 안전합니다.</li>
+        <li>최종 방어선은 <strong>관리자 수기 정정</strong>입니다.</li>
+      </ul>
+      <div class="callout callout-red mt-3">
+        GPS 반경 검증(실내 오차·권한 거부로 현장 클레임)과 코드 주기 갱신(인쇄 자체가 불가능해짐)은 <strong>채택하지 않습니다.</strong>
       </div>
     </div>
 
