@@ -150,7 +150,15 @@
     { id:'A2-20', screen:'A2', screenName:'코스 빌더', group:'알림', feature:'알림 채널 설정', desc:'이메일 vs 앱 푸시 선택. 수강 확정·D-day 리마인더·수료 완료 알림 자동 발송 채널 설정', input:'라디오 선택', output:'notifyChannel state', note:'채널 미결정 시 오픈 불가', pri:'P1', phase:2, status:'phase2' },
     { id:'A2-21', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'회차별 학습 시간', desc:'회차 시간(종료−시작)으로 학습시간 자동 계산. "직접 입력" 체크 시 회차별 시간/분 수정(override) → "직접 입력" 배지(구 "수정됨", 2026-06-25 변경). studyMinOverride(null=자동)', input:'체크박스 + 시간/분 input', output:'sessions[].studyMinOverride', note:'2026-05-27 브레인스토밍 확정. 자동 기본, override 예외', pri:'P2', phase:1, status:'todo' },
     { id:'A2-22', screen:'A2', screenName:'코스 빌더', group:'수강신청', feature:'회차선택형 ↔ 다중조합 상호배타 가드', desc:'회차선택형(sessionSelect)은 "회원이 차수 1개 선택"(single) 전용. "회원이 여러 차수 선택"(multiple)로 전환 시 회차선택형 차수를 전체일정으로 자동 전환 + 토스트 안내, 다중 상태에선 수강유형 모달의 "회차 선택형" 카드 잠금(Lock·사용 불가). 다중에서 회차 분기가 필요하면 차수를 분리해 표현', input:'신청 방식 라디오 변경', output:'sessionSelect 강제 false + 모달 카드 disabled', note:'2026-06-01 기획팀 합의(A안) + 빌더 코드 반영. 학습자단 아닌 빌더 입구에서 차단', pri:'P1', phase:1, status:'todo' },
+    { id:'A2-34', screen:'A2', screenName:'코스 빌더', group:'수료 조건', feature:'출석 방식 (라이브 QR / 인쇄 QR)', desc:'수료 조건 &gt; 출석 판정 기준 블록에 라디오 2개. 라이브=강사 화면 QR 30초 자동 갱신, 인쇄=차수당 QR PNG를 내려받아 현장 게시. 코스 레벨 선(先)결정으로 진행 중 임의 전환을 열지 않는다. 인쇄 선택 시 "자동 갱신이 없어 사진 공유를 막지 못합니다" 경고 노출', input:'라디오 선택', output:'attendanceMode(live|fixed)', note:'2026-07-28 E1·E2 → 2026-08-04 유지. 신규 코스 기본값 fixed(E3, 영업 니즈 — 07-22 D5의 라이브 기본을 개정). 필드 없는 기존 코스는 읽을 때 live로 간주, 마이그레이션 없음', pri:'P1', phase:1, status:'todo' },
+    { id:'A2-35', screen:'A2', screenName:'코스 빌더', group:'수료 조건', feature:'퇴장 체크 사용 스위치', desc:'출석 판정 기준 블록에 스위치 1행. ON이면 차수당 입장·퇴장 QR 2장 발급, 종료 전 퇴장 스캔은 조퇴 판정, 미체크자는 "퇴장 미확인" 표시. 기본 OFF — 대부분 현장은 입장만 쓴다', input:'스위치 토글', output:'checkoutEnabled(boolean)', note:'2026-08-04 F4·F5·F7·F8. 켜면 수강생이 두 번 찍어야 하므로 퍼블리시 필요 등급. 섹션 신설 없이 기존 블록에 1행 추가', pri:'P1', phase:1, status:'todo' },
+    { id:'A2-36', screen:'A2', screenName:'코스 빌더', group:'수료 조건', feature:'인쇄 QR 안내 · 인쇄→라이브 전환 가드', desc:'인쇄 선택 시 "차수별 QR은 퍼블리싱 후 운영 현황 &gt; 출석에서 PNG로 내려받습니다" 안내. 인쇄→라이브 전환 시 차수 토큰을 즉시 폐기하고 남은 인쇄물이 거부됨을 경고', input:'출석 방식 변경', output:'qrTokenIn/qrTokenOut 폐기', note:'2026-08-04 F14. 경고만 띄우고 토큰을 살려두면 경고가 의미를 갖지 못한다', pri:'P1', phase:1, status:'todo' },
     { id:'A2-33', screen:'A2', screenName:'코스 빌더', group:'커리큘럼', feature:'병렬 분반 + 회차별 QR', desc:'같은 시간대에 강의실을 나눠 동시 진행하는 병렬 분반 지원. 분반/회차마다 QR을 따로 발급해 출석을 분리 식별. 회차 시간 겹침 경고(A2-11a)의 정식 해소책', input:'분반 설정 + 회차별 QR 발급', output:'session.qrCode 개별 생성', note:'2026-06-16 정의. 현재는 차수당 QR 1개라 겹침 경고로만 안내', pri:'P2', phase:2, status:'phase2' },
+
+    { id:'A3-34', screen:'A3', screenName:'수강관리', group:'출석', feature:'출석 탭 진입 버튼 모드 분기', desc:'출석 방식이 진입 버튼을 정한다 — live는 [라이브 출석]/[QR 출석 시작], fixed는 [출석 QR]. 반대 경로는 비활성이 아니라 미표시. fixed는 오늘 회차가 없어도 노출한다(전날 미리 뽑는 동선)', input:'버튼 클릭', output:'liveMode=true 또는 QrModal open', note:'2026-07-28 E9 → 2026-08-04 유지. 기존 A3-04를 모드 분기로 확장', pri:'P1', phase:1, status:'todo' },
+    { id:'A3-35', screen:'A3', screenName:'수강관리', group:'출석', feature:'차수 QR 모달 (PNG 다운로드 · 재발급)', desc:'차수당 QR 1장 발급 — 그 차수 전체 회차를 커버하고 회차는 스캔 시각으로 시스템이 판단. 퇴장 체크 ON이면 입장·퇴장 2장. 순수 QR 이미지 PNG만 제공(A4 레이아웃·일괄 인쇄 없음), 파일명이 유일한 식별자. 재발급은 명시적 버튼 + 2단 확인이며 입장·퇴장을 쌍으로 동시 교체', input:'[출석 QR] 클릭 · PNG 다운로드 · 재발급', output:'option.qrTokenIn/qrTokenOut · {코스명}_{차수명}_{입장|퇴장}_{발급일}.png', note:'2026-08-04 E13·D3·F5·F9·F10·F11. 토큰은 발급 후 동결. 회차 추가·일정·차수명·장소 변경은 재발급 불필요(이미지에 정보 없음)', pri:'P1', phase:1, status:'todo' },
+    { id:'A3-36', screen:'A3', screenName:'수강관리', group:'출석', feature:'퇴장 미확인 표시 + 마감 시 판단', desc:'퇴장 체크 ON인데 퇴장을 찍지 않은 수강생을 "퇴장 미확인"으로 표시. 상태를 자동 변경하지 않고 관리자가 회차 마감 시 판단한다. outAt=null만으로는 "퇴장 안 쓰는 코스"와 "쓰는데 안 찍음"을 구분할 수 없어 별도 필드를 둔다', input:'-', output:'attendance[sessId].outMissing(boolean)', note:'2026-08-04 F7. 자동 출석 인정은 퇴장 체크의 목적을 없애고, 자동 조퇴 처리는 앱을 안 꺼내고 나간 사람을 벌한다. 현재 offline-view.html 미구현', pri:'P1', phase:1, status:'todo' },
+    { id:'A3-37', screen:'A3', screenName:'수강관리', group:'출석', feature:'조퇴·정상 퇴장 자동 판정', desc:'퇴장 QR 스캔이 회차 종료 전이면 조퇴(early_leave), 종료 후면 outAt만 기록하고 입장 판정을 유지. 입장 판정이 퇴장보다 우선하므로 이미 결석 확정된 회차는 퇴장 스캔으로 뒤집히지 않는다. 조퇴는 출석으로 인정(출석률 분자 포함)', input:'퇴장 QR 스캔', output:'attendance[sessId].status/outAt', note:'2026-08-04 F6·F8 + 입장 우선 규칙. 조퇴=출석 인정은 2026-05-27 공용 정책 유지', pri:'P1', phase:1, status:'todo' },
 
     /* ── A3 Phase 2: 수강·출석 관리 추가 기능 ── */
     { id:'A3-21', screen:'A3', screenName:'수강관리', group:'수료', feature:'수료 처리 버튼', desc:'전 회차 종료 후 활성화. 수료 대상자 목록 미리보기 → 확인 클릭 → 수료 확정. 1회성. 취소 불가', input:'"수료 처리" 버튼 클릭', output:'completedStudents Set 확정', note:'2026-04-28 Phase 2 이월. 회차 종료는 수업 종료 시각 자동', pri:'P1', phase:2, status:'phase2' },
@@ -166,7 +174,7 @@
     { id:'A3-31', screen:'A3', screenName:'수강관리', group:'수료', feature:'수료 취소 기능', desc:'잘못 처리된 수료 확정 취소. 수료 상태 → 미수료 롤백. 감사 로그 필수', input:'수료 취소 버튼', output:'completedStudents에서 제거', note:'Phase 1 미지원', pri:'P2', phase:2, status:'phase2' },
 
     /* ── Phase 3: 도메인 확장 (온라인·모바일·다국어) ── */
-    { id:'A1-04', screen:'A1', screenName:'코스 목록', group:'다국어', feature:'다국어 코스명 등록', desc:'국문/영문 동시 등록. 학습자 언어 설정에 따라 자동 노출', input:'국문/영문 입력', output:'i18n 데이터 저장', note:'', pri:'P3', phase:3, status:'phase2' },
+    { id:'A1-12', screen:'A1', screenName:'코스 목록', group:'다국어', feature:'다국어 코스명 등록', desc:'국문/영문 동시 등록. 학습자 언어 설정에 따라 자동 노출', input:'국문/영문 입력', output:'i18n 데이터 저장', note:'구 A1-04 — Phase 1 코스 검색과 ID 충돌로 2026-08-05 재배정. ', pri:'P3', phase:3, status:'phase2' },
     { id:'A2-30', screen:'A2', screenName:'코스 빌더', group:'온라인 코스', feature:'영상 강의 등록', desc:'온라인 코스용 영상 업로드/스트리밍 + 진도율 추적', input:'영상 업로드', output:'video slot 생성', note:'블렌디드 코스 기반', pri:'P1', phase:3, status:'phase2' },
     { id:'A2-31', screen:'A2', screenName:'코스 빌더', group:'온라인 코스', feature:'퀴즈·시험 빌더', desc:'객관식/주관식 문항 생성, 자동 채점, 패스 기준', input:'문항 입력', output:'exam slot 생성', note:'시험 부정 방지 Phase 4 연계', pri:'P1', phase:3, status:'phase2' },
     { id:'A2-32', screen:'A2', screenName:'코스 빌더', group:'수료 조건', feature:'영상/시험/설문 슬롯 추가', desc:'completionRules에 video/exam/survey 타입 추가. 복합 수료 조건', input:'슬롯 타입 선택', output:'completionRules 확장', note:'Phase 1 스키마 예약 활용', pri:'P1', phase:3, status:'phase2' },
@@ -216,8 +224,11 @@
     { id:'U4-06', screen:'U4', screenName:'MY학습', group:'신청', feature:'취소 사유 입력', desc:'수강 취소 모달에서 사유 텍스트 입력 (선택 항목). 입력값 서버 저장 및 관리자 조회', input:'textarea 입력', output:'취소 사유 저장 API', note:'Phase 1 프로토에서 제거 완료 — textarea 없이 취소 확정만', pri:'P2', phase:2, status:'phase2' },
 
     /* ── U5. 학습자 QR 출석 ── */
-    { id:'U5-01', screen:'U5', screenName:'QR출석', group:'QR', feature:'현장 QR 출석 체크인', desc:'라이브 QR 화면의 QR을 학습자 앱 카메라로 스캔 → 현장 체크인. 스캔 시각이 회차 시작 시간 기준 정시면 출석(attended), 지각기준 내면 지각(late)으로 출석 처리', input:'QR 스캔', output:'출석(attended) or 지각(late) 상태 변경', note:'2026-06-16 현장 체크인 동작 정리. 타임스탬프+회차ID 포함', pri:'P1', phase:1, status:'todo' },
-    { id:'U5-02', screen:'U5', screenName:'QR출석', group:'QR', feature:'QR 스캔 결과 피드백', desc:'스캔 성공: 출석/지각 안내 토스트. 이미 스캔: 중복 처리 안내. 오류: 재시도 안내', input:'스캔 결과', output:'토스트 UI', note:'', pri:'P1', phase:1, status:'todo' },
+    { id:'U5-01', screen:'U5', screenName:'QR출석', group:'QR', feature:'현장 QR 출석 체크인', desc:'교육장 QR을 카메라로 스캔 → 앱 오픈(딥링크) → 서버가 (현재 시각 · 등록 차수 · QR 종류 · 기존 기록)으로 판정. 라이브 QR은 스캔 즉시 처리하고, 인쇄 QR은 랜딩을 먼저 보여준 뒤 [출석 체크]를 눌러야 기록한다 — 벽에 상시 붙어 있어 지나가며 잘못 찍는 것을 출석으로 만들지 않기 위해서다', input:'QR 스캔 (외부 URL 진입)', output:'attendance[sessId].status/inAt', note:'2026-06-16 정리 → 2026-08-05 개정. 시각은 서버 기준(클라이언트 시각 불신). 회차는 스캔 시각으로 판단(E13). 상세 = docs/qr-attendance-handoff.md', pri:'P1', phase:1, status:'todo' },
+    { id:'U5-02', screen:'U5', screenName:'QR출석', group:'QR', feature:'스캔 랜딩 2상태 (대기 · 출석 체크 가능)', desc:'인쇄 QR 전용. 출석 가능 시간대 밖이면 "대기" — 회차명·시작시각·"12:30부터 출석 가능"·장소·강사·내 출석 현황을 보여주고 출석 버튼은 만들지 않는다(비활성이 아니라 미표시). 시간대 안이면 "출석 체크 가능" — 하단 고정 [출석 체크] 버튼', input:'QR 스캔 · [출석 체크] 클릭', output:'GET /qr/resolve → PRE|OPEN · POST /qr/check', note:'2026-08-04 F12 → 2026-08-05 G7로 2상태 개정. QR은 게이트가 아니라 차수 홈. 좌상단 X는 MY 화면으로 이동(G8). 라이브 QR에는 랜딩이 없다', pri:'P1', phase:1, status:'todo' },
+    { id:'U5-03', screen:'U5', screenName:'QR출석', group:'QR', feature:'판정 결과 5종', desc:'출석 / 지각 / 결석 / 조퇴 / 정상 퇴장. 지각·조퇴에 "출석으로 인정돼요"를 명시해 불필요한 문의를 줄인다. 출석·지각·정상 퇴장은 3초 후 자동 닫힘, 결석·조퇴는 수동 닫기. 조퇴·정상 퇴장은 퇴장 체크 ON인 코스에만 나타난다', input:'[출석 체크] 클릭 (인쇄) · 스캔 (라이브)', output:'판정 결과 모달', note:'2026-08-05 G6. 결석 판정 한계값은 미정의 — 확정 전까지 노출 시각은 예시. 케이스 15종 = user/qr-attendance-cases.html', pri:'P1', phase:1, status:'todo' },
+    { id:'U5-04', screen:'U5', screenName:'QR출석', group:'QR', feature:'안내 오버레이 4종', desc:'이미 확인됨(기존 기록을 덮지 않고 현재 상태 표시) / 종료된 과정 / 다른 차수(차수당 QR 1장이므로 차수 단위 거부) / 만료된 QR(라이브 전용 — 30초 갱신 전 캡처본). 랜딩 대신 즉시 뜨며, 오류가 아니라 정상 동작이다', input:'QR 스캔', output:'오버레이 모달', note:'2026-08-05 G6·G7. 종료 화면에 최종 출석률·수료 여부·수료증을 넣지 않는다 — 수료 처리·수료증이 Phase 2라 보여줄 것이 출석 현황뿐이고 그건 MY에 이미 있다', pri:'P1', phase:1, status:'todo' },
+    { id:'U5-05', screen:'U5', screenName:'QR출석', group:'QR', feature:'스캔 진입 분기 (앱 미설치 · 미로그인)', desc:'QR 스캔은 카메라 앱에서 외부 URL로 진입하므로 앱 오픈 전 분기가 필요하다. 앱 미설치 시 스토어/웹 유도, 미로그인 시 로그인 후 원래 스캔 URL로 복귀. 복귀하지 않으면 다시 찍어야 하고 그 사이 출석 가능 시간대를 벗어날 수 있다', input:'QR 스캔', output:'딥링크 라우팅 + 로그인 후 리다이렉트', note:'2026-08-05 열린 항목 — 미확정. 첫 회차에 처음 앱을 켜는 사용자가 정확히 이 경로를 탄다', pri:'P1', phase:1, status:'todo' },
 
     /* ── U7. 카테고리 (category.html) — 2026-05-07 추가 ── */
     { id:'U7-01', screen:'U7', screenName:'카테고리', group:'헤더', feature:'카테고리 검색', desc:'카테고리 화면 상단 검색 바. 카테고리명·코스명 키워드로 즉시 필터', input:'검색어 입력', output:'검색 결과 필터', note:'', pri:'P1', phase:1, status:'todo' },
@@ -444,11 +455,11 @@
               <div className="flex items-center gap-2">
                 <FileSpreadsheet size={18} className="text-indigo-500"/>
                 <h1 className="text-[16px] font-black text-slate-900">기능명세서</h1>
-                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.8</span>
+                <span className="text-[11px] font-bold text-slate-400">오프라인 코스 시스템 v1.9</span>
                 <span className="text-[10px] font-black text-violet-700 bg-violet-100 border border-violet-300 px-2 py-0.5 rounded-full ml-1">📍 기능 라인 SSOT</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-06-25</span>
+                <span className="text-[12px] text-slate-400 font-medium">기준일: 2026-08-05</span>
               </div>
             </header>
           )}
