@@ -617,15 +617,16 @@
   <div class="proto-chips">
     <button class="proto-chip" onclick="showQr('qr-success')">출석</button>
     <button class="proto-chip" onclick="showQr('qr-late')">지각</button>
-    <button class="proto-chip" onclick="showQr('qr-absent')">결석</button>
     <button class="proto-chip" onclick="showQr('qr-early')">조퇴 (퇴장)</button>
     <button class="proto-chip" onclick="showQr('qr-checkout')">정상 퇴장</button>
   </div>
   <div style="font-size: 10px; font-weight: 800; color: var(--secondary); margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 1px;">오버레이 (즉시 거부·안내)</div>
   <div class="proto-chips">
     <button class="proto-chip" onclick="showQr('qr-already')">이미 확인됨</button>
-    <button class="proto-chip" onclick="showQr('qr-closed')">종료된 과정</button>
+    <button class="proto-chip" onclick="showQr('qr-closed')">종료된 회차</button>
     <button class="proto-chip" onclick="showQr('qr-notarget')">다른 차수</button>
+    <button class="proto-chip" onclick="showQr('qr-notsession')">다른 회차 (회차선택형)</button>
+    <button class="proto-chip" onclick="showQr('qr-invalid')">사용할 수 없는 QR</button>
   </div>
 </div>
 
@@ -962,20 +963,27 @@
   </div>
 
 <!-- ════════════════════════════════════════════════════
-     QR 스캔 랜딩 2상태 (design 2026-08-04 F12 · 08-05 G7 개정)
+     QR 스캔 랜딩 2상태 (design 2026-08-04 F12 · 08-05 G7 개정 · 08-07 I1~I4 개정)
      스캔 URL은 항상 동일하고, 서버가
-     (현재 시각, 등록 차수, 토큰 종류, 기존 기록)으로 상태를 정한다.
-     ① 등록 차수 확인 → 아니면 오버레이: 다른 차수
-     ② 토큰 종류 식별 (입장 / 퇴장 / 라이브)
-     ③ 출석 가능 시간대 매칭 → 없으면 PRE 또는 오버레이: 종료된 과정
-     ④ 기존 기록 확인 → 있으면 오버레이: 이미 확인됨
-     ⑤ 기록 + 판정 → OPEN
+     (토큰이 가리키는 회차, 현재 시각, 등록 차수·회차, 토큰 종류, 기존 기록)으로 상태를 정한다.
+     ① 토큰 → 회차·종류 식별 (입장 / 퇴장 / 라이브)   ← 회차가 여기서 확정 (I1)
+        조회 실패(폐기·재발급된 토큰) → 오버레이: 사용할 수 없는 QR   ← 08-11 I10
+     ② 등록 차수 확인 → 아니면 오버레이: 다른 차수
+     ③ 등록 회차 확인 (회차선택형만) → 아니면 오버레이: 다른 회차   ← 08-06 H2 · 08-07 I3
+     ④ 출석 가능 시간대 → 이르면 PRE / 늦으면 오버레이: 종료된 회차
+     ⑤ 기존 기록 확인 → 있으면 오버레이: 이미 확인됨
+     ⑥ 기록 + 판정 → OPEN (출석 / 지각. 결석은 만들지 않는다 — 08-06 H6)
+
+     08-07 I3으로 ③과 ④가 뒤바뀌었다 — 종전에는 인쇄 QR이 차수당 1장이라
+     회차가 스캔 시각으로 결정됐고(E13), 회차가 정해지기 전엔 대조할 대상이 없었다.
+     이제 토큰이 곧 회차이므로 대조를 앞으로 당긴다.
+     PRE·CLOSED도 "남은 회차" 탐색 없이 그 회차의 전/후로 정해진다 (I4).
 
      CLOSED는 랜딩이 아니라 오버레이다(G7). 수료 판정·수료증이 Phase 2라
      보여줄 것이 출석 현황뿐이고, 그건 MY 화면에 이미 있다.
      ════════════════════════════════════════════════════ -->
 
-<!-- ── PRE : 출석 가능 시간대 밖 + 남은 회차 있음 ── -->
+<!-- ── PRE : 이 회차의 출석 가능 시간대 전 (08-07 I4) ── -->
 <div class="qr-land" id="qr-land-pre">
   <div class="qr-land-top">
     <span class="mi" onclick="exitToMy()">close</span>
@@ -983,7 +991,7 @@
   </div>
   <div class="qr-land-body">
     <div class="qr-state pre"><span class="mi">schedule</span>출석 대기</div>
-    <div class="qr-land-course">다음 회차</div>
+    <div class="qr-land-course">이 회차</div>
     <div class="qr-land-sess">3회차 · 리스크 관리 실습</div>
     <div class="qr-land-when">4월 9일 (목) 13:00 ~ 16:00</div>
 
@@ -1067,13 +1075,13 @@
 
 <!-- ════ QR 결과 모달들 ════ -->
 
-<!-- ── 판정 결과 5종 : OPEN에서 [출석 체크]를 누른 뒤 ── -->
+<!-- ── 판정 결과 4종 : OPEN에서 [출석 체크]를 누른 뒤 (결석 없음 — H6) ── -->
 
 <!-- 출석 (시작 ~ 지각 기준 이내) -->
 <div class="qr-overlay" id="qr-success" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon success"><span class="mi">check</span></div>
-    <div class="qr-modal-title">출석 완료!</div>
+    <div class="qr-modal-title">출석 처리 완료</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-name">홍길동 님</div>
     <div class="qr-modal-desc">오늘도 화이팅이에요</div>
@@ -1086,7 +1094,7 @@
 <div class="qr-overlay" id="qr-late" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon late-icon"><span class="mi">schedule</span></div>
-    <div class="qr-modal-title">지각 처리됐어요</div>
+    <div class="qr-modal-title">지각 처리 완료</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-name">홍길동 님</div>
     <div class="qr-modal-desc">지각도 출석으로 인정돼요</div>
@@ -1095,24 +1103,16 @@
   </div>
 </div>
 
-<!-- 결석 (시간대 안이지만 지각 한계를 넘겨 입장) -->
-<div class="qr-overlay" id="qr-absent" onclick="if(event.target===this)closeQr()">
-  <div class="qr-modal">
-    <div class="qr-modal-icon fail"><span class="mi">event_busy</span></div>
-    <div class="qr-modal-title">결석 처리됐어요</div>
-    <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
-    <div class="qr-modal-name">홍길동 님</div>
-    <div class="qr-modal-desc">출석으로 인정받기 어려운 시각이에요.<br>사정이 있었다면 강사·담당자에게 알려주세요</div>
-    <div class="qr-modal-time" style="color:var(--error);">2026.04.09 15:40</div>
-    <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
-  </div>
-</div>
+<!-- 결석 결과 모달은 두지 않는다 (2026-08-06 H6)
+     스캔은 `출석`/`지각`만 만든다. 출석 가능 시간대가 `시작 30분 전 ~ 종료`라 상한이 이미 있고,
+     지각과 결석을 가르는 경계값은 정의된 적이 없었다. 한계값을 정하는 대신 구간을 없앴다.
+     결석은 **회차 마감 시 안 찍은 사람**에게 붙으므로 학습자가 스캔 직후 볼 화면이 아니다. -->
 
 <!-- 조퇴 (퇴장 QR · 회차 종료 전) -->
 <div class="qr-overlay" id="qr-early" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon late-icon"><span class="mi">logout</span></div>
-    <div class="qr-modal-title">조퇴로 기록됐어요</div>
+    <div class="qr-modal-title">조퇴 처리 완료</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-name">홍길동 님</div>
     <div class="qr-modal-desc">조퇴도 출석으로 인정돼요.<br>안전하게 돌아가세요</div>
@@ -1125,22 +1125,22 @@
 <div class="qr-overlay" id="qr-checkout" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon success"><span class="mi">logout</span></div>
-    <div class="qr-modal-title">수고하셨어요!</div>
+    <div class="qr-modal-title">정상 퇴장 처리 완료</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-name">홍길동 님</div>
-    <div class="qr-modal-desc">끝까지 참여 확인됐어요</div>
+    <div class="qr-modal-desc">끝까지 참여 확인됐어요. 수고하셨어요!</div>
     <div class="qr-modal-time">2026.04.09 16:04 퇴장</div>
     <button class="qr-modal-btn primary" onclick="closeQr()">확인</button>
   </div>
 </div>
 
-<!-- ── 오버레이 2종 : 랜딩 대신 즉시 뜨는 안내 (F12) ── -->
+<!-- ── 오버레이 5종 : 랜딩 대신 즉시 뜨는 안내 (F12 · 08-06 H1 · 08-11 I10) ── -->
 
 <!-- 이미 확인됨 — 기존 기록을 덮지 않는다 -->
 <div class="qr-overlay" id="qr-already" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon wait"><span class="mi">task_alt</span></div>
-    <div class="qr-modal-title">이미 입장 확인됐어요</div>
+    <div class="qr-modal-title">이미 출석 처리된 회차</div>
     <div class="qr-modal-course">3회차 · 리스크 관리 실습</div>
     <div class="qr-modal-desc" style="margin-top:8px;">다시 찍어도 기록은 그대로 유지돼요</div>
     <div class="qr-modal-time" style="color:var(--warning);">09:04 지각으로 기록됨</div>
@@ -1148,12 +1148,26 @@
   </div>
 </div>
 
-<!-- 종료된 과정 — 차수에 남은 회차 없음 (G7: 랜딩 아님) -->
+<!-- 종료된 회차 — 이 회차의 시간대가 지남 (G7: 랜딩 아님 · 08-07 I4로 '과정' → '회차') -->
 <div class="qr-overlay" id="qr-closed" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon wait"><span class="mi">flag</span></div>
-    <div class="qr-modal-title">종료된 과정입니다</div>
-    <div class="qr-modal-desc" style="margin-top:8px;">이 QR은 더 이상 출석에 사용되지 않아요</div>
+    <div class="qr-modal-title">종료된 회차 · 출석 안 됨</div>
+    <div class="qr-modal-desc" style="margin-top:8px;">이 QR은 더 이상 출석에 사용되지 않아요.<br><b>오늘 수업이 있다면</b> 벽에 붙은 QR이 지난 회차 것일 수 있어요 — 담당자에게 확인해주세요</div>
+    <div style="height:12px"></div>
+    <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
+  </div>
+</div>
+
+<!-- 사용할 수 없는 QR — 폐기·재발급된 토큰 (08-11 I10 신설)
+     회차별 발급으로 유통 장수가 늘고 회차 단위 재발급이 열려, 구버전 종이가 벽에 남을 확률이 커졌다.
+     종전에는 이 응답이 정의돼 있지 않아 스캔 시 화면이 없었다.
+     H3와 같은 원칙 — 학습자가 다음에 무엇을 할지 알려준다. -->
+<div class="qr-overlay" id="qr-invalid" onclick="if(event.target===this)closeQr()">
+  <div class="qr-modal">
+    <div class="qr-modal-icon fail"><span class="mi">block</span></div>
+    <div class="qr-modal-title">폐기된 QR · 출석 안 됨</div>
+    <div class="qr-modal-desc" style="margin-top:8px;">새 QR로 <b>교체된 것 같아요</b>.<br>담당자에게 최신 QR을 요청해주세요</div>
     <div style="height:12px"></div>
     <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
   </div>
@@ -1163,8 +1177,22 @@
 <div class="qr-overlay" id="qr-notarget" onclick="if(event.target===this)closeQr()">
   <div class="qr-modal">
     <div class="qr-modal-icon fail"><span class="mi">person_off</span></div>
-    <div class="qr-modal-title">다른 차수의 QR이에요</div>
+    <div class="qr-modal-title">다른 차수 QR · 출석 안 됨</div>
     <div class="qr-modal-desc" style="margin-top:8px;">홍길동 님은 <b>2차수</b> 등록자입니다.<br>본인 차수 교육장의 QR을 찍어주세요</div>
+    <div style="height:12px"></div>
+    <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
+  </div>
+</div>
+
+<!-- 등록 회차 밖 — 회차선택형에서만 뜬다 (08-06 H1·H3)
+     법정의무교육처럼 "제공 회차 중 1개를 이수"하는 코스라 아무 회차나 인정하면 계약이 깨진다.
+     H3: 본인 회차 날짜를 반드시 함께 보여준다. 어디로 가야 할지 모르면 관리자 문의로 되돌아온다. -->
+<div class="qr-overlay" id="qr-notsession" onclick="if(event.target===this)closeQr()">
+  <div class="qr-modal">
+    <div class="qr-modal-icon fail"><span class="mi">event_busy</span></div>
+    <div class="qr-modal-title">미신청 회차 · 출석 안 됨</div>
+    <div class="qr-modal-course">내 회차 · 5월 20일 (수) 13:00</div>
+    <div class="qr-modal-desc" style="margin-top:8px;">이 교육은 <b>신청한 회차에만</b> 출석이 인정돼요.<br>회차를 바꾸려면 교육 담당자에게 문의해주세요</div>
     <div style="height:12px"></div>
     <button class="qr-modal-btn gray" onclick="closeQr()">확인</button>
   </div>

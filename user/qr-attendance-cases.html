@@ -216,20 +216,22 @@
   <!-- ── 분기 조건표 ── -->
   <div class="ref-panel">
     <h2>어떤 화면이 나오는가 — 서버 판정 순서</h2>
-    <p class="sub">스캔 URL은 항상 동일하다. 서버가 <code>(현재 시각, 등록 차수, 토큰 종류, 기존 기록)</code>으로 화면을 정한다.
+    <p class="sub">스캔 URL은 항상 동일하다. 서버가 <code>(현재 시각, 등록 차수, 등록 회차, 토큰 종류, 기존 기록)</code>으로 화면을 정한다.
        클라이언트 시각은 신뢰하지 않는다.</p>
 
     <div class="flow">
       <div class="flow-step"><div class="n">STEP 1</div><div class="t">등록 차수 확인</div>
         <div class="d">아니면 → 오버레이 <b>다른 차수의 QR</b></div></div>
-      <div class="flow-step"><div class="n">STEP 2</div><div class="t">토큰 종류 식별</div>
-        <div class="d">입장 / 퇴장 / 라이브 — 여기서 두 방식이 갈린다</div></div>
-      <div class="flow-step"><div class="n">STEP 3</div><div class="t">출석 가능 시간대 매칭</div>
-        <div class="d">프린트만 적용. 없으면 → <b>대기</b> 랜딩 또는 <b>종료된 과정</b> 오버레이</div></div>
-      <div class="flow-step"><div class="n">STEP 4</div><div class="t">기존 기록 확인</div>
+      <div class="flow-step"><div class="n">STEP 2</div><div class="t">토큰 → 회차·종류 식별</div>
+        <div class="d">입장 / 퇴장 / 라이브 — 여기서 두 방식이 갈린다. <b>회차도 여기서 확정된다</b>(08-07 I1)</div></div>
+      <div class="flow-step"><div class="n">STEP 3</div><div class="t">등록 회차 확인</div>
+        <div class="d"><b>회차선택형만.</b> 아니면 → 오버레이 <b>다른 회차</b> — 토큰이 곧 회차라 시간대 검사 전에 대조한다(08-07 I3)</div></div>
+      <div class="flow-step"><div class="n">STEP 4</div><div class="t">출석 가능 시간대</div>
+        <div class="d">프린트만 적용. 이르면 → <b>대기</b> 랜딩 / 늦으면 → <b>종료된 회차</b> 오버레이</div></div>
+      <div class="flow-step"><div class="n">STEP 5</div><div class="t">기존 기록 확인</div>
         <div class="d">있으면 → 오버레이 <b>이미 확인됨</b> (덮지 않는다)</div></div>
-      <div class="flow-step"><div class="n">STEP 5</div><div class="t">기록 + 판정</div>
-        <div class="d">지각 기준으로 출석 / 지각 / 결석</div></div>
+      <div class="flow-step"><div class="n">STEP 6</div><div class="t">기록 + 판정</div>
+        <div class="d">지각 기준으로 <b>출석 / 지각</b> — 스캔은 결석을 만들지 않는다(H6)</div></div>
     </div>
 
     <div class="ref-grid">
@@ -244,8 +246,9 @@
             <tr><td><b>만료된 QR</b></td><td class="memo">30초 갱신 전 캡처본을 스캔 — <b>라이브 전용</b></td><td>결과 모달</td></tr>
             <tr><td><b>이미 확인됨</b></td><td class="memo">같은 회차 기존 기록 존재</td><td>오버레이</td></tr>
             <tr><td><b>다른 차수</b></td><td class="memo">등록 차수 밖</td><td>오버레이</td></tr>
+            <tr><td><b>다른 회차</b></td><td class="memo">회차선택형 + 등록 회차 밖 — 라이브는 강사 화면이 회차를 지정하므로 경로가 다를 수 있다(구현 시 재확인)</td><td>오버레이</td></tr>
             <tr class="row-div"><td colspan="3">존재하지 않는 케이스</td></tr>
-            <tr><td class="no">대기 / 종료된 과정</td><td class="memo">강사가 QR을 띄우지 않으면 스캔할 대상 자체가 없다</td><td class="no">—</td></tr>
+            <tr><td class="no">대기 / 종료된 회차</td><td class="memo">강사가 QR을 띄우지 않으면 스캔할 대상 자체가 없다</td><td class="no">—</td></tr>
             <tr><td class="no">조퇴 / 정상 퇴장</td><td class="memo">퇴장 체크는 프린트 QR 전용 (토큰 2개 발급 구조)</td><td class="no">—</td></tr>
           </tbody>
         </table>
@@ -257,16 +260,16 @@
         <table class="ref">
           <thead><tr><th style="width:120px">케이스</th><th>조건</th><th style="width:96px">화면</th></tr></thead>
           <tbody>
-            <tr><td><b>대기</b></td><td class="memo">시간대 밖 + 남은 회차 있음 (시작 30분 전 이전)</td><td>랜딩</td></tr>
+            <tr><td><b>대기</b></td><td class="memo">이 회차의 시간대 전 (시작 30분 전 이전)</td><td>랜딩</td></tr>
             <tr><td><b>출석 체크 가능</b></td><td class="memo">시간대 안 + 기존 기록 없음</td><td>랜딩</td></tr>
             <tr><td><b>출석</b></td><td class="memo">체크 후 — 지각 기준 이내</td><td>결과 모달</td></tr>
             <tr><td><b>지각</b></td><td class="memo">체크 후 — 지각 기준 초과</td><td>결과 모달</td></tr>
-            <tr><td><b>결석</b></td><td class="memo">체크 후 — 지각 한계 초과 <b style="color:var(--error)">(한계값 미정의 · 아래 참고)</b></td><td>결과 모달</td></tr>
             <tr><td><b>조퇴</b></td><td class="memo">퇴장 QR · 회차 종료 <b>전</b> — 퇴장 체크 ON일 때만</td><td>결과 모달</td></tr>
             <tr><td><b>정상 퇴장</b></td><td class="memo">퇴장 QR · 회차 종료 <b>후</b> ~ 30분</td><td>결과 모달</td></tr>
             <tr><td><b>이미 확인됨</b></td><td class="memo">같은 회차 기존 기록 존재</td><td>오버레이</td></tr>
-            <tr><td><b>다른 차수</b></td><td class="memo">등록 차수 밖 (차수당 QR 1장이므로 차수 단위 거부)</td><td>오버레이</td></tr>
-            <tr><td><b>종료된 과정</b></td><td class="memo">차수에 남은 회차 없음 — <b>오버레이</b>다(G7). 수료 판정·수료증이 Phase 2라 랜딩으로 만들 내용이 없다</td><td>오버레이</td></tr>
+            <tr><td><b>다른 차수</b></td><td class="memo">등록 차수 밖 — QR이 가리키는 회차가 속한 차수의 등록자가 아닐 때</td><td>오버레이</td></tr>
+            <tr><td><b>다른 회차</b></td><td class="memo">회차선택형 + 등록 회차 밖. 차수는 맞으므로 위 행에 안 걸린다 — <b>토큰이 곧 회차이므로 시간대 검사 전에</b> 대조한다(08-06 H2 · 08-07 I3)</td><td>오버레이</td></tr>
+            <tr><td><b>종료된 회차</b></td><td class="memo">이 회차의 시간대가 지남(08-07 I4 — 종전 "종료된 과정"/차수에 남은 회차 없음) — <b>오버레이</b>다(G7). 수료 판정·수료증이 Phase 2라 랜딩으로 만들 내용이 없다</td><td>오버레이</td></tr>
           </tbody>
         </table>
       </div>
@@ -275,11 +278,13 @@
     <div class="callout blue">
       <b>출석 가능 시간대</b> — 입장 <code>회차 시작 30분 전 ~ 종료</code> · 퇴장 <code>회차 시작 ~ 종료 후 30분</code>.
       30분은 양쪽 모두 <b>고정값</b>이며 설정으로 노출하지 않는다. 시간대는 "스캔을 접수할지"만 정하고,
-      출석·지각·결석 판정은 기존 지각 기준이 그대로 한다 — <b>30분 전에 찍어도 출석</b>이다.
+      출석·지각 판정은 기존 지각 기준이 그대로 한다 — <b>30분 전에 찍어도 출석</b>이다.
     </div>
     <div class="callout amber">
-      <b>회차 종료 직후는 "종료된 과정"이 아니라 다음 회차의 "대기"</b>다. 회차 단위로 두면 5회차 차수에 상태 전이가
-      10번 생기고 학습자는 하루에 두 얼굴을 본다. 종료 안내는 그 차수에 <b>남은 회차가 없을 때만</b>이다.
+      <b>08-07 I4로 개정됐다.</b> 종전에는 "회차 종료 직후는 다음 회차의 대기"였다 —
+      차수당 QR 1장이라 한 장이 5회차 내내 얼굴을 바꿔야 했고, 상태 전이가 10번 생기는 걸 피하려 종료를 차수 끝으로 미뤘다.
+      이제 <b>QR이 회차마다 따로</b>라 그 종이는 그 회차만 대변한다 — 회차가 끝나면 그 QR은 <b>종료된 회차</b>이고,
+      다음 회차 QR을 찍으면 <b>대기</b>다. 한 장이 두 얼굴을 갖지 않는다.
     </div>
     <div class="callout blue">
       <b>진입 경로</b> — 카메라로 QR을 찍으면 <b>스캔 URL → 터치클래스 앱 오픈(딥링크) → 서버 판정 → 아래 화면</b> 순서다.
@@ -292,11 +297,12 @@
       "최종 출석률·수료 여부를 보여준다"였는데, <b>수료 처리·수료증 발급이 Phase 2</b>라 실제로 보여줄 것이
       출석 현황뿐이고 그건 MY 화면에 이미 있다. 화면을 하나 더 만들 이유가 사라졌다.
     </div>
-    <div class="callout red">
-      <b>미해결 — 결석 판정 한계값이 정의되지 않았다.</b> 08-04 타임라인에는 입장 시간대 안에 <code>결석</code> 구간이
-      그려져 있고 "지각 한계를 넘겨 입장"이라는 표현도 있으나, 그 <b>경계값도 설정 항목도 어디에도 없다</b>.
-      운영 가이드의 지각 기준 표 역시 <code>지각 → 결석</code> 전이를 다루지 않는다.
-      아래 <b>P5 결석</b> 폰은 이 갭을 드러내기 위한 것이며, 실제 문구·시각은 한계값 확정 후 확정해야 한다.
+    <div class="callout">
+      <b>스캔은 결석을 만들지 않는다 (2026-08-06 H6).</b> 08-04 타임라인에는 입장 시간대 안에 <code>결석</code> 구간이
+      그려져 있었으나 <b>경계값도 설정 항목도 정의된 적이 없었다</b>. 한계값을 정하는 대신 <b>구간을 없앴다</b> —
+      출석 가능 시간대가 <code>시작 30분 전 ~ 종료</code>라 상한은 이미 있고, 늦게 온 사람의 결석 처리는
+      사유가 붙는 판단이라 <b>관리자 수기 변경</b>으로 남긴다. 결석은 <b>회차 마감 시 안 찍은 사람</b>에게 붙으므로
+      학습자가 스캔 직후 볼 화면이 아니다. (기존 P5 결석 케이스 삭제 — 이후 번호를 당겼다)
     </div>
   </div>
 
@@ -314,16 +320,17 @@
     <h2>B. 프린트 QR 출석</h2>
     <span class="sec-tag print">신규 코스 기본값</span>
   </div>
-  <p class="sec-d">인쇄한 PNG를 벽·입구에 부착한다. <b>차수당 1장</b>이 그 차수의 모든 회차를 커버하며
-     회차는 스캔 시각으로 시스템이 판정한다. 토큰이 동결돼 있어 사진 공유를 막지 못하므로
+  <p class="sec-d">인쇄한 PNG를 벽·입구에 부착한다. <b>회차마다 1장</b>이며(08-07 I1) <b>붙인 QR이 곧 그 회차</b>다 —
+     스캔 시각으로 되짚지 않는다. 토큰이 동결돼 있어 사진 공유를 막지 못하므로
      <b>출석 가능 시간대</b>가 노출 범위를 회차 단위로 잘라낸다. <b>새 코스의 기본값이 프린트</b>이므로(08-04 E3) 이 경로가 실제 다수가 된다. QR은 게이트가 아니라 <b>차수 홈</b>이라서,
      시간대 밖에 찍어도 내 출석 현황을 볼 수 있는 <b>랜딩 2상태</b>가 존재한다.</p>
   <div class="gallery" id="gal-print"></div>
 
   <p class="ver">
-    QR 출석 케이스 v1.0 · 2026-08-05<br>
-    라이브 5종 + 프린트 10종 = 15케이스 · 랜딩 2상태(대기·출석 체크 가능) + 판정 결과 6종 + 오버레이 3종<br>
-    용어: <b>유효 창 → 출석 가능 시간대</b> (2026-08-05 G1) · 결석 한계값 미정의 (열린 항목)
+    QR 출석 케이스 v1.1 · 2026-08-06<br>
+    라이브 5종 + 프린트 11종 = 16케이스 · 랜딩 2상태(대기·출석 체크 가능) + 판정 결과 5종 + 오버레이 5종<br>
+    회차선택형 <b>다른 회차</b> 거부 추가 (H1) · 판정 순서 5→6단계 · <b>스캔 결석 판정 삭제</b> (H6)<br>
+    용어: <b>유효 창 → 출석 가능 시간대</b> (2026-08-05 G1) · 결석 한계값 — H6로 <b>해소</b>(구간 삭제)
   </p>
 </div>
 
@@ -346,32 +353,32 @@ const CASES_LIVE = [
   { n:'L1', title:'출석', chips:[['lab-green','출석']],
     cond:'지각 기준 <b>10분 이내</b> 스캔 (13:00 시작 · 13:07 스캔). 라이브는 시간대 검증이 없어 <b>강사가 QR을 띄운 동안</b>이 곧 접수 구간이다.',
     type:'modal', src:'live',
-    icon:'check', iconCls:'success', mTitle:'출석 완료!', desc:'오늘도 화이팅이에요',
+    icon:'check', iconCls:'success', mTitle:'출석 처리 완료', desc:'오늘도 화이팅이에요',
     time:'2026.04.09 13:07', btn:'primary' },
 
   { n:'L2', title:'지각', chips:[['lab-amber','지각']],
     cond:'지각 기준 <b>초과</b> 스캔 (13:23). 지각도 출석률 분자에 포함된다 — 학습자에게 그 사실을 알려 불필요한 문의를 막는다.',
     type:'modal', src:'live',
-    icon:'schedule', iconCls:'late', mTitle:'지각 처리됐어요', desc:'지각도 출석으로 인정돼요',
+    icon:'schedule', iconCls:'late', mTitle:'지각 처리 완료', desc:'지각도 출석으로 인정돼요',
     time:'2026.04.09 13:23', timeCls:'var(--warning)', btn:'warn' },
 
   { n:'L3', title:'만료된 QR', chips:[['lab-red','라이브 전용'],['lab-grey','거부']],
     cond:'<b>30초 갱신 전의 QR</b>을 캡처해 스캔. 라이브 모드의 사진 공유 방어 장치가 작동한 결과다. 프린트 QR에는 이 케이스가 없다(토큰 동결).',
     type:'modal', src:'live',
-    icon:'timer_off', iconCls:'fail', mTitle:'만료된 QR이에요', hideName:true,
+    icon:'timer_off', iconCls:'fail', mTitle:'만료된 QR · 출석 안 됨', hideName:true,
     desc:'화면에 표시된 <b>최신 QR</b>을 다시 찍어주세요', btn:'gray' },
 
   { n:'L4', title:'이미 확인됨', chips:[['lab-grey','오버레이']],
     cond:'같은 회차에 <b>기존 기록이 있는 상태</b>로 재스캔. 기록을 덮지 않고 현재 상태를 보여준다 — 재스캔으로 지각을 출석으로 되돌릴 수 없다.',
     type:'modal', src:'live',
-    icon:'task_alt', iconCls:'wait', mTitle:'이미 입장 확인됐어요', hideName:true,
+    icon:'task_alt', iconCls:'wait', mTitle:'이미 출석 처리된 회차', hideName:true,
     desc:'다시 찍어도 기록은 그대로 유지돼요',
     time:'13:23 지각으로 기록됨', timeCls:'var(--warning)', btn:'gray' },
 
   { n:'L5', title:'다른 차수', chips:[['lab-red','거부'],['lab-grey','오버레이']],
     cond:'<b>등록하지 않은 차수</b>의 QR을 스캔. 거부 단위는 회차가 아니라 <b>차수</b>다 — 등록은 차수 단위로 이뤄지기 때문이다.',
     type:'modal', src:'live',
-    icon:'person_off', iconCls:'fail', mTitle:'다른 차수의 QR이에요', hideName:true,
+    icon:'person_off', iconCls:'fail', mTitle:'다른 차수 QR · 출석 안 됨', hideName:true,
     desc:'홍길동 님은 <b>2차수</b> 등록자입니다.<br>본인 차수 교육장의 QR을 찍어주세요', btn:'gray' },
 ];
 
@@ -379,7 +386,7 @@ const CASES_PRINT = [
   { n:'P1', title:'대기', chips:[['lab-grey','랜딩'],['lab-blue','시간대 밖']],
     cond:'현재 <b>12:29</b> — 시작(13:00) 30분 전이 아직 안 됐다. 출석 버튼을 <b>만들지 않는다</b>: 누를 수 없는 버튼을 보여주면 눌러보고 실패한다.',
     type:'land', state:'pre', stateIcon:'schedule', stateLabel:'출석 대기',
-    course:'다음 회차',
+    course:'이 회차',
     avail:{ t:'12:30부터 출석 가능', s:'시작 30분 전부터 QR을 찍을 수 있어요' },
     foot:{ note:'출석 가능 시각이 되면 이 화면에서 바로 체크할 수 있어요' } },
 
@@ -392,53 +399,59 @@ const CASES_PRINT = [
   { n:'P3', title:'출석', chips:[['lab-green','출석']],
     cond:'P2에서 <code>[출석 체크]</code>를 누른 결과. 시작 <b>13분 전</b> 스캔이지만 정상 <b>출석</b>이다 — 시간대는 접수 여부만 정하고 판정은 지각 기준이 한다.',
     type:'modal', src:'print',
-    icon:'check', iconCls:'success', mTitle:'출석 완료!', desc:'오늘도 화이팅이에요',
+    icon:'check', iconCls:'success', mTitle:'출석 처리 완료', desc:'오늘도 화이팅이에요',
     time:'2026.04.09 12:47', btn:'primary' },
 
   { n:'P4', title:'지각', chips:[['lab-amber','지각']],
     cond:'13:23 체크 — 지각 기준 10분 초과. 벽 QR을 늦게 찍어도 <b>기록은 남는다</b>. 결석보다 지각이 학습자에게 유리하므로 늦더라도 찍게 유도한다.',
     type:'modal', src:'print',
-    icon:'schedule', iconCls:'late', mTitle:'지각 처리됐어요', desc:'지각도 출석으로 인정돼요',
+    icon:'schedule', iconCls:'late', mTitle:'지각 처리 완료', desc:'지각도 출석으로 인정돼요',
     time:'2026.04.09 13:23', timeCls:'var(--warning)', btn:'warn' },
 
-  { n:'P5', title:'결석', chips:[['lab-red','결석'],['lab-red','한계값 미정의']],
-    cond:'<b style="color:var(--error)">한계값이 정의되지 않은 케이스.</b> 08-04 타임라인에는 입장 시간대 안에 결석 구간이 있으나 경계값·설정 항목이 없다. 아래 15:40은 <b>예시</b>이며 확정값이 아니다.',
-    type:'modal', src:'print',
-    icon:'event_busy', iconCls:'fail', mTitle:'결석 처리됐어요',
-    desc:'출석으로 인정받기 어려운 시각이에요.<br>사정이 있었다면 강사·담당자에게 알려주세요',
-    time:'2026.04.09 15:40', timeCls:'var(--error)', btn:'gray' },
 
-  { n:'P6', title:'조퇴', chips:[['lab-amber','조퇴'],['lab-grey','퇴장 체크 ON']],
+  { n:'P5', title:'조퇴', chips:[['lab-amber','조퇴'],['lab-grey','퇴장 체크 ON']],
     cond:'<b>퇴장 QR</b>을 회차 종료(16:00) <b>전</b>에 스캔. 판정은 <b>찍은 종이가 선언</b>하므로 스캔 순서를 추론하지 않는다. 퇴장 체크 OFF(기본)면 이 케이스가 없고 관리자 수기 처리다.',
     type:'modal', src:'print',
-    icon:'logout', iconCls:'late', mTitle:'조퇴로 기록됐어요',
+    icon:'logout', iconCls:'late', mTitle:'조퇴 처리 완료',
     desc:'조퇴도 출석으로 인정돼요.<br>안전하게 돌아가세요',
     time:'2026.04.09 14:30 퇴장', timeCls:'var(--warning)', btn:'warn' },
 
-  { n:'P7', title:'정상 퇴장', chips:[['lab-green','정상 퇴장'],['lab-grey','퇴장 체크 ON']],
+  { n:'P6', title:'정상 퇴장', chips:[['lab-green','정상 퇴장'],['lab-grey','퇴장 체크 ON']],
     cond:'퇴장 QR을 종료(16:00) <b>후</b> 스캔. 퇴장 시간대는 <code>종료 후 30분</code>까지 — 나가면서 줄 서서 찍는 동선이고, 입장의 30분 선행과 대칭이라 기억하기 쉽다.',
     type:'modal', src:'print',
-    icon:'logout', iconCls:'success', mTitle:'수고하셨어요!', desc:'끝까지 참여 확인됐어요',
+    icon:'logout', iconCls:'success', mTitle:'정상 퇴장 처리 완료', desc:'끝까지 참여 확인됐어요. 수고하셨어요!',
     time:'2026.04.09 16:04 퇴장', btn:'primary' },
 
-  { n:'P8', title:'이미 확인됨', chips:[['lab-grey','오버레이']],
+  { n:'P7', title:'이미 확인됨', chips:[['lab-grey','오버레이']],
     cond:'벽 QR은 여러 번 찍기 쉽다. 기존 기록을 <b>덮지 않고</b> 현재 상태를 보여준다. 이 안내가 없으면 "찍었는데 아무 반응이 없다"는 문의가 생긴다.',
     type:'modal', src:'print',
-    icon:'task_alt', iconCls:'wait', mTitle:'이미 입장 확인됐어요', hideName:true,
+    icon:'task_alt', iconCls:'wait', mTitle:'이미 출석 처리된 회차', hideName:true,
     desc:'다시 찍어도 기록은 그대로 유지돼요',
     time:'13:23 지각으로 기록됨', timeCls:'var(--warning)', btn:'gray' },
 
-  { n:'P9', title:'다른 차수', chips:[['lab-red','거부'],['lab-grey','오버레이']],
-    cond:'차수가 여러 개인 코스에서 <b>다른 차수 교육장</b>의 QR을 찍은 경우. 차수당 QR이 1장이므로 거부 단위도 차수다.',
+  { n:'P8', title:'다른 차수', chips:[['lab-red','거부'],['lab-grey','오버레이']],
+    cond:'차수가 여러 개인 코스에서 <b>다른 차수 교육장</b>의 QR을 찍은 경우. QR이 가리키는 회차가 속한 차수의 등록자가 아니면 거부한다.',
     type:'modal', src:'print',
-    icon:'person_off', iconCls:'fail', mTitle:'다른 차수의 QR이에요', hideName:true,
+    icon:'person_off', iconCls:'fail', mTitle:'다른 차수 QR · 출석 안 됨', hideName:true,
     desc:'홍길동 님은 <b>2차수</b> 등록자입니다.<br>본인 차수 교육장의 QR을 찍어주세요', btn:'gray' },
 
-  { n:'P10', title:'종료된 과정', chips:[['lab-grey','오버레이'],['lab-blue','남은 회차 없음']],
-    cond:'차수의 <b>모든 회차가 끝난</b> 뒤 스캔. <b>랜딩이 아니라 오버레이</b>다(08-05 G7) — 수료 판정·수료증이 Phase 2라 보여줄 것이 출석 현황뿐이고, 그건 MY 화면에 이미 있다.',
+  { n:'P9', title:'종료된 회차', chips:[['lab-grey','오버레이'],['lab-blue','시간대 지남']],
+    cond:'<b>이 회차가 끝난</b> 뒤 스캔 — 종료 30분 후까지가 퇴장 시간대이고 그마저 지난 상태다(08-07 I4 · 종전에는 "차수의 모든 회차가 끝난 뒤"였다). <b>랜딩이 아니라 오버레이</b>다(08-05 G7) — 수료 판정·수료증이 Phase 2라 보여줄 것이 출석 현황뿐이고, 그건 MY 화면에 이미 있다.',
     type:'modal', src:'print',
-    icon:'flag', iconCls:'wait', mTitle:'종료된 과정입니다', hideName:true,
-    desc:'이 QR은 더 이상 출석에 사용되지 않아요', btn:'gray' },
+    icon:'flag', iconCls:'wait', mTitle:'종료된 회차 · 출석 안 됨', hideName:true,
+    desc:'이 QR은 더 이상 출석에 사용되지 않아요.<br><b>오늘 수업이 있다면</b> 벽에 붙은 QR이 지난 회차 것일 수 있어요 — 담당자에게 확인해주세요', btn:'gray' },
+
+  { n:'P10', title:'다른 회차', chips:[['lab-red','거부'],['lab-grey','오버레이'],['lab-blue','회차선택형']],
+    cond:'<b>회차선택형</b> 코스에서 본인이 신청하지 않은 회차 날 스캔한 경우(08-06 H1). 차수는 맞아서 P8에 안 걸린다. 인쇄 QR은 <b>토큰이 곧 회차</b>이므로(08-07 I1) 스캔 즉시 회차가 확정되고, <b>시간대 검사보다 먼저</b> 대조한다(I3). 법정의무교육처럼 "제공 회차 중 1개 이수"가 계약인 코스라 아무 회차나 인정하면 회차선택형을 둘 이유가 사라진다. 회차 변경은 <b>관리자</b>가 한다 — 스캔으로 등록을 옮기면 정원·변경기한 검증을 우회한다.',
+    type:'modal', src:'print',
+    icon:'event_busy', iconCls:'fail', mTitle:'미신청 회차 · 출석 안 됨', hideName:true,
+    desc:'이 교육은 <b>신청한 회차에만</b> 출석이 인정돼요.<br>회차를 바꾸려면 교육 담당자에게 문의해주세요',
+    time:'내 회차 · 5월 20일 (수) 13:00', btn:'gray' },
+  { n:'P11', title:'사용할 수 없는 QR', chips:[['lab-red','거부'],['lab-grey','오버레이'],['lab-blue','08-11 신설']],
+    cond:'<b>폐기·재발급된 토큰</b>을 스캔한 경우. 회차별 발급(I1)으로 유통 장수가 늘고 회차 단위 재발급이 열리면서 구버전 종이가 벽에 남을 확률이 커졌다. 종전 스펙에는 이 응답이 <b>정의돼 있지 않아</b> 조회 실패 시 보여줄 화면이 없었다(08-11 I10 신설). 인쇄물 하단의 <b>발급일</b>로 관리자가 구버전을 가려낼 수 있다.',
+    type:'modal', src:'print',
+    icon:'block', iconCls:'fail', mTitle:'폐기된 QR · 출석 안 됨', hideName:true,
+    desc:'새 QR로 <b>교체된 것 같아요</b>.<br>담당자에게 최신 QR을 요청해주세요', btn:'gray' },
 ];
 
 /* ── 렌더 ── */
