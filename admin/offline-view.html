@@ -816,6 +816,18 @@
     const [tab, setTab] = useState('dashboard');
     const [pkgFilter, setPkgFilter] = useState('all');
     const [search, setSearch] = useState('');
+    /* ── 수강생 현황: 차수별 검색·페이지 (2026-08-11) ──
+       종전에는 상단 툴바 하나가 전 차수를 동시에 걸렀다. 차수가 여러 개면
+       "지금 이 검색어가 어느 차수에 걸린 건지"를 매번 되짚어야 하고, 명단이 길면 스크롤로만 넘겼다.
+       검색과 페이지를 차수 안으로 내리면 차수 카드가 각자 독립된 명단이 된다.
+       상단 툴바의 차수 셀렉트는 그 역할을 카드가 흡수하므로 감춘다(코드는 남긴다 — 되살릴 여지). */
+    const [pkgSearch, setPkgSearch] = useState({});   // {pkgId: '검색어'}
+    const [pkgPage, setPkgPage] = useState({});       // {pkgId: 1-based}
+    const ROSTER_PER = 10;
+    const setPkgSearchFor = (pid, v) => {
+      setPkgSearch(prev => ({ ...prev, [pid]: v }));
+      setPkgPage(prev => ({ ...prev, [pid]: 1 }));     // 검색이 바뀌면 1페이지로 — 빈 페이지에 남지 않게
+    };
     const [openPkgs, setOpenPkgs] = useState(new Set(COURSE.packages.map(p=>p.id)));
     const togglePkg = id => setOpenPkgs(p => { const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n; });
 
@@ -2066,19 +2078,10 @@
               {/* ─── 수강생 현황 탭 (학습자 중심) ─── */}
               {tab==='roster' && (
                 <div className="animate-fadeIn" data-feature-id="A3-09">
-                  {/* 툴바 */}
+                  {/* 툴바 — 검색·차수 필터는 차수 카드 안으로 내렸다(2026-08-11). 여기는 코스 단위 액션만 남긴다.
+                      A3-10(검색)은 차수 카드 헤더로 이동 · 차수 셀렉트는 카드가 역할을 흡수해 미표시 */}
                   <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50">
-                    <div className="relative" data-feature-id="A3-10">
-                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="이름·아이디·그룹 검색"
-                        className="pl-8 pr-4 py-1.5 border border-slate-200 rounded-lg text-[14px] outline-none focus:border-indigo-400 bg-white w-56"/>
-                    </div>
-                    <select value={pkgFilter} onChange={e=>setPkgFilter(e.target.value)}
-                      className="px-3 py-1.5 border border-slate-200 rounded-lg text-[14px] outline-none focus:border-indigo-400 bg-white">
-                      <option value="all">전체 차수</option>
-                      {COURSE.packages.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                    <span className="text-[13px] text-slate-400 font-medium ml-auto">{filtered.length}명</span>
+                    <span className="text-[13px] text-slate-400 font-medium mr-auto">전체 {filtered.length}명</span>
                     <button onClick={()=>setShowEnrollModal(true)}
                       className="flex items-center gap-1 px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-[13px] font-bold hover:bg-indigo-600 transition-colors shadow-sm">
                       <Plus size={12}/> 등록
@@ -2092,11 +2095,17 @@
                     {COURSE.packages.filter(pkg=>pkgFilter==='all'||pkg.id===pkgFilter).map(pkg=>{
                       const isOpen=openPkgs.has(pkg.id);
                       const pkgL=LEARNERS.filter(l=>l.pkgId===pkg.id);
+                      // 검색어는 차수별로 따로 둔다. 상단 툴바 검색(search)은 더 이상 여기에 걸지 않는다
+                      const pq=(pkgSearch[pkg.id]||'').trim();
                       const filteredPkgL=pkgL.filter(l=>{
-                        if(!search.trim()) return true;
-                        const q=search.toLowerCase();
+                        if(!pq) return true;
+                        const q=pq.toLowerCase();
                         return l.name.includes(q)||l.dept.includes(q)||(l.loginId||'').toLowerCase().includes(q);
                       });
+                      // 페이지는 검색 결과 기준. 삭제·검색으로 총 페이지가 줄면 마지막 페이지로 당겨 빈 화면을 막는다
+                      const pTotal=Math.max(1, Math.ceil(filteredPkgL.length/ROSTER_PER));
+                      const pCur=Math.min(pkgPage[pkg.id]||1, pTotal);
+                      const pagedPkgL=filteredPkgL.slice((pCur-1)*ROSTER_PER, pCur*ROSTER_PER);
                       const allClosed=pkg.sessions.length>0&&pkg.sessions.every(s=>closedSessions.has(s.id));
                       const pkgDoneCnt=pkgL.filter(l=>completionMap[l.id]==='completed').length;
                       const allCompleted=allClosed&&pkgL.length>0&&pkgDoneCnt===pkgL.length;
@@ -2117,6 +2126,25 @@
                               </div>
                               <div className="text-[12px] text-slate-400 mt-0.5">{fmtRange(pkg.startDate,pkg.endDate)} · {pkg.place}</div>
                             </div>
+                            {/* 차수별 검색 (A3-10) — 헤더 클릭은 접힘 토글이라 입력 조작이 카드를 접지 않게 전파를 끊는다.
+                                검색어가 있으면 접혀 있어도 펼쳐 준다: 결과가 안 보이면 검색한 의미가 없다 */}
+                            {isOpen && (
+                              <div className="relative shrink-0" data-feature-id="A3-10" onClick={e=>e.stopPropagation()}>
+                                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                                <input value={pkgSearch[pkg.id]||''} onChange={e=>setPkgSearchFor(pkg.id, e.target.value)}
+                                  placeholder="이름·아이디·그룹 검색"
+                                  className="pl-8 pr-7 py-1.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-indigo-400 bg-white w-56"/>
+                                {pq && (
+                                  <button onClick={()=>setPkgSearchFor(pkg.id,'')} title="검색 지우기"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"><X size={12}/></button>
+                                )}
+                              </div>
+                            )}
+                            {!isOpen && pq && (
+                              <span className="shrink-0 text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                                검색 “{pq}”
+                              </span>
+                            )}
                             <div className="flex items-center gap-2 shrink-0">
                               {isOpen?<ChevronUp size={15} className="text-slate-400"/>:<ChevronDown size={15} className="text-slate-400"/>}
                             </div>
@@ -2150,7 +2178,7 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {filteredPkgL.map((l,li)=>{
+                                  {pagedPkgL.map((l,li)=>{
                                     const compl=completionMap[l.id]||'not_started';
                                     const cfg=COMPL_CFG[compl];
                                     return (
@@ -2280,11 +2308,42 @@
                                   })}
                                   {filteredPkgL.length===0 && (
                                     <tr><td colSpan={8+pkg.sessions.length} className="text-center py-8 text-slate-400 text-[14px]">
-                                      {search.trim() ? '검색 결과가 없습니다' : '등록된 수강생이 없습니다'}
+                                      {pq ? '검색 결과가 없습니다' : '등록된 수강생이 없습니다'}
                                     </td></tr>
                                   )}
                                 </tbody>
                               </table>
+                              {/* 차수별 페이지네이션 (2026-08-11) — 명단이 길면 스크롤로만 넘기게 두지 않는다.
+                                  1페이지뿐이면 컨트롤을 만들지 않고 건수만 알린다 */}
+                              {filteredPkgL.length>0 && (
+                                <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-slate-100 bg-slate-50/60">
+                                  <span className="text-[12px] text-slate-400 font-medium tabular-nums">
+                                    {pq && <span className="text-slate-500">검색 {filteredPkgL.length}명 / </span>}
+                                    전체 {pkgL.length}명
+                                    {pTotal>1 && <span> · {(pCur-1)*ROSTER_PER+1}~{Math.min(pCur*ROSTER_PER, filteredPkgL.length)}번째</span>}
+                                  </span>
+                                  {pTotal>1 && (
+                                    <div className="flex items-center gap-1">
+                                      <button onClick={()=>setPkgPage(prev=>({...prev,[pkg.id]:Math.max(1,pCur-1)}))}
+                                        disabled={pCur<=1}
+                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                        <ChevronLeft size={13}/>
+                                      </button>
+                                      {Array.from({length:pTotal},(_,i)=>i+1).map(n=>(
+                                        <button key={n} onClick={()=>setPkgPage(prev=>({...prev,[pkg.id]:n}))}
+                                          className={`w-7 h-7 flex items-center justify-center rounded-lg text-[12px] font-bold transition-colors tabular-nums ${n===pCur?'bg-indigo-600 text-white':'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'}`}>
+                                          {n}
+                                        </button>
+                                      ))}
+                                      <button onClick={()=>setPkgPage(prev=>({...prev,[pkg.id]:Math.min(pTotal,pCur+1)}))}
+                                        disabled={pCur>=pTotal}
+                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                        <ChevronRight size={13}/>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
