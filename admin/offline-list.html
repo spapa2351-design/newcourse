@@ -858,15 +858,13 @@
                               {/* 수강관리 */}
                               <td className="px-3 py-3 text-center" data-feature-id="A1-08">
                                 <div className="inline-flex flex-col items-center gap-1">
-                                  {(isActive || course.status === 'closed') ? (
-                                    <a href={`offline-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
-                                      <Users size={10}/> 수강관리
-                                    </a>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 bg-slate-50 text-slate-300 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold cursor-not-allowed whitespace-nowrap" title="퍼블리싱 후 이용 가능">
-                                      <Users size={10}/> 수강관리
-                                    </span>
-                                  )}
+                                  {/* 임시저장 코스도 수강관리 진입 허용 (2026-08-11) — 빌더에서 배정 명단 UI를 걷어내
+                                      등록 진입점이 수강관리 하나로 모였다. 퍼블리싱 후에만 열면 관리자 배정형 코스는
+                                      발행 전에 사람을 넣을 곳이 없어진다. 차수·회차는 임시저장에도 이미 확정돼 있으므로
+                                      등록 모달의 겹침 판정(slotConflict)은 그대로 성립한다. */}
+                                  <a href={`offline-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
+                                    <Users size={10}/> 수강관리
+                                  </a>
                                   {/* 출석 방식 — 코스 레벨 설정. 라이브 QR / 인쇄 QR 중 하나 */}
                                   <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[10px] font-bold whitespace-nowrap ${attCfg.bg} ${attCfg.text} ${attCfg.border}`}
                                     title={`출석 방식 — ${attCfg.tip}`}>
