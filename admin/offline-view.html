@@ -330,11 +330,12 @@
       completion: {}
     },
 
-    // ── 케이스 D: 공개예약 — 수강생 없음 ──
+    // ── 케이스 D: 수강생 없음 (빈 상태) ──
+    //    2026-08-07 퍼블리싱 예약 제거로 status 'scheduled' → 'active'. 케이스의 요지는 신청 0명이다.
     14: {
       course: {
         id:14, title:'하반기 신입사원 온보딩 (7월)',
-        status:'scheduled', instructor:'박지훈', category:'공통/온보딩', enrollMethod:'assign',
+        status:'active', instructor:'박지훈', category:'공통/온보딩', enrollMethod:'assign',
         attendanceMode:'fixed',
         packages:[
           { id:'pr1', name:'1기 (7/1~7/3)', startDate:'2026-07-01', endDate:'2026-07-03',
@@ -361,7 +362,7 @@
        차수 1개 + 회차 3개. 학습자는 `pickSessId`로 **회차 1개만** 신청한다.
        분모를 차수 전체(3회차)로 잡으면 본인 회차를 나가도 1/3 = 33%가 되어
        100% 기준을 아무도 통과하지 못한다. 분모를 등록 회차로 좁혀야 1/1 = 100%가 나온다.
-       ?id=20 으로 확인. 인쇄 QR이라 QR은 차수당 1장이고 회차는 스캔 시각으로 갈린다. */
+       ?id=20 으로 확인. 인쇄 QR이며 QR은 회차마다 따로다 — 스캔한 QR이 곧 회차다 (08-07 I1). */
     20: {
       course: {
         id:20, title:'2026 법정의무교육 — 직장 내 괴롭힘 예방',
@@ -406,7 +407,7 @@
 
   /* ── 출석 방식 (attendanceMode) — 코스 레벨 선(先)결정. 진행 중 전환은 빌더에서만 (경고 + 토큰 폐기) ──
      'live'  = 강사 화면 전체화면 QR + 30초 자동갱신 (기존 동작)
-     'fixed' = 차수당 QR 발급 → PNG 다운로드해 현장 게시. 회차는 스캔 시각으로 판정 (E13)
+     'fixed' = 회차당 QR 발급 → PNG 다운로드해 현장 게시. 스캔한 QR이 곧 회차다 (E13 → 08-07 I1)
      필드가 없는 기존 코스는 'live'로 간주하고 마이그레이션하지 않는다 (E3).
      ?mode=fixed|live · ?checkout=1 로 두 분기를 QA에서 바로 확인할 수 있다. */
   const _qp = new URLSearchParams(window.location.search);
@@ -446,29 +447,193 @@
     const g = qrCells(token, n);
     for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (g[y][x]) ctx.fillRect((x + q) * px, (y + q) * px, px, px);
   };
-  // 파일명이 유일한 식별자 (F10) — 이미지에는 아무 정보도 싣지 않는다 (F9)
-  const qrFileName = (pkgName, kind, issuedAt) =>
-    [COURSE.title, pkgName, kind, issuedAt.replace(/-/g, '')]
-      .map(s => String(s).trim().replace(/\s+/g, '').replace(/[\\/:*?"<>|]/g, ''))
-      .join('_') + '.png';
-  const downloadQr = (token, fileName) => {
-    const c = document.createElement('canvas');
-    drawQr(c, token, 16);
-    const a = document.createElement('a');
-    a.href = c.toDataURL('image/png'); a.download = fileName; a.click();
+  /* ── 인쇄용 QR 시트 (2026-08-07: F9 개정) ──
+     종전에는 "이미지에 아무 정보도 싣지 않는다"(F9)였다. 근거는 "정보가 없으면 낡지 않는다"였는데,
+     회차별 발급(I1)으로 장수가 늘면서 **벽에서 어느 종이가 어느 회차인지 못 알아보는 문제**가 더 커졌다.
+     파일명만으로는 인쇄한 뒤 구분이 안 된다. 그래서 QR 위에 코스명·회차명·학습시간을 인쇄한다.
+     대가: 회차명·시간이 바뀌면 **재출력이 필요해진다**(종전엔 불필요했다). */
+  const QR_FAM = 'Pretendard, -apple-system, "Segoe UI", sans-serif';
+  /* 배치는 한 곳에서만 계산한다 — PNG(canvas)와 SVG가 갈라지면 인쇄물이 두 종류가 된다. */
+  const _measureCanvas = document.createElement('canvas');
+  const qrSheetLayout = ({ sessName, studyLabel, placeLabel, issuedAt, kind, px = 16 }) => {
+    const q = 2, n = 25, qrSize = (n + q * 2) * px;
+    const pad = Math.round(px * 1.5);
+    const fTitle = Math.round(px * 1.15), fMain = Math.round(px * 1.75), fSub = Math.round(px * 1.15);
+    const fFoot = Math.round(px * 0.9);
+    const gap = Math.round(px * 0.45);
+    const headH = pad + fTitle + gap + fMain + gap + fSub + pad;
+    // 발급일은 QR 아래 작게 — 벽에 남은 구버전 종이를 육안으로 가려내는 유일한 단서다(재발급 시 갱신)
+    const footH = Math.round(px * 0.5) + fFoot + pad;
+    const W = qrSize, H = headH + qrSize + footH;
+    // 한 줄 유지 — 폭을 넘으면 잘라낸다. 측정은 캔버스로 하고 SVG도 그 결과를 쓴다.
+    const mctx = _measureCanvas.getContext('2d');
+    const fit = (text, size, weight) => {
+      mctx.font = `${weight} ${size}px ${QR_FAM}`;
+      const full = String(text || '');
+      let t = full;
+      while (t && mctx.measureText(t).width > W - pad * 2) t = t.slice(0, -1);
+      return t === full ? t : t.slice(0, -1) + '…';
+    };
+    // 장소는 회차 → 차수 상속(2단). 회차마다 장소가 다른 코스에서 부착 대조의 기준이 된다
+    const sub = placeLabel ? `학습시간 ${studyLabel} · ${placeLabel}` : `학습시간 ${studyLabel}`;
+    return { q, n, px, qrSize, pad, fTitle, fMain, fSub, fFoot, gap, headH, footH, W, H,
+      title: fit(COURSE.title, fTitle, 500),
+      main:  fit(`${sessName} · ${kind}`, fMain, 800),
+      sub:   fit(sub, fSub, 500),
+      foot:  issuedAt ? `발급 ${issuedAt}` : '' };
   };
-  const QrBox = ({ token, px = 7 }) => {
+  const drawQrSheet = (canvas, sheet) => {
+    const L = qrSheetLayout(sheet);
+    canvas.width = L.W; canvas.height = L.H;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, L.W, L.H);
+
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    let y = L.pad;
+    ctx.fillStyle = '#64748b'; ctx.font = `500 ${L.fTitle}px ${QR_FAM}`;
+    ctx.fillText(L.title, L.W / 2, y); y += L.fTitle + L.gap;
+    // 회차명 + 입장/퇴장 — 가장 크게
+    ctx.fillStyle = '#0f172a'; ctx.font = `800 ${L.fMain}px ${QR_FAM}`;
+    ctx.fillText(L.main, L.W / 2, y); y += L.fMain + L.gap;
+    // 학습시간
+    ctx.fillStyle = '#64748b'; ctx.font = `500 ${L.fSub}px ${QR_FAM}`;
+    ctx.fillText(L.sub, L.W / 2, y);
+
+    // QR — 헤더 아래
+    ctx.fillStyle = '#0f172a';
+    const g = qrCells(sheet.token, L.n);
+    for (let gy = 0; gy < L.n; gy++) for (let gx = 0; gx < L.n; gx++)
+      if (g[gy][gx]) ctx.fillRect((gx + L.q) * L.px, L.headH + (gy + L.q) * L.px, L.px, L.px);
+
+    // 발급일 — QR 아래
+    if (L.foot) {
+      ctx.fillStyle = '#94a3b8'; ctx.font = `500 ${L.fFoot}px ${QR_FAM}`;
+      ctx.fillText(L.foot, L.W / 2, L.headH + L.qrSize + Math.round(L.px * 0.5));
+    }
+  };
+  /* ── SVG 시트 (2026-08-11) ──
+     현장에서 A4·라벨지 크기가 제각각이라 확대해도 안 뭉개지는 벡터가 필요하다. 구성은 PNG와 같다.
+     모듈은 가로 연속분을 한 <rect>로 합친다 — 625칸을 낱개로 뱉으면 파일만 커진다. */
+  const svgEsc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+  const qrSheetSvg = (sheet) => {
+    const L = qrSheetLayout(sheet);
+    const g = qrCells(sheet.token, L.n);
+    let rects = '';
+    for (let gy = 0; gy < L.n; gy++) {
+      let run = 0;
+      for (let gx = 0; gx <= L.n; gx++) {
+        const on = gx < L.n && g[gy][gx];
+        if (on) { run++; continue; }
+        if (run) {
+          rects += `<rect x="${(gx - run + L.q) * L.px}" y="${L.headH + (gy + L.q) * L.px}" width="${run * L.px}" height="${L.px}"/>`;
+          run = 0;
+        }
+      }
+    }
+    // 캔버스는 textBaseline='top' — SVG는 기준선이 달라 폰트 크기의 약 0.82를 내려 맞춘다
+    const tx = L.W / 2;
+    const yTitle = L.pad + Math.round(L.fTitle * 0.82);
+    const yMain  = L.pad + L.fTitle + L.gap + Math.round(L.fMain * 0.82);
+    const ySub   = L.pad + L.fTitle + L.gap + L.fMain + L.gap + Math.round(L.fSub * 0.82);
+    const yFoot  = L.headH + L.qrSize + Math.round(L.px * 0.5) + Math.round(L.fFoot * 0.82);
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${L.W}" height="${L.H}" viewBox="0 0 ${L.W} ${L.H}">`
+      + `<rect width="${L.W}" height="${L.H}" fill="#ffffff"/>`
+      + `<g font-family='${QR_FAM}' text-anchor="middle">`
+      + `<text x="${tx}" y="${yTitle}" font-size="${L.fTitle}" font-weight="500" fill="#64748b">${svgEsc(L.title)}</text>`
+      + `<text x="${tx}" y="${yMain}" font-size="${L.fMain}" font-weight="800" fill="#0f172a">${svgEsc(L.main)}</text>`
+      + `<text x="${tx}" y="${ySub}" font-size="${L.fSub}" font-weight="500" fill="#64748b">${svgEsc(L.sub)}</text>`
+      + (L.foot ? `<text x="${tx}" y="${yFoot}" font-size="${L.fFoot}" font-weight="500" fill="#94a3b8">${svgEsc(L.foot)}</text>` : '')
+      + `</g><g fill="#0f172a" shape-rendering="crispEdges">${rects}</g></svg>`;
+  };
+  // 파일명도 식별자로 유지 (F10 → I5) — 이제 이미지 자체에도 정보가 있다
+  const qrFileBase = (pkgName, sessName, kind, issuedAt) =>
+    [COURSE.title, pkgName, sessName, kind, issuedAt.replace(/-/g, '')]
+      .map(s => String(s).trim().replace(/\s+/g, '').replace(/[\\/:*?"<>|]/g, ''))
+      .join('_');
+  const qrFileName = (pkgName, sessName, kind, issuedAt, ext = 'png') =>
+    `${qrFileBase(pkgName, sessName, kind, issuedAt)}.${ext}`;
+  const saveAs = (href, fileName, revoke) => {
+    const a = document.createElement('a');
+    a.href = href; a.download = fileName; a.click();
+    if (revoke) setTimeout(() => URL.revokeObjectURL(href), 1000);
+  };
+  const downloadQr = (sheet, fileName) => {
+    const c = document.createElement('canvas');
+    drawQrSheet(c, { ...sheet, px: 16 });
+    saveAs(c.toDataURL('image/png'), fileName);
+  };
+  const downloadQrSvg = (sheet, fileName) => {
+    const blob = new Blob([qrSheetSvg({ ...sheet, px: 16 })], { type: 'image/svg+xml;charset=utf-8' });
+    saveAs(URL.createObjectURL(blob), fileName, true);
+  };
+  const qrPngBytes = (sheet) => new Promise(resolve => {
+    const c = document.createElement('canvas');
+    drawQrSheet(c, { ...sheet, px: 16 });
+    c.toBlob(b => b.arrayBuffer().then(ab => resolve(new Uint8Array(ab))), 'image/png');
+  });
+
+  /* ── ZIP 묶기 (2026-08-11) ──
+     수십 장을 한 장씩 저장하게 두면 브라우저 다중 다운로드 경고에 걸리고 폴더가 뒤섞인다.
+     압축은 store(무압축) — PNG는 이미 압축본이라 deflate 이득이 거의 없고, 그 대가로 외부 라이브러리를 안 쓴다. */
+  const _crcTable = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) { let c = i; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[i] = c >>> 0; }
+    return t;
+  })();
+  const crc32 = (buf) => {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < buf.length; i++) c = _crcTable[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  };
+  const zipBlob = (files) => {                    // files: [{name, data:Uint8Array}]
+    const enc = new TextEncoder();
+    const d = new Date();
+    const dosTime = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+    const dosDate = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+    const local = [], central = [];
+    let offset = 0;
+    files.forEach(f => {
+      const name = enc.encode(f.name), crc = crc32(f.data), size = f.data.length;
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true);
+      lh.setUint16(6, 0x0800, true);                 // UTF-8 파일명 (한글 차수·회차명)
+      lh.setUint16(8, 0, true);                      // 0 = store
+      lh.setUint16(10, dosTime, true); lh.setUint16(12, dosDate, true);
+      lh.setUint32(14, crc, true); lh.setUint32(18, size, true); lh.setUint32(22, size, true);
+      lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+      local.push(new Uint8Array(lh.buffer), name, f.data);
+
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true);
+      ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+      ch.setUint16(12, dosTime, true); ch.setUint16(14, dosDate, true);
+      ch.setUint32(16, crc, true); ch.setUint32(20, size, true); ch.setUint32(24, size, true);
+      ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+      central.push(new Uint8Array(ch.buffer), name);
+      offset += 30 + name.length + size;
+    });
+    const cdSize = central.reduce((n, b) => n + b.length, 0);
+    const eocd = new DataView(new ArrayBuffer(22));
+    eocd.setUint32(0, 0x06054b50, true);
+    eocd.setUint16(8, files.length, true); eocd.setUint16(10, files.length, true);
+    eocd.setUint32(12, cdSize, true); eocd.setUint32(16, offset, true);
+    return new Blob([...local, ...central, new Uint8Array(eocd.buffer)], { type: 'application/zip' });
+  };
+  const zipSafe = (s) => String(s).trim().replace(/\s+/g, '').replace(/[\\/:*?"<>|]/g, '');
+  /* 화면 미리보기 = 인쇄물과 같은 구성. 다르면 미리보기가 아니다. */
+  const QrBox = ({ sheet, px = 5, width = 148 }) => {
     const ref = useRef(null);
-    useEffect(() => { if (ref.current) drawQr(ref.current, token, px); }, [token, px]);
-    return <canvas ref={ref} className="rounded-lg border border-slate-200 bg-white" style={{ width: 160, height: 160 }}/>;
+    useEffect(() => { if (ref.current) drawQrSheet(ref.current, { ...sheet, px }); },
+      [sheet.token, sheet.sessName, sheet.studyLabel, sheet.placeLabel, sheet.issuedAt, sheet.kind, px]);
+    return <canvas ref={ref} className="rounded-lg border border-slate-200 bg-white" style={{ width }}/>;
   };
 
-  /* ── 코스 상태별 뷰 모드 (오프라인: active·published·scheduled·draft·closed) ──
-     오프라인은 종료 모달(온라인 전용)이 없는 단순 모델 — 회차 종료·신청 만료로 자연 종료. 운영중/예정/종료 상태로만 구분. */
+  /* ── 코스 상태별 뷰 모드 (오프라인: active·published·draft·closed) ──
+     오프라인은 종료 모달(온라인 전용)이 없는 단순 모델 — 회차 종료·신청 만료로 자연 종료. 운영중/작성 중/종료 상태로만 구분.
+     2026-08-07: 퍼블리싱 예약 제거로 scheduled 상태를 삭제했다. */
   const OFF_STATUS = {
     active:    { badge: '운영중', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
     published: { badge: '운영중', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-    scheduled: { badge: '예정',   bg: 'bg-sky-50',     text: 'text-sky-700',     border: 'border-sky-200' },
     draft:     { badge: '작성 중', bg: 'bg-slate-100',  text: 'text-slate-500',   border: 'border-slate-200' },
     closed:    { badge: '종료',   bg: 'bg-slate-100',  text: 'text-slate-500',   border: 'border-slate-200' },
   };
@@ -476,11 +641,22 @@
   const isClosedCourse = COURSE.status === 'closed';
 
   /* ── 수강생 등록 모달용 풀 ──
-     그룹은 "필터"로만 쓰고 등록 단위는 개인. loginId=아이디, groups=다중 그룹, role=권한 */
+     그룹은 "필터"로만 쓰고 등록 단위는 개인. loginId=아이디, groups=다중 그룹, role=권한
+
+     `busy` = 이 사람이 **다른 코스에서 이미 등록한 회차** (2026-08-11 I14).
+     한 사람이 같은 시간 두 곳에 있을 수 없다는 물리 제약을 검사하려면 코스 경계를 넘는 조회가 필요한데,
+     프로토타입에는 코스 간 등록 저장소가 없다. 그래서 그 조회 결과를 이 필드로 대신한다.
+     실제 구현에서는 `(userId, startAt)` 인덱스로 그 사람의 전 등록 회차를 조회한다 — 온라인 코스는 제외. */
   const STUDENT_POOL = [
-    {id:'u1', name:'이승주', loginId:'seungju.lee',  groups:['비서실'],          role:''},
+    {id:'u1', name:'이승주', loginId:'seungju.lee',  groups:['비서실'],          role:'',
+     busy:[{course:'2026 정보보안 교육', sess:'2회차', date:'2026-04-14', start:'09:00', end:'12:00'}]},
     {id:'u2', name:'김하은', loginId:'haeun.kim',    groups:['개발팀','IT'],      role:''},
-    {id:'u3', name:'박준서', loginId:'junseo.park',  groups:['디자인팀'],         role:''},
+    /* 이 코스에 이미 등록된 회원 — `COURSE.learners`와 loginId로 이어진다.
+       회원 풀과 등록자 명단이 분리돼 있어 지금까지 중복 등록이 걸러지지 않았다. */
+    {id:'u21',name:'박지현', loginId:'jihyun.park',  groups:['비서실'],           role:''},
+    {id:'u22',name:'김수연', loginId:'suyeon.kim',   groups:['개발팀'],           role:''},
+    {id:'u3', name:'박준서', loginId:'junseo.park',  groups:['디자인팀'],         role:'',
+     busy:[{course:'신임 팀장 리더십 캠프', sess:'1회차', date:'2026-05-12', start:'10:00', end:'13:00'}]},
     {id:'u4', name:'정유진', loginId:'yujin.jung',   groups:['마케팅팀'],         role:'부관리자'},
     {id:'u5', name:'최민호', loginId:'minho.choi',   groups:['영업팀','영업본부'], role:''},
     {id:'u6', name:'강소연', loginId:'soyeon.kang',  groups:['인사팀','관리본부'], role:''},
@@ -547,6 +723,16 @@
     return `${mm}분`;
   };
   const sessionStudyMin = s => (s.studyMinOverride != null ? s.studyMinOverride : durationMin(s.start, s.end));  // 관리자 직접 입력(override) 우선, 없으면 자동
+
+  /* ── 일정 겹침 판정 (2026-08-11 I14) ──
+     빌더 `_sessConflict`와 **같은 규칙**이다 — 백엔드가 두 진입점에서 같은 판정을 요구했다.
+     기준은 사람 하나: **같은 사람이 같은 시간에 두 곳에 있을 수 없다.**
+     그래서 코스·차수·장소를 보지 않고 **시간만** 본다. 규칙이 하나로 줄어든다.
+     경계는 열림 — `12:00 종료 → 12:00 시작`은 겹침이 아니다(연속 수업). 이동시간 버퍼는 두지 않는다:
+     몇 분을 둘지는 물리 법칙이 아니라 운영 판단이라 스펙에 넣으면 끝없이 흔들린다. */
+  const _toMin = t => { const [h, m] = String(t || '').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+  const slotConflict = (a, b) => a.date && b.date && a.date === b.date
+    && _toMin(a.start) < _toMin(b.end) && _toMin(b.start) < _toMin(a.end);
   const pkgStudyMin = pkg => pkg.sessions.reduce((b,s)=>b + sessionStudyMin(s), 0);  // 차수당 학습시간(회차 합)
   /* 강사 = 회차 → 차수(pkg.instructor) → 대표(COURSE.instructor) 3단 상속. 읽기 전용 표시 */
   const effInstructor = (pkg, s) => (s.instructor && s.instructor.trim()) || (pkg && pkg.instructor && pkg.instructor.trim()) || COURSE.instructor || '';
@@ -653,22 +839,83 @@
     const qrTimerRef = useRef(null);
     const bcRef = useRef(null);
 
-    /* ── 차수 QR 모달 (고정 모드 전용, A3-34·A3-35) ──
-       토큰은 발급 후 동결(D3). 재발급만 새 토큰을 만들고, 입장·퇴장을 쌍으로 교체한다(F11). */
-    const [qrModal, setQrModal] = useState(null);        // 대상 차수(pkg) 또는 null
-    const [qrIssues, setQrIssues] = useState({});        // {pkgId: {rev, issuedAt}}
-    const [qrConfirmReissue, setQrConfirmReissue] = useState(false);  // 2단 확인 (모달 내 인라인)
-    const qrInfoOf = (pkg) => {
-      const { rev = 1, issuedAt = '2026-04-06' } = qrIssues[pkg.id] || {};
-      return { rev, issuedAt, tokenIn: `${COURSE.id}:${pkg.id}:in:v${rev}`, tokenOut: `${COURSE.id}:${pkg.id}:out:v${rev}` };
+    /* ── 출석 QR 모달 (고정 모드 전용, A3-34·A3-35·A3-47) ──
+       08-07 I1: 발급 단위가 차수 → 회차로 바뀌었다. 모달은 차수를 열되 내용은 회차 목록이다.
+       토큰은 발급 후 동결(D3). 재발급만 새 토큰을 만들고, 입장·퇴장을 쌍으로 교체한다(F11) — 단위는 회차.
+
+       I7 개정(2026-08-07): 수동 `발급` 단계를 없앴다. 토큰 생성은 비용도 부작용도 없고
+       인쇄·부착 전까지 QR은 아무 의미가 없다 — 관리자가 잊을 수 있는 단계만 하나 늘 뿐이었다.
+       회차가 생기면 자동 발급되므로 `미발급` 상태는 존재하지 않는다. 남는 조작은 재발급뿐.
+
+       I8 개정(2026-08-11): 모달의 단위는 코스다. 인쇄는 차수 하나가 아니라 코스 전체를 한 번에 뽑는 일이라
+       모달은 전체 차수의 회차를 차수별로 묶어 보여주고, 특정 차수에서 들어왔을 때만 그 차수로 필터를 건다.
+       필터는 모달 안에서 언제든 [전체]로 풀 수 있다. */
+    const [qrModal, setQrModal] = useState(null);        // {pkgId:'all'|차수 id} 또는 null
+    const qrKey = (pkgId, sessId) => `${pkgId}:${sessId}`;
+    // {`pkgId:sessId`: {rev, issuedAt}} — 키가 없으면 최초 발급본으로 간주(자동 발급)
+    const [qrIssues, setQrIssues] = useState({});
+    const [qrConfirmReissue, setQrConfirmReissue] = useState(null);  // 2단 확인 대상 `pkgId:sessId` (모달 내 인라인)
+    const qrInfoOf = (pkg, sess) => {
+      const { rev = 1, issuedAt = '2026-04-06' } = qrIssues[qrKey(pkg.id, sess.id)] || {};
+      return { rev, issuedAt,
+        tokenIn:  `${COURSE.id}:${pkg.id}:${sess.id}:in:v${rev}`,
+        tokenOut: `${COURSE.id}:${pkg.id}:${sess.id}:out:v${rev}` };
     };
-    const reissueQr = (pkg) => {
-      setQrIssues(prev => ({ ...prev, [pkg.id]: { rev: (prev[pkg.id]?.rev || 1) + 1, issuedAt: TODAY } }));
-      setQrConfirmReissue(false);
+    const reissueQr = (pkg, sess) => {
+      setQrIssues(prev => ({ ...prev,
+        [qrKey(pkg.id, sess.id)]: { rev: (prev[qrKey(pkg.id, sess.id)]?.rev || 1) + 1, issuedAt: TODAY } }));
+      setQrConfirmReissue(null);
     };
-    const closeQrModal = () => { setQrModal(null); setQrConfirmReissue(false); };
-    // 모드가 진입 동작을 정한다 (E9). 고정 모드에서는 라이브 전체화면으로 가지 않는다.
-    const openAttendanceQr = (pkg) => ATT_MODE === 'fixed' ? setQrModal(pkg) : setLiveMode(true);
+
+    /* ── 전체 다운로드 (2026-08-11) ──
+       회차별 발급(I1) 이후 한 코스에서 뽑을 장수가 수십 장이 됐다. 한 장씩 누르게 두면 빠뜨린다.
+       파일은 개별 다운로드와 **완전히 같은 것**을 차수 폴더로 묶어 ZIP 하나로 준다 —
+       합본 이미지를 만들면 라벨로 못 쓰고, 낱개 저장은 다중 다운로드 경고에 걸린다.
+       PNG·SVG를 함께 담아 버튼을 하나로 유지한다(형식 선택은 개별 카드에서). */
+    const [qrBulk, setQrBulk] = useState(null);   // {done, total} 또는 null
+    const qrSheetsOf = (pkgs) => {
+      const out = [];
+      pkgs.forEach(pkg => pkg.sessions.forEach(s => {
+        const q = qrInfoOf(pkg, s);
+        const studyLabel = fmtDuration(sessionStudyMin(s));
+        const kinds = CHECKOUT_ON
+          ? [{ kind:'입장', token:q.tokenIn }, { kind:'퇴장', token:q.tokenOut }]
+          : [{ kind:'입장', token:q.tokenIn }];
+        kinds.forEach(k => out.push({
+          sheet: { token:k.token, sessName:s.name, studyLabel,
+                   placeLabel: effPlace(pkg, s), issuedAt: q.issuedAt, kind:k.kind },
+          dir: zipSafe(pkg.name),
+          /* 파일명에 발급일을 남긴다 (I5) — 재발급 후 다시 받은 ZIP이 구버전과 같은 이름이면
+             폴더에서 섞이고 덮어쓴다. 코스·차수는 루트 폴더와 상위 폴더가 이미 지고 있다. */
+          base: `${zipSafe(s.name)}_${k.kind}_${q.issuedAt.replace(/-/g,'')}`,
+        }));
+      }));
+      return out;
+    };
+    const downloadQrZip = async (pkgs, scopeLabel) => {
+      if (qrBulk) return;                          // 진행 중 재진입 방지
+      const jobs = qrSheetsOf(pkgs);
+      if (!jobs.length) return;
+      setQrBulk({ done: 0, total: jobs.length });
+      const enc = new TextEncoder();
+      const root = zipSafe(`${COURSE.title}_출석QR_${scopeLabel}_${TODAY.replace(/-/g,'')}`);
+      const files = [];
+      for (let i = 0; i < jobs.length; i++) {
+        const j = jobs[i];
+        files.push({ name: `${root}/${j.dir}/${j.base}.png`, data: await qrPngBytes(j.sheet) });
+        files.push({ name: `${root}/${j.dir}/${j.base}.svg`, data: enc.encode(qrSheetSvg({ ...j.sheet, px: 16 })) });
+        setQrBulk({ done: i + 1, total: jobs.length });
+      }
+      saveAs(URL.createObjectURL(zipBlob(files)), `${root}.zip`, true);
+      setTimeout(() => setQrBulk(null), 1200);
+    };
+    const closeQrModal = () => { setQrModal(null); setQrConfirmReissue(null); };
+    const setQrScope = (pkgId) => { setQrModal({ pkgId }); setQrConfirmReissue(null); };
+    /* 모드가 진입 동작을 정한다 (E9). 고정 모드에서는 라이브 전체화면으로 가지 않는다.
+       pkg 없이 부르면(코스 단위 진입) 전체 차수로 연다. */
+    const openAttendanceQr = (pkg) => ATT_MODE === 'fixed'
+      ? setQrScope(pkg ? pkg.id : 'all')
+      : setLiveMode(true);
     const attQrLabel = ATT_MODE === 'fixed' ? '출석 QR' : 'QR 출석';
 
     const [coverImage, setCoverImage] = useState(() => {
@@ -1444,9 +1691,10 @@
                 </button>
               )}
               {/* 모드가 진입 버튼을 정한다 (E9) — 반대 경로는 비활성이 아니라 미표시.
-                  고정 모드는 오늘 회차가 없어도 열린다(전날 미리 뽑는 게 목적). */}
+                  고정 모드는 오늘 회차가 없어도 열린다(전날 미리 뽑는 게 목적).
+                  사이드바 = 코스 단위 진입 → 특정 차수가 아니라 전체 차수의 회차를 연다 (I8). */}
               {!isClosedCourse && (todaySess || ATT_MODE==='fixed') && (
-                <button data-feature-id="A3-04" onClick={()=>openAttendanceQr(todayPkg || COURSE.packages[0])}
+                <button data-feature-id="A3-04" onClick={()=>openAttendanceQr(null)}
                   className="w-full flex items-center justify-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-[14px] py-2 rounded-xl transition-colors shadow-sm">
                   <QrCode size={13}/> {ATT_MODE==='fixed' ? '출석 QR' : '라이브 출석'}
                 </button>
@@ -2154,13 +2402,62 @@
           const totalPages = Math.max(1, Math.ceil(filtered.length/PER));
           const page = Math.min(enrollPage, totalPages);
           const rows = filtered.slice((page-1)*PER, page*PER);
+          /* ── 일정 겹침 검사 (2026-08-11 I14 → I15로 강화) ──
+             빌더가 퍼블리싱 시점에 잡는 것과 같은 규칙을, 배정 시점에도 건다.
+             빌더 검증은 스냅샷이라 그 뒤의 배정은 그대로 우회한다 — 한쪽에만 있으면 규칙이 아니라 권고다.
+
+             I15: 처음엔 "선택 후 경고 + 확인하고 등록" opt-in이었으나 **선택 자체를 막는 것**으로 바꿨다.
+             고르게 한 뒤 되돌리는 것보다 못 고르게 하는 편이 실수를 원천에서 없앤다 —
+             한 사람이 같은 시간에 두 곳에 있는 건 운영 재량이 아니라 물리적으로 불가능한 일이라
+             정원 초과(재량으로 늘릴 수 있음)와 달리 빠져나갈 문을 두지 않는다.
+
+             회차선택형 차수는 학습자가 회차를 직접 고르므로 이 화면에서 대상 회차가 정해지지 않는다 →
+             전 회차로 대조하면 과탐지가 되어 검사하지 않고, 그 사실을 화면에 알린다. */
+          /* 그 사람이 **이미 잡혀 있는 시간** 전부. 두 출처를 합친다.
+             ① 이 코스의 등록분 — `COURSE.learners`(loginId로 매칭) → 그 사람의 차수 → 그 차수의 전 회차
+             ② 타 코스 등록분 — `busy` 스텁 (프로토타입에 코스 간 저장소가 없어 조회 결과를 대신한다)
+             실제 구현에서는 둘을 나누지 않는다 — `(userId, startAt)`로 그 사람의 전 등록 회차를 한 번에 조회한다. */
+          const takenSlotsOf = (m) => {
+            const out = [];
+            (LEARNERS||[]).forEach(l => {
+              if (l.loginId !== m.loginId) return;
+              const p = COURSE.packages.find(x => x.id === l.pkgId);
+              if (!p) return;
+              // 회차선택형이면 본인이 고른 회차만 잡혀 있다 (H4·H5) — 전 회차로 보면 과탐지다
+              const ss = (p.sessionSelect && l.pickSessId)
+                ? (p.sessions||[]).filter(x => x.id === l.pickSessId)
+                : (p.sessions||[]);
+              ss.forEach(x => out.push({ course:COURSE.title, pkgId:p.id, sess:x.name,
+                                         date:x.date, start:x.start, end:x.end }));
+            });
+            (m.busy||[]).forEach(b => out.push(b));
+            return out;
+          };
+          /* 반환: {reason:'enrolled'|'conflict', hits:[...]} — 둘 다 선택을 막지만 사유가 다르다.
+             같은 차수에 이미 있으면 '겹침'이 아니라 '중복 등록'이므로 라벨을 나눈다. */
+          const conflictOf = (m) => {
+            if (!m || !cur) return null;
+            const taken = takenSlotsOf(m);
+            if (!taken.length) return null;
+            if (taken.some(t => t.pkgId === cur.id)) return { reason:'enrolled', hits:[] };
+            if (cur.sessionSelect) return null;   // 대상 회차가 안 정해져 판정 불가
+            const hits = [];
+            (cur.sessions||[]).forEach(s => taken.forEach(t => {
+              if (slotConflict({date:s.date, start:s.start, end:s.end}, t)) hits.push({ sess:s, busy:t });
+            }));
+            return hits.length ? { reason:'conflict', hits } : null;
+          };
           const filteredIds = filtered.map(s=>s.id);
-          const allFilteredSelected = filteredIds.length>0 && filteredIds.every(id=>selectedMembers.has(id));
+          // 겹치는 회원은 선택 대상에서 제외한다 (I15) — 전체 선택·헤더 체크 상태 모두 이 기준을 쓴다
+          const selectableIds = filtered.filter(s=>!conflictOf(s)).map(s=>s.id);
+          const blockedCount = filteredIds.length - selectableIds.length;
+          const allFilteredSelected = selectableIds.length>0 && selectableIds.every(id=>selectedMembers.has(id));
           const idLines = enrollIdText.split(/[\n,]/).map(x=>x.trim()).filter(Boolean);
           const selCount = enrollTab==='member' ? selectedMembers.size : enrollTab==='id' ? idLines.length : 0;
           const over = selCount > remain;
+
           const blocked = selCount===0 || over;
-          const toggleMember = id => setSelectedMembers(prev=>{const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n;});
+          const toggleMember = id => { setSelectedMembers(prev=>{const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n;}); };
           const roleBadge = role => role==='관리자' ? 'bg-indigo-100 text-indigo-700' : role==='부관리자' ? 'bg-sky-100 text-sky-700' : '';
           return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -2185,7 +2482,26 @@
                       const rm = Math.max(0, p.capacity - p.enrolled);
                       const on = enrollPkg===p.id;
                       return (
-                        <button key={p.id} onClick={()=>setEnrollPkg(p.id)}
+                        <button key={p.id} onClick={()=>{
+                            /* 차수를 바꾸면 이미 고른 인원이 새 차수와 겹칠 수 있다 — 선택을 남겨두면 막은 의미가 없다 (I15).
+                               판정 대상이 바뀌는 유일한 지점이 여기라, 여기서만 걷어내면 충분하다. */
+                            setEnrollPkg(p.id);
+                            setSelectedMembers(prev=>{
+                              const n = new Set(prev);
+                              [...prev].forEach(id=>{
+                                const m = STUDENT_POOL.find(x=>x.id===id);
+                                if (!m) return;
+                                const taken = takenSlotsOf(m);
+                                if (!taken.length) return;
+                                if (taken.some(t => t.pkgId === p.id)) { n.delete(id); return; }
+                                if (p.sessionSelect) return;
+                                const clash = (p.sessions||[]).some(ss => taken.some(t =>
+                                  slotConflict({date:ss.date, start:ss.start, end:ss.end}, t)));
+                                if (clash) n.delete(id);
+                              });
+                              return n;
+                            });
+                          }}
                           className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-colors border ${on?'bg-indigo-600 text-white border-indigo-600':'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'}`}>
                           {p.name} · <span className={on?'text-indigo-100':rm<=0?'text-rose-500':rm<=5?'text-amber-600':'text-emerald-600'}>{rm<=0?'마감':`잔여 ${rm}`}</span>
                         </button>
@@ -2219,6 +2535,16 @@
                       className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-amber-500 text-white rounded-lg text-[12px] font-bold hover:bg-amber-600 transition-colors">
                       <Plus size={13}/> 정원 {cur.enrolled+selCount}명으로 늘려 등록
                     </button>
+                  </div>
+                )}
+
+                {/* 회차선택형은 이 화면에서 대상 회차가 정해지지 않아 겹침을 판정할 수 없다 — 숨기지 않고 알린다 */}
+                {enrollTab==='member' && selCount>0 && cur?.sessionSelect && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 flex items-start gap-2">
+                    <AlertCircle size={13} className="text-slate-400 mt-0.5 shrink-0"/>
+                    <span className="text-[11px] text-slate-500 leading-relaxed">
+                      <b className="text-slate-600">회차선택형 차수</b>라 학습자가 회차를 직접 고릅니다 — 등록 시점에는 일정 겹침을 판정할 수 없습니다.
+                    </span>
                   </div>
                 )}
               </div>
@@ -2265,8 +2591,9 @@
                     </div>
                     <div className="px-6 py-2 flex items-center justify-between shrink-0">
                       <span className="text-[12px] text-slate-500">검색 결과 <strong className="text-slate-700 font-bold">{filtered.length}</strong>명</span>
-                      <button onClick={()=>setSelectedMembers(prev=>{const n=new Set(prev); allFilteredSelected?filteredIds.forEach(id=>n.delete(id)):filteredIds.forEach(id=>n.add(id)); return n;})}
-                        className="text-[12px] font-bold text-indigo-600 hover:underline">{allFilteredSelected?'현재 목록 선택 해제':'현재 목록 전체 선택'}</button>
+                      {/* 전체 선택도 겹치는 회원은 건너뛴다 — 개별 클릭으로 못 고르는 걸 일괄로 담으면 막은 의미가 없다 (I15) */}
+                      <button onClick={()=>setSelectedMembers(prev=>{const n=new Set(prev); allFilteredSelected?selectableIds.forEach(id=>n.delete(id)):selectableIds.forEach(id=>n.add(id)); return n;})}
+                        className="text-[12px] font-bold text-indigo-600 hover:underline">{allFilteredSelected?'현재 목록 선택 해제':`현재 목록 전체 선택${blockedCount?` (겹침 ${blockedCount}명 제외)`:''}`}</button>
                     </div>
                     <div className="flex-1 overflow-y-auto custom-scrollbar px-6">
                       <table className="w-full text-[13px]">
@@ -2282,26 +2609,42 @@
                         <tbody>
                           {rows.map(s=>{
                             const sel = selectedMembers.has(s.id);
+                            const cf = conflictOf(s);     // 걸리면 선택 자체를 막는다 (I15)
+                            const hits = !!cf;
+                            const h = cf && cf.hits && cf.hits[0];
+                            const why = !cf ? null
+                              : cf.reason === 'enrolled' ? '이미 이 차수에 등록된 회원입니다'
+                              : `${h.busy.course} ${h.busy.sess} (${h.busy.date} ${h.busy.start}~${h.busy.end})과 겹칩니다`;
                             return (
-                              <tr key={s.id} onClick={()=>toggleMember(s.id)}
-                                className={`border-b border-slate-50 cursor-pointer transition-colors ${sel?'bg-indigo-50':'hover:bg-slate-50'}`}>
-                                <td className="py-2.5 text-center"><input type="checkbox" checked={sel} readOnly className="w-4 h-4 accent-indigo-600 align-middle"/></td>
+                              <tr key={s.id} onClick={()=>{ if(!cf) toggleMember(s.id); }}
+                                title={why || undefined}
+                                className={`border-b border-slate-50 transition-colors ${hits?'bg-slate-50/60 cursor-not-allowed':sel?'bg-indigo-50 cursor-pointer':'hover:bg-slate-50 cursor-pointer'}`}>
+                                <td className="py-2.5 text-center"><input type="checkbox" checked={sel} disabled={!!hits} readOnly className="w-4 h-4 accent-indigo-600 align-middle disabled:opacity-40"/></td>
                                 <td className="py-2.5">
                                   <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[11px] font-black text-slate-500 shrink-0">{s.name[0]}</div>
-                                    <span className="font-bold text-slate-800">{s.name}</span>
+                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 ${hits?'bg-slate-100 text-slate-300':'bg-slate-100 text-slate-500'}`}>{s.name[0]}</div>
+                                    <div className="min-w-0">
+                                      <span className={`font-bold ${hits?'text-slate-400':'text-slate-800'}`}>{s.name}</span>
+                                      {cf && (
+                                        <div className={`text-[11px] font-semibold leading-tight mt-0.5 truncate ${cf.reason==='enrolled'?'text-slate-400':'text-rose-500'}`}>
+                                          {cf.reason === 'enrolled'
+                                            ? '이미 등록됨'
+                                            : `일정 겹침 — ${h.busy.course} ${h.busy.sess} (${h.busy.start}~${h.busy.end})`}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 </td>
-                                <td className="py-2.5 text-slate-500">{s.loginId}</td>
+                                <td className={`py-2.5 ${hits?'text-slate-300':'text-slate-500'}`}>{s.loginId}</td>
                                 <td className="py-2.5">
                                   <div className="flex flex-wrap gap-1">
                                     {s.groups.map(g=>(
-                                      <span key={g} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px] font-semibold">{g}</span>
+                                      <span key={g} className={`px-1.5 py-0.5 rounded text-[11px] font-semibold ${hits?'bg-slate-50 text-slate-300':'bg-slate-100 text-slate-600'}`}>{g}</span>
                                     ))}
                                   </div>
                                 </td>
                                 <td className="py-2.5">
-                                  {s.role && <span className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${roleBadge(s.role)}`}>{s.role}</span>}
+                                  {s.role && <span className={`px-1.5 py-0.5 rounded text-[11px] font-bold ${hits?'bg-slate-50 text-slate-300':roleBadge(s.role)}`}>{s.role}</span>}
                                 </td>
                               </tr>
                             );
@@ -2623,87 +2966,155 @@
             </div>
           </div>
         )}
-        {/* ── 차수 QR 모달 (고정 모드, A3-34·A3-35) ──
-            차수당 발급(E13) · 토큰 동결(D3) · 입퇴장 쌍 재발급(F11) · PNG만(F9) */}
+        {/* ── 출석 QR 모달 (고정 모드, A3-34·A3-35) ──
+            코스 단위로 열고 전체 차수의 회차를 차수별로 묶어 보여준다(I8) ·
+            회차당 발급(I1) · 토큰 동결(D3) · 입퇴장 쌍 재발급(F11) · 라벨 인쇄(F9 개정) · 파일명에 회차(I5) */}
         {qrModal && (()=>{
-          const q = qrInfoOf(qrModal);
-          const cards = [
-            { kind:'입장', token:q.tokenIn,  desc:'들어올 때 · 입구에 게시', tone:'indigo' },
-            ...(CHECKOUT_ON ? [{ kind:'퇴장', token:q.tokenOut, desc:'나갈 때 · 출구에 게시', tone:'orange' }] : []),
-          ];
+          const PKGS = COURSE.packages;
+          const scope = qrModal.pkgId;
+          const shownPkgs = scope === 'all' ? PKGS : PKGS.filter(p=>p.id === scope);
+          const shownSessCnt = shownPkgs.reduce((n,p)=>n + p.sessions.length, 0);
+          const sheetCnt = shownSessCnt * (CHECKOUT_ON ? 2 : 1);
           return (
             <div className="fixed inset-0 bg-slate-900/50 z-[60] flex items-center justify-center p-6 animate-fadeIn" onClick={closeQrModal}>
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[560px] overflow-hidden" onClick={e=>e.stopPropagation()}>
-                {/* 헤더 */}
-                <div className="px-6 py-4 bg-slate-900 flex items-start gap-3">
+              {/* 폭은 QR 장수가 정한다 — 부착 체크 문단이 빠진 뒤로 넓은 폭은 오른쪽 여백만 남았다 (2026-08-11) */}
+              <div className={`bg-white rounded-2xl shadow-2xl w-full max-h-[92vh] flex flex-col overflow-hidden ${CHECKOUT_ON ? 'max-w-[520px]' : 'max-w-[420px]'}`} onClick={e=>e.stopPropagation()}>
+                {/* 헤더 — 단위는 코스. 차수는 그 아래 범위 표시로 내려간다 */}
+                <div className="px-6 py-4 bg-slate-900 flex items-start gap-3 shrink-0">
                   <QrCode size={18} className="text-indigo-400 shrink-0 mt-0.5"/>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[15px] font-black text-white">{qrModal.name}</div>
-                    <div className="text-[12px] text-slate-400 mt-0.5">{qrModal.place} · {qrModal.sessions.length}회차 · 신청 {qrModal.enrolled}명</div>
+                    <div className="text-[15px] font-black text-white truncate">{COURSE.title} · 출석 QR</div>
+                    <div className="text-[12px] text-slate-400 mt-0.5">
+                      {scope === 'all' ? `전체 ${PKGS.length}개 차수` : shownPkgs[0].name} · {shownSessCnt}회차 · 인쇄물 {sheetCnt}장
+                    </div>
                   </div>
                   <button onClick={closeQrModal} className="text-slate-400 hover:text-white transition-colors shrink-0"><X size={18}/></button>
                 </div>
 
-                {/* 설명 — 차수당 1개, 회차는 스캔 시각으로 (E13) */}
-                <div className="px-6 py-3 bg-indigo-50/70 border-b border-indigo-100">
-                  <p className="text-[12px] text-slate-600 leading-relaxed">
-                    이 QR {CHECKOUT_ON ? '2장' : '1장'}으로 <span className="font-bold text-indigo-600">{qrModal.sessions.length}회차 전체</span>를 커버합니다.
-                    회차는 <span className="font-bold text-indigo-600">스캔한 시각</span>으로 자동 구분되므로 회차마다 따로 뽑지 않습니다.
-                    <span className="text-slate-400"> 회차 추가·일정 변경에도 재발급이 필요 없습니다.</span>
-                  </p>
-                </div>
-
-                {/* QR 카드 */}
-                <div className={`px-6 py-5 grid gap-4 ${CHECKOUT_ON ? 'grid-cols-2' : 'grid-cols-1 justify-items-center'}`}>
-                  {cards.map(c=>(
-                    <div key={c.kind} className="flex flex-col items-center gap-2.5">
-                      <span className={`text-[12px] font-black px-2.5 py-0.5 rounded-full border ${c.tone==='indigo'
-                        ? 'text-indigo-600 bg-indigo-50 border-indigo-200' : 'text-orange-600 bg-orange-50 border-orange-200'}`}>{c.kind}</span>
-                      <QrBox token={c.token}/>
-                      <span className="text-[11px] text-slate-400">{c.desc}</span>
-                      <button onClick={()=>downloadQr(c.token, qrFileName(qrModal.name, c.kind, q.issuedAt))}
-                        className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 text-white rounded-lg text-[12px] font-bold hover:bg-slate-700 transition-colors">
-                        <Download size={13}/> PNG 다운로드
+                {/* 차수 범위 — 기본은 전체. 한 차수만 뽑을 때 좁힌다 (I8) */}
+                {PKGS.length > 1 && (
+                  <div className="px-6 py-2.5 bg-slate-800 border-b border-slate-700 flex items-center gap-1.5 overflow-x-auto shrink-0">
+                    <span className="text-[11px] font-bold text-slate-500 shrink-0 mr-0.5">차수</span>
+                    <button onClick={()=>setQrScope('all')}
+                      className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${scope==='all'
+                        ? 'bg-indigo-500 text-white' : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700'}`}>
+                      전체 {PKGS.length}개 차수
+                    </button>
+                    {PKGS.map(p=>(
+                      <button key={p.id} onClick={()=>setQrScope(p.id)}
+                        className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${scope===p.id
+                          ? 'bg-indigo-500 text-white' : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700'}`}>
+                        {p.name} · {p.sessions.length}회차
                       </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* 차수 → 회차 목록 — 회차마다 입장(·퇴장) QR */}
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                  {shownPkgs.map(pkg=>(
+                    <div key={pkg.id}>
+                      {/* 차수 구분 — 스크롤 중에도 지금 보는 QR이 어느 차수 것인지 잃지 않게 sticky */}
+                      <div className="sticky top-0 z-10 px-6 py-2.5 bg-slate-100/95 backdrop-blur border-y border-slate-200 flex items-center gap-2">
+                        <Layers size={12} className="text-slate-400 shrink-0"/>
+                        <span className="text-[12px] font-black text-slate-700 shrink-0">{pkg.name}</span>
+                        <span className="flex-1 min-w-0 text-[11px] text-slate-400 truncate">{pkg.place} · {pkg.sessions.length}회차 · 신청 {pkg.enrolled}명</span>
+                      </div>
+                      <div className="divide-y divide-slate-100">
+                        {pkg.sessions.map(s=>{
+                          const q = qrInfoOf(pkg, s);
+                          const studyLabel = fmtDuration(sessionStudyMin(s));
+                          const rk = qrKey(pkg.id, s.id);
+                          const cards = [
+                            { kind:'입장', token:q.tokenIn,  tone:'indigo' },
+                            ...(CHECKOUT_ON ? [{ kind:'퇴장', token:q.tokenOut, tone:'orange' }] : []),
+                          ];
+                          // 미리보기·PNG·SVG가 같은 구성을 쓰도록 시트를 한 곳에서 만든다 (ZIP도 같은 필드)
+                          const sheetOf = (c) => ({ token:c.token, sessName:s.name, studyLabel,
+                                                    placeLabel: effPlace(pkg, s), issuedAt: q.issuedAt, kind:c.kind });
+                          return (
+                            <div key={rk} className="px-6 py-5">
+                              <div className="flex items-center gap-2 mb-3.5">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-[14px] font-black text-slate-800 truncate">{s.name}</div>
+                                  <div className="text-[12px] text-slate-400 tabular-nums mt-0.5">{s.date} · {s.start}~{s.end} · 학습 {studyLabel}</div>
+                                </div>
+                                <span className="text-[11px] text-slate-400 tabular-nums shrink-0">
+                                  {q.issuedAt} 발급{q.rev>1 && ` · ${q.rev}차`}
+                                </span>
+                                <button onClick={()=>setQrConfirmReissue(qrConfirmReissue === rk ? null : rk)}
+                                  className="shrink-0 flex items-center gap-1 px-2.5 py-1 bg-white border border-slate-300 text-slate-600 rounded-lg text-[11px] font-bold hover:bg-slate-100 transition-colors">
+                                  <RefreshCw size={11}/> 재발급
+                                </button>
+                              </div>
+
+                              {qrConfirmReissue === rk && (
+                                <div className="mb-3.5 bg-rose-50 border border-rose-200 rounded-xl px-3.5 py-2.5 flex items-start gap-2 animate-fadeIn">
+                                  <AlertTriangle size={13} className="text-rose-500 shrink-0 mt-0.5"/>
+                                  <p className="flex-1 text-[11px] text-rose-600 leading-relaxed">
+                                    <span className="font-bold">{pkg.name} · {s.name}</span>에 게시한 QR이 <span className="font-bold">즉시 무효화</span>됩니다.
+                                    {CHECKOUT_ON ? ' 입장·퇴장이 함께 교체되므로 둘 다 다시 내려받아 교체하세요.' : ' 새 QR을 다시 내려받아 교체하세요.'}
+                                  </p>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <button onClick={()=>reissueQr(pkg, s)}
+                                      className="px-2.5 py-1 bg-rose-500 text-white rounded-lg text-[11px] font-bold hover:bg-rose-600 transition-colors">정말 재발급</button>
+                                    <button onClick={()=>setQrConfirmReissue(null)}
+                                      className="px-2.5 py-1 bg-white border border-slate-300 text-slate-600 rounded-lg text-[11px] font-bold hover:bg-slate-100 transition-colors">취소</button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 카드는 남는 폭을 나눠 갖는다 — 고정 폭으로 두면 오른쪽에 빈 자리가 생긴다 */}
+                              <div className="flex items-start justify-center gap-4">
+                                {cards.map(c=>(
+                                  <div key={c.kind} className="flex flex-col items-center gap-2 flex-1 min-w-0 max-w-[240px]">
+                                    <span className={`text-[11px] font-black px-2 py-0.5 rounded-full border ${c.tone==='indigo'
+                                      ? 'text-indigo-600 bg-indigo-50 border-indigo-200' : 'text-orange-600 bg-orange-50 border-orange-200'}`}>{c.kind}</span>
+                                    <QrBox sheet={sheetOf(c)} px={6} width="100%"/>
+                                    {/* PNG는 그대로 쓰는 용, SVG는 라벨지·A4로 확대해 인쇄하는 용 — 둘 다 같은 구성 */}
+                                    <div className="w-full grid grid-cols-2 gap-1.5">
+                                      <button onClick={()=>downloadQr(sheetOf(c), qrFileName(pkg.name, s.name, c.kind, q.issuedAt, 'png'))}
+                                        className="flex items-center justify-center gap-1 px-2 py-1.5 bg-slate-800 text-white rounded-lg text-[11px] font-bold hover:bg-slate-700 transition-colors">
+                                        <Download size={11}/> PNG
+                                      </button>
+                                      <button onClick={()=>downloadQrSvg(sheetOf(c), qrFileName(pkg.name, s.name, c.kind, q.issuedAt, 'svg'))}
+                                        className="flex items-center justify-center gap-1 px-2 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-[11px] font-bold hover:bg-slate-50 transition-colors">
+                                        <Download size={11}/> SVG
+                                      </button>
+                                    </div>
+                                    <div className="text-[10px] text-slate-400 break-all leading-snug text-center">
+                                      {qrFileBase(pkg.name, s.name, c.kind, q.issuedAt)}<span className="text-slate-300">.png / .svg</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                {!CHECKOUT_ON && (
-                  <div className="px-6 pb-4 -mt-1">
-                    <p className="text-[11px] text-slate-400 text-center">퇴장 체크를 쓰려면 코스 빌더 &gt; 수료 조건 &gt; 출석 판정 기준에서 켜세요.</p>
+                {/* 푸터 — 지금 보고 있는 범위를 ZIP 하나로. 버튼은 하나, 나머지는 설명 */}
+                <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 shrink-0 flex items-center gap-3">
+                  <div className="flex-1 min-w-0 text-[11px] text-slate-400 leading-snug">
+                    {qrBulk
+                      ? <span className="text-indigo-600 font-bold">
+                          ZIP 만드는 중 — {qrBulk.done}/{qrBulk.total}장
+                          {qrBulk.done === qrBulk.total && ' · 저장됩니다'}
+                        </span>
+                      : <>
+                          <span className="font-bold text-slate-500">{scope==='all' ? `전체 ${PKGS.length}개 차수` : shownPkgs[0].name}</span>
+                          {' '}· 회차 {shownSessCnt}개 · QR {sheetCnt}장. 차수별 폴더로 나뉘고 PNG·SVG가 함께 들어갑니다.
+                          {!CHECKOUT_ON && ' 퇴장 체크는 코스 빌더 > 수료 조건 > 출석 판정 기준에서 켜세요.'}
+                        </>}
                   </div>
-                )}
-
-                {/* 발급 정보 · 재발급 */}
-                <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-bold text-slate-600 tabular-nums">{q.issuedAt} 발급{q.rev>1 && <span className="text-slate-400 font-medium"> · {q.rev}차</span>}</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">파일명으로 구분합니다 — {qrFileName(qrModal.name, '입장', q.issuedAt)}</div>
-                  </div>
-                  {qrConfirmReissue ? (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button onClick={()=>reissueQr(qrModal)}
-                        className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[12px] font-bold hover:bg-rose-600 transition-colors">정말 재발급</button>
-                      <button onClick={()=>setQrConfirmReissue(false)}
-                        className="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-[12px] font-bold hover:bg-slate-100 transition-colors">취소</button>
-                    </div>
-                  ) : (
-                    <button onClick={()=>setQrConfirmReissue(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-[12px] font-bold hover:bg-slate-100 transition-colors shrink-0">
-                      <RefreshCw size={12}/> 재발급
-                    </button>
-                  )}
+                  <button data-feature-id="A3-47" disabled={!!qrBulk} onClick={()=>downloadQrZip(shownPkgs, scope==='all' ? '전체차수' : shownPkgs[0].name)}
+                    className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-slate-800 text-white rounded-lg text-[12px] font-bold hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    <Download size={12}/> {qrBulk ? '만드는 중…' : `전체 다운로드 (ZIP · ${sheetCnt}장)`}
+                  </button>
                 </div>
-                {qrConfirmReissue && (
-                  <div className="px-6 py-2.5 bg-rose-50 border-t border-rose-100 flex items-start gap-1.5 animate-fadeIn">
-                    <AlertTriangle size={12} className="text-rose-500 shrink-0 mt-0.5"/>
-                    <p className="text-[11px] text-rose-600 leading-relaxed">
-                      이미 게시한 QR이 <span className="font-bold">즉시 무효화</span>됩니다.
-                      {CHECKOUT_ON ? ' 입장·퇴장이 함께 교체되므로 둘 다 다시 내려받아 교체하세요.' : ' 새 QR을 다시 내려받아 교체하세요.'}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           );

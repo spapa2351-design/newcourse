@@ -109,8 +109,9 @@
           { name: '집합교육 3주차', startDate: '2026-07-01', endDate: '2026-07-03', place: '강남 교육장', capacity: 25, enrolled: 0, sessions: 3 },
           { name: '최종 발표', startDate: '2026-07-31', endDate: '2026-07-31', place: '한샘 HQ 대교육장', capacity: 100, enrolled: 0, sessions: 1 },
         ]},
-      { id: 14, title: '하반기 신입사원 온보딩 (7월)', status: 'scheduled', thumb: '', instructor: '박지훈', creator: 'jiyoungkim', category: '공통/온보딩', registeredAt: '2026/04/28 09:00', enrollMethod: 'assign',
-        scheduledAt: '2026-05-01T09:00',
+      // 2026-08-07: 퍼블리싱 예약 제거로 'scheduled' → 'active'.
+      // 신청 0명 코스 — offline-view `?id=14`가 수강생 빈 상태 픽스처로 쓰므로 수강관리 진입을 유지한다.
+      { id: 14, title: '하반기 신입사원 온보딩 (7월)', status: 'active', thumb: '', instructor: '박지훈', creator: 'jiyoungkim', category: '공통/온보딩', registeredAt: '2026/04/28 09:00', enrollMethod: 'assign',
         attendanceMode: 'fixed',
         totalEnrolled: 0, totalCapacity: 80,
         packages: [
@@ -135,7 +136,6 @@
     const STATUS_CFG = {
       active:    { label: '운영중',   bg: 'bg-indigo-50',  text: 'text-indigo-600',  dot: 'bg-indigo-500' },
       published: { label: '운영중',   bg: 'bg-indigo-50',  text: 'text-indigo-600',  dot: 'bg-indigo-500' },
-      scheduled: { label: '공개예약', bg: 'bg-violet-50',  text: 'text-violet-600',  dot: 'bg-violet-400 animate-pulse' },
       draft:     { label: '임시저장', bg: 'bg-slate-100',  text: 'text-slate-500',   dot: 'bg-slate-400' },
       saved:     { label: '임시저장', bg: 'bg-slate-100',  text: 'text-slate-500',   dot: 'bg-slate-400' },
       closed:    { label: '종료',     bg: 'bg-slate-50',   text: 'text-slate-400',   dot: 'bg-slate-300' },
@@ -143,11 +143,11 @@
 
     /* ── 출석 방식 (attendanceMode) — 코스 레벨 선(先)결정. 빌더에서만 전환한다 ──
        'live'  = 강사 화면에 QR 표시 · 30초마다 자동 갱신
-       'fixed' = 차수당 QR 발급 → 인쇄해 현장 게시. 회차는 스캔 시각으로 판정
+       'fixed' = 회차당 QR 발급 → 인쇄해 현장 게시. 스캔한 QR이 곧 회차다 (08-07 I1)
        필드가 없는 기존 코스는 'live'로 간주 (offline-view.html과 동일 규칙). */
     const ATT_MODE_CFG = {
       live:  { label: '라이브 QR', bg: 'bg-rose-50',   text: 'text-rose-600',   border: 'border-rose-200',   tip: '강사 화면에 QR 표시 · 30초마다 자동 갱신' },
-      fixed: { label: '인쇄 QR',   bg: 'bg-sky-50',    text: 'text-sky-700',    border: 'border-sky-200',    tip: '차수당 QR 발급 → 인쇄해 현장 게시. 회차는 스캔 시각으로 판정' },
+      fixed: { label: '인쇄 QR',   bg: 'bg-sky-50',    text: 'text-sky-700',    border: 'border-sky-200',    tip: '회차당 QR 발급 → 인쇄해 현장 게시. 스캔한 QR이 곧 회차' },
     };
     const attModeOf = (c) => ATT_MODE_CFG[c.attendanceMode] || ATT_MODE_CFG.live;
 
@@ -157,13 +157,22 @@
        운영중 코스는 빌더로 직행하지 않고 읽기 전용 상세로 먼저 보낸다.
        퍼블리싱된 코스의 편집은 상세의 [수정] 버튼이 유일한 진입점.
        종료 코스도 상세로 보내되 수정 버튼 없이 열린다.
-       아직 공개 전인 임시저장·공개예약 코스는 기존대로 빌더 직행. */
+       아직 공개 전인 임시저장 코스는 기존대로 빌더 직행. */
     const courseEditHref = (c) => {
       if (c.status === 'active' || c.status === 'published')
         return `offline-detail.html?courseId=${c.id}${c.draftPending ? '&draft=1' : ''}`;
       if (c.status === 'closed')
         return `offline-detail.html?courseId=${c.id}&closed=1`;
       return `offline-builder.html?courseId=${c.id}`;
+    };
+
+    /* ── 코스명 클릭 진입점 ──
+       목록의 코스명은 수강관리(offline-view)로 보낸다.
+       아직 퍼블리싱 전인 임시저장 코스는 수강관리가 없으므로 기존 수정 경로 유지. */
+    const courseNameHref = (c) => {
+      if (c.status === 'active' || c.status === 'published' || c.status === 'closed')
+        return `offline-view.html?id=${c.id}`;
+      return courseEditHref(c);
     };
 
     const fmtDate = (d) => d ? d.replace(/-/g, '.').slice(5) : '';
@@ -231,7 +240,6 @@
       const statusCounts = useMemo(() => ({
         all:       courses.length,
         active:    courses.filter(c => c.status === 'active' || c.status === 'published').length,
-        scheduled: courses.filter(c => c.status === 'scheduled').length,
         draft:     courses.filter(c => c.status === 'draft' || c.status === 'saved').length,
         closed:    courses.filter(c => c.status === 'closed').length,
       }), [courses]);
@@ -239,7 +247,6 @@
       const filtered = useMemo(() => {
         let list = courses;
         if (statusFilter === 'active')    list = list.filter(c => c.status === 'active' || c.status === 'published');
-        else if (statusFilter === 'scheduled') list = list.filter(c => c.status === 'scheduled');
         else if (statusFilter === 'draft') list = list.filter(c => c.status === 'draft' || c.status === 'saved');
         else if (statusFilter === 'closed') list = list.filter(c => c.status === 'closed');
         if (catFilter !== 'all') list = list.filter(c => c.category === catFilter);
@@ -378,7 +385,6 @@
       const STATUS_TABS = [
         { key: 'all',       label: '전체' },
         { key: 'active',    label: '운영중' },
-        { key: 'scheduled', label: '공개예약' },
         { key: 'draft',     label: '임시저장' },
         { key: 'closed',    label: '종료' },
       ];
@@ -828,7 +834,9 @@
                               {/* 코스명 */}
                               <td className="px-3 py-3">
                                 <div className="flex items-center gap-2">
-                                  <a href={courseEditHref(course)} className="text-[14px] font-bold text-slate-800 hover:text-indigo-600 transition-colors leading-snug">
+                                  <a href={courseNameHref(course)}
+                                    title={(isActive || course.status === 'closed') ? '수강관리로 이동' : '코스 수정 (퍼블리싱 전)'}
+                                    className="text-[14px] font-bold text-slate-800 hover:text-indigo-600 transition-colors leading-snug">
                                     {course.title}
                                   </a>
                                   {hasPackages && (
@@ -850,7 +858,7 @@
                               {/* 수강관리 */}
                               <td className="px-3 py-3 text-center" data-feature-id="A1-08">
                                 <div className="inline-flex flex-col items-center gap-1">
-                                  {(isActive || course.status === 'closed' || course.status === 'scheduled') ? (
+                                  {(isActive || course.status === 'closed') ? (
                                     <a href={`offline-view.html?id=${course.id}`} className="inline-flex items-center gap-1 bg-indigo-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors whitespace-nowrap shadow-sm">
                                       <Users size={10}/> 수강관리
                                     </a>
@@ -877,7 +885,7 @@
                                 <span className="inline-block bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px] font-bold">{course.category}</span>
                               </td>
                               {/* 교육 기간 */}
-                              <td className="px-3 py-3 text-[12px] text-slate-600 font-medium" data-feature-id={dday ? 'A1-06' : (course.status === 'scheduled' ? 'A1-09' : undefined)}>
+                              <td className="px-3 py-3 text-[12px] text-slate-600 font-medium" data-feature-id={dday ? 'A1-06' : undefined}>
                                 {getDateRange(course)}
                                 {dday && (
                                   <span className={`ml-1.5 text-[10px] font-black px-1.5 py-0.5 rounded
@@ -886,11 +894,6 @@
                                       : 'bg-amber-50 text-amber-600'}`}>
                                     {dday}
                                   </span>
-                                )}
-                                {course.status === 'scheduled' && course.scheduledAt && (
-                                  <div className="text-[10px] text-violet-500 font-bold mt-0.5 flex items-center gap-0.5">
-                                    <Clock size={9}/> {new Date(course.scheduledAt).toLocaleString('ko-KR', {month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})} 공개
-                                  </div>
                                 )}
                               </td>
                               {/* 수강 인원 */}

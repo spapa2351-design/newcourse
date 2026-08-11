@@ -247,7 +247,8 @@
         ]
       },
       14: {
-        status: 'scheduled',
+        // 2026-08-07: 퍼블리싱 예약 기능 제거로 'scheduled' → 'saved'(임시저장)
+        status: 'saved',
         attendanceMode: 'fixed',
         info: { title:'하반기 신입사원 온보딩 (7월)', category:'공통/온보딩', instructor:'박지훈', instructorDesc:'신입사원 온보딩 전문 강사', intro:'', location:'판교 연수원', address:'', traffic:'' },
         options:[
@@ -524,18 +525,14 @@
       const [catPickerOpen, setCatPickerOpen] = useState(false);
       const [catSearch, setCatSearch] = useState('');
       const [catCollapsed, setCatCollapsed] = useState(new Set());
-      const [publishType, setPublishType] = useState('now'); // now | scheduled
-      const [publishSchedule, setPublishSchedule] = useState('');
-      const [scheduledAt, setScheduledAt] = useState(null); // 예약 확정 시 datetime string 저장
       const [toast, setToast] = useState(null);
       const toastTimer = useRef(null);
-      const scheduleCheckRef = useRef(null);
       const [secOpen, setSecOpen] = useState({ s1: true, s2: true, s3: true, s4: true });
       const [eligibleGroups, setEligibleGroups] = useState([]);
       const [eligGrpDrop, setEligGrpDrop] = useState(false);
 
-      const statusLabel = { draft: '임시저장', saved: '임시저장', scheduled: '공개 예약됨', published: '퍼블리싱됨' };
-      const statusColor = { draft: 'bg-amber-50 text-amber-700 border-amber-200', saved: 'bg-amber-50 text-amber-700 border-amber-200', scheduled: 'bg-violet-50 text-violet-700 border-violet-300', published: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      const statusLabel = { draft: '임시저장', saved: '임시저장', published: '퍼블리싱됨' };
+      const statusColor = { draft: 'bg-amber-50 text-amber-700 border-amber-200', saved: 'bg-amber-50 text-amber-700 border-amber-200', published: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
 
       const dismissToast = () => {
         setToast(prev => prev ? { ...prev, dismissing: true } : null);
@@ -649,6 +646,14 @@
         { label: '모든 회차 날짜/시간 설정', ok: options.every(o => o.sessions.every(s => s.date && s.startTime && s.endTime)) },
         { label: '모든 회차 종료 > 시작 (자정 넘김 없음)', ok: options.every(o => o.sessions.every(s => !s.startTime || !s.endTime || _toMin(s.endTime) > _toMin(s.startTime))) },
         { label: '다중 조합형 차수 일정 미겹침', ok: selectionRule !== 'multiple' || !hasOptionOverlap },
+        /* 회차별 QR(08-07 I1) 이후 신설 — 종전엔 차수당 QR 1장이 스캔 시각으로 회차를 하나만 확정해
+           이중 출석이 구조적으로 불가능했다. 회차별 QR은 겹치는 두 회차를 연달아 찍으면 둘 다 기록되어
+           출석률 분자가 부풀고 수료 판정이 틀어진다. 그래서 겹침을 경고에서 **차단**으로 올린다.
+           회차선택형은 제외 — 학습자가 회차 1개만 등록하고 등록 회차 대조(I3)가 나머지를 거부하므로
+           이중 출석 경로가 없다. 같은 시간 병렬 분반도 회차선택형으로만 열린다. */
+        { label: '일반 차수 회차 시간 미겹침 (회차선택형 제외)',
+          ok: options.every(o => o.sessionSelect || o.sessions.every((s, i) =>
+                o.sessions.every((t, j) => i === j || !_sessConflict(s, t)))) },
         { label: '배정 인원 일정 겹침 없음 (지정등록)', ok: !adminAssign || !hasPersonOverlap },
         { label: '수료 조건 최소 1개 설정', ok: completionRules.length > 0 },
       ];
@@ -662,43 +667,12 @@
       const handlePublish = () => {
         const checks = getValidation();
         if (checks.some(c => !c.ok)) return;
-        if (publishType === 'scheduled' && publishSchedule) {
-          const schedDt = new Date(publishSchedule);
-          if (schedDt <= new Date()) {
-            // 이미 지난 시간이면 즉시 퍼블리싱
-            setCourseStatus('published');
-            setScheduledAt(null);
-            applyPublished();
-            showToast('예약 시간이 이미 지나 즉시 퍼블리싱됩니다', '🚀');
-          } else {
-            setCourseStatus('scheduled');
-            setScheduledAt(publishSchedule);
-            // 예약 시간 도달 시 자동 published 전환 시뮬레이션
-            if (scheduleCheckRef.current) clearTimeout(scheduleCheckRef.current);
-            scheduleCheckRef.current = setTimeout(() => {
-              setCourseStatus('published');
-              setScheduledAt(null);
-              applyPublished();
-              showToast('예약된 시간이 되어 코스가 공개됐습니다', '🎉', 5000);
-            }, schedDt - new Date());
-            showToast(`${schedDt.toLocaleString('ko-KR', {month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}에 공개 예약됐습니다`, '📅', 4000);
-          }
-        } else {
-          const wasDraftEdit = draftPending;
-          setCourseStatus('published');
-          setScheduledAt(null);
-          applyPublished();
-          showToast(wasDraftEdit ? '변경사항이 공개됐습니다 — 드래프트가 실서비스로 교체됩니다' : '코스가 즉시 공개됐습니다', '🚀');
-        }
+        const wasDraftEdit = draftPending;
+        setCourseStatus('published');
+        applyPublished();
+        showToast(wasDraftEdit ? '변경사항이 공개됐습니다 — 드래프트가 실서비스로 교체됩니다' : '코스가 즉시 공개됐습니다', '🚀');
         setShowPublishModal(false);
         setLastSavedAt(new Date());
-      };
-
-      const handleCancelSchedule = () => {
-        if (scheduleCheckRef.current) clearTimeout(scheduleCheckRef.current);
-        setCourseStatus('saved');
-        setScheduledAt(null);
-        showToast('예약 공개가 취소됐습니다', '↩️');
       };
 
       // 더미 그룹 목록 (실제 환경에서는 API 연동)
@@ -834,7 +808,7 @@
       const checkoutOn = checkoutEnabled && checkoutAvailable;
       /* ── A2-36 · 인쇄 → 라이브 전환 경고 ──
          벽에 붙은 종이는 소프트웨어로 회수되지 않는다. 경고만 띄우고 토큰을 살려두면
-         관리자가 잊는 순간 두 경로가 동시에 살아나므로, 확인 시 차수 토큰을 함께 폐기한다.
+         관리자가 잊는 순간 두 경로가 동시에 살아나므로, 확인 시 그 차수의 전 회차 토큰을 함께 폐기한다 (F14 → 08-07 I6).
          퍼블리싱 전에는 배포된 인쇄물이 없으므로 그냥 바뀐다. 라이브 → 인쇄도 막지 않는다(E7). */
       const [showAttModeWarn, setShowAttModeWarn] = useState(false);
       const needsAttModeWarn = (next) =>
@@ -845,7 +819,7 @@
         setAttendanceMode(next);
       };
       const confirmAttModeSwitch = () => {
-        setAttendanceMode('live');   // 실제 구현에서는 여기서 차수 토큰 폐기 API를 함께 호출한다
+        setAttendanceMode('live');   // 실제 구현에서는 여기서 그 차수의 전 회차 토큰 폐기 API를 함께 호출한다 (I6)
         setShowAttModeWarn(false);
       };
 
@@ -1146,15 +1120,6 @@
                     <CircleDot size={10}/>
                     {statusLabel[courseStatus]}
                   </span>
-                )}
-                {courseStatus === 'scheduled' && scheduledAt && (
-                  <div className="ml-1 flex items-center gap-1.5 bg-violet-50 border border-violet-200 rounded-full px-3 py-1">
-                    <Clock size={11} className="text-violet-500"/>
-                    <span className="text-[11px] font-bold text-violet-700">
-                      {new Date(scheduledAt).toLocaleString('ko-KR', { month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' })}
-                    </span>
-                    <button onClick={handleCancelSchedule} className="text-violet-400 hover:text-red-500 transition-colors ml-0.5" title="예약 취소"><X size={11}/></button>
-                  </div>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -1916,8 +1881,8 @@
                         {[
                           { v:'live',  label:'라이브 QR', desc:'강사 화면에 QR 표시 · 30초마다 자동 갱신',
                             sub:'사진 공유로 대리 출석하는 걸 막습니다' },
-                          { v:'fixed', label:'인쇄 QR',   desc:'차수당 QR을 내려받아 현장에 게시합니다',
-                            sub:'회차는 스캔한 시각으로 자동 구분됩니다',
+                          { v:'fixed', label:'인쇄 QR',   desc:'회차마다 QR을 내려받아 현장에 게시합니다',
+                            sub:'붙인 QR이 곧 그 회차입니다 — 자리와 회차를 맞춰 주세요',
                             warn:'자동 갱신이 없어 사진 공유를 막지 못합니다' },
                         ].map(o=>{
                           const on = attendanceMode===o.v;
@@ -1938,6 +1903,29 @@
                                     <AlertTriangle size={10} className="shrink-0"/>{o.warn}
                                   </div>
                                 )}
+
+                                {/* 퇴장 체크 — 인쇄 QR의 하위 설정이다(F6). 라이브에는 입·퇴장을 선언할 종이가 없어
+                                    별도 행으로 띄워두면 어느 방식에 딸린 옵션인지 읽히지 않았다. 선택된 인쇄 카드 안에 넣는다.
+                                    checkoutEnabled 값 자체는 보존해 라이브로 갔다 돌아와도 원래 설정이 살아난다. */}
+                                {o.v==='fixed' && on && (
+                                  <div className="mt-2 pt-2 border-t border-indigo-100 flex items-center gap-2 flex-wrap animate-fadeIn"
+                                    onClick={e=>e.stopPropagation()}>
+                                    <div onClick={()=>setCheckoutEnabled(v=>!v)}
+                                      className={`w-9 h-5 rounded-full relative transition-colors cursor-pointer ${checkoutOn ? 'bg-indigo-500' : 'bg-slate-300'}`}>
+                                      <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${checkoutOn ? 'left-[19px]' : 'left-0.5'}`}/>
+                                    </div>
+                                    <span onClick={()=>setCheckoutEnabled(v=>!v)}
+                                      className={`text-[12px] font-bold cursor-pointer transition-colors ${checkoutOn ? 'text-slate-700' : 'text-slate-400'}`}>퇴장 체크</span>
+                                    {/* 세부 규칙 — 켰을 때만 */}
+                                    <div className={`flex items-center gap-2 flex-wrap transition-opacity ${checkoutOn ? 'opacity-100' : 'opacity-30'}`}>
+                                      <div className="w-px h-4 bg-slate-200"/>
+                                      <span className="text-[12px] text-slate-400">종료 전 퇴장</span>
+                                      <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">조퇴</span>
+                                      <span className="text-[12px] text-slate-400">/ 미체크</span>
+                                      <span className="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">퇴장 미확인</span>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           );
@@ -1945,37 +1933,15 @@
                       </div>
                       {attendanceMode==='fixed' && (
                         <p className="text-[11px] text-slate-400 mt-2 pl-3 leading-relaxed animate-fadeIn">
-                          차수별 QR은 퍼블리싱한 뒤 <span className="font-semibold text-slate-500">운영 현황 &gt; 출석</span>에서 PNG로 내려받습니다.
-                          회차마다 따로 뽑을 필요 없습니다.
+                          회차별 QR은 퍼블리싱한 뒤 <span className="font-semibold text-slate-500">운영 현황 &gt; 출석</span>에서 내려받습니다.
+                          회차마다 <span className="font-semibold text-slate-500">PNG·SVG</span>를 받거나 전체를 <span className="font-semibold text-slate-500">ZIP 한 번에</span> 받을 수 있고,
+                          회차를 나중에 추가하면 그 회차 QR은 자동 발급됩니다.
                         </p>
                       )}
                     </div>
 
-                    {/* 퇴장 체크 행 — 인쇄 QR 전용.
-                        라이브는 화면 QR 1개가 30초마다 회전하는 구조라 입·퇴장을 선언할 매체가 없다(F6).
-                        숨기지 않고 비활성 + 사유를 남긴다 — 사라지면 왜 없는지 알 수 없다(E2와 같은 판단).
-                        checkoutEnabled 값 자체는 보존해 인쇄로 되돌리면 원래 설정이 살아난다. */}
-                    <div className={`px-4 py-3 bg-white flex items-center gap-3 ${checkoutAvailable ? '' : 'opacity-40'}`}>
-                      {/* 스위치 */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div onClick={() => { if (checkoutAvailable) setCheckoutEnabled(v => !v); }}
-                          className={`w-9 h-5 rounded-full relative transition-colors ${checkoutAvailable ? 'cursor-pointer' : 'cursor-not-allowed'} ${checkoutOn ? 'bg-indigo-500' : 'bg-slate-300'}`}>
-                          <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${checkoutOn ? 'left-[19px]' : 'left-0.5'}`}/>
-                        </div>
-                        <span className={`text-[12px] font-bold transition-colors ${checkoutOn ? 'text-slate-700' : 'text-slate-400'}`}>퇴장 체크 사용</span>
-                      </div>
-
-                      {/* 세부 규칙 — 스위치 ON일 때만 활성 */}
-                      <div className={`flex items-center gap-2 flex-wrap transition-opacity ${checkoutOn ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
-                        <div className="w-px h-4 bg-slate-200"/>
-                        <span className="text-[12px] text-slate-400">종료 전 퇴장</span>
-                        <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">조퇴</span>
-                        <span className="text-[12px] text-slate-400">/ 미체크</span>
-                        <span className="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">퇴장 미확인</span>
-                      </div>
-                    </div>
-
-                    {/* 라이브 — 왜 못 쓰는지 */}
+                    {/* 라이브 — 퇴장 체크가 왜 안 보이는지.
+                        스위치는 인쇄 카드 안으로 들어갔으므로 라이브에서는 아예 없다 — 사유는 남긴다(E2). */}
                     {!checkoutAvailable && (
                       <div className="px-4 py-2 bg-slate-50 border-t border-slate-200 flex items-start gap-1.5 animate-fadeIn">
                         <Info size={12} className="text-slate-400 shrink-0 mt-0.5"/>
@@ -1992,7 +1958,7 @@
                       <div className="px-4 py-2 bg-indigo-50/60 border-t border-indigo-100 flex items-start gap-1.5 animate-fadeIn">
                         <QrCode size={12} className="text-indigo-400 shrink-0 mt-0.5"/>
                         <p className="text-[11px] text-slate-500 leading-relaxed flex-1 min-w-0">
-                          차수마다 <span className="font-bold text-indigo-600">입장 QR · 퇴장 QR 2장</span>이 발급됩니다.
+                          회차마다 <span className="font-bold text-indigo-600">입장 QR · 퇴장 QR 2장</span>이 발급됩니다 (08-07 I1·I2 — 발급 단위는 회차입니다).
                           퍼블리싱 후 <span className="font-semibold text-slate-600">운영 현황 &gt; 출석</span>에서 내려받아 입구·출구에 게시하세요.
                         </p>
                       </div>
@@ -2325,7 +2291,8 @@
                             // 회차선택형인데 개별 정원이 없으면 그 회차는 신청 제한이 없다 (2026-08-06 H7).
                             // 차수 정원은 총원이라 한 회차에 전원이 몰려도 통과한다 — 조용히 두면 현장에서 터진다.
                             const pickNoCap = opt.sessionSelect && !hasIndividual;
-                            // 차수 내 회차 시간 겹침 — 같은 시간대 회차는 QR 출석 코드(차수당 1개)로 구분 불가
+                            // 차수 내 회차 시간 겹침 — 08-07 I1 이후 QR은 회차별이라 출석은 구분된다.
+                            // 남는 문제는 일정이다: 차수 등록자는 전 회차 수강이 전제라 겹치면 물리적으로 못 간다.
                             const sessOverlap = opt.sessions.some(o => o.id !== sess.id && _sessConflict(o, sess));
                             return (
                               <div
@@ -2375,7 +2342,7 @@
                                       </span>
                                     )}
                                     {sessOverlap && (
-                                      <span title="같은 시간대에 겹치는 회차가 있습니다. 출석 QR 코드는 차수당 1개라 같은 시간 회차는 출석이 구분되지 않습니다. 시간대를 분리하세요." className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0 flex items-center gap-0.5">
+                                      <span title="같은 시간대에 겹치는 회차가 있습니다. 출석 QR은 회차별이라 출석 자체는 구분되지만, 차수 등록자는 전 회차 수강이 전제이므로 겹치면 참석할 수 없습니다. 시간대를 분리하거나 회차선택형으로 여세요." className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0 flex items-center gap-0.5">
                                         <AlertTriangle size={9}/> 시간 겹침
                                       </span>
                                     )}
@@ -3203,49 +3170,6 @@
                     </div>
                   </div>
 
-                  {/* 퍼블리싱 방식 */}
-                  {allPassed && (
-                    <div className="animate-fadeIn">
-                      <h4 className="text-[14px] font-bold text-slate-800 mb-3 flex items-center gap-1.5">
-                        <Clock size={14} className="text-slate-400"/> 공개 시점
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <label className={`flex items-center gap-2.5 p-3.5 rounded-xl border-2 cursor-pointer transition-all
-                          ${publishType === 'now' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 hover:border-indigo-200'}`}>
-                          <input type="radio" name="pubType" checked={publishType === 'now'} onChange={() => setPublishType('now')} className="w-4 h-4 accent-indigo-600"/>
-                          <div>
-                            <div className="text-[14px] font-bold text-slate-800">즉시 공개</div>
-                            <div className="text-[12px] text-slate-500 mt-0.5">저장 즉시 학습자에게 노출</div>
-                          </div>
-                        </label>
-                        <label className={`flex items-center gap-2.5 p-3.5 rounded-xl border-2 cursor-pointer transition-all
-                          ${publishType === 'scheduled' ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 hover:border-indigo-200'}`}>
-                          <input type="radio" name="pubType" checked={publishType === 'scheduled'} onChange={() => setPublishType('scheduled')} className="w-4 h-4 accent-indigo-600"/>
-                          <div>
-                            <div className="text-[14px] font-bold text-slate-800">예약 공개</div>
-                            <div className="text-[12px] text-slate-500 mt-0.5">지정 일시에 자동으로 공개</div>
-                          </div>
-                        </label>
-                      </div>
-                      {publishType === 'scheduled' && (
-                        <div className="mt-3 bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 animate-fadeIn space-y-2">
-                          <label className="block text-[12px] font-bold text-violet-700 mb-1.5 flex items-center gap-1"><Clock size={11}/> 공개 예약 일시</label>
-                          <input
-                            type="datetime-local"
-                            value={publishSchedule}
-                            min={new Date().toISOString().slice(0,16)}
-                            onChange={e => setPublishSchedule(e.target.value)}
-                            className="w-full border border-violet-300 rounded-lg p-2.5 text-[14px] outline-none focus:border-violet-500 text-slate-700 bg-white"
-                          />
-                          {publishSchedule && (
-                            <div className="text-[11px] text-violet-600 font-semibold">
-                              📅 {new Date(publishSchedule).toLocaleString('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit'})} 에 학습자에게 공개됩니다
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {/* 경고 */}
                   {allPassed && (
@@ -3272,13 +3196,13 @@
                     </button>
                     <button
                       onClick={handlePublish}
-                      disabled={!allPassed || (publishType === 'scheduled' && !publishSchedule)}
+                      disabled={!allPassed}
                       className={`px-6 py-2.5 rounded-xl text-[14px] font-bold flex items-center gap-1.5 transition-all shadow-sm
-                        ${allPassed && !(publishType === 'scheduled' && !publishSchedule)
+                        ${allPassed
                           ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200'
                           : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
                     >
-                      <Send size={14}/> {publishType === 'scheduled' ? '예약 퍼블리싱' : '즉시 퍼블리싱'}
+                      <Send size={14}/> 즉시 퍼블리싱
                     </button>
                   </div>
                 </div>
