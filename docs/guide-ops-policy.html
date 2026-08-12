@@ -64,6 +64,8 @@
   .callout-blue { border-color: #3b82f6; background: #eff6ff; color: #1e3a8a; }
   .callout-amber { border-color: #f59e0b; background: #fffbeb; color: #78350f; }
   .callout-green { border-color: #10b981; background: #ecfdf5; color: #065f46; }
+  /* 중립 인용 — 화면 문구·학습자 시점 서술을 그대로 옮길 때 (2026-08-11) */
+  .callout-slate { border-color: #94a3b8; background: #f8fafc; color: #334155; }
 
   /* ── step ── */
   .step-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
@@ -172,7 +174,7 @@
     <input id="search-input" type="text" placeholder="정책 검색..." autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>closeDrop(),180)">
     <div id="search-drop"></div>
   </div>
-  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.5 · 2026-08-05</span>
+  <span class="version-badge text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full ml-3">오프라인 코스 Phase 1 · v2.6 · 2026-08-07</span>
   <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full ml-1.5 font-bold border border-emerald-300">📍 운영 가이드 SSOT</span>
 </header>
 
@@ -227,6 +229,7 @@ function closeMobileSidebar() {
     <div class="nav-item" onclick="showPage('close-rules',this)"><span class="nav-dot"></span>정정 가능 범위</div>
     <div class="nav-item" onclick="showPage('close-deduction',this)"><span class="nav-dot"></span>회차 종료 Q&A</div>
     <div class="nav-item" onclick="showPage('close-change',this)"><span class="nav-dot"></span>차수·회차 변경 정책</div>
+    <div class="nav-item" onclick="showPage('cohort-delete',this)"><span class="nav-dot"></span>차수 삭제·폐강 정책</div>
 
     <div class="nav-divider"></div>
     <div class="nav-group-title">3. 수료 처리</div>
@@ -500,7 +503,7 @@ function closeMobileSidebar() {
         <div class="step-num">5</div>
         <div class="step-body">
           <div class="step-action">회차 생성 (약 2~5분)</div>
-          <div class="step-note">수동 입력 또는 일괄 생성(🪄 버튼 → 요일·시간 선택 → 자동 생성). 각 회차에 날짜·시작·종료 시간 필요. 토글 ON 시 회차 강사도 입력(비우면 차수 → 대표 상속). <strong>같은 차수 안에서 회차 시간이 겹치면 "시간 겹침" 경고</strong>가 뜹니다 — 출석 QR은 차수당 1개라 같은 시간 회차는 출석이 구분되지 않으니 시간대를 분리하세요(2026-06-16)</div>
+          <div class="step-note">수동 입력 또는 일괄 생성(🪄 버튼 → 요일·시간 선택 → 자동 생성). 각 회차에 날짜·시작·종료 시간 필요. 토글 ON 시 회차 강사도 입력(비우면 차수 → 대표 상속). <strong>같은 차수 안에서 회차 시간이 겹치면 "시간 겹침" 경고</strong>가 뜹니다 — 일정 관리상의 안내입니다. <strong>출석 구분과는 무관해졌습니다</strong>: 2026-08-07부터 출석 QR이 회차별로 발급되어 시간이 겹쳐도 QR이 회차를 구분합니다(종전에는 차수당 1개라 구분이 불가능했습니다)</div>
         </div>
       </div>
       <div class="step-row">
@@ -768,7 +771,7 @@ function closeMobileSidebar() {
         <div class="step-num" style="background:#16a34a">5</div>
         <div class="step-body">
           <div class="step-action">수업 종료 시각 도래 → 회차 자동 종료 (별도 클릭 없음)</div>
-          <div class="step-note">남은 미확인 인원은 운영자가 직접 정리합니다("미확인 일괄 처리" 도구로 전원 출석/전원 결석/개별 처리). 자동 결석 전환은 Phase 2 예정. 회차 종료 시각은 되돌릴 수 없음</div>
+          <div class="step-note">남은 미확인 인원은 운영자가 <strong>학습자별 상태 드롭다운에서 한 명씩</strong> 정리합니다. 전원 출석·전원 결석 같은 <strong>일괄 처리 도구는 Phase 1에 없습니다</strong>(자동 결석 전환과 함께 Phase 2 예정). 회차 종료 시각은 되돌릴 수 없음</div>
         </div>
       </div>
     </div>
@@ -824,7 +827,7 @@ function closeMobileSidebar() {
         <div class="step-num" style="background:#2563eb">1</div>
         <div class="step-body">
           <div class="step-action">관리자 메인 (offline-list.html) 접속</div>
-          <div class="step-note">상단 상태 탭(전체/운영중/공개예약/임시저장/종료) + 좌측 카테고리 트리 표시</div>
+          <div class="step-note">상단 상태 탭(전체/운영중/임시저장/종료) + 좌측 카테고리 트리 표시</div>
         </div>
       </div>
       <div class="step-row">
@@ -837,8 +840,8 @@ function closeMobileSidebar() {
       <div class="step-row">
         <div class="step-num" style="background:#2563eb">3</div>
         <div class="step-body">
-          <div class="step-action">코스 행 클릭 → 차수 인라인 확장</div>
-          <div class="step-note">잔여석·일정·모집 상태 등 차수 상세가 행 아래로 펼쳐짐</div>
+          <div class="step-action">목록 행에서 차수 수 · 교육 기간 · 수강 인원 확인</div>
+          <div class="step-note">한 행에 상태 · 코스명 · 차수 · 분류 · 교육 기간 · 수강 인원 · 등록일 · 생성자가 표시됩니다. <strong>행을 펼치는 인라인 확장은 없습니다</strong> — 차수별 잔여석·일정은 수강관리 화면에서 봅니다</div>
         </div>
       </div>
       <div class="step-row">
@@ -864,7 +867,6 @@ function closeMobileSidebar() {
         </thead>
         <tbody>
           <tr><td><span class="b b-slate">임시저장</span></td><td>아직 퍼블리싱 전(draft/saved). 학습자 앱에 안 보임</td><td>퍼블리싱 11항목 확인 → 공개 처리</td></tr>
-          <tr><td><span class="b b-violet">공개예약</span></td><td>지정한 공개 시각에 자동 공개 예약된 상태(scheduled)</td><td>공개 전 미리 지정 등록 배정 가능. 공개 시각 확인</td></tr>
           <tr><td><span class="b b-green">운영중</span></td><td>퍼블리싱되어 학습자 앱에 노출(active/published). 신청·수업 진행</td><td>잔여석 모니터링 · 회차별 출석 관리 · QR 운영</td></tr>
           <tr><td><span class="b b-slate">종료</span></td><td>운영 종료(closed). 조회 전용, 출석 처리 불가</td><td>출석률 기준 수료/미수료 판정 확인</td></tr>
         </tbody>
@@ -878,10 +880,11 @@ function closeMobileSidebar() {
       <table class="xl-table">
         <thead><tr><th style="width:160px">기능</th><th>사용 방법</th><th style="width:180px">활용 케이스</th></tr></thead>
         <tbody>
-          <tr><td>상태 탭 필터</td><td>상단 탭 클릭 (전체/운영중/공개예약/임시저장/종료)</td><td>현재 진행 중인 코스만 보고 싶을 때</td></tr>
+          <tr><td>상태 탭 필터</td><td>상단 탭 클릭 (전체/운영중/임시저장/종료)</td><td>현재 진행 중인 코스만 보고 싶을 때</td></tr>
           <tr><td>카테고리 필터</td><td>좌측 카테고리 트리에서 클릭</td><td>특정 분류 코스만 볼 때</td></tr>
           <tr><td>검색</td><td>검색창에 코스명 입력</td><td>특정 코스를 빠르게 찾을 때</td></tr>
-          <tr><td>차수 인라인 확장</td><td>코스 행 클릭</td><td>차수별 잔여석·날짜를 빠르게 확인</td></tr>
+          <tr><td>코스명 클릭</td><td>운영중·종료 코스는 수강관리(offline-view)로, 임시저장 코스는 빌더로 이동</td><td>수강생·출석 관리로 바로 진입</td></tr>
+          <tr><td>코스 상세 진입</td><td>행 우측 관리 버튼 — 운영중·종료은 읽기 전용 상세, 임시저장은 빌더 직행</td><td>퍼블리싱된 코스는 상세의 [수정]이 유일한 편집 진입점</td></tr>
           <tr><td>코스 삭제</td><td>행 우측 삭제 버튼 또는 체크박스 다중 선택 후 삭제</td><td>잘못 등록된 코스 제거</td></tr>
         </tbody>
       </table>
@@ -1293,7 +1296,7 @@ function closeMobileSidebar() {
       </div>
       <div class="case-how">
         <span class="case-how-label">💡 어떻게 운영하나요</span>
-        전사 의무 참석이라 <strong>QR 출석을 굳이 돌리지 않아도 돼요</strong>. 코스만 개설해두고, 수업 종료 후 운영자가 <strong>"미확인 일괄 처리 → 전원 출석"</strong>으로 처리하면 끝.
+        전사 의무 참석이라 <strong>QR 출석을 굳이 돌리지 않아도 돼요</strong>. 코스만 개설해두고, 수업 종료 후 운영자가 <strong>미확인 인원을 한 명씩 출석으로</strong> 바꿔주면 끝. 다만 일괄 처리 도구가 없어 인원이 많으면 시간이 걸립니다.
       </div>
       <div class="case-warn">
         <span class="case-warn-label">⚠️ 주의할 점</span>
@@ -1424,7 +1427,7 @@ function closeMobileSidebar() {
       </div>
       <div class="case-how">
         <span class="case-how-label">💡 어떻게 운영하나요</span>
-        ⑲ 사외이사 워크숍과 같은 패턴이에요. <strong>자율 수강 + 임원실 안내 + 수업 종료 후 수동 출석 처리.</strong> 임원은 실제 출석 추적을 안 하는 경우가 많으니 "미확인 일괄 처리 → 전원 출석"으로 충분합니다.
+        ⑲ 사외이사 워크숍과 같은 패턴이에요. <strong>자율 수강 + 임원실 안내 + 수업 종료 후 수동 출석 처리.</strong> 임원은 실제 출석 추적을 안 하는 경우가 많고 인원도 적어, 미확인 인원을 하나씩 출석으로 바꿔주면 충분합니다.
       </div>
     </div>
   </div>
@@ -1455,7 +1458,7 @@ function closeMobileSidebar() {
           <tr>
             <td><span class="b b-orange">부분</span></td>
             <td class="text-center font-bold">1</td>
-            <td>⑮ CEO 타운홀 — 수업 종료 후 일괄 출석 수동 처리</td>
+            <td>⑮ CEO 타운홀 — 수업 종료 후 출석 수동 처리</td>
           </tr>
           <tr>
             <td><span class="b b-red">워크어라운드</span></td>
@@ -1572,7 +1575,7 @@ function closeMobileSidebar() {
             <td class="text-center font-bold">①</td>
             <td><strong>미확인 인원 운영자 수동 정리</strong></td>
             <td>회차 종료 후 미확인 인원이 남으면 운영자가 직접 처리해야 함. 깜빡하면 학습자 클레임</td>
-            <td><span class="b b-orange">정책</span> 수업 종료 시각에 자동 종료. 미확인은 운영자가 직접 정리. <span class="b b-orange">UI</span> "미확인 일괄 처리" 도구로 빠르게 처리 가능 (전원 출석/전원 결석/개별)</td>
+            <td><span class="b b-orange">정책</span> 수업 종료 시각에 자동 종료. 미확인은 운영자가 직접 정리. <span class="b b-red">UI 한계</span> <strong>일괄 처리 도구가 없어 한 명씩 드롭다운으로</strong> 바꿔야 합니다 — 인원 많은 회차는 시간이 걸리므로 종료 직후 바로 정리하는 걸 운영 룰로 잡으세요 (일괄 도구는 Phase 2)</td>
           </tr>
           <tr>
             <td class="text-center font-bold">②</td>
@@ -1726,7 +1729,7 @@ function closeMobileSidebar() {
         </thead>
         <tbody>
           <tr><td>수강생이 QR을 늦게 찍었는데 출석으로 바꿔달라고 함</td><td><span class="b b-orange">1장 출석 처리</span></td><td>지각 기준 시간 확인 → 관리자 수동 변경</td></tr>
-          <tr><td>회차 종료 후 결석이 너무 많음</td><td><span class="b b-orange">2장 회차 종료</span></td><td>관리자가 개별 상태 수동 변경 가능 → 한 명씩 수정 또는 "미확인 일괄 처리" 도구 사용</td></tr>
+          <tr><td>회차 종료 후 결석이 너무 많음</td><td><span class="b b-orange">2장 회차 종료</span></td><td>관리자가 개별 상태 수동 변경 가능 → 한 명씩 수정 (일괄 처리 도구 없음)</td></tr>
           <tr><td>수강생이 수료가 안 됐는데 이의 제기</td><td><span class="b b-orange">3장 수료 처리</span></td><td>출석률 계산 방법 확인 → 지각·조퇴 출석 인정 여부</td></tr>
           <tr><td>정원이 찼는데 신청 추가 요청이 들어옴</td><td><span class="b b-orange">4장 수강신청</span></td><td>정원 초과 처리 기준 확인</td></tr>
           <tr><td>출석 상태가 잘못 입력됨</td><td><span class="b b-orange">5장 데이터 정정</span></td><td>수정 가능 범위 확인</td></tr>
@@ -1916,7 +1919,7 @@ function closeMobileSidebar() {
           <tr><td>수업 시작 전 스캔</td><td><span class="b b-green">출석</span></td><td>시작 전 미리 스캔 — 출석 처리</td></tr>
           <tr><td>수업 시작 후 0~10분 이내</td><td><span class="b b-green">출석</span></td><td>정상 출석 인정 범위</td></tr>
           <tr><td>수업 시작 후 11분 이후</td><td><span class="b b-orange">지각</span></td><td>기준 초과 → 지각 처리</td></tr>
-          <tr><td>QR 스캔 없이 회차 종료</td><td><span class="b b-red">결석</span></td><td>운영자가 수동으로 결석 처리 (또는 "미확인 일괄 처리" 도구 사용)</td></tr>
+          <tr><td>QR 스캔 없이 회차 종료</td><td><span class="b b-red">결석</span></td><td>운영자가 한 명씩 수동으로 결석 처리</td></tr>
         </tbody>
       </table>
     </div>
@@ -2087,7 +2090,7 @@ function closeMobileSidebar() {
       </table>
     </div>
     <div class="callout callout-blue mt-3">
-      <strong>마감 버튼 없음</strong>: 시간 기반 자동이라 "마감 버튼"이 따로 없습니다. 운영자는 미확인 인원만 빠르게 정리하면 돼요 ("미확인 일괄 처리" 도구 사용). Phase 1엔 자동 결석 처리·운영자 단계별 알림·시스템 잠금 정책 없음 (Phase 2 이월).
+      <strong>마감 버튼 없음</strong>: 시간 기반 자동이라 "마감 버튼"이 따로 없습니다. 운영자는 미확인 인원을 한 명씩 정리하면 돼요. Phase 1엔 미확인 일괄 처리 도구·자동 결석 처리·운영자 단계별 알림·시스템 잠금 정책 없음 (Phase 2 이월).
     </div>
   </div>
 
@@ -2111,8 +2114,8 @@ function closeMobileSidebar() {
       <div class="step-row">
         <div class="step-num">3</div>
         <div class="step-body">
-          <div class="step-action">미확인 → 출석/지각/조퇴/결석으로 수동 변경 (또는 일괄 처리)</div>
-          <div class="step-note">"미확인 일괄 처리" 도구로 빠르게 처리 가능 (전원 결석/전원 출석/개별 처리).</div>
+          <div class="step-action">미확인 → 출석/지각/조퇴/결석으로 수동 변경</div>
+          <div class="step-note">학습자 × 회차 셀의 상태 드롭다운에서 한 명씩 바꿉니다. 일괄 처리 도구는 없습니다(Phase 2 예정).</div>
         </div>
       </div>
       <div class="step-row">
@@ -2204,7 +2207,7 @@ function closeMobileSidebar() {
           <tr><td>개별 출석 상태 수동 변경</td><td><span class="b b-green">가능</span></td><td><span class="b b-green">가능</span></td><td>관리자 무제한 정정 정책</td></tr>
           <tr><td>결석 → 출석 수동 변경</td><td><span class="b b-green">가능</span></td><td><span class="b b-green">가능</span></td><td>종료 후에도 관리자 자유 변경</td></tr>
           <tr><td>출석 → 결석 수동 변경</td><td><span class="b b-green">가능</span></td><td><span class="b b-green">가능</span></td><td>관리자 무제한 정정 정책</td></tr>
-          <tr><td>"미확인 일괄 처리" 도구</td><td><span class="b b-green">가능</span></td><td><span class="b b-green">가능</span></td><td>전원 출석/전원 결석/개별 처리</td></tr>
+          <tr><td>"미확인 일괄 처리" 도구</td><td colspan="2" style="text-align:center"><span class="b b-slate">Phase 1 없음</span></td><td>전원 출석/전원 결석 도구 미제공. 한 명씩 드롭다운으로 변경 (Phase 2 예정)</td></tr>
           <tr><td>QR 자동 스캔 (라이브모드)</td><td><span class="b b-green">활성</span></td><td><span class="b b-slate">비활성</span></td><td>수업 시간 동안만 활성</td></tr>
           <tr><td>"마감 버튼" 사용</td><td>—</td><td>—</td><td><span class="b b-slate">버튼 자체 없음</span> (시간 기반 자동 종료)</td></tr>
           <tr><td>학습자 푸시·이메일 알림</td><td colspan="2" style="text-align:center"><span class="b b-green">즉시성 알림만</span> (Phase 1)</td><td>출석 처리됨 / 출석률 갱신만. 결석 통보·HR 연동은 Phase 2</td></tr>
@@ -2220,7 +2223,7 @@ function closeMobileSidebar() {
         <thead><tr><th>상황</th><th>처리 방법</th></tr></thead>
         <tbody>
           <tr><td>실제로 출석했지만 QR 미스캔으로 결석 처리됨</td><td>출석 관리 → 해당 수강생 → 드롭다운 → <strong>출석</strong> 또는 <strong>지각</strong>으로 변경</td></tr>
-          <tr><td>여러 명을 한번에 수정해야 함</td><td>"미확인 일괄 처리" 도구 사용. 일괄 정정 기능은 Phase 2 확장 예정</td></tr>
+          <tr><td>여러 명을 한번에 수정해야 함</td><td>Phase 1엔 방법이 없습니다 — 한 명씩 드롭다운으로 수정하세요. 일괄 처리·일괄 정정은 Phase 2 확장 예정</td></tr>
           <tr><td>이미 수료 판정이 끝난 뒤 출석을 고친 경우</td><td>출석률은 즉시 재계산됩니다. 단, 이미 확정된 수료/미수료 이력의 자동 갱신은 Phase 2 대응</td></tr>
         </tbody>
       </table>
@@ -2278,7 +2281,7 @@ function closeMobileSidebar() {
   <div class="guide-section">
     <div class="section-title">Q3. "운영자가 따로 처리할 일이 있나요?" <span class="section-tag">운영자</span></div>
     <div class="callout callout-blue mt-2">
-      <strong>"마감 버튼" 자체가 사라졌어요.</strong> 운영자가 할 일은 <strong>미확인 인원을 직접 정리</strong>하는 것뿐. "미확인 일괄 처리" 도구로 빠르게 정리 가능 (전원 결석/전원 출석/개별).
+      <strong>"마감 버튼" 자체가 사라졌어요.</strong> 운영자가 할 일은 <strong>미확인 인원을 직접 정리</strong>하는 것뿐 — 학습자별 상태 드롭다운에서 한 명씩 바꿉니다.
     </div>
     <div class="callout callout-amber mt-3">
       Phase 1엔 자동 결석 처리·운영자 단계별 알림·시스템 잠금 정책 없음 (Phase 2 이월).
@@ -2341,7 +2344,7 @@ function closeMobileSidebar() {
 
   <div class="guide-section">
     <div class="section-title">Q8. "수업이 아예 못 열린 경우엔요? (휴강)" <span class="section-tag">Phase 3</span></div>
-    <p class="text-sm text-slate-600 mt-2 mb-3">강사가 갑자기 못 오거나, 강의장 사고나 천재지변으로 수업이 안 열린 경우. <strong>Phase 1에서는 운영자가 직접 처리</strong>(전원 출석 수동 처리 등)하지만, 사용자 클레임이 자주 나오는 영역이라 Phase 2부터 정식 상태로 들어옵니다.</p>
+    <p class="text-sm text-slate-600 mt-2 mb-3">강사가 갑자기 못 오거나, 강의장 사고나 천재지변으로 수업이 안 열린 경우. <strong>Phase 1에서는 운영자가 직접 처리</strong>(참석자를 한 명씩 출석으로 변경 등)하지만, 사용자 클레임이 자주 나오는 영역이라 Phase 2부터 정식 상태로 들어옵니다.</p>
     <div class="overflow-x-auto mt-3">
       <table class="xl-table">
         <thead><tr><th style="width:200px">항목</th><th>처리</th></tr></thead>
@@ -2356,7 +2359,7 @@ function closeMobileSidebar() {
       </table>
     </div>
     <div class="callout callout-amber mt-3">
-      <strong>Phase 1 임시 운영</strong>: 수업 자체가 못 열렸다면 → 그 회차의 미확인 인원을 운영자가 직접 "출석" 또는 "결석"으로 일괄 처리하세요 ("미확인 일괄 처리" 도구 사용). 운영팀 내부 룰을 정해두세요. (작년 강사 펑크 사건 때 운영자별로 처리가 달라 출석률 경계 인원의 결과가 갈렸던 사례 있음)
+      <strong>Phase 1 임시 운영</strong>: 수업 자체가 못 열렸다면 → 그 회차의 미확인 인원을 운영자가 한 명씩 "출석" 또는 "결석"으로 바꿔주세요(일괄 처리 도구 없음). 운영팀 내부 룰을 정해두세요. (작년 강사 펑크 사건 때 운영자별로 처리가 달라 출석률 경계 인원의 결과가 갈렸던 사례 있음)
     </div>
   </div>
 
@@ -2647,8 +2650,8 @@ function closeMobileSidebar() {
         <tbody>
           <tr><td><strong>표출 방식</strong></td><td>강사·운영자 화면을 빔·모니터에 띄움</td><td>PNG를 인쇄해 벽·입구에 부착</td></tr>
           <tr><td><strong>QR 갱신</strong></td><td>30초마다 자동 갱신</td><td>없음 — 발급 후 동결(변하지 않음)</td></tr>
-          <tr><td><strong>발급 단위</strong></td><td>회차 진행 중 실시간 생성</td><td>차수당 1장 (퇴장 체크 ON이면 2장)</td></tr>
-          <tr><td><strong>회차 구분</strong></td><td>강사가 연 회차</td><td>스캔 시각으로 시스템이 자동 판단</td></tr>
+          <tr><td><strong>발급 단위</strong></td><td>회차 진행 중 실시간 생성</td><td><strong>회차당 1장</strong> (퇴장 체크 ON이면 2장) — 2026-08-07 개정</td></tr>
+          <tr><td><strong>회차 구분</strong></td><td>강사가 연 회차</td><td><strong>QR 자체가 회차</strong>입니다 (종전의 스캔 시각 자동 판단은 폐지)</td></tr>
           <tr><td><strong>사진 공유 방어</strong></td><td><span class="b b-green">가능</span> 30초 갱신이 막음</td><td><span class="b b-red">불가</span> 아래 트레이드오프 참고</td></tr>
           <tr><td><strong>적합한 현장</strong></td><td>빔·스크린이 있는 교육장 · 어뷰징이 문제되는 코스</td><td>빔·스크린 없는 곳, 전날 미리 준비하는 운영</td></tr>
           <tr><td><strong>새 코스 기본값</strong></td><td>—</td><td><span class="b b-green">기본 선택</span> 개설 시 별도로 바꾸지 않으면 인쇄입니다</td></tr>
@@ -2656,7 +2659,7 @@ function closeMobileSidebar() {
       </table>
     </div>
     <div class="callout callout-amber mt-2">
-      <strong>진행 중 임의 전환은 열지 않습니다.</strong> 벽에 붙은 종이는 소프트웨어로 회수되지 않기 때문입니다. 부득이 <code>인쇄 → 라이브</code>로 바꾸면 <strong>차수 QR이 즉시 폐기</strong>되어 남은 인쇄물은 모두 거부됩니다 — 반드시 종이를 수거하세요.
+      <strong>진행 중 임의 전환은 열지 않습니다.</strong> 벽에 붙은 종이는 소프트웨어로 회수되지 않기 때문입니다. 부득이 <code>인쇄 → 라이브</code>로 바꾸면 <strong>그 차수의 전 회차 QR이 즉시 폐기</strong>되어 남은 인쇄물은 모두 거부됩니다 — 반드시 종이를 수거하세요. 회차별 발급이라 <strong>수거할 장수가 회차 수만큼</strong>이니 빠뜨리지 마세요.
     </div>
   </div>
 
@@ -2710,8 +2713,8 @@ function closeMobileSidebar() {
       <div class="step-row">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-action">수업 전날 — 출석 탭 <code>[출석 QR]</code> → PNG 다운로드 → 인쇄</div>
-          <div class="step-note">오늘 회차가 없어도 버튼이 보입니다. 차수당 1장이면 그 차수 전체 회차를 커버합니다.</div>
+          <div class="step-action">수업 전날 — 출석 탭 <code>[출석 QR]</code> → <code>[전체 다운로드 (ZIP)]</code> → 인쇄</div>
+          <div class="step-note">오늘 회차가 없어도 버튼이 보입니다. <strong>회차마다 QR이 따로입니다</strong>(2026-08-07 개정) — 낱장으로 받지 말고 <strong>ZIP 한 번</strong>으로 받으세요(2026-08-11 추가). 모달은 <strong>전체 차수</strong>가 기본이고 상단 차수 필터로 좁힐 수 있으니, 차수별 담당이 다르면 필터를 걸고 받으면 그 차수만 담깁니다. ZIP 안은 <code>{차수명}/{회차명}_{입장|퇴장}_{발급일}</code> 구조라 폴더째 인쇄 순서대로 정리됩니다. 회차 한 장만 다시 뽑을 때는 카드의 <code>[PNG]</code>·<code>[SVG]</code>를 쓰세요 — <strong>라벨지·A4로 확대해 붙일 때는 SVG</strong>가 안 뭉개집니다.</div>
         </div>
       </div>
       <div class="step-row">
@@ -2725,7 +2728,7 @@ function closeMobileSidebar() {
         <div class="step-num">3</div>
         <div class="step-body">
           <div class="step-action">수강생이 입장하며 스캔 — 시작 30분 전부터 가능</div>
-          <div class="step-note">회차는 시스템이 스캔 시각으로 자동 판단합니다. 수강생이 회차를 고르지 않습니다.</div>
+          <div class="step-note">벽에 붙은 QR이 곧 그 회차입니다(2026-08-07 개정) — 수강생이 회차를 고르지 않습니다. 다른 회차 QR을 찍으면 <code>아직 열리지 않음</code> 또는 <code>종료된 회차</code>로 거부됩니다.</div>
         </div>
       </div>
       <div class="step-row">
@@ -2744,7 +2747,7 @@ function closeMobileSidebar() {
       </div>
     </div>
     <div class="callout callout-green mt-2">
-      <strong>회차 추가·일정 변경·차수명·장소가 바뀌어도 재출력이 불필요합니다.</strong> QR 이미지에는 아무 정보도 인쇄되지 않기 때문입니다. 재발급이 필요한 경우는 <em>인쇄물 유출이 의심될 때</em>뿐입니다.
+      <strong>차수명·장소·강사가 바뀌어도 재출력이 불필요합니다.</strong> QR 이미지에 그 정보는 인쇄되지 않기 때문입니다. 다만 <strong>회차명이나 회차 시간을 바꾸면 재출력이 필요합니다</strong>(2026-08-07 개정) — 이미지 상단에 회차명·학습시간이 찍히기 때문입니다. 이때 QR 자체는 유효하므로 <strong>재발급이 아니라 재출력</strong>입니다. <strong>회차를 새로 추가하면</strong> 토큰은 자동 발급되니 <strong>인쇄·부착만</strong> 하면 됩니다. 재<em>발급</em>이 필요한 경우는 인쇄물 유출이 의심될 때뿐입니다.
     </div>
   </div>
 
@@ -2761,7 +2764,7 @@ function closeMobileSidebar() {
           </tr>
         </thead>
         <tbody>
-          <tr><td><strong>입장</strong></td><td>회차 <strong>시작 30분 전 ~ 종료 시각</strong></td><td>지각 기준 그대로 — <span class="b b-green">출석</span> / <span class="b b-orange">지각</span> / <span class="b b-red">결석</span></td></tr>
+          <tr><td><strong>입장</strong></td><td>회차 <strong>시작 30분 전 ~ 종료 시각</strong></td><td>지각 기준 그대로 — <span class="b b-green">출석</span> / <span class="b b-orange">지각</span> (스캔은 <span class="b b-red">결석</span>을 만들지 않음)</td></tr>
           <tr><td><strong>퇴장</strong></td><td>회차 <strong>시작 ~ 종료 후 30분</strong></td><td>종료 <strong>전</strong> → <span class="b b-yellow">조퇴</span> · 종료 <strong>후</strong> → 정상 퇴장</td></tr>
         </tbody>
       </table>
@@ -2788,7 +2791,7 @@ function closeMobileSidebar() {
       <strong>30분은 고정값이며 설정 항목으로 노출하지 않습니다.</strong> 운영자가 입력하는 것은 회차 시간뿐이고, 출석 가능 시간대는 거기서 자동 계산됩니다. "입장하며 5~10분 전에 찍는" 동선을 덮기에 충분하고, 값 하나 때문에 코스 설정을 늘리지 않는다는 판단입니다.
     </div>
     <div class="callout callout-amber mt-2">
-      <strong>출석 가능 시간대 ≠ 지각 기준.</strong> 시간대는 "지금 스캔을 받을지"만 정하고, 출석·지각·결석 판정은 기존 지각 기준이 그대로 합니다. 30분 전에 찍어도 <span class="b b-green">출석</span>입니다.
+      <strong>출석 가능 시간대 ≠ 지각 기준.</strong> 시간대는 "지금 스캔을 받을지"만 정하고, 출석·지각 판정은 기존 지각 기준이 그대로 합니다. 30분 전에 찍어도 <span class="b b-green">출석</span>입니다. <strong>결석은 회차 마감 시 한 번도 찍지 않은 수강생</strong>에게 붙습니다 — 늦게 찍었다고 자동으로 결석이 되지는 않습니다.
     </div>
   </div>
 
@@ -2880,17 +2883,18 @@ function closeMobileSidebar() {
       <table class="xl-table">
         <thead><tr><th style="width:150px">항목</th><th>규칙</th></tr></thead>
         <tbody>
-          <tr><td><strong>발급 단위</strong></td><td><strong>차수당 1장.</strong> 그 차수의 모든 회차를 한 장으로 커버합니다. 회차는 스캔 시각으로 시스템이 구분합니다</td></tr>
-          <tr><td><strong>퇴장 체크 ON</strong></td><td>입장용·퇴장용 <strong>2장</strong>. 입장/퇴장 판정은 <strong>찍은 종이가 선언</strong>하므로 스캔 순서를 추론하지 않습니다</td></tr>
-          <tr><td><strong>진입 경로</strong></td><td>관리 화면 <strong>출석 탭 → <code>[출석 QR]</code></strong> → 차수 QR 모달. 오늘 회차가 없어도 노출됩니다(전날 준비 동선)</td></tr>
-          <tr><td><strong>산출물</strong></td><td><strong>순수 QR 이미지 PNG만.</strong> A4 레이아웃·일괄 인쇄는 제공하지 않습니다 — 이미지에 코스명·차수·날짜를 싣지 않으므로 낡을 것이 없습니다</td></tr>
-          <tr><td><strong>파일명</strong></td><td>파일명이 유일한 식별자입니다 — <code>{코스명}_{차수명}_{입장|퇴장}_{발급일}.png</code></td></tr>
-          <tr><td><strong>기록 단위</strong></td><td>QR은 차수 단위지만 <strong>출석 기록은 회차 단위</strong>로 남습니다. 출석부 구조는 라이브와 동일합니다</td></tr>
+          <tr><td><strong>발급 단위</strong></td><td><strong>회차당 1장</strong> (2026-08-07 개정 · 종전 차수당 1장). <strong>QR 자체가 회차를 가리킵니다</strong> — 스캔 시각으로 되짚지 않습니다</td></tr>
+          <tr><td><strong>퇴장 체크 ON</strong></td><td>회차마다 입장용·퇴장용 <strong>2장</strong>. 입장/퇴장 판정은 <strong>찍은 종이가 선언</strong>하므로 스캔 순서를 추론하지 않습니다</td></tr>
+          <tr><td><strong>부착 주의</strong></td><td><strong>회차와 붙이는 자리를 맞추세요.</strong> 다른 회차 QR을 붙이면 그 시간에 스캔이 거부되어(<code>아직 열리지 않음</code> 또는 <code>종료된 회차</code>) 학습자가 출석하지 못합니다. 잘못 기록되는 것이 아니라 막히므로 현장에서 바로 드러납니다</td></tr>
+          <tr><td><strong>진입 경로</strong></td><td>관리 화면 <strong>출석 탭 → <code>[출석 QR]</code></strong> → QR 모달. <strong>모달의 단위는 코스</strong>여서 전체 차수의 회차가 차수별로 묶여 나오고, 상단 <strong>차수 필터</strong>로 좁힙니다(2026-08-11 개정 · 종전에는 차수 하나만 열렸습니다). 차수 카드·캘린더로 들어가면 그 차수로 필터된 채 열립니다. 오늘 회차가 없어도 노출됩니다(전날 준비 동선)</td></tr>
+          <tr><td><strong>산출물</strong></td><td><strong>라벨 + QR 합성 PNG·SVG.</strong> 인쇄물 상단에 <strong>코스명 · 회차명·입퇴장 · 학습시간·장소</strong>, QR 아래에 <strong>발급일</strong>이 함께 찍혀 벽에서 바로 구분됩니다(2026-08-07 개정 → 2026-08-11 장소·발급일 추가). <strong>SVG는 확대 인쇄용</strong>입니다. 전 회차는 <strong>ZIP 한 번</strong>으로 받습니다 — A4 자동 레이아웃·<em>일괄 PDF 출력은 여전히 미제공</em>입니다</td></tr>
+          <tr><td><strong>파일명</strong></td><td>파일명도 식별자로 유지합니다. <strong>회차가 포함됩니다</strong>(2026-08-07 개정) — <code>{코스명}_{차수명}_{회차명}_{입장|퇴장}_{발급일}.png|svg</code>. ZIP 안에서는 코스·차수를 폴더가 지므로 <code>{차수명}/{회차명}_{입장|퇴장}_{발급일}</code>이며, <strong>발급일이 재발급본과 구버전을 갈라놓습니다</strong></td></tr>
+          <tr><td><strong>기록 단위</strong></td><td>QR도 <strong>회차 단위</strong>이고(2026-08-07 개정 · 종전 차수 단위) 출석 기록도 회차 단위로 남습니다. 출석부 구조는 라이브와 동일합니다</td></tr>
         </tbody>
       </table>
     </div>
     <div class="callout callout-amber mt-2">
-      <strong>이미지에 아무 정보도 인쇄되지 않으므로 파일명 관리가 곧 현물 관리입니다.</strong> 다운로드 후 파일명을 바꾸면 어느 차수의 것인지 알 수 없습니다.
+      <strong>인쇄물 상단의 회차명을 붙일 자리와 대조하세요.</strong> 2026-08-07부터 이미지에 코스명·회차명·학습시간이 찍히므로 벽에서도 구분됩니다. 파일명에도 같은 정보가 들어갑니다.
     </div>
   </div>
 
@@ -2907,15 +2911,15 @@ function closeMobileSidebar() {
       <div class="step-row">
         <div class="step-num">2</div>
         <div class="step-body">
-          <div class="step-action">퇴장 체크 사용 여부 확정</div>
-          <div class="step-note">인쇄 후에 켜면 <strong>퇴장 QR을 다시 뽑아 붙여야</strong> 합니다. 부착 전에 결정하세요.</div>
+          <div class="step-action">퇴장 체크 사용 여부 확정 — 빌더 <code>수료 조건 &gt; 출석 판정 기준 &gt; 인쇄 QR</code> 카드 안의 스위치</div>
+          <div class="step-note">인쇄 후에 켜면 <strong>퇴장 QR을 다시 뽑아 붙여야</strong> 합니다. 부착 전에 결정하세요. 스위치는 <strong>인쇄 QR을 고른 동안에만</strong> 보입니다(2026-08-11 개정) — 라이브 QR은 입·퇴장을 구분할 수단이 없어 이 옵션이 성립하지 않습니다.</div>
         </div>
       </div>
       <div class="step-row">
         <div class="step-num">3</div>
         <div class="step-body">
-          <div class="step-action">차수별로 PNG 다운로드 → 인쇄</div>
-          <div class="step-note">차수가 여러 개면 <strong>차수마다 별도 QR</strong>입니다. 섞이면 <code>귀하는 N차수 등록자입니다</code> 거부가 발생합니다.</div>
+          <div class="step-action">전체 ZIP 다운로드 → 차수 폴더별로 인쇄</div>
+          <div class="step-note">차수가 여러 개면 <strong>차수마다·회차마다 별도 QR</strong>입니다. ZIP은 <strong>차수별 폴더</strong>로 나뉘어 오니 폴더째 인쇄하면 섞이지 않습니다. 섞으면 <code>다른 차수 QR · 출석 안 됨</code> 거부가 발생합니다.</div>
         </div>
       </div>
       <div class="step-row">
@@ -2941,8 +2945,11 @@ function closeMobileSidebar() {
       <table class="xl-table">
         <thead><tr><th style="width:280px">상황</th><th style="width:130px">조치</th><th>이유</th></tr></thead>
         <tbody>
-          <tr><td>회차 추가 / 일정(날짜·시간) 변경</td><td><span class="b b-green">불필요</span></td><td>회차는 스캔 시각으로 판단하므로 QR이 그대로 유효</td></tr>
-          <tr><td>차수명 변경 / 장소 변경 / 강사 변경</td><td><span class="b b-green">불필요</span></td><td>이미지에 해당 정보가 없음</td></tr>
+          <tr><td><strong>회차 추가</strong></td><td><span class="b b-blue">인쇄만</span></td><td>토큰은 자동 발급됩니다. QR 모달에서 해당 회차 PNG·SVG를 내려받아 인쇄·부착하세요</td></tr>
+          <tr><td><strong>회차명 / 회차 시간(학습시간) 변경</strong></td><td><span class="b b-orange">재출력</span></td><td>이미지 상단에 회차명·학습시간이 인쇄되므로 낡습니다(2026-08-07 개정). QR 자체는 유효하니 <strong>재발급이 아니라 재출력</strong>입니다</td></tr>
+          <tr><td><strong>장소 변경</strong></td><td><span class="b b-orange">재출력</span></td><td><strong>2026-08-11 변경</strong> — 라벨에 장소가 인쇄되면서 재출력 대상이 됐습니다(종전 "불필요"). 회차 장소가 없으면 차수 장소가 상속되므로, <strong>차수 장소를 바꾸면 그 차수의 상속 회차가 모두 재출력</strong>입니다</td></tr>
+          <tr><td>날짜만 변경 (회차 시간·장소 그대로)</td><td><span class="b b-green">불필요</span></td><td>QR은 회차에 묶여 있고 이미지에 날짜는 찍히지 않습니다. 시간·장소가 함께 바뀌었다면 위 두 행을 따르세요</td></tr>
+          <tr><td>차수명 변경 / 강사 변경</td><td><span class="b b-green">불필요</span></td><td>이미지에 해당 정보가 없음(차수명은 파일명에만 들어갑니다)</td></tr>
           <tr><td>정원·수료 조건 변경</td><td><span class="b b-green">불필요</span></td><td>QR과 무관</td></tr>
           <tr><td><strong>인쇄물 유출·분실이 의심됨</strong></td><td><span class="b b-red">재발급</span></td><td>기존 토큰을 무효화해야 함</td></tr>
           <tr><td><strong>퇴장 체크를 나중에 켬</strong></td><td><span class="b b-orange">퇴장분 추가</span></td><td>퇴장용 QR이 새로 발급됨</td></tr>
@@ -2962,16 +2969,16 @@ function closeMobileSidebar() {
       <table class="xl-table">
         <thead><tr><th style="width:130px">화면</th><th style="width:190px">조건</th><th>내용</th></tr></thead>
         <tbody>
-          <tr><td><span class="b b-slate">대기</span> 랜딩</td><td>출석 가능 시간대 밖 + 남은 회차 있음</td><td>회차명 · 시작 시각 · <code>12:30부터 출석 가능</code> · 장소 · 강사 · <code>내 출석 현황 2/5</code> — <strong>출석 버튼 없음</strong></td></tr>
+          <tr><td><span class="b b-slate">대기</span> 랜딩</td><td>이 회차의 출석 가능 시간대 <strong>전</strong></td><td>회차명 · 시작 시각 · <code>12:30부터 출석 가능</code> · 장소 · 강사 · <code>내 출석 현황 2/5</code> — <strong>출석 버튼 없음</strong></td></tr>
           <tr><td><span class="b b-green">출석 가능</span> 랜딩</td><td>출석 가능 시간대 안 + 기존 기록 없음</td><td><code>[출석 체크]</code> 버튼 → 누르면 판정 결과 표시</td></tr>
           <tr><td><span class="b b-slate">이미 확인됨</span> 안내</td><td>같은 회차에 기존 기록 존재</td><td><code>이미 입장 확인됨 · 2회차 09:04 지각</code> — 재스캔해도 기존 기록을 덮지 않습니다</td></tr>
-          <tr><td><span class="b b-blue">종료된 과정</span> 안내</td><td>차수에 남은 회차 없음</td><td><code>종료된 과정입니다 · 이 QR은 더 이상 출석에 사용되지 않아요</code></td></tr>
+          <tr><td><span class="b b-blue">종료된 회차</span> 안내</td><td>이 회차의 출석 가능 시간대 <strong>후</strong></td><td><code>종료된 회차 · 출석 안 됨 · 이 QR은 더 이상 출석에 사용되지 않아요</code></td></tr>
           <tr><td><span class="b b-red">다른 차수</span> 안내</td><td>등록하지 않은 차수의 QR</td><td><code>귀하는 2차수 등록자입니다</code> — 본인 차수 교육장의 QR로 안내</td></tr>
         </tbody>
       </table>
     </div>
     <div class="callout callout-blue mt-2">
-      <strong>회차 종료 직후는 "종료된 과정"이 아니라 다음 회차의 "대기"</strong>로 넘어갑니다. 5회차 차수에서 학습자가 하루에 두 얼굴을 보지 않도록 한 것으로, <strong>종료 안내는 그 차수에 남은 회차가 없을 때만</strong> 나타납니다.
+      <strong>2026-08-07 개정</strong> — 종전에는 "회차 종료 직후는 다음 회차의 대기"였습니다. 차수당 QR이 1장이라 한 장이 회차마다 얼굴을 바꿔야 했기 때문입니다. 이제 <strong>QR이 회차별</strong>이라 그 종이는 그 회차만 대변합니다 — 회차가 끝나면 그 QR은 <strong>종료된 회차</strong>이고, 다음 회차 QR을 찍으면 <strong>대기</strong>입니다.
     </div>
     <div class="callout callout-amber mt-2">
       <strong>종료 화면에 최종 출석률·수료 여부는 표시하지 않습니다.</strong> 수료 처리·수료증 발급이 Phase 2이므로 지금 보여줄 수 있는 것은 출석 현황뿐이고, 그것은 학습자 MY 화면에 이미 있습니다. 수료 관련 문의는 <em>7. CS 응대</em> 기준으로 안내하세요.
@@ -3005,7 +3012,7 @@ function closeMobileSidebar() {
           <tr><td>스캔했는데 출석 처리 안 됨</td><td>인터넷 연결 불안정</td><td>수강생 Wi-Fi 확인 / 관리자 화면 새로고침 후 상태 확인</td></tr>
           <tr><td>라이브 모드 화면이 업데이트 안 됨</td><td>관리자 화면 인터넷 불안정 <span class="b b-slate">라이브</span></td><td>관리자 화면 새로고침</td></tr>
           <tr><td>스마트폰이 없는 수강생</td><td>기기 미소지</td><td>수업 후 관리자 수동으로 출석 처리</td></tr>
-          <tr><td>QR 스캔 자체가 불가능한 환경</td><td>인터넷 불가 장소 등</td><td>회차 자동 종료 후 운영자가 "미확인 일괄 처리" 도구로 수동 처리</td></tr>
+          <tr><td>QR 스캔 자체가 불가능한 환경</td><td>인터넷 불가 장소 등</td><td>회차 자동 종료 후 운영자가 한 명씩 수동 처리 (종이 명단으로 대조)</td></tr>
         </tbody>
       </table>
     </div>
@@ -3024,8 +3031,9 @@ function closeMobileSidebar() {
           <tr><td>"출석 버튼이 안 보여요"</td><td><span class="b b-green">정상</span></td><td>회차 시작 <strong>30분 전이 안 됐을 때</strong>입니다. 화면에 표시된 <code>N시 N분부터 출석 가능</code> 시각 이후 다시 찍도록 안내</td></tr>
           <tr><td>"이미 확인됐다고 나와요"</td><td><span class="b b-green">정상</span></td><td>중복 스캔 방지입니다. <strong>기존 기록이 그대로 유지</strong>되며 손실 없음. 표시된 상태(예: <code>2회차 09:04 지각</code>)를 확인시켜 주세요</td></tr>
           <tr><td>"다른 차수 등록자라고 나와요"</td><td><span class="b b-green">정상</span></td><td>등록하지 않은 차수의 QR을 찍은 경우입니다. <strong>본인 차수 교육장의 QR</strong>을 찍도록 안내</td></tr>
-          <tr><td>"수업 끝났는데 출석률만 나와요"</td><td><span class="b b-green">정상</span></td><td>그 차수에 남은 회차가 없을 때의 화면입니다</td></tr>
-          <tr><td>"회차를 고르는 화면이 없어요"</td><td><span class="b b-green">정상</span></td><td>회차는 <strong>스캔 시각으로 시스템이 자동 판단</strong>합니다. 수강생이 고르지 않습니다</td></tr>
+          <tr><td>"수업 끝났는데 출석률만 나와요"</td><td><span class="b b-green">정상</span></td><td><strong>그 회차가 끝났을 때</strong>의 화면입니다(2026-08-07 개정 — 종전에는 차수에 남은 회차가 없을 때)</td></tr>
+          <tr><td>"회차를 고르는 화면이 없어요"</td><td><span class="b b-green">정상</span></td><td><strong>벽에 붙은 QR이 곧 그 회차</strong>입니다. 수강생이 고르지 않습니다</td></tr>
+          <tr><td><strong>"종료된 회차라는데 오늘 수업이에요"</strong></td><td><span class="b b-red">부착 확인</span></td><td><strong>다른 회차 QR이 붙어 있을 가능성</strong>이 큽니다(회차별 발급). 파일명(<code>…_2회차_입장_…</code>)으로 대조해 올바른 종이로 교체하고, 그동안의 출석은 관리 화면에서 수기 처리하세요</td></tr>
         </tbody>
       </table>
     </div>
@@ -3140,8 +3148,13 @@ function closeMobileSidebar() {
   <div class="guide-section">
     <div class="section-title">한 줄 정책 <span class="section-tag">핵심</span></div>
     <div class="callout callout-blue">
-      <strong>출석률 = 학습자가 등록된 차수의 "이미 마감된 수업" 중 출석한 비율</strong><br>
+      <strong>출석률 = 학습자가 <u>등록한 수업</u> 중 "이미 마감된 수업"에서 출석한 비율</strong><br>
       <span class="text-xs text-slate-600">계산할 때 쓰는 칸은 "이미 끝난 수업"만이에요. 아직 안 한 미래 수업이나 다른 차수의 수업은 들어가지 않아요.</span>
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>회차선택형은 분모가 다릅니다 (2026-08-06)</strong> — 학습자가 <strong>여러 날짜 중 하나를 골라</strong> 신청하는 코스(법정의무교육 등)에서는 <strong>본인이 고른 그 수업 1칸만</strong> 계산에 들어갑니다.<br>
+      <span class="text-xs text-slate-600">예: 5개 날짜 중 5월 20일을 골라 신청하고 그날 출석 → <strong>출석률 100%</strong>(1칸 중 1칸). 나머지 4개 날짜는 <strong>본인이 신청하지 않았으므로 결석이 아니고, 계산에도 안 들어갑니다.</strong> 관리자 명부에는 <strong>「미신청」</strong>으로 표시됩니다.<br>
+      고른 수업이 아직 안 끝났으면 <strong>계산할 칸이 없어 "판정 보류"</strong>입니다 — 출석률 0%나 미수료로 보이면 잘못된 것이니 문의로 올려주세요.</span>
     </div>
   </div>
 
@@ -3586,6 +3599,232 @@ function closeMobileSidebar() {
 </div>
 
 
+<div id="page-cohort-delete" class="page">
+  <div class="page-tag">2. 회차 종료</div>
+  <div class="page-title">차수 삭제·폐강 정책</div>
+  <div class="page-desc">차수를 없애야 할 때 관리자가 누르는 버튼은 늘 휴지통 하나뿐이었어요. 신청자가 0명이든 40명이든 똑같이 지워졌습니다. 그게 문제입니다. 이 페이지는 삭제와 폐강을 어떻게 가르는지 정한 정책입니다. <span class="text-slate-400">(2026-08-11 확정)</span></div>
+
+  <div class="guide-section">
+    <div class="section-title">삭제가 만드는 진짜 문제 <span class="section-tag">핵심</span></div>
+    <div class="callout callout-red">
+      <strong>차수를 삭제하면 신청자에게 알릴 방법이 사라집니다.</strong><br>
+      그 차수의 신청 내역도 함께 사라지기 때문에, 누가 신청했는지 모르는 상태가 됩니다. "이 교육은 열리지 않습니다"라는 알림을 보낼 <strong>대상 명단 자체가 지워지는</strong> 거예요.
+    </div>
+    <p class="text-sm text-slate-600 mt-3">신청자 입장에서는 이렇게 됩니다.</p>
+    <div class="callout callout-slate mt-2">
+      분명히 신청했는데, 내 신청 목록에서 그 교육이 사라졌다.<br>
+      취소된 건지, 원래 없었던 건지, 내가 잘못 본 건지 알 수 없다.
+    </div>
+    <p class="text-sm text-slate-600 mt-3">교육 당일에 교육장으로 찾아오는 사람이 생기는 건 이 지점입니다. 관리자는 지웠다고 생각하고, 신청자는 여전히 신청 상태라고 생각합니다.</p>
+    <p class="text-sm text-slate-700 mt-3"><strong>특히 회원이 직접 신청한 경우가 위험합니다.</strong> 관리자가 배정한 인원은 부서장을 통해 구두로 전달되기도 하지만, 스스로 신청한 사람은 <strong>시스템 알림이 유일한 연락 수단</strong>이에요. 그 통로가 끊기면 알릴 방법이 없습니다.</p>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">알림 기능이 아직 없는데 왜 지금 정하나</div>
+    <p class="text-sm text-slate-600 mt-2"><strong>푸시알림 발송은 다음 개발 과제입니다.</strong> 그러면 "지금은 알림도 없는데 왜 폐강이 필요한가"라는 반문이 나옵니다.</p>
+    <div class="callout callout-amber mt-3">
+      <strong>지금 명단을 지워버리면, 나중에 알림 기능을 붙여도 보낼 대상이 없습니다.</strong><br>
+      기능은 나중에 붙일 수 있지만 지워진 명단은 복구할 수 없어요. 그래서 명단 보존은 지금부터 시작해야 합니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">기준은 신청자 수 하나 <span class="section-tag">필수</span></div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:120px">신청자</th>
+            <th style="width:130px">처리</th>
+            <th style="width:130px">어디서</th>
+            <th>무슨 일이 일어나나</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>0명</strong></td>
+            <td><span class="b b-slate">삭제</span></td>
+            <td>빌더 (코스 수정)</td>
+            <td>차수와 회차가 완전히 사라짐. 지울 사용자 데이터가 없으니 흔적을 남길 이유도 없음</td>
+          </tr>
+          <tr>
+            <td><strong>1명 이상</strong></td>
+            <td><span class="b b-red">폐강</span></td>
+            <td>수강관리</td>
+            <td>차수는 남고 신청이 취소됨. <strong>신청 이력·출석 기록 보존</strong> + 신청자 알림</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-blue mt-3">
+      <strong>차수가 종료됐는지, 진행 중인지, 퍼블리싱됐는지는 보지 않습니다.</strong> 규칙이 하나면 헷갈릴 일이 없고 나중에 흔들리지도 않아요.
+    </div>
+    <p class="text-sm text-slate-600 mt-3">"종료된 차수는 삭제 불가"를 따로 쓰지 않는 이유:</p>
+    <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1 mt-1">
+      <li>종료·진행 중인 차수는 대개 신청자가 있으므로 <strong>결과적으로 삭제가 막힙니다.</strong> 규칙을 하나 더 만들 필요가 없어요</li>
+      <li>반대로 "종료됐지만 아무도 신청하지 않은 차수"는 삭제할 수 있습니다. 아무도 오지 않아 열리지 못한 과거 차수를 영구히 남길 이유가 없기 때문입니다</li>
+    </ul>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">차수 삭제 — 신청자 0명</div>
+    <p class="text-sm text-slate-600 mt-2">실제로 이 경우가 가장 많습니다. 전부 <strong>관리자의 작업 흔적</strong>이지 교육이 아니에요.</p>
+    <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1 mt-2">
+      <li>차수를 복제해 만들다 남은 <code>- 복사본</code></li>
+      <li>반복 요일 일괄 생성으로 8회차가 만들어진 것</li>
+      <li>날짜를 잘못 넣어 다시 만든 차수</li>
+    </ul>
+    <p class="text-sm text-slate-600 mt-3">여기에 무거운 경고를 띄우면 일을 방해할 뿐입니다. 확인 한 번만 받고 지웁니다.</p>
+    <div class="callout callout-slate mt-3">
+      <strong>수강생을 전원 수동 삭제하면 신청자 0명이 되어 삭제할 수 있습니다.</strong><br>
+      의도해서 만든 경로는 아니지만 막지 않았어요. "1명 잘못 등록해서 뺀다"는 정상 업무이고, 전원을 한 명씩 확인하며 뺀 것이라면 오히려 더 신중한 경로입니다.
+    </div>
+    <div class="callout callout-amber mt-2">
+      <strong>삭제는 임시저장 상태입니다.</strong> 빌더에서 지워도 퍼블리싱할 때까지 실제 서비스에는 그대로 남아 있어요. 관리자에게는 "지웠는데 아직 살아있다"로 보이고, 그 사이 신청이 들어와 0명이 아니게 될 수도 있습니다.<br>
+      그래서 실제로 발효되는 <strong>퍼블리싱 확인 모달</strong>에서 <code>차수 N개 삭제가 이번 공개로 반영됩니다</code>로 다시 확인받습니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">차수 폐강 — 신청자 1명 이상</div>
+    <p class="text-sm text-slate-600 mt-2">빌더에서 휴지통을 누르면 삭제되지 않고 이렇게 안내됩니다.</p>
+    <div class="callout callout-slate mt-2">
+      <strong>신청자가 있어 삭제할 수 없습니다</strong><br>
+      A반에 신청자 28명이 있습니다. 삭제하면 신청 이력이 사라져 폐강 알림을 보낼 대상도 함께 없어집니다.<br><br>
+      이 차수를 열지 않으려면 <strong>수강관리 &gt; 차수 폐강</strong>을 이용하세요.<br>
+      <span class="text-slate-500">일정만 바뀐 경우라면 삭제 대신 회차 날짜를 수정하세요 — 신청자를 유지할 수 있습니다.</span>
+    </div>
+    <p class="text-sm text-slate-600 mt-3">마지막 줄이 중요합니다. 강사나 장소 문제로 날짜를 옮겨야 할 때 관리자는 "지우고 다시 만들자"로 접근하기 쉽고, 그러면 <strong>모아둔 신청자를 전부 잃습니다.</strong> 날짜만 고치면 되는 일이에요.</p>
+
+    <div class="section-title mt-5">폐강하면 무슨 일이 일어나나</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:150px">구분</th>
+            <th>내용</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="b b-green">남는 것</span></td>
+            <td>신청 이력(누가 신청했었는지) · 출석 기록(이미 진행된 회차가 있다면 그대로) · 폐강 사유와 시각</td>
+          </tr>
+          <tr>
+            <td><span class="b b-red">빠지는 것</span></td>
+            <td>신규 신청(차수 선택 목록에서 사라짐) · 출석 QR 발급 · <strong>코스 통계 전부</strong>(정원·신청자 수·출석률·수료율·평균 학습시간·회차 수)</td>
+          </tr>
+          <tr>
+            <td><span class="b b-blue">명단</span></td>
+            <td><strong>수강생 명단에는 남습니다.</strong> 명단에서까지 지우면 삭제와 똑같아지니까요</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-blue mt-3">
+      통계에서 빼는 이유는 간단합니다. <strong>열리지 않은 교육은 그 코스의 실적이 아닙니다.</strong> 폐강한 차수 때문에 코스 출석률이 깎이거나 수료율이 낮아 보이면 지표를 신뢰할 수 없어요.<br>
+      <strong>"지표에서는 빼고 사람은 남긴다" — 이게 삭제와 폐강을 가르는 지점입니다.</strong>
+    </div>
+
+    <div class="section-title mt-5">폐강 사유는 필수입니다</div>
+    <p class="text-sm text-slate-600 mt-2">입력한 사유가 <strong>신청자에게 그대로 전달됩니다.</strong> 그래서 비워둘 수 없어요.</p>
+    <div class="callout callout-green mt-2">
+      <strong>좋은 예</strong><br>
+      최소 인원(10명) 미달로 이 차수는 개설되지 않습니다. 5/12 B반으로 신청해 주세요.
+    </div>
+    <p class="text-sm text-slate-600 mt-2">취소 통보만으로는 신청자가 다음에 뭘 해야 할지 모릅니다. <strong>어디로 가면 되는지</strong>까지 적어야 문의가 줄어듭니다.</p>
+
+    <div class="section-title mt-5">되돌릴 수 없습니다</div>
+    <div class="callout callout-red mt-2">
+      폐강하면 취소 알림이 즉시 발송되고, <strong>알림은 회수되지 않습니다.</strong> "취소됐다던 교육이 다시 살아나는" 상황은 더 큰 혼란을 만들기 때문에 폐강 해제 기능은 두지 않았습니다.
+    </div>
+    <p class="text-sm text-slate-600 mt-2"><strong>같은 일정으로 다시 열어야 한다면 빌더의 <code>차수 복제</code>를 쓰세요.</strong> 복제하면 폐강 상태가 복사되지 않고 신청자 0명인 정상 차수로 만들어집니다. 폐강 해제가 없는 대신 이 경로가 열려 있습니다.</p>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">왜 폐강은 수강관리에서 하나</div>
+    <p class="text-sm text-slate-600 mt-2">빌더(코스 수정)에서 하지 않는 이유가 두 가지 있습니다.</p>
+    <ul class="text-sm text-slate-700 list-disc pl-5 space-y-2 mt-2">
+      <li><strong>빌더는 임시저장 모델입니다.</strong> 빌더에서 바꾼 내용은 퍼블리싱할 때까지 실제 서비스에 반영되지 않아요. 그런데 폐강은 <strong>지금 당장 신규 신청을 막아야 하는 일</strong>입니다. 퍼블리싱을 기다리는 동안 신청이 계속 들어오면 취소할 사람만 늘어납니다</li>
+      <li><strong>알릴 대상 명단이 수강관리에 있습니다.</strong> 빌더는 커리큘럼 구조(차수·회차·정원·수료 조건)를 다루는 화면이고, 실제 신청자 명단은 수강관리에 있어요. 통보는 명단이 있는 곳에서 해야 합니다</li>
+    </ul>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:140px">화면</th>
+            <th>역할</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>빌더</strong></td><td>커리큘럼 구조를 만든다. 신청자 0명 차수는 삭제할 수 있다. 폐강된 차수는 <strong>읽기만</strong> 한다(회색 표시·사유 노출·수정 잠금·퍼블리싱 검증 제외)</td></tr>
+          <tr><td><strong>수강관리</strong></td><td>사람을 다룬다. 등록도, 폐강도 여기서 한다</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-sm text-slate-600 mt-3">같은 정리로 <strong>차수 배정 명단 관리도 빌더에서 걷어냈습니다.</strong> 빌더 명단과 수강관리 등록은 같은 일을 하는 두 진입점이었고, 빌더 명단은 발행 후 수강관리로 들어온 등록자를 보지 못했어요. 사람을 넣는 일은 수강관리 한 곳으로 모았습니다.</p>
+    <div class="callout callout-blue mt-2">
+      그래서 <strong>임시저장 코스도 수강관리에 들어갈 수 있게 열었습니다.</strong> 퍼블리싱 후에만 열면 관리자 배정형 코스는 발행 전에 사람을 넣을 곳이 없어집니다.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">회차는 조금 다릅니다</div>
+    <p class="text-sm text-slate-600 mt-2">차수는 <strong>등록 단위</strong>이고, 회차는 <strong>일정 단위</strong>입니다. 그래서 규칙도 달라요.</p>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:200px">회차 상태</th>
+            <th>처리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>아직 진행되지 않음</td><td><span class="b b-green">삭제·일정 변경 가능</span></td></tr>
+          <tr><td>이미 종료됨</td><td><span class="b b-red">삭제·수정 불가</span> 출결 기록 보호</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-amber mt-3">
+      <strong>"5회차 계획을 3회차로 줄인다"</strong> 같은 일은 차수를 지우는 게 아니라 <strong>남은 회차만 삭제</strong>하면 됩니다. 신청자도 그대로 유지됩니다.
+    </div>
+    <p class="text-sm text-slate-500 mt-3">상세는 <strong>차수·회차 변경 정책</strong> 페이지 참고.</p>
+  </div>
+
+  <div class="guide-section">
+    <div class="section-title">한 장 요약</div>
+    <div class="overflow-x-auto mt-3">
+      <table class="xl-table">
+        <thead>
+          <tr>
+            <th style="width:180px">상황</th>
+            <th>할 일</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>신청자 0명</strong></td>
+            <td>빌더에서 삭제. 확인 한 번.<br><span class="text-slate-500">· 수강생을 전원 수동 삭제해도 0명이 되어 삭제 가능<br>· 삭제는 임시저장 — 퍼블리싱 모달에서 "차수 N개 삭제" 요약으로 재확인</span></td>
+          </tr>
+          <tr>
+            <td><strong>신청자 1명 이상</strong></td>
+            <td>빌더에서 삭제 불가 → <strong>수강관리 &gt; 차수 폐강</strong><br><span class="text-slate-500">· 사유 입력(필수 · 신청자에게 전달됨)<br>· 즉시 발효 · 신청 이력·출석 기록 보존<br>· 코스 통계 전부에서 제외 (명단에는 남음)<br>· 되돌릴 수 없음 — 다시 열려면 차수 복제<br>· 알림 발송은 다음 개발 과제</span></td>
+          </tr>
+          <tr>
+            <td><strong>회차만 없애야 할 때</strong></td>
+            <td>진행 전 회차 → 삭제·일정 변경 가능 / 종료된 회차 → 잠김</td>
+          </tr>
+          <tr>
+            <td><strong>날짜만 바뀐 경우</strong></td>
+            <td><span class="b b-green">삭제하지 말 것</span> 회차 날짜만 수정하면 신청자를 그대로 유지할 수 있습니다</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
 <div id="page-capacity-policy" class="page">
   <div class="page-tag">4. 수강신청 관리</div>
   <div class="page-title">정원 변경 정책</div>
@@ -3655,7 +3894,7 @@ function closeMobileSidebar() {
     </div>
     <p class="text-sm text-slate-700 mt-3">정원을 늘리지 않으면 일반 등록 버튼은 비활성이라 <strong>잔여석을 넘기는 등록은 막힙니다</strong> — 잔여석이 음수가 되는 비정상 상태를 만들지 않습니다.</p>
     <div class="callout callout-amber mt-3">
-      <strong>신청 방식과 무관</strong>합니다. 자율 수강 코스든 관리자 지정 등록 코스든 관리자는 수강관리에서 직접 배정할 수 있고, 자율 신청분과 관리자 배정분은 <strong>같은 정원·잔여석</strong>을 공유합니다(관리자가 배정하면 학습자 신청 화면의 잔여석도 그만큼 줄어듭니다). <strong>공개예약 코스도 공개 전에 미리 배정</strong>할 수 있습니다.
+      <strong>신청 방식과 무관</strong>합니다. 자율 수강 코스든 관리자 지정 등록 코스든 관리자는 수강관리에서 직접 배정할 수 있고, 자율 신청분과 관리자 배정분은 <strong>같은 정원·잔여석</strong>을 공유합니다(관리자가 배정하면 학습자 신청 화면의 잔여석도 그만큼 줄어듭니다).
     </div>
   </div>
 
@@ -3743,6 +3982,7 @@ function closeMobileSidebar() {
     { id:'close-rules',        label:'정정 가능 범위',          cat:'2. 회차 종료' },
     { id:'close-deduction',    label:'회차 종료 Q&A',           cat:'2. 회차 종료' },
     { id:'close-change',       label:'차수·회차 변경 정책',     cat:'2. 회차 종료' },
+    { id:'cohort-delete',      label:'차수 삭제·폐강 정책',     cat:'2. 회차 종료', kw:'삭제 폐강 취소 신청자 0명 알림 명단 복제 재개설 휴지통 통계 제외 임시저장 퍼블리싱 반영' },
     { id:'cert-cond',          label:'수료 기준',               cat:'3. 수료 처리', kw:'조퇴 출석 인정 수료 출석률 75' },
     { id:'cert-cases',         label:'케이스별 판정',           cat:'3. 수료 처리' },
     { id:'enroll-types',       label:'신청 방식 2종',           cat:'4. 수강신청' },
@@ -3750,7 +3990,7 @@ function closeMobileSidebar() {
     { id:'capacity-policy',    label:'정원 변경 정책',           cat:'4. 수강신청' },
     { id:'data-perm',          label:'수정 가능 범위',          cat:'5. 데이터 정정' },
     { id:'qr-flow',            label:'QR 운영 절차',            cat:'6. QR 현장 운영', kw:'라이브 인쇄 고정 출석 가능 시간대 30분 퇴장 체크 조퇴 사진 공유 대리출석 트레이드오프 출석방식' },
-    { id:'qr-print',           label:'인쇄 QR 운영',            cat:'6. QR 현장 운영', kw:'인쇄 고정 PNG 다운로드 발급 재발급 부착 파일명 차수 토큰 동결 대기 종료 유출' },
+    { id:'qr-print',           label:'인쇄 QR 운영',            cat:'6. QR 현장 운영', kw:'인쇄 고정 PNG 다운로드 발급 재발급 부착 파일명 회차별 회차 토큰 동결 대기 종료 유출 미발급' },
     { id:'qr-trouble',         label:'스캔 오류 대응',          cat:'6. QR 현장 운영', kw:'오류 만료 스캔 실패 이미 확인됨 다른 차수 출석버튼 없음 CS' },
     { id:'cs-guide',           label:'문의 유형별 처리',        cat:'7. CS 응대' },
     { id:'cs-escalate',        label:'에스컬레이션 기준',       cat:'7. CS 응대' },
